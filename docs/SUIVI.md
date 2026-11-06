@@ -27,6 +27,8 @@
 - 2026-11-06 : extrait de test S45 (plan + tome, sans données personnelles) ; analyse du « Décompte barquettes »
   et du « Déboitage » ; règle d'alerte « rien de noté » documentée.
 
+- 2026-11-06 : alerte « rien de noté » (150 kg par plage de réutilisation), jours de production, page Alertes.
+
 ## Fonctionnalités terminées
 
 | Date | Fonctionnalité | Tests |
@@ -46,6 +48,7 @@
 | 2026-11-06 | Administration des comptes : création (mot de passe provisoire affiché une fois), réinitialisation, désactivation | 6 tests d'intégration ; écran vérifié dans le navigateur |
 | 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
 | 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
+| 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
 | 2026-11-06 | Écrans : connexion, changement de mot de passe, accueil (équipe, semaine en cours lue en base), déconnexion | Vérification manuelle |
 | 2026-11-06 | Référentiels (équipes, zones, sous-zones, causes, destinations, unités, contenants, tares, rôles, permissions, comptes, audit) + données initiales idempotentes | 11 tests d'intégration |
 
@@ -61,6 +64,7 @@
 - La base de développement a été réinitialisée le 06/11/2026 (comptes renommés par fonction) ; elle contient
   une cause de test validée : « Bac oublié en chambre froide ».
 - Écran de création de compte : testé par les tests d'intégration, pas encore manuellement dans le navigateur.
+- Base de développement : `ALERTES_DEBUT=2026-11-02` dans le `.env` local (test) ; 8 alertes de test pour S45.
 - Le délai de correction des équipes (fin de la semaine de saisie) est une proposition en attente de validation.
 - Au premier lancement du serveur de développement, Postgres.app peut demander d'autoriser la connexion :
   tant que ce n'est pas accepté, les pages renvoient une erreur de connexion à la base.
@@ -74,5 +78,6 @@
 | `0000_init_production_weeks` | Création de `production_weeks` | Aucune (base vide) |
 | `0001_referentiels_phase1` | Création des 18 tables de référentiels, comptes et audit | Aucune modification de `production_weeks` |
 | `0004_lignes_versionnees` | Colonne `revision` sur les tares et destinations des déclarations | Lignes existantes rattachées à la version 1 |
+| `0005_alertes_rien_de_note` | Tables `production_days` et `missing_declaration_alerts` | Aucune modification des tables existantes |
 | `0003_declarations` | Création des 5 tables de déclarations, tares utilisées, destinations, versions et lots | Aucune modification des tables existantes |
 | `0002_causes_par_sous_zone` | Création de `cause_subzones` | Aucune modification des tables existantes ; base de dév. recréée (aucune donnée réelle) |

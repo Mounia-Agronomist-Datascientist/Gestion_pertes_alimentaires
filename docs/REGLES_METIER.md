@@ -88,15 +88,7 @@ Toutes les saisies sont conservées pour la traçabilité et le suivi des perfor
   est affiché (« Saisie le jour même », « Saisie 2 jours après la perte »).
 - Délai maximal : **7 jours** après la date de la perte, pour déclarer comme pour corriger ou annuler.
   Au-delà, seul un responsable (zone, production, administrateur) peut le faire.
-- Alerte « rien de noté » (réponses du 06/11/2026) :
-  - contrôle **chaque jour de production**, pour chaque équipe active (les 8 équipes travaillent tous les
-    jours ouvrés, en horaires décalés de 5h00 à 20h45) ;
-  - une équipe sans aucune déclaration un jour donné reçoit une **perte estimée forfaitaire de 150 kg**,
-    comptée à part et toujours signalée comme estimation (jamais confondue avec une perte déclarée) ;
-  - l'alerte est visible par l'**administratrice**, le **responsable de production** et le **chef de
-    l'équipe concernée** ;
-  - les jours de production viennent du « Décompte barquettes » (onglets par jour) ou du calendrier ;
-  - ⚠️ à confirmer : « mercredi et vendredi … 600 kg par semaine » (voir docs/POINTS_A_VALIDER.md A1).
+- Alerte « rien de noté » : voir R8.
 
 ## R6 — Statuts et corrections
 
@@ -127,3 +119,20 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
     responsable unique, sans équipe.
 - Une équipe désactivée pour une semaine n'apparaît pas dans les choix de cette semaine, mais son historique
   reste consultable.
+
+## R8 — Plages de réutilisation et alerte « rien de noté » (validé le 06/11/2026)
+
+- On produit chaque jour ; les surplus peuvent être réutilisés d'un jour à l'autre, **sauf après le vendredi**
+  (DLC trop courte pour le lundi) et **après le mercredi** (le lendemain commence une nouvelle semaine).
+- Chaque semaine de production a donc deux **plages** : jeudi → vendredi (un samedi travaillé y est rattaché)
+  et lundi → mercredi. Les jours de production viennent de la table `production_days` (pré-remplie jeudi,
+  vendredi, lundi, mardi, mercredi ; à aligner sur le calendrier du portail : fériés, samedis).
+- Le lendemain du dernier jour d'une plage, chaque équipe active **sans aucune déclaration** sur la plage
+  reçoit une **perte estimée de 150 kg** (valeur conservée dans l'alerte). Une semaine sans rien : 2 × 150 kg.
+- Comptent : les pertes attribuées à l'équipe et celles saisies par son compte (même hors cuisine), non annulées.
+- Une perte déclarée ensuite dans le délai de 7 jours **régularise** l'alerte (l'estimation n'est plus comptée,
+  l'alerte reste dans l'historique). L'administration ou la production peut **lever** une alerte avec motif.
+- L'estimation est toujours comptée **à part** des pertes déclarées dans les statistiques.
+- Visible par l'administratrice et le responsable de production (toutes les équipes) et par chaque équipe (les siennes).
+- Mise en service : variable `ALERTES_DEBUT` (aucune plage antérieure n'est contrôlée). Évaluation à chaque
+  affichage de l'accueil et par la tâche quotidienne `npm run alertes:evaluer` (à planifier vers 22h).

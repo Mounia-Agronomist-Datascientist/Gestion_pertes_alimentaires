@@ -60,4 +60,5 @@ npm run db:check                     # vérifie la connexion
 | `npm run db:generate -- --name <nom>` | Génère une migration après modification de `src/db/schema/` |
 | `npm run db:migrate` | Applique les migrations en attente |
 | `npm run build` | Build de production |
+| `npm run alertes:evaluer` | Évalue les alertes « rien de noté » (à planifier chaque jour en production) |
 | `npm run db:reset` | **Développement uniquement** : vide la base `*_dev`, la recrée et recrée les comptes de test |

@@ -4,6 +4,8 @@ import { formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-pr
 import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
 import { countPendingProposals } from "@/modules/admin/causes";
+import { alertsStartDateFromEnv, evaluateMissingDeclarations, listAlerts } from "@/modules/alertes/service";
+import { alertTitle, fmtLongDay, regularizationDeadline } from "./alertes/format";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
@@ -17,6 +19,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const week = await findStoredProductionWeek(db, toProductionLocalDate(new Date()));
   const pendingCauses = can(user, "cause.review") ? await countPendingProposals(db) : 0;
+  // Évaluation légère à chaque affichage ; en production, une tâche quotidienne fait de même (npm run alertes:evaluer).
+  await evaluateMissingDeclarations(db, { startDate: alertsStartDateFromEnv() });
+  const activeAlerts = await listAlerts(db, user, { onlyActive: true });
+  const alertKg = activeAlerts.reduce((sum, a) => sum + a.estimatedKg, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,6 +31,26 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           Mot de passe modifié.
         </p>
       )}
+
+      {activeAlerts.length > 0 &&
+        (user.teamId ? (
+          activeAlerts.map((a) => (
+            <div key={a.id} role="alert" className="flex flex-col gap-1 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-red-900">
+              <p className="font-semibold">{alertTitle(a)}</p>
+              <p>{a.estimatedKg} kg de pertes estimées sont attribués à votre équipe.</p>
+              {regularizationDeadline(a.lastDay) >= toProductionLocalDate(new Date()) && (
+                <p className="text-sm">
+                  Si des pertes ont eu lieu sur cette période, déclarez-les (7 jours maximum après chaque perte, au plus tard
+                  le {fmtLongDay(regularizationDeadline(a.lastDay))}) : l&apos;estimation sera alors retirée.
+                </p>
+              )}
+            </div>
+          ))
+        ) : (
+          <Link href="/alertes" role="alert" className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 font-semibold text-red-900">
+            {activeAlerts.length} alerte{activeAlerts.length > 1 ? "s" : ""} « rien de noté » — {alertKg} kg estimés →
+          </Link>
+        ))}
 
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <p className="text-sm text-slate-500">Semaine de production en cours</p>
@@ -55,6 +81,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <Link href="/historique" className="btn-secondary flex items-center justify-center">
         Pertes déclarées et corrections
+      </Link>
+      <Link href="/alertes" className="text-center text-slate-700 underline">
+        Alertes « rien de noté »
       </Link>
 
       {(can(user, "user.manage") || can(user, "referentiel.manage")) && (
