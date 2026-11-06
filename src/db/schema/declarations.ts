@@ -128,12 +128,17 @@ export const lossDeclarations = pgTable(
   ],
 );
 
-/** Tares utilisées pour une pesée en gastros (version de tare conservée). */
+/**
+ * Tares utilisées pour une pesée en gastros (version de tare conservée).
+ * `revision` : version de la déclaration à laquelle la ligne appartient ; les lignes des versions
+ * précédentes sont conservées.
+ */
 export const declarationContainers = pgTable("declaration_containers", {
   id: uuid("id").primaryKey().defaultRandom(),
   declarationId: uuid("declaration_id")
     .notNull()
     .references(() => lossDeclarations.id),
+  revision: integer("revision").notNull().default(1),
   containerTareId: uuid("container_tare_id")
     .notNull()
     .references(() => containerTares.id),
@@ -141,12 +146,13 @@ export const declarationContainers = pgTable("declaration_containers", {
   tareKgSnapshot: numeric("tare_kg_snapshot", { precision: 12, scale: 4, mode: "number" }).notNull(),
 });
 
-/** Répartition de la perte entre destinations, dans l'unité de la quantité nette. */
+/** Répartition de la perte entre destinations, dans l'unité de la quantité nette (versionnée comme ci-dessus). */
 export const declarationDestinations = pgTable("declaration_destinations", {
   id: uuid("id").primaryKey().defaultRandom(),
   declarationId: uuid("declaration_id")
     .notNull()
     .references(() => lossDeclarations.id),
+  revision: integer("revision").notNull().default(1),
   destinationId: uuid("destination_id")
     .notNull()
     .references(() => destinations.id),

@@ -11,8 +11,9 @@ import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-produ
 import { computeNetWeight, type GastroLine, type SupportTare } from "@/domain/tares";
 import { convertToKg, type KgStatus, type UnitKind } from "@/domain/unites";
 import { writeAudit } from "@/modules/audit/audit";
-import { type AuthUser, can, requirePermission } from "@/modules/auth/permissions";
+import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
+import { canModifyDeclaration, canReadDeclaration } from "./access";
 import { declarationInputSchema } from "./input";
 
 /** Erreur de saisie, affichable telle quelle à l'utilisateur. */
@@ -27,14 +28,15 @@ export interface CreatedDeclaration {
   kgStatus: KgStatus;
 }
 
-export async function createDeclaration(
-  db: Db,
-  user: AuthUser,
-  rawInput: unknown,
-  now: Date = new Date(),
-): Promise<CreatedDeclaration> {
-  requirePermission(user, "declaration.create");
+/** Valeurs calculées d'une déclaration, prêtes à être enregistrées. */
+type PreparedDeclaration = Awaited<ReturnType<typeof prepareDeclaration>>;
 
+/**
+ * Contrôle une saisie et calcule toutes les valeurs à enregistrer, sans rien écrire.
+ * Utilisé à la création et à la correction : les règles ne sont écrites qu'une fois.
+ * `declaredAt` : horodatage de la saisie initiale (conservé lors d'une correction).
+ */
+async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now: Date, declaredAt: Date) {
   const parsed = declarationInputSchema.safeParse(rawInput);
   if (!parsed.success) {
     throw new DeclarationError(parsed.error.issues[0]?.message ?? "Saisie invalide");
@@ -62,7 +64,7 @@ export async function createDeclaration(
   }
   const [lossWeek, declaredWeek] = await Promise.all([
     findStoredProductionWeek(db, input.occurredOn),
-    findStoredProductionWeek(db, today),
+    findStoredProductionWeek(db, toProductionLocalDate(declaredAt)),
   ]);
   if (!lossWeek || !declaredWeek) {
     throw new DeclarationError("Aucune semaine de production paramétrée pour cette date : prévenez l'administrateur");
@@ -206,7 +208,7 @@ export async function createDeclaration(
       containers: [],
     };
   }
-  const measurementMethod =
+  const measurementMethod: (typeof s.measurementMethodEnum.enumValues)[number] =
     input.method === "comptage" && measurement.kgStatus === "converti" ? "conversion_reference" : input.method;
 
   // ─── Cause ──────────────────────────────────────────────────────────────
@@ -240,74 +242,104 @@ export async function createDeclaration(
   );
   const kgPerUnit = measurement.netKg != null ? measurement.netKg / measurement.netQuantity : null;
 
-  // ─── Enregistrement ─────────────────────────────────────────────────────
+  return {
+    values: {
+      occurredOn: input.occurredOn,
+      occurredTime: input.occurredTime ?? null,
+      declaredAt,
+      productionWeekId: lossWeek.id,
+      declaredWeekId: declaredWeek.id,
+      isLate,
+      zoneId: place.zone.id,
+      subzoneId: place.subzone.id,
+      teamId,
+      responsibility: teamId ? ("equipe" as const) : ("zone" as const),
+      productId: product.id,
+      productUnlisted: product.unlisted,
+      productCategory: product.category,
+      productName: product.name,
+      productExternalId: product.externalId,
+      productCode: product.code,
+      productVariant: product.variant,
+      measurementMethod,
+      quantity: measurement.quantity,
+      unitCode: measurement.unitCode,
+      tareTotalKg: measurement.tareTotalKg,
+      netQuantity: measurement.netQuantity,
+      netUnitCode: measurement.netUnitCode,
+      netKg: measurement.netKg,
+      kgStatus: measurement.kgStatus,
+      conversionFactorUsed: measurement.factorUsed,
+      causeId: cause.id,
+      causeName: cause.name,
+      comment: input.comment || null,
+      destinationGapJustification: justification,
+      updatedAt: now,
+    },
+    containers: measurement.containers,
+    destinations: input.destinations.map((d) => ({
+      destinationId: d.destinationId,
+      quantity: roundQuantity(d.quantity),
+      netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
+    })),
+  };
+}
+
+/** Enregistre les tares et destinations d'une version donnée et renvoie l'instantané complet. */
+async function writeVersionLines(
+  tx: Db,
+  declaration: typeof s.lossDeclarations.$inferSelect,
+  prepared: Pick<PreparedDeclaration, "containers" | "destinations">,
+) {
+  const containers = prepared.containers.length
+    ? await tx
+        .insert(s.declarationContainers)
+        .values(
+          prepared.containers.map((c) => ({
+            declarationId: declaration.id,
+            revision: declaration.revision,
+            containerTareId: c.containerTareId,
+            count: c.count,
+            tareKgSnapshot: c.tareKg,
+          })),
+        )
+        .returning()
+    : [];
+  const destinations = await tx
+    .insert(s.declarationDestinations)
+    .values(prepared.destinations.map((d) => ({ ...d, declarationId: declaration.id, revision: declaration.revision })))
+    .returning();
+  return { declaration, containers, destinations };
+}
+
+function summarize(declaration: typeof s.lossDeclarations.$inferSelect): CreatedDeclaration {
+  return {
+    id: declaration.id,
+    isLate: declaration.isLate,
+    netQuantity: declaration.netQuantity,
+    netUnitCode: declaration.netUnitCode,
+    netKg: declaration.netKg,
+    kgStatus: declaration.kgStatus,
+  };
+}
+
+export async function createDeclaration(
+  db: Db,
+  user: AuthUser,
+  rawInput: unknown,
+  now: Date = new Date(),
+): Promise<CreatedDeclaration> {
+  requirePermission(user, "declaration.create");
+  const prepared = await prepareDeclaration(db, user, rawInput, now, now);
+
   return db.transaction(async (tx) => {
     const [declaration] = await tx
       .insert(s.lossDeclarations)
-      .values({
-        status: "validee",
-        occurredOn: input.occurredOn,
-        occurredTime: input.occurredTime ?? null,
-        declaredAt: now,
-        productionWeekId: lossWeek.id,
-        declaredWeekId: declaredWeek.id,
-        isLate,
-        zoneId: place.zone.id,
-        subzoneId: place.subzone.id,
-        teamId,
-        responsibility: teamId ? "equipe" : "zone",
-        createdBy: user.id,
-        productId: product.id,
-        productUnlisted: product.unlisted,
-        productCategory: product.category,
-        productName: product.name,
-        productExternalId: product.externalId,
-        productCode: product.code,
-        productVariant: product.variant,
-        measurementMethod,
-        quantity: measurement.quantity,
-        unitCode: measurement.unitCode,
-        tareTotalKg: measurement.tareTotalKg,
-        netQuantity: measurement.netQuantity,
-        netUnitCode: measurement.netUnitCode,
-        netKg: measurement.netKg,
-        kgStatus: measurement.kgStatus,
-        conversionFactorUsed: measurement.factorUsed,
-        causeId: cause.id,
-        causeName: cause.name,
-        comment: input.comment || null,
-        destinationGapJustification: justification,
-        updatedAt: now,
-      })
+      .values({ ...prepared.values, status: "validee", revision: 1, createdBy: user.id })
       .returning();
     if (!declaration) throw new Error("Enregistrement impossible");
 
-    const containers = measurement.containers.length
-      ? await tx
-          .insert(s.declarationContainers)
-          .values(
-            measurement.containers.map((c) => ({
-              declarationId: declaration.id,
-              containerTareId: c.containerTareId,
-              count: c.count,
-              tareKgSnapshot: c.tareKg,
-            })),
-          )
-          .returning()
-      : [];
-    const destinations = await tx
-      .insert(s.declarationDestinations)
-      .values(
-        input.destinations.map((d) => ({
-          declarationId: declaration.id,
-          destinationId: d.destinationId,
-          quantity: roundQuantity(d.quantity),
-          netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
-        })),
-      )
-      .returning();
-
-    const snapshot = { declaration, containers, destinations };
+    const snapshot = await writeVersionLines(tx, declaration, prepared);
     await tx.insert(s.declarationRevisions).values({
       declarationId: declaration.id,
       revision: 1,
@@ -324,14 +356,129 @@ export async function createDeclaration(
       after: snapshot,
       occurredAt: now,
     });
+    return summarize(declaration);
+  });
+}
 
-    return {
-      id: declaration.id,
-      isLate,
-      netQuantity: measurement.netQuantity,
-      netUnitCode: measurement.netUnitCode,
-      netKg: measurement.netKg,
-      kgStatus: measurement.kgStatus,
-    };
+// ─── Corrections et annulations (docs/REGLES_METIER.md R5, R6) ─────────────────
+
+/** La déclaration a été modifiée par quelqu'un d'autre depuis son affichage. */
+export class DeclarationConflictError extends DeclarationError {
+  constructor() {
+    super("Cette perte vient d'être modifiée par quelqu'un d'autre : rechargez la page avant de corriger.");
+  }
+}
+
+export interface ChangeOptions {
+  reason: string;
+  /** Version affichée à l'utilisateur au moment où il a commencé la modification. */
+  expectedRevision: number;
+}
+
+async function loadForChange(db: Db, user: AuthUser, id: string, options: ChangeOptions, now: Date) {
+  const reason = options.reason?.trim() ?? "";
+  if (reason.length < 3) throw new DeclarationError("Indiquez le motif de la modification");
+
+  const [existing] = await db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, id));
+  if (!existing || !canReadDeclaration(user, existing)) throw new DeclarationError("Déclaration introuvable");
+  if (existing.status === "annulee") throw new DeclarationError("Cette déclaration est annulée : elle ne peut plus être modifiée");
+
+  const [declaredWeek] = await db.select().from(s.productionWeeks).where(eq(s.productionWeeks.id, existing.declaredWeekId));
+  if (!canModifyDeclaration(user, existing, declaredWeek!.endDate, toProductionLocalDate(now))) {
+    throw new ForbiddenError("Vous ne pouvez plus modifier cette déclaration : demandez à un responsable");
+  }
+  if (existing.revision !== options.expectedRevision) throw new DeclarationConflictError();
+  return { existing, reason };
+}
+
+async function currentSnapshot(db: Db, declaration: typeof s.lossDeclarations.$inferSelect) {
+  const [containers, destinations] = await Promise.all([
+    db
+      .select()
+      .from(s.declarationContainers)
+      .where(and(eq(s.declarationContainers.declarationId, declaration.id), eq(s.declarationContainers.revision, declaration.revision))),
+    db
+      .select()
+      .from(s.declarationDestinations)
+      .where(and(eq(s.declarationDestinations.declarationId, declaration.id), eq(s.declarationDestinations.revision, declaration.revision))),
+  ]);
+  return { declaration, containers, destinations };
+}
+
+/**
+ * Corrige une déclaration : nouvelle version complète, anciennes valeurs conservées,
+ * date de saisie initiale inchangée, motif obligatoire.
+ */
+export async function correctDeclaration(
+  db: Db,
+  user: AuthUser,
+  id: string,
+  rawInput: unknown,
+  options: ChangeOptions,
+  now: Date = new Date(),
+): Promise<CreatedDeclaration> {
+  const { existing, reason } = await loadForChange(db, user, id, options, now);
+  const prepared = await prepareDeclaration(db, user, rawInput, now, existing.declaredAt);
+  const before = await currentSnapshot(db, existing);
+
+  return db.transaction(async (tx) => {
+    const revision = existing.revision + 1;
+    const [declaration] = await tx
+      .update(s.lossDeclarations)
+      .set({ ...prepared.values, status: "corrigee", revision })
+      .where(and(eq(s.lossDeclarations.id, id), eq(s.lossDeclarations.revision, existing.revision)))
+      .returning();
+    if (!declaration) throw new DeclarationConflictError();
+
+    const after = await writeVersionLines(tx, declaration, prepared);
+    await tx.insert(s.declarationRevisions).values({
+      declarationId: id,
+      revision,
+      status: "corrigee",
+      data: after,
+      changedBy: user.id,
+      changedAt: now,
+      reason,
+    });
+    await writeAudit(tx, { userId: user.id, action: "update", entity: "loss_declaration", entityId: id, before, after, reason, occurredAt: now });
+    return summarize(declaration);
+  });
+}
+
+/** Annule une déclaration : elle reste consultable mais sort des statistiques. */
+export async function cancelDeclaration(
+  db: Db,
+  user: AuthUser,
+  id: string,
+  options: ChangeOptions,
+  now: Date = new Date(),
+): Promise<void> {
+  const { existing, reason } = await loadForChange(db, user, id, options, now);
+  const before = await currentSnapshot(db, existing);
+
+  await db.transaction(async (tx) => {
+    const revision = existing.revision + 1;
+    const [declaration] = await tx
+      .update(s.lossDeclarations)
+      .set({ status: "annulee", revision, updatedAt: now })
+      .where(and(eq(s.lossDeclarations.id, id), eq(s.lossDeclarations.revision, existing.revision)))
+      .returning();
+    if (!declaration) throw new DeclarationConflictError();
+
+    // Les lignes de tares et destinations sont reconduites telles quelles dans la nouvelle version.
+    const after = await writeVersionLines(tx, declaration, {
+      containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
+      destinations: before.destinations.map((d) => ({ destinationId: d.destinationId, quantity: d.quantity, netKg: d.netKg })),
+    });
+    await tx.insert(s.declarationRevisions).values({
+      declarationId: id,
+      revision,
+      status: "annulee",
+      data: after,
+      changedBy: user.id,
+      changedAt: now,
+      reason,
+    });
+    await writeAudit(tx, { userId: user.id, action: "cancel", entity: "loss_declaration", entityId: id, before, after, reason, occurredAt: now });
   });
 }
