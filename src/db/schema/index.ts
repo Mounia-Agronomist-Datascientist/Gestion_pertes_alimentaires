@@ -3,3 +3,4 @@ export * from "./production-weeks";
 export * from "./organisation";
 export * from "./referentiels";
 export * from "./auth";
+export * from "./declarations";

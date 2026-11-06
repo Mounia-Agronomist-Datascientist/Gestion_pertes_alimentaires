@@ -36,6 +36,12 @@ export interface KgConversion {
 
 export class QuantityError extends Error {}
 
+/**
+ * Unités de comptage auxquelles s'applique le poids unitaire du produit.
+ * Un nombre de gastros ou de contenants n'a pas de poids de référence : jamais converti.
+ */
+export const PRODUCT_COUNT_UNITS: ReadonlySet<string> = new Set(["piece", "barquette"]);
+
 export function assertPositiveQuantity(quantity: number): void {
   if (!Number.isFinite(quantity) || quantity <= 0) {
     throw new QuantityError("La quantité doit être supérieure à 0");
@@ -71,6 +77,14 @@ export function convertToKg(quantity: number, unit: Unit, product: ProductConver
       };
 
     case "comptage":
+      if (!PRODUCT_COUNT_UNITS.has(unit.code)) {
+        return {
+          netKg: null,
+          kgStatus: "non_converti",
+          factorUsed: null,
+          reason: "Aucun poids de référence pour ce contenant : quantité conservée en unités",
+        };
+      }
       if (product.unitWeightKg == null) {
         return {
           netKg: null,

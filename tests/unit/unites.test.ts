@@ -46,6 +46,11 @@ describe("conversion en kilogrammes", () => {
     expect(convertToKg(12, barquette, food).kgStatus).toBe("non_converti");
   });
 
+  it("un nombre de gastros n'est jamais converti avec le poids unitaire du produit", () => {
+    const gastro: Unit = { code: "gastro", kind: "comptage", toBaseFactor: 1 };
+    expect(convertToKg(3, gastro, { ...food, unitWeightKg: 0.35 }).kgStatus).toBe("non_converti");
+  });
+
   it("consommables : jamais convertis en kg alimentaires", () => {
     expect(convertToKg(100, barquette, { isConsumable: true, unitWeightKg: 0.02 })).toEqual({
       netKg: null,
