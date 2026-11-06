@@ -10,12 +10,19 @@
 - 2026-11-06 : socle technique (Next.js 16, React 19, Drizzle, PostgreSQL 18, Vitest 5, PGlite, Tailwind 4),
   règle des semaines de production codée et testée, première migration.
 
+- 2026-11-06 : application sur le port 3001 ; schéma des référentiels et données initiales ; règles
+  tares (avec échelles), unités et destinations codées et testées.
+
 ## Fonctionnalités terminées
 
 | Date | Fonctionnalité | Tests |
 |---|---|---|
 | 2026-11-06 | Règle R1 : calcul et génération du calendrier des semaines de production (`src/domain/semaine-production.ts`) | 22 tests unitaires |
 | 2026-11-06 | Table `production_weeks` avec contraintes (début un jeudi, 7 jours, unicité) | 4 tests d'intégration |
+| 2026-11-06 | Règle R3 : poids net avec tares de gastros et d'échelle (`src/domain/tares.ts`) | 9 tests unitaires |
+| 2026-11-06 | Règle R2 : conversion en kg (`src/domain/unites.ts`) | 9 tests unitaires |
+| 2026-11-06 | Règle R4 : répartition entre destinations (`src/domain/destinations.ts`) | 8 tests unitaires |
+| 2026-11-06 | Référentiels (équipes, zones, sous-zones, causes, destinations, unités, contenants, tares, rôles, permissions, comptes, audit) + données initiales idempotentes | 11 tests d'intégration |
 
 ## Anomalies connues / points de vigilance
 
@@ -28,3 +35,4 @@
 | Migration | Contenu | Données existantes |
 |---|---|---|
 | `0000_init_production_weeks` | Création de `production_weeks` | Aucune (base vide) |
+| `0001_referentiels_phase1` | Création des 18 tables de référentiels, comptes et audit | Aucune modification de `production_weeks` |

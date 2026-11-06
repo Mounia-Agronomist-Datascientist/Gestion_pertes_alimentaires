@@ -86,12 +86,12 @@ anti-chevauchement.
 **zones** — `id`, `code` unique, `name`, `display_order`, `requires_justification` (pour « Autre »), `active`.
 
 **subzones** — `id`, `zone_id`, `code`, `name`, `display_order`, `team_mode`
-(`obligatoire`|`facultative`|`aucune`), `active`. Les méthodes de mesure proposées par sous-zone seront ajoutées si le besoin se confirme.
+(`equipe`|`zone`), `active`. Les méthodes de mesure proposées par sous-zone seront ajoutées si le besoin se confirme.
 
 ### Référentiels de saisie
 
 **units** — `code` PK (`kg`, `g`, `l`, `ml`, `piece`, `barquette`, `contenant`, `gastro`…), `label`,
-`kind` (`masse`|`volume`|`comptage`), `to_kg_factor` (numeric, uniquement pour `masse`), `active`.
+`kind` (`masse`|`volume`|`comptage`), `to_base_factor` (vers kg, L ou 1 selon la famille), `active`.
 
 **products** (référentiel simple en Phase 1, enrichi en Phase 2)
 | Colonne | Type | Remarque |
@@ -110,7 +110,7 @@ anti-chevauchement.
 
 Unicité : (`external_id`) si non nul ; (`category`,`code`) si non nul. Index trigramme sur `name` pour la recherche.
 
-**causes** — `id`, `name`, `description`, `is_other` (cause « Autres pertes », toujours disponible),
+**causes** — `id`, `code`, `name`, `description`, `is_other` (cause « Autres pertes », toujours disponible),
 `status` (`proposee`|`active`|`rejetee`|`inactive`), `proposed_by` FK users null, `proposed_at`,
 `reviewed_by`, `reviewed_at`.
 
@@ -144,7 +144,7 @@ communes), `closed_at`.
 | is_late | bool | `declared_week ≠ production_week` |
 | zone_id, subzone_id | FK | |
 | team_id | FK, null | |
-| responsibility | enum | `equipe`, `collective`, `non_attribuee` |
+| responsibility | enum | `equipe` ou `zone` (déduit du `team_mode` de la sous-zone) |
 | created_by | FK users | |
 | batch_id | FK, null | mode groupé |
 | product_id | FK, null | null si produit hors référentiel (libellé libre, à revoir en Phase 2) |

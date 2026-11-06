@@ -4,7 +4,7 @@ Application web interne (PWA) permettant aux équipes de production de déclarer
 rapidement leurs pertes, et aux responsables de les analyser (quantités, coûts,
 causes, destinations, impact environnemental).
 
-> **État du projet : fin de Phase 0 — socle technique en place, pile validée.**
+> **État du projet : Phase 1 en cours — référentiels et règles de calcul en place.**
 
 ## Documentation
 
@@ -23,8 +23,8 @@ causes, destinations, impact environnemental).
 
 | Phase | Objet | Statut |
 |---|---|---|
-| 0 | Cadrage technique | 🟡 Socle en place — en attente de validation finale |
-| 1 | Déclarations de pertes (application utilisable) | ⏳ |
+| 0 | Cadrage technique | ✅ |
+| 1 | Déclarations de pertes (application utilisable) | 🟡 En cours — référentiels et règles de calcul faits |
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ⏳ |
 | 3 | Calcul des coûts | ⏳ |
 | 4 | Tableaux de bord et statistiques | ⏳ |
@@ -43,13 +43,14 @@ npm install
 cp .env.example .env                 # puis adapter DATABASE_URL si besoin
 createdb pertes_dev                  # avec Postgres.app : /Applications/Postgres.app/Contents/Versions/latest/bin/createdb
 npm run db:migrate                   # applique les migrations SQL de src/db/migrations
+npm run db:seed                      # charge les référentiels initiaux (sans écraser l'existant)
 npm run db:check                     # vérifie la connexion
 ```
 
 ### Au quotidien
 | Commande | Rôle |
 |---|---|
-| `npm run dev` | Lance l'application sur http://localhost:3000 |
+| `npm run dev` | Lance l'application sur http://localhost:3001 (le port 3000 est réservé à une autre application) |
 | `npm test` | Tests unitaires et d'intégration (PostgreSQL embarqué, sans configuration) |
 | `npm run typecheck` | Vérification des types TypeScript |
 | `npm run db:generate -- --name <nom>` | Génère une migration après modification de `src/db/schema/` |
