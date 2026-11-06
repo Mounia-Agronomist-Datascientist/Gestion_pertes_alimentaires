@@ -16,7 +16,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:check": "tsx scripts/db-check.ts",
     "db:seed": "tsx scripts/db-seed.ts",
-    "db:reset": "tsx scripts/db-reset.ts && npm run db:migrate && npm run db:seed"
+    "db:reset": "tsx scripts/db-reset.ts && npm run db:migrate && npm run db:seed && rm -f comptes-dev.local.md && npm run db:dev-accounts",
+    "db:dev-accounts": "tsx scripts/create-dev-accounts.ts"
   },
   "repository": {
     "type": "git",

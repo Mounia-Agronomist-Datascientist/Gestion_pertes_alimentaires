@@ -7,3 +7,18 @@
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
+
+/* Champs et boutons dimensionnés pour une utilisation au doigt, en atelier (≥ 48 px). */
+@layer components {
+  .field {
+    @apply min-h-12 rounded-xl border border-slate-300 bg-white px-4 text-lg outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/30;
+  }
+
+  .btn-primary {
+    @apply min-h-14 rounded-xl bg-teal-700 px-4 text-lg font-semibold text-white hover:bg-teal-800 disabled:opacity-60;
+  }
+
+  .btn-tile {
+    @apply flex min-h-24 flex-col items-start justify-center gap-1 rounded-2xl bg-teal-700 p-4 text-xl font-semibold text-white;
+  }
+}

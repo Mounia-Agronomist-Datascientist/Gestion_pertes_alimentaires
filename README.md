@@ -4,7 +4,7 @@ Application web interne (PWA) permettant aux équipes de production de déclarer
 rapidement leurs pertes, et aux responsables de les analyser (quantités, coûts,
 causes, destinations, impact environnemental).
 
-> **État du projet : Phase 1 en cours — référentiels et règles de calcul en place.**
+> **État du projet : Phase 1 en cours — référentiels, règles de calcul et connexion en place.**
 
 ## Documentation
 
@@ -24,7 +24,7 @@ causes, destinations, impact environnemental).
 | Phase | Objet | Statut |
 |---|---|---|
 | 0 | Cadrage technique | ✅ |
-| 1 | Déclarations de pertes (application utilisable) | 🟡 En cours — référentiels et règles de calcul faits |
+| 1 | Déclarations de pertes (application utilisable) | 🟡 En cours — référentiels, calculs et connexion faits ; écran de déclaration à venir |
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ⏳ |
 | 3 | Calcul des coûts | ⏳ |
 | 4 | Tableaux de bord et statistiques | ⏳ |
@@ -44,8 +44,11 @@ cp .env.example .env                 # puis adapter DATABASE_URL si besoin
 createdb pertes_dev                  # avec Postgres.app : /Applications/Postgres.app/Contents/Versions/latest/bin/createdb
 npm run db:migrate                   # applique les migrations SQL de src/db/migrations
 npm run db:seed                      # charge les référentiels initiaux (sans écraser l'existant)
+npm run db:dev-accounts              # crée les comptes de test ; identifiants dans comptes-dev.local.md
 npm run db:check                     # vérifie la connexion
 ```
+
+`comptes-dev.local.md` est ignoré par git : les mots de passe de test ne sont jamais publiés.
 
 ### Au quotidien
 | Commande | Rôle |
@@ -56,3 +59,4 @@ npm run db:check                     # vérifie la connexion
 | `npm run db:generate -- --name <nom>` | Génère une migration après modification de `src/db/schema/` |
 | `npm run db:migrate` | Applique les migrations en attente |
 | `npm run build` | Build de production |
+| `npm run db:reset` | **Développement uniquement** : vide la base `*_dev`, la recrée et recrée les comptes de test |

@@ -12,3 +12,4 @@ test-results/
 backups/
 next-env.d.ts
 *.tsbuildinfo
+*.local.md

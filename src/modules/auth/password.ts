@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { hash, verify } from "@node-rs/argon2";
+import { MIN_PASSWORD_LENGTH } from "./password-policy";
 
-/** Longueur minimale des mots de passe (docs/SECURITE.md §3). */
-export const MIN_PASSWORD_LENGTH = 10;
+export { MIN_PASSWORD_LENGTH };
 
 export class PasswordPolicyError extends Error {}
 
