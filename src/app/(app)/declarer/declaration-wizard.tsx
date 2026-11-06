@@ -15,16 +15,39 @@ import {
   PRODUCT_CATEGORY_LABELS,
 } from "@/modules/declarations/input";
 import type { DeclarationOptions } from "@/modules/declarations/options";
-import { submitDeclaration, type SubmitResult } from "./actions";
+import { submitCorrection, submitDeclaration, type SubmitResult } from "./actions";
 
 type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "cause" | "destination" | "recap" | "done";
-type ProductChoice =
+export type ProductChoice =
   | { kind: "listed"; id: string; name: string; category: string }
   | { kind: "free"; name: string; category: (typeof PRODUCT_CATEGORIES)[number] };
+
+/** État de départ d'une correction, construit à partir de la déclaration existante. */
+export interface WizardInitial {
+  zoneId: string;
+  subzoneId: string;
+  teamId: string | null;
+  product: ProductChoice;
+  method: InputMethod;
+  quantity: string;
+  unitCode: string | null;
+  useTare: boolean;
+  grossKg: string;
+  gastroCounts: Record<string, number>;
+  supportId: string | null;
+  causeId: string;
+  destinationLines: { destinationId: string; quantity: string }[];
+  justification: string;
+  occurredOn: string;
+  occurredTime: string;
+  comment: string;
+}
 
 interface Props {
   options: DeclarationOptions;
   userTeam: { letter: string; colorName: string; colorHex: string } | null;
+  /** Mode correction : déclaration à corriger, version affichée et valeurs de départ. */
+  correction?: { id: string; revision: number; initial: WizardInitial };
 }
 
 const LAST_SUBZONE_KEY = "pertes:derniere-sous-zone";
@@ -54,26 +77,30 @@ function writeStorage(key: string, value: string) {
   }
 }
 
-export function DeclarationWizard({ options, userTeam }: Props) {
-  const [step, setStep] = useState<Step>("zone");
-  const [zoneId, setZoneId] = useState<string | null>(null);
-  const [subzoneId, setSubzoneId] = useState<string | null>(null);
-  const [teamId, setTeamId] = useState<string | null>(null);
-  const [product, setProduct] = useState<ProductChoice | null>(null);
-  const [method, setMethod] = useState<InputMethod | null>(null);
-  const [quantity, setQuantity] = useState("");
-  const [unitCode, setUnitCode] = useState<string | null>(null);
-  const [useTare, setUseTare] = useState(false);
-  const [grossKg, setGrossKg] = useState("");
-  const [gastroCounts, setGastroCounts] = useState<Record<string, number>>({});
-  const [supportId, setSupportId] = useState<string | null>(null);
-  const [causeId, setCauseId] = useState<string | null>(null);
-  const [splitMode, setSplitMode] = useState(false);
-  const [destinationLines, setDestinationLines] = useState<{ destinationId: string; quantity: string }[]>([]);
-  const [justification, setJustification] = useState("");
-  const [occurredOn, setOccurredOn] = useState(options.today);
-  const [occurredTime, setOccurredTime] = useState("");
-  const [comment, setComment] = useState("");
+export function DeclarationWizard({ options, userTeam, correction }: Props) {
+  const init = correction?.initial;
+  const [step, setStep] = useState<Step>(init ? "recap" : "zone");
+  const [zoneId, setZoneId] = useState<string | null>(init?.zoneId ?? null);
+  const [subzoneId, setSubzoneId] = useState<string | null>(init?.subzoneId ?? null);
+  const [teamId, setTeamId] = useState<string | null>(init?.teamId ?? null);
+  const [product, setProduct] = useState<ProductChoice | null>(init?.product ?? null);
+  const [method, setMethod] = useState<InputMethod | null>(init?.method ?? null);
+  const [quantity, setQuantity] = useState(init?.quantity ?? "");
+  const [unitCode, setUnitCode] = useState<string | null>(init?.unitCode ?? null);
+  const [useTare, setUseTare] = useState(init?.useTare ?? false);
+  const [grossKg, setGrossKg] = useState(init?.grossKg ?? "");
+  const [gastroCounts, setGastroCounts] = useState<Record<string, number>>(init?.gastroCounts ?? {});
+  const [supportId, setSupportId] = useState<string | null>(init?.supportId ?? null);
+  const [causeId, setCauseId] = useState<string | null>(init?.causeId ?? null);
+  const [splitMode, setSplitMode] = useState((init?.destinationLines.length ?? 0) > 1);
+  const [destinationLines, setDestinationLines] = useState<{ destinationId: string; quantity: string }[]>(
+    init?.destinationLines ?? [],
+  );
+  const [justification, setJustification] = useState(init?.justification ?? "");
+  const [occurredOn, setOccurredOn] = useState(init?.occurredOn ?? options.today);
+  const [occurredTime, setOccurredTime] = useState(init?.occurredTime ?? "");
+  const [comment, setComment] = useState(init?.comment ?? "");
+  const [reason, setReason] = useState("");
   const [result, setResult] = useState<SubmitResult | null>(null);
   const [lastSubzoneId, setLastSubzoneId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -270,7 +297,9 @@ export function DeclarationWizard({ options, userTeam }: Props) {
       comment: comment || null,
     };
     startTransition(async () => {
-      const r = await submitDeclaration(payload);
+      const r = correction
+        ? await submitCorrection({ id: correction.id, expectedRevision: correction.revision, reason, payload })
+        : await submitDeclaration(payload);
       setResult(r);
       if (r.ok) setStep("done");
     });
@@ -286,7 +315,7 @@ export function DeclarationWizard({ options, userTeam }: Props) {
           <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-emerald-600 text-4xl text-white">
             ✓
           </span>
-          <p className="text-xl font-semibold">Perte enregistrée</p>
+          <p className="text-xl font-semibold">{correction ? "Correction enregistrée" : "Perte enregistrée"}</p>
           <p>
             {fmt(d.netQuantity)} {unitLabel(d.netUnitCode)}
             {d.netKg != null && d.netUnitCode !== "kg" && ` (${fmt(d.netKg)} kg)`} — {product?.name}
@@ -294,12 +323,20 @@ export function DeclarationWizard({ options, userTeam }: Props) {
           <p className="text-sm">{cause?.name}</p>
           {d.isLate && <p className="text-sm font-medium text-amber-800">Déclaration tardive (semaine précédente)</p>}
         </div>
-        <button type="button" className="btn-primary" onClick={() => resetForNext(true)}>
-          Nouvelle perte — même endroit
-        </button>
-        <button type="button" className="btn-secondary" onClick={() => resetForNext(false)}>
-          Nouvelle perte — autre endroit
-        </button>
+        {correction ? (
+          <Link href={`/historique/${correction.id}`} className="btn-primary flex items-center justify-center">
+            Voir la déclaration et ses versions
+          </Link>
+        ) : (
+          <>
+            <button type="button" className="btn-primary" onClick={() => resetForNext(true)}>
+              Nouvelle perte — même endroit
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => resetForNext(false)}>
+              Nouvelle perte — autre endroit
+            </button>
+          </>
+        )}
         <Link href="/" className="text-center text-slate-600 underline">
           Terminer
         </Link>
@@ -315,8 +352,8 @@ export function DeclarationWizard({ options, userTeam }: Props) {
             ← Retour
           </button>
         ) : (
-          <Link href="/" className="rounded-xl px-2 py-2 font-medium text-slate-700">
-            ← Accueil
+          <Link href={correction ? `/historique/${correction.id}` : "/"} className="rounded-xl px-2 py-2 font-medium text-slate-700">
+            {correction ? "← Annuler la correction" : "← Accueil"}
           </Link>
         )}
         <span className="text-sm text-slate-500">
@@ -495,7 +532,18 @@ export function DeclarationWizard({ options, userTeam }: Props) {
             </p>
           )}
 
-          <button type="button" className="btn-primary" disabled={!net} onClick={() => goNext("quantity")}>
+          <button
+            type="button"
+            className="btn-primary"
+            disabled={!net}
+            onClick={() => {
+              // Une seule destination : elle suit la nouvelle quantité (cas d'une correction).
+              if (net && destinationLines.length === 1) {
+                setDestinationLines([{ destinationId: destinationLines[0]!.destinationId, quantity: String(net.quantity) }]);
+              }
+              goNext("quantity");
+            }}
+          >
             Continuer
           </button>
         </Section>
@@ -599,37 +647,53 @@ export function DeclarationWizard({ options, userTeam }: Props) {
 
       {step === "recap" && net && (
         <Section title="Vérifier et valider">
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-2xl bg-white p-4">
+          {correction && (
+            <p className="rounded-xl bg-amber-50 p-3 text-amber-900">
+              Correction : touchez « Modifier » sur la ligne à changer, puis indiquez le motif en bas de page.
+            </p>
+          )}
+          <dl className="grid grid-cols-[auto_1fr_auto] items-start gap-x-3 gap-y-2 rounded-2xl bg-white p-4">
             <dt className="text-slate-500">Lieu</dt>
             <dd>
               {zone?.name}
               {zone && zone.subzones.length > 1 && ` › ${subzone?.name}`}
             </dd>
+            <EditLink onClick={() => setStep("zone")} />
             <dt className="text-slate-500">Équipe</dt>
             <dd>
               {subzone?.teamMode === "equipe"
                 ? `Équipe ${userTeam?.letter ?? team?.letter}`
                 : `Responsable de zone${userTeam ? ` (saisi par l'équipe ${userTeam.letter})` : ""}`}
             </dd>
+            {needsTeam ? <EditLink onClick={() => setStep("team")} /> : <span />}
             <dt className="text-slate-500">Produit</dt>
             <dd>
               {product?.name}
               {product?.kind === "free" && <span className="text-sm text-amber-700"> (hors liste)</span>}
             </dd>
+            <EditLink onClick={() => setStep("product")} />
             <dt className="text-slate-500">Quantité</dt>
             <dd>
               {netLabel}
               {useTare && tarePreview?.result && ` (brut ${fmt(tarePreview.result.grossKg)} kg − tare ${fmt(tarePreview.result.tareTotalKg)} kg)`}
               {!useTare && net.kg != null && net.unitCode !== "kg" && ` = ${fmt(net.kg)} kg`}
             </dd>
+            <EditLink onClick={() => setStep("quantity")} />
             <dt className="text-slate-500">Cause</dt>
             <dd>{options.causes.find((c) => c.id === causeId)?.name}</dd>
+            <EditLink onClick={() => setStep("cause")} />
             <dt className="text-slate-500">Destination</dt>
             <dd>
               {destinationLines
-                .map((l) => `${options.destinations.find((d) => d.id === l.destinationId)?.name}${splitMode ? ` : ${l.quantity}` : ""}`)
+                .map(
+                  (l) =>
+                    `${options.destinations.find((d) => d.id === l.destinationId)?.name}${
+                      splitMode ? ` : ${fmt(parseNumber(l.quantity) ?? 0)}` : ""
+                    }`,
+                )
                 .join(" ; ")}
             </dd>
+            <EditLink onClick={() => setStep("destination")} />
           </dl>
 
           <div className="grid grid-cols-2 gap-3">
@@ -658,13 +722,24 @@ export function DeclarationWizard({ options, userTeam }: Props) {
             <textarea className="field min-h-20 py-2" value={comment} onChange={(e) => setComment(e.target.value)} />
           </label>
 
+          {correction && (
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">Motif de la correction (obligatoire)</span>
+              <input className="field" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="ex. erreur de pesée" />
+            </label>
+          )}
           {result && !result.ok && (
             <p role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">
               {result.error}
             </p>
           )}
-          <button type="button" className="btn-primary" disabled={pending || !occurredOn} onClick={submit}>
-            {pending ? "Enregistrement…" : "Valider la perte"}
+          <button
+            type="button"
+            className="btn-primary"
+            disabled={pending || !occurredOn || (!!correction && reason.trim().length < 3)}
+            onClick={submit}
+          >
+            {pending ? "Enregistrement…" : correction ? "Enregistrer la correction" : "Valider la perte"}
           </button>
         </Section>
       )}
@@ -708,6 +783,14 @@ function Tile({
       } ${selected ? "border-teal-700 bg-teal-50" : "border-transparent bg-white shadow-sm"}`}
     >
       {children}
+    </button>
+  );
+}
+
+function EditLink({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="text-sm font-medium text-teal-800 underline">
+      Modifier
     </button>
   );
 }

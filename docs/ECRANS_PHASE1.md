@@ -44,7 +44,11 @@ Après validation : confirmation claire (coche verte + résumé) et deux boutons
 - Chaque ligne est modifiable / supprimable **avant** validation (lignes en statut `brouillon`).
 - Bouton « Valider les N pertes » → toutes passent en `validee` dans une seule transaction.
 
-## E5 — Historique
+## E5 — Historique (« Pertes déclarées »)
+- Filtres : cette semaine / semaine précédente / toutes ; afficher ou masquer les annulées.
+- Correction : l'assistant de déclaration s'ouvre sur le récapitulatif prérempli ; « Modifier » sur la ligne
+  à changer ; motif obligatoire ; la date de saisie initiale est conservée.
+- Détail : historique des versions (date, auteur, motif, champs modifiés).
 - Compte équipe : uniquement les déclarations de son équipe ; filtres semaine, zone, cause.
 - Responsable de zone : déclarations de ses zones.
 - Responsable production / admin / direction : toutes.

@@ -1,0 +1,51 @@
+import { notFound, redirect } from "next/navigation";
+import { db } from "@/db/client";
+import { toProductionLocalDate } from "@/domain/semaine-production";
+import { requireUser } from "@/modules/auth/next-session";
+import { INPUT_METHODS, type InputMethod } from "@/modules/declarations/input";
+import { getDeclarationOptions } from "@/modules/declarations/options";
+import { getDeclarationDetail } from "@/modules/declarations/queries";
+import { DeclarationWizard, type WizardInitial } from "../../../declarer/declaration-wizard";
+
+export const metadata = { title: "Corriger une perte — Pertes" };
+
+export default async function CorrectPage({ params }: { params: Promise<{ id: string }> }) {
+  const user = await requireUser();
+  const { id } = await params;
+  const detail = await getDeclarationDetail(db, user, id).catch(() => null);
+  if (!detail) notFound();
+  if (!detail.canModify) redirect(`/historique/${id}`);
+  const d = detail.declaration;
+
+  const useTare = d.tareTotalKg != null;
+  // « Conversion automatique » est déduite : à la saisie, elle correspond à un comptage.
+  const method: InputMethod = (INPUT_METHODS as readonly string[]).includes(d.measurementMethod)
+    ? (d.measurementMethod as InputMethod)
+    : "comptage";
+  const support = detail.containers.find((c) => c.kind === "support");
+
+  const initial: WizardInitial = {
+    zoneId: d.zoneId,
+    subzoneId: d.subzoneId,
+    teamId: d.teamId,
+    product: d.productId
+      ? { kind: "listed", id: d.productId, name: d.productName, category: d.productCategory }
+      : { kind: "free", name: d.productName, category: d.productCategory },
+    method,
+    quantity: useTare ? "" : String(d.quantity),
+    unitCode: useTare ? null : d.unitCode,
+    useTare,
+    grossKg: useTare ? String(d.quantity) : "",
+    gastroCounts: Object.fromEntries(detail.containers.filter((c) => c.kind === "gastro").map((c) => [c.containerTypeId, c.count])),
+    supportId: support?.containerTypeId ?? null,
+    causeId: d.causeId,
+    destinationLines: detail.destinations.map((x) => ({ destinationId: x.destinationId, quantity: String(x.quantity) })),
+    justification: d.destinationGapJustification ?? "",
+    occurredOn: d.occurredOn,
+    occurredTime: d.occurredTime?.slice(0, 5) ?? "",
+    comment: d.comment ?? "",
+  };
+
+  const options = await getDeclarationOptions(db, user, toProductionLocalDate(new Date()));
+  return <DeclarationWizard options={options} userTeam={user.team} correction={{ id, revision: d.revision, initial }} />;
+}

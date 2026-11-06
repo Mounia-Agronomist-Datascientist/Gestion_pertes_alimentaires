@@ -51,6 +51,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </section>
       )}
 
+      <Link href="/historique" className="btn-secondary flex items-center justify-center">
+        Pertes déclarées et corrections
+      </Link>
+
       <Link href="/mot-de-passe" className="text-slate-600 underline">
         Changer le mot de passe
       </Link>

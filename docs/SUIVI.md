@@ -18,6 +18,8 @@
   connexion, sessions, changement de mot de passe, comptes de développement ; accueil aux couleurs de l'équipe.
 - 2026-11-06 : déclaration immédiate d'une perte (assistant mobile en 6 à 8 étapes), enregistrement avec
   historique des versions et journal d'audit.
+- 2026-11-06 : historique des pertes (liste par semaine, détail, versions), corrections et annulations
+  versionnées avec motif.
 
 ## Fonctionnalités terminées
 
@@ -31,6 +33,8 @@
 | 2026-11-06 | Connexion, sessions glissantes, blocage après 5 échecs, changement de mot de passe, périmètres de lecture | 14 tests d'intégration + vérification manuelle dans le navigateur (mobile) |
 | 2026-11-06 | Service d'enregistrement d'une déclaration : attribution équipe/zone, semaines et retards, tares, conversions, causes par zone/sous-zone, destinations, version 1 + audit | 25 tests d'intégration |
 | 2026-11-06 | Écran « Déclarer une perte » : zone, poste, équipe, produit (liste ou hors liste), quantité avec calcul de tare en direct, cause filtrée, destination(s) avec reste à affecter, récapitulatif, confirmation | Parcours complet vérifié dans le navigateur (mobile) et en base |
+| 2026-11-06 | Corrections et annulations : nouvelle version complète, motif obligatoire, verrou contre les modifications simultanées, droits par rôle et délai pour les équipes | 8 tests d'intégration |
+| 2026-11-06 | Écrans « Pertes déclarées » (liste filtrée par semaine, annulées masquables), détail avec historique des versions et champs modifiés, correction via l'assistant prérempli, annulation | Création → correction → annulation vérifiées dans le navigateur (mobile) et en base |
 | 2026-11-06 | Écrans : connexion, changement de mot de passe, accueil (équipe, semaine en cours lue en base), déconnexion | Vérification manuelle |
 | 2026-11-06 | Référentiels (équipes, zones, sous-zones, causes, destinations, unités, contenants, tares, rôles, permissions, comptes, audit) + données initiales idempotentes | 11 tests d'intégration |
 
@@ -42,7 +46,11 @@
 - Le référentiel des produits est vide : toutes les saisies sont « hors liste » en attendant une liste de départ.
 - L'estimation par contenant (« 2 gastros pleins ») n'est pas convertie en kg : il faudrait un poids de
   référence par produit et par contenant.
-- Une déclaration de test (« Purée de carottes (test) ») existe dans la base de développement locale.
+- Une déclaration de test (« Purée de carottes (test) », corrigée puis annulée) existe dans la base de
+  développement locale.
+- Le délai de correction des équipes (fin de la semaine de saisie) est une proposition en attente de validation.
+- Au premier lancement du serveur de développement, Postgres.app peut demander d'autoriser la connexion :
+  tant que ce n'est pas accepté, les pages renvoient une erreur de connexion à la base.
 - Les tests de bout en bout automatisés (Playwright) ne sont pas encore en place ; les écrans ont été vérifiés
   à la main dans le navigateur.
 
@@ -52,5 +60,6 @@
 |---|---|---|
 | `0000_init_production_weeks` | Création de `production_weeks` | Aucune (base vide) |
 | `0001_referentiels_phase1` | Création des 18 tables de référentiels, comptes et audit | Aucune modification de `production_weeks` |
+| `0004_lignes_versionnees` | Colonne `revision` sur les tares et destinations des déclarations | Lignes existantes rattachées à la version 1 |
 | `0003_declarations` | Création des 5 tables de déclarations, tares utilisées, destinations, versions et lots | Aucune modification des tables existantes |
 | `0002_causes_par_sous_zone` | Création de `cause_subzones` | Aucune modification des tables existantes ; base de dév. recréée (aucune donnée réelle) |

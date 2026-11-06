@@ -23,7 +23,7 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | C3 ✅ | Causes « Chutes » | « Chute » = produit tombé ; ajout de « Chutes de découpe » limitée au déboîtage | — |
 | C4 ✅ | Causes du stockage | Ajoutées : péremption, rupture de la chaîne du froid, mauvaise rotation, mauvais stockage, stock excédentaire | — |
 | 1 🟠 | Comptes partagés | Mot de passe par équipe géré par l'admin ; rotation à chaque départ ; révocation des sessions. Durée de session proposée : 30 jours glissants pour les comptes équipe et responsables de zone, 12 h pour les autres | Phase 1 |
-| C1 🟠 | Correction par une équipe | Délai pendant lequel une équipe peut corriger sa déclaration (ex. jusqu'à la fin de la semaine de production), au-delà correction par un responsable | Phase 1 |
+| C1 🟠 | Correction par une équipe | **Appliqué en attendant validation** : une équipe corrige ou annule ses déclarations jusqu'à la fin de la semaine de production pendant laquelle elle les a saisies ; ensuite, un responsable (règle unique dans `src/modules/declarations/access.ts`) | Validation |
 | C2 ✅ | Causes initiales | Listes reçues pour toutes les zones et chargées (26 causes, voir src/db/seed/data.ts) | — |
 | P1 🔴 | Référentiel produits Phase 1 | Le référentiel est vide : les saisies se font en « hors liste ». Il faut une liste de départ (export Melba même partiel : identifiant, nom, catégorie, unité, poids unitaire si connu) | Mise en service |
 | P2 🟠 | Estimation par contenant | Pour convertir « 2 gastros pleins » en kg, il faudrait un poids moyen par produit et par type de gastro. À défaut, la quantité reste en nombre de gastros (non convertie) | Phase 1–2 |

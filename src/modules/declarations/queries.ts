@@ -94,7 +94,13 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
   const [weeks, containers, destinations, revisions] = await Promise.all([
     db.select().from(s.productionWeeks).where(inArray(s.productionWeeks.id, [d.productionWeekId, d.declaredWeekId])),
     db
-      .select({ name: s.containerTypes.name, count: s.declarationContainers.count, tareKg: s.declarationContainers.tareKgSnapshot })
+      .select({
+        containerTypeId: s.containerTypes.id,
+        kind: s.containerTypes.kind,
+        name: s.containerTypes.name,
+        count: s.declarationContainers.count,
+        tareKg: s.declarationContainers.tareKgSnapshot,
+      })
       .from(s.declarationContainers)
       .innerJoin(s.containerTares, eq(s.declarationContainers.containerTareId, s.containerTares.id))
       .innerJoin(s.containerTypes, eq(s.containerTares.containerTypeId, s.containerTypes.id))
