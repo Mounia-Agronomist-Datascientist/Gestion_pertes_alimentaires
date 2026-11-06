@@ -21,6 +21,8 @@
 - 2026-11-06 : historique des pertes (liste par semaine, détail, versions), corrections et annulations
   versionnées avec motif.
 - 2026-11-06 : déclaration groupée (« plusieurs pertes »), enregistrée en une seule fois, tout ou rien.
+- 2026-11-06 : délai de 7 jours pour les équipes ; aucun prénom dans l'application ; administration des
+  comptes, des équipes par semaine et des causes (avec propositions des équipes).
 
 ## Fonctionnalités terminées
 
@@ -37,6 +39,10 @@
 | 2026-11-06 | Corrections et annulations : nouvelle version complète, motif obligatoire, verrou contre les modifications simultanées, droits par rôle et délai pour les équipes | 8 tests d'intégration |
 | 2026-11-06 | Écrans « Pertes déclarées » (liste filtrée par semaine, annulées masquables), détail avec historique des versions et champs modifiés, correction via l'assistant prérempli, annulation | Création → correction → annulation vérifiées dans le navigateur (mobile) et en base |
 | 2026-11-06 | Déclaration groupée : lignes préparées sur l'appareil (conservées après rechargement), même endroit réutilisé, modifier / retirer une ligne, validation en une transaction, ligne fautive signalée | 3 tests d'intégration + série de 2 pertes vérifiée dans le navigateur et en base |
+| 2026-11-06 | Délai des équipes (7 jours) pour déclarer / corriger / annuler, retard de saisie affiché | 4 tests |
+| 2026-11-06 | Administration des comptes : création (mot de passe provisoire affiché une fois), réinitialisation, désactivation | 6 tests d'intégration ; écran vérifié dans le navigateur |
+| 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
+| 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
 | 2026-11-06 | Écrans : connexion, changement de mot de passe, accueil (équipe, semaine en cours lue en base), déconnexion | Vérification manuelle |
 | 2026-11-06 | Référentiels (équipes, zones, sous-zones, causes, destinations, unités, contenants, tares, rôles, permissions, comptes, audit) + données initiales idempotentes | 11 tests d'intégration |
 
@@ -49,8 +55,9 @@
 - Le référentiel des produits est vide : toutes les saisies sont « hors liste » en attendant une liste de départ.
 - L'estimation par contenant (« 2 gastros pleins ») n'est pas convertie en kg : il faudrait un poids de
   référence par produit et par contenant.
-- Une déclaration de test (« Purée de carottes (test) », corrigée puis annulée) existe dans la base de
-  développement locale.
+- La base de développement a été réinitialisée le 06/11/2026 (comptes renommés par fonction) ; elle contient
+  une cause de test validée : « Bac oublié en chambre froide ».
+- Écran de création de compte : testé par les tests d'intégration, pas encore manuellement dans le navigateur.
 - Le délai de correction des équipes (fin de la semaine de saisie) est une proposition en attente de validation.
 - Au premier lancement du serveur de développement, Postgres.app peut demander d'autoriser la connexion :
   tant que ce n'est pas accepté, les pages renvoient une erreur de connexion à la base.

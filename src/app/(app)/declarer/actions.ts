@@ -1,7 +1,10 @@
 "use server";
 
 import { db } from "@/db/client";
+import { AdminError } from "@/modules/admin/accounts";
+import { proposeCause } from "@/modules/admin/causes";
 import { requireUser } from "@/modules/auth/next-session";
+import { ForbiddenError } from "@/modules/auth/permissions";
 import {
   BatchLineError,
   type CreatedDeclaration,
@@ -52,5 +55,16 @@ export async function submitBatch(payloads: unknown[]): Promise<BatchResult> {
     if (isInputError(e)) return { ok: false, error: e.message, lineIndex: null };
     console.error("Échec d'enregistrement d'un lot de déclarations", e);
     return { ok: false, error: "Erreur inattendue : rien n'a été enregistré. Réessayez.", lineIndex: null };
+  }
+}
+
+export async function proposeCauseAction(input: { name: string; description: string; zoneId: string }): Promise<{ ok: boolean; error?: string }> {
+  const user = await requireUser();
+  try {
+    await proposeCause(db, user, input);
+    return { ok: true };
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { ok: false, error: e.message };
+    throw e;
   }
 }

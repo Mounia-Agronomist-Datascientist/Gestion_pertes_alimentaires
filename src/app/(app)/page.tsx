@@ -3,6 +3,7 @@ import { db } from "@/db/client";
 import { formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
+import { countPendingProposals } from "@/modules/admin/causes";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
@@ -15,6 +16,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const user = await requireUser();
   const params = await searchParams;
   const week = await findStoredProductionWeek(db, toProductionLocalDate(new Date()));
+  const pendingCauses = can(user, "cause.review") ? await countPendingProposals(db) : 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,8 +58,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       </Link>
 
       {(can(user, "user.manage") || can(user, "referentiel.manage")) && (
-        <Link href="/admin" className="btn-secondary flex items-center justify-center">
+        <Link href="/admin" className="btn-secondary flex items-center justify-center gap-2">
           Administration
+          {pendingCauses > 0 && (
+            <span className="rounded-full bg-amber-500 px-2 text-sm text-white">
+              {pendingCauses} cause{pendingCauses > 1 ? "s" : ""} à valider
+            </span>
+          )}
         </Link>
       )}
 

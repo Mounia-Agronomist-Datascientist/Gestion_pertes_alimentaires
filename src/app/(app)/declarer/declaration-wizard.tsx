@@ -15,7 +15,7 @@ import {
   PRODUCT_CATEGORY_LABELS,
 } from "@/modules/declarations/input";
 import type { DeclarationOptions } from "@/modules/declarations/options";
-import { submitCorrection, submitDeclaration, type SubmitResult } from "./actions";
+import { proposeCauseAction, submitCorrection, submitDeclaration, type SubmitResult } from "./actions";
 
 type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "cause" | "destination" | "recap" | "done";
 export type ProductChoice =
@@ -625,6 +625,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           <p className="text-sm text-slate-500">
             Aucune cause ne correspond ? Choisissez « Autres pertes » et expliquez en commentaire.
           </p>
+          {zone && <ProposeCause zoneId={zone.id} zoneName={zone.name} />}
         </Section>
       )}
 
@@ -847,6 +848,60 @@ function Tile({
     >
       {children}
     </button>
+  );
+}
+
+/** Proposition d'une cause manquante (§9.3), soumise à validation de l'administrateur. */
+function ProposeCause({ zoneId, zoneName }: { zoneId: string; zoneName: string }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  if (status?.ok) {
+    return (
+      <p role="status" className="rounded-xl bg-emerald-50 p-3 text-emerald-900">
+        {status.message}
+      </p>
+    );
+  }
+  if (!open) {
+    return (
+      <button type="button" className="self-start text-sm font-medium text-teal-800 underline" onClick={() => setOpen(true)}>
+        Proposer une nouvelle cause
+      </button>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl bg-white p-4">
+      <p className="font-medium">Nouvelle cause pour « {zoneName} »</p>
+      <input className="field" placeholder="Nom de la cause" value={name} onChange={(e) => setName(e.target.value)} />
+      <input
+        className="field"
+        placeholder="Précision (facultatif)"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      {status && !status.ok && <p className="text-red-800">{status.message}</p>}
+      <button
+        type="button"
+        className="btn-secondary"
+        disabled={pending || name.trim().length < 3}
+        onClick={() =>
+          startTransition(async () => {
+            const r = await proposeCauseAction({ name, description, zoneId });
+            setStatus(
+              r.ok
+                ? { ok: true, message: "Merci : proposition envoyée à l'administrateur. En attendant, choisissez « Autres pertes »." }
+                : { ok: false, message: r.error ?? "Proposition impossible" },
+            );
+          })
+        }
+      >
+        Envoyer la proposition
+      </button>
+    </div>
   );
 }
 

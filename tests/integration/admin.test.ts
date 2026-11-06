@@ -3,6 +3,15 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as s from "@/db/schema";
 import { seed, zoneIdByCode } from "@/db/seed/seed";
 import { createAccountByAdmin, listAccounts, resetPassword, setAccountActive } from "@/modules/admin/accounts";
+import {
+  countPendingProposals,
+  createCause,
+  listCausesForAdmin,
+  proposeCause,
+  reviewCause,
+  setCauseActive,
+  updateCause,
+} from "@/modules/admin/causes";
 import { listTeamsForWeek, setTeamWeekActive } from "@/modules/admin/teams";
 import { createAccount } from "@/modules/auth/accounts";
 import { ForbiddenError, type AuthUser } from "@/modules/auth/permissions";
@@ -92,5 +101,80 @@ describe("administration", () => {
       teams = await listTeamsForWeek(t.db, admin, week);
       expect(teams.find((x) => x.letter === "H")?.activeThisWeek).toBe(true);
     });
+  });
+});
+
+describe("causes", () => {
+  let t: Awaited<ReturnType<typeof createTestDb>>;
+  let admin: AuthUser;
+  let team: AuthUser;
+  let cuisine: string;
+  let plonge: string;
+
+  beforeAll(async () => {
+    t = await createTestDb();
+    await seed(t.db);
+    cuisine = await zoneIdByCode(t.db, "CUISINE");
+    plonge = await zoneIdByCode(t.db, "PLONGE");
+    const teamA = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "A")))[0]!.id;
+    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
+    team = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-a", displayName: "Équipe A", roleCode: "equipe", teamId: teamA, password: "mot-de-passe-equipe" }));
+  });
+
+  afterAll(async () => {
+    await t.close();
+  });
+
+  const activeCauseNames = async (zoneId: string) => {
+    const rows = await t.db
+      .select({ name: s.causes.name })
+      .from(s.causes)
+      .innerJoin(s.causeZones, eq(s.causeZones.causeId, s.causes.id))
+      .where(and(eq(s.causeZones.zoneId, zoneId), eq(s.causes.status, "active")));
+    return rows.map((r) => r.name);
+  };
+
+  it("une proposition n'apparaît dans les listes qu'après validation", async () => {
+    const proposed = await proposeCause(t.db, team, { name: "Bac renversé au transport", zoneId: cuisine });
+    expect(proposed.status).toBe("proposee");
+    expect(await activeCauseNames(cuisine)).not.toContain("Bac renversé au transport");
+    expect(await countPendingProposals(t.db)).toBe(1);
+
+    await reviewCause(t.db, admin, proposed.id, { accept: true, name: "Bac renversé pendant le transport", zoneIds: [cuisine, plonge] });
+    expect(await activeCauseNames(cuisine)).toContain("Bac renversé pendant le transport");
+    expect(await activeCauseNames(plonge)).toContain("Bac renversé pendant le transport");
+    expect(await countPendingProposals(t.db)).toBe(0);
+  });
+
+  it("refuse les doublons de formulation (accents, casse, ponctuation)", async () => {
+    await expect(proposeCause(t.db, team, { name: "erreur de PREPARATION !", zoneId: cuisine })).rejects.toThrow(/existe déjà/);
+  });
+
+  it("une proposition rejetée ne bloque pas une nouvelle proposition du même nom", async () => {
+    const p = await proposeCause(t.db, team, { name: "Coupure de courant", zoneId: cuisine });
+    await reviewCause(t.db, admin, p.id, { accept: false, reason: "Utiliser « Autres pertes »" });
+    expect((await t.db.select().from(s.causes).where(eq(s.causes.id, p.id)))[0]?.status).toBe("rejetee");
+    await expect(proposeCause(t.db, team, { name: "Coupure de courant", zoneId: cuisine })).resolves.toBeTruthy();
+  });
+
+  it("désactive une cause, mais jamais « Autres pertes »", async () => {
+    const causes = await listCausesForAdmin(t.db, admin);
+    const other = causes.find((c) => c.isOther)!;
+    const four = causes.find((c) => c.code === "CUI_FOUR_SALE")!;
+    await expect(setCauseActive(t.db, admin, other.id, false)).rejects.toThrow(/toujours/);
+    await setCauseActive(t.db, admin, four.id, false);
+    expect(await activeCauseNames(cuisine)).not.toContain(four.name);
+  });
+
+  it("renommer une cause ne change pas les déclarations passées (nom conservé à la saisie)", async () => {
+    const created = await createCause(t.db, admin, { name: "Cause temporaire", zoneIds: [cuisine] });
+    await updateCause(t.db, admin, created.id, { name: "Cause renommée", zoneIds: [cuisine] });
+    const [row] = await t.db.select().from(s.causes).where(eq(s.causes.id, created.id));
+    expect(row?.name).toBe("Cause renommée");
+  });
+
+  it("réserve la gestion et la validation à l'administrateur", async () => {
+    await expect(listCausesForAdmin(t.db, team)).rejects.toThrow(ForbiddenError);
+    await expect(createCause(t.db, team, { name: "Test", zoneIds: [cuisine] })).rejects.toThrow(ForbiddenError);
   });
 });

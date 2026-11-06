@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
+import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
 import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
@@ -59,4 +60,57 @@ export async function teamWeekAction(formData: FormData): Promise<void> {
     note: String(formData.get("note") ?? ""),
   });
   revalidatePath("/admin/equipes");
+}
+
+// ─── Causes ──────────────────────────────────────────────────────────────────
+
+export interface CauseActionState {
+  error?: string;
+  message?: string;
+}
+
+export async function causeAction(_prev: CauseActionState, formData: FormData): Promise<CauseActionState> {
+  const admin = await requireUser();
+  const intent = String(formData.get("intent"));
+  const causeId = String(formData.get("causeId") ?? "");
+  const fields = () => ({
+    name: String(formData.get("name") ?? ""),
+    description: String(formData.get("description") ?? "") || null,
+    zoneIds: formData.getAll("zoneIds").map(String),
+  });
+  try {
+    switch (intent) {
+      case "create":
+        await createCause(db, admin, fields());
+        break;
+      case "update":
+        await updateCause(db, admin, causeId, fields());
+        break;
+      case "accept":
+        await reviewCause(db, admin, causeId, { accept: true, ...fields() });
+        break;
+      case "reject":
+        await reviewCause(db, admin, causeId, { accept: false, reason: String(formData.get("reason") ?? "") });
+        break;
+      case "activate":
+      case "deactivate":
+        await setCauseActive(db, admin, causeId, intent === "activate");
+        break;
+      default:
+        return { error: "Action inconnue" };
+    }
+    revalidatePath("/admin/causes");
+    const labels: Record<string, string> = {
+      create: "Cause créée.",
+      update: "Cause modifiée. Les déclarations passées gardent l'ancien nom.",
+      accept: "Proposition validée : la cause est maintenant proposée aux équipes.",
+      reject: "Proposition rejetée.",
+      activate: "Cause réactivée.",
+      deactivate: "Cause désactivée : elle n'est plus proposée.",
+    };
+    return { message: labels[intent] };
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
 }
