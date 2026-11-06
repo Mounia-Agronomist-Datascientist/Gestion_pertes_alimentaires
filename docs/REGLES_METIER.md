@@ -44,14 +44,17 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
 
 1. L'utilisateur choisit un ou plusieurs types de gastro et leur nombre.
 2. Il saisit le poids brut total mesuré.
-3. ✅ La tare **n'est pas proportionnelle** : le référentiel donne, pour chaque type de gastro, la tare
-   **selon le nombre de gastros** (table type × nombre → tare totale). Pour chaque type :
-   `tare du type = valeur lue dans la table pour (type, nombre)` ; `tare totale = Σ tares des types`.
-   ⚠️ Comportement si le nombre saisi dépasse la table : à définir à réception du fichier
-   (proposition : refus avec message, pas d'extrapolation).
-4. `poids net = poids brut − tare totale`.
-5. Si le poids net ≤ 0 → erreur bloquante (« le poids brut doit être supérieur à la tare »).
-6. L'identifiant **de la version de tare** utilisée est conservé dans la déclaration.
+3. ✅ Le fichier de référence (« Multiplication des gastros ») est **strictement proportionnel** :
+   `tare d'un type = nombre × tare unitaire du type`. Tares unitaires : Gastro 1 (fin) 1,10 kg ;
+   1TR (fin à trous) 1,15 kg ; 2 (moyen) 1,25 kg ; 2TR (moyen à trous) 1,30 kg ; 3 (moyen profond) 1,75 kg ;
+   4 (profond) 2,25 kg.
+4. Le nombre de gastros d'un type est limité à la capacité de l'échelle indiquée dans le fichier
+   (40 pour les gastros 1 et 1TR, 30 pour les autres) ; au-delà, la saisie est refusée.
+5. Si les gastros sont pesés **sur leur échelle**, la tare de l'échelle est ajoutée : échelle classique 21 kg,
+   échelle à four 52 kg (valeurs du même fichier). Au plus une échelle par pesée.
+6. `tare totale = tare de l'échelle éventuelle + Σ tares des types` ; `poids net = poids brut − tare totale`.
+7. Si le poids net ≤ 0 → erreur bloquante (« le poids brut doit être supérieur à la tare »).
+8. L'identifiant **de la version de tare** utilisée est conservé dans la déclaration.
 
 ## R4 — Répartition entre destinations
 
@@ -81,8 +84,9 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 ## R6 — Attribution à une équipe
 
 - Compte équipe : l'équipe est préremplie et non modifiable.
-- ⚠️ Chaque sous-zone porte un paramètre `team_mode` : `obligatoire`, `facultative` ou `aucune`. Une perte
-  peut donc être enregistrée sans équipe (responsabilité collective / zone) lorsque la sous-zone le permet.
-  Le paramétrage initial de chaque sous-zone est à valider (point 2 du cahier des charges).
+- ✅ Chaque sous-zone porte un paramètre `team_mode` (validé le 06/11/2026) :
+  - `equipe` — Cuisine / Production (déboîtage → salle blanche) : la perte est attribuée à l'une des 8 équipes ;
+  - `zone` — Réception, Stockage, Conditionnement, Plonge : la perte est attribuée à la zone et à son
+    responsable unique, sans équipe.
 - Une équipe désactivée pour une semaine n'apparaît pas dans les choix de cette semaine, mais son historique
   reste consultable.

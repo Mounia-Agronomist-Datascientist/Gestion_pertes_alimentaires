@@ -86,7 +86,7 @@ anti-chevauchement.
 **zones** — `id`, `code` unique, `name`, `display_order`, `requires_justification` (pour « Autre »), `active`.
 
 **subzones** — `id`, `zone_id`, `code`, `name`, `display_order`, `team_mode`
-(`obligatoire`|`facultative`|`aucune`), `allowed_methods` (text[] des méthodes de mesure proposées), `active`.
+(`obligatoire`|`facultative`|`aucune`), `active`. Les méthodes de mesure proposées par sous-zone seront ajoutées si le besoin se confirme.
 
 ### Référentiels de saisie
 
@@ -119,12 +119,12 @@ Unicité : (`external_id`) si non nul ; (`category`,`code`) si non nul. Index tr
 **destinations** — `id`, `code`, `name`, `kind` (`destruction`|`compost`|`don`|`personnel`|`vente`|
 `reutilisation`|`retour_fournisseur`|`autre`), `financial_recovery` bool, `display_order`, `active`.
 
-**container_types** — `id`, `code`, `name` (ex. « GN 1/1 inox 65 mm »), `active`.
+**container_types** — `id`, `code`, `name` (ex. « Gastro 4 – profond »), `kind` (`gastro` | `support` pour les
+échelles), `max_count` (capacité de l'échelle), `active`.
 
-**container_tares** — `id`, `container_type_id`, `container_count` smallint (nombre de gastros),
-`tare_total_kg` numeric (tare totale pour ce nombre), `valid_from`, `valid_to` null, `created_by`.
-Unicité (`container_type_id`, `container_count`, `valid_from`). La tare varie selon le nombre de gastros
-(elle n'est pas proportionnelle). Une modification de tare = nouvelle ligne (version) ; l'ancienne est clôturée.
+**container_tares** — `id`, `container_type_id`, `unit_tare_kg`, `valid_from`, `valid_to` null, `source`,
+`created_by`. La tare totale est proportionnelle au nombre de gastros (vérifié sur le fichier de référence).
+Une modification de tare = nouvelle ligne (version) ; l'ancienne est clôturée.
 
 ### Déclarations
 

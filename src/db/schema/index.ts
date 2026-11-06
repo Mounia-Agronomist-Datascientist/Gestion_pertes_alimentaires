@@ -1,2 +1,5 @@
 // Point d'entrée du schéma Drizzle : chaque groupe de tables a son propre fichier.
 export * from "./production-weeks";
+export * from "./organisation";
+export * from "./referentiels";
+export * from "./auth";
