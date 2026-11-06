@@ -43,11 +43,26 @@ export interface WizardInitial {
   comment: string;
 }
 
+/** Ligne préparée en mode « plusieurs pertes », gardée sur l'appareil jusqu'à la validation du lot. */
+export interface BatchLine {
+  payload: Record<string, unknown>;
+  initial: WizardInitial;
+  summary: { productName: string; quantityLabel: string; causeName: string; placeLabel: string; destinationLabel: string };
+}
+
 interface Props {
   options: DeclarationOptions;
   userTeam: { letter: string; colorName: string; colorHex: string } | null;
   /** Mode correction : déclaration à corriger, version affichée et valeurs de départ. */
   correction?: { id: string; revision: number; initial: WizardInitial };
+  /** Mode « plusieurs pertes » : la ligne est ajoutée à la liste au lieu d'être enregistrée. */
+  batch?: {
+    initial?: Partial<WizardInitial>;
+    startStep?: "zone" | "product" | "recap";
+    editing: boolean;
+    onAdd: (line: BatchLine) => void;
+    onCancel: () => void;
+  };
 }
 
 const LAST_SUBZONE_KEY = "pertes:derniere-sous-zone";
@@ -77,9 +92,9 @@ function writeStorage(key: string, value: string) {
   }
 }
 
-export function DeclarationWizard({ options, userTeam, correction }: Props) {
-  const init = correction?.initial;
-  const [step, setStep] = useState<Step>(init ? "recap" : "zone");
+export function DeclarationWizard({ options, userTeam, correction, batch }: Props) {
+  const init: Partial<WizardInitial> | undefined = correction?.initial ?? batch?.initial;
+  const [step, setStep] = useState<Step>(correction ? "recap" : (batch?.startStep ?? "zone"));
   const [zoneId, setZoneId] = useState<string | null>(init?.zoneId ?? null);
   const [subzoneId, setSubzoneId] = useState<string | null>(init?.subzoneId ?? null);
   const [teamId, setTeamId] = useState<string | null>(init?.teamId ?? null);
@@ -92,7 +107,7 @@ export function DeclarationWizard({ options, userTeam, correction }: Props) {
   const [gastroCounts, setGastroCounts] = useState<Record<string, number>>(init?.gastroCounts ?? {});
   const [supportId, setSupportId] = useState<string | null>(init?.supportId ?? null);
   const [causeId, setCauseId] = useState<string | null>(init?.causeId ?? null);
-  const [splitMode, setSplitMode] = useState((init?.destinationLines.length ?? 0) > 1);
+  const [splitMode, setSplitMode] = useState((init?.destinationLines?.length ?? 0) > 1);
   const [destinationLines, setDestinationLines] = useState<{ destinationId: string; quantity: string }[]>(
     init?.destinationLines ?? [],
   );
@@ -270,7 +285,7 @@ export function DeclarationWizard({ options, userTeam, correction }: Props) {
   }
 
   function submit() {
-    if (!subzone || !product || !method || !causeId || !net) return;
+    if (!zone || !subzone || !product || !method || !causeId || !net) return;
     const payload = {
       occurredOn,
       occurredTime: occurredTime || null,
@@ -296,6 +311,42 @@ export function DeclarationWizard({ options, userTeam, correction }: Props) {
       destinationGapJustification: justification || null,
       comment: comment || null,
     };
+    if (batch) {
+      batch.onAdd({
+        payload,
+        initial: {
+          zoneId: zone.id,
+          subzoneId: subzone.id,
+          teamId,
+          product,
+          method,
+          quantity,
+          unitCode,
+          useTare,
+          grossKg,
+          gastroCounts,
+          supportId,
+          causeId,
+          destinationLines,
+          justification,
+          occurredOn,
+          occurredTime,
+          comment,
+        },
+        summary: {
+          productName: product.name,
+          quantityLabel: net.kg != null && net.unitCode !== "kg" ? `${netLabel} (${fmt(net.kg)} kg)` : netLabel,
+          causeName: options.causes.find((c) => c.id === causeId)?.name ?? "",
+          placeLabel: [zone.subzones.length > 1 ? subzone.name : zone.name, team ? `Équipe ${team.letter}` : null]
+            .filter(Boolean)
+            .join(" · "),
+          destinationLabel: destinationLines
+            .map((l) => options.destinations.find((d) => d.id === l.destinationId)?.name)
+            .join(", "),
+        },
+      });
+      return;
+    }
     startTransition(async () => {
       const r = correction
         ? await submitCorrection({ id: correction.id, expectedRevision: correction.revision, reason, payload })
@@ -347,7 +398,11 @@ export function DeclarationWizard({ options, userTeam, correction }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        {stepIndex > 0 ? (
+        {batch && (stepIndex === 0 || step === "recap" || step === (batch.startStep ?? "zone")) ? (
+          <button type="button" onClick={batch.onCancel} className="rounded-xl px-2 py-2 font-medium text-slate-700">
+            ← Liste
+          </button>
+        ) : stepIndex > 0 ? (
           <button type="button" onClick={goBack} className="rounded-xl px-2 py-2 font-medium text-slate-700">
             ← Retour
           </button>
@@ -739,7 +794,15 @@ export function DeclarationWizard({ options, userTeam, correction }: Props) {
             disabled={pending || !occurredOn || (!!correction && reason.trim().length < 3)}
             onClick={submit}
           >
-            {pending ? "Enregistrement…" : correction ? "Enregistrer la correction" : "Valider la perte"}
+            {pending
+              ? "Enregistrement…"
+              : correction
+                ? "Enregistrer la correction"
+                : batch
+                  ? batch.editing
+                    ? "Mettre à jour la ligne"
+                    : "Ajouter à la liste"
+                  : "Valider la perte"}
           </button>
         </Section>
       )}

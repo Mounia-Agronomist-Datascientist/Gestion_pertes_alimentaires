@@ -44,10 +44,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             Déclarer une perte
             <span className="text-sm font-normal">Au fil de l&apos;eau, une perte à la fois</span>
           </Link>
-          <div aria-disabled className="btn-tile opacity-60">
+          <Link href="/declarer/serie" className="btn-tile">
             Déclarer plusieurs pertes
-            <span className="text-sm font-normal">Bientôt disponible</span>
-          </div>
+            <span className="text-sm font-normal">En fin de service, tout d&apos;un coup</span>
+          </Link>
         </section>
       )}
 

@@ -20,6 +20,7 @@
   historique des versions et journal d'audit.
 - 2026-11-06 : historique des pertes (liste par semaine, détail, versions), corrections et annulations
   versionnées avec motif.
+- 2026-11-06 : déclaration groupée (« plusieurs pertes »), enregistrée en une seule fois, tout ou rien.
 
 ## Fonctionnalités terminées
 
@@ -35,6 +36,7 @@
 | 2026-11-06 | Écran « Déclarer une perte » : zone, poste, équipe, produit (liste ou hors liste), quantité avec calcul de tare en direct, cause filtrée, destination(s) avec reste à affecter, récapitulatif, confirmation | Parcours complet vérifié dans le navigateur (mobile) et en base |
 | 2026-11-06 | Corrections et annulations : nouvelle version complète, motif obligatoire, verrou contre les modifications simultanées, droits par rôle et délai pour les équipes | 8 tests d'intégration |
 | 2026-11-06 | Écrans « Pertes déclarées » (liste filtrée par semaine, annulées masquables), détail avec historique des versions et champs modifiés, correction via l'assistant prérempli, annulation | Création → correction → annulation vérifiées dans le navigateur (mobile) et en base |
+| 2026-11-06 | Déclaration groupée : lignes préparées sur l'appareil (conservées après rechargement), même endroit réutilisé, modifier / retirer une ligne, validation en une transaction, ligne fautive signalée | 3 tests d'intégration + série de 2 pertes vérifiée dans le navigateur et en base |
 | 2026-11-06 | Écrans : connexion, changement de mot de passe, accueil (équipe, semaine en cours lue en base), déconnexion | Vérification manuelle |
 | 2026-11-06 | Référentiels (équipes, zones, sous-zones, causes, destinations, unités, contenants, tares, rôles, permissions, comptes, audit) + données initiales idempotentes | 11 tests d'intégration |
 
@@ -42,7 +44,8 @@
 
 - TypeScript 7 (nouvelle version native) est utilisé ; si un outil devient incompatible, revenir à TypeScript 5.x.
 - ESLint/Prettier pas encore configurés (prévu au début de la Phase 1).
-- Le bouton « Déclarer plusieurs pertes » (mode groupé) est encore « Bientôt disponible ».
+- En mode groupé, les lignes non validées restent sur l'appareil (stockage du navigateur) : elles sont
+  perdues si l'on vide les données du navigateur avant de valider.
 - Le référentiel des produits est vide : toutes les saisies sont « hors liste » en attendant une liste de départ.
 - L'estimation par contenant (« 2 gastros pleins ») n'est pas convertie en kg : il faudrait un poids de
   référence par produit et par contenant.

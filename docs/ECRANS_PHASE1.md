@@ -37,7 +37,13 @@ mémorisation du dernier contexte (zone, sous-zone).
 Après validation : confirmation claire (coche verte + résumé) et deux boutons « Nouvelle perte (même zone) »
 / « Terminer ».
 
-## E4 — Déclaration groupée
+## E4 — Déclaration groupée (réalisé)
+- Les lignes sont préparées sur l'appareil, sans rien enregistrer, et survivent à un rechargement de page.
+- « Ajouter une perte (même endroit) » reprend zone, poste, équipe et date de la ligne précédente.
+- « Valider les N pertes » : tout est contrôlé puis enregistré en une seule fois ; si une ligne est invalide,
+  rien n'est enregistré et la ligne est signalée.
+
+Prévu initialement :
 - En-tête commun : date, zone, sous-zone, équipe (modifiable pour tout le lot).
 - Tableau de lignes ajoutées une à une (produit, quantité, méthode, cause, destination) avec la même aide
   à la saisie que E3, en format compact.

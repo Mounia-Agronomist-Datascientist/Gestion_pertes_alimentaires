@@ -25,7 +25,7 @@ causes, destinations, impact environnemental).
 | Phase | Objet | Statut |
 |---|---|---|
 | 0 | Cadrage technique | ✅ |
-| 1 | Déclarations de pertes (application utilisable) | 🟡 En cours — déclaration, historique, corrections et annulations faits ; mode groupé et administration à venir |
+| 1 | Déclarations de pertes (application utilisable) | 🟡 En cours — déclaration immédiate et groupée, historique, corrections et annulations faits ; administration à venir |
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ⏳ |
 | 3 | Calcul des coûts | ⏳ |
 | 4 | Tableaux de bord et statistiques | ⏳ |
