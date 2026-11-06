@@ -4,8 +4,7 @@ Application web interne (PWA) permettant aux équipes de production de déclarer
 rapidement leurs pertes, et aux responsables de les analyser (quantités, coûts,
 causes, destinations, impact environnemental).
 
-> **État du projet : Phase 0 — cadrage technique (aucun code applicatif).**
-> Les choix ci-dessous sont des **propositions en attente de validation**.
+> **État du projet : fin de Phase 0 — socle technique en place, pile validée.**
 
 ## Documentation
 
@@ -24,7 +23,7 @@ causes, destinations, impact environnemental).
 
 | Phase | Objet | Statut |
 |---|---|---|
-| 0 | Cadrage technique | 🟡 En cours — à valider |
+| 0 | Cadrage technique | 🟡 Socle en place — en attente de validation finale |
 | 1 | Déclarations de pertes (application utilisable) | ⏳ |
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ⏳ |
 | 3 | Calcul des coûts | ⏳ |
@@ -34,5 +33,25 @@ causes, destinations, impact environnemental).
 
 ## Lancement
 
-La procédure de lancement sera écrite à la fin de la Phase 0, une fois la pile
-technique et l'hébergement validés (voir [docs/ARCHITECTURE.md §6](docs/ARCHITECTURE.md)).
+### Prérequis
+- Node.js 22 ou plus récent
+- PostgreSQL (en développement : [Postgres.app](https://postgresapp.com), port 5432)
+
+### Première installation
+```bash
+npm install
+cp .env.example .env                 # puis adapter DATABASE_URL si besoin
+createdb pertes_dev                  # avec Postgres.app : /Applications/Postgres.app/Contents/Versions/latest/bin/createdb
+npm run db:migrate                   # applique les migrations SQL de src/db/migrations
+npm run db:check                     # vérifie la connexion
+```
+
+### Au quotidien
+| Commande | Rôle |
+|---|---|
+| `npm run dev` | Lance l'application sur http://localhost:3000 |
+| `npm test` | Tests unitaires et d'intégration (PostgreSQL embarqué, sans configuration) |
+| `npm run typecheck` | Vérification des types TypeScript |
+| `npm run db:generate -- --name <nom>` | Génère une migration après modification de `src/db/schema/` |
+| `npm run db:migrate` | Applique les migrations en attente |
+| `npm run build` | Build de production |
