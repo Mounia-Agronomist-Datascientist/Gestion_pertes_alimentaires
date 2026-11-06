@@ -55,6 +55,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         Pertes déclarées et corrections
       </Link>
 
+      {(can(user, "user.manage") || can(user, "referentiel.manage")) && (
+        <Link href="/admin" className="btn-secondary flex items-center justify-center">
+          Administration
+        </Link>
+      )}
+
       <Link href="/mot-de-passe" className="text-slate-600 underline">
         Changer le mot de passe
       </Link>
