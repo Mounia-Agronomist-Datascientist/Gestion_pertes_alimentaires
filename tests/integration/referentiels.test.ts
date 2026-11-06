@@ -56,6 +56,16 @@ describe("données initiales des référentiels", () => {
     expect(rows.map((r) => r.zone).sort()).toEqual(["CONDITIONNEMENT", "PLONGE"]);
   });
 
+  it("restreint « Chutes de découpe » au déboîtage", async () => {
+    const rows = await t.db
+      .select({ subzone: s.subzones.code })
+      .from(s.causeSubzones)
+      .innerJoin(s.causes, eq(s.causeSubzones.causeId, s.causes.id))
+      .innerJoin(s.subzones, eq(s.causeSubzones.subzoneId, s.subzones.id))
+      .where(eq(s.causes.code, "CUI_CHUTES_DECOUPE"));
+    expect(rows).toEqual([{ subzone: "CUI_DEBOITAGE" }]);
+  });
+
   it("a une seule cause « Autres pertes »", async () => {
     const others = await t.db.select().from(s.causes).where(eq(s.causes.isOther, true));
     expect(others).toHaveLength(1);

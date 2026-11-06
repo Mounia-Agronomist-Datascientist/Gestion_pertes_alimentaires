@@ -93,6 +93,8 @@ interface CauseSeed {
   name: string;
   description?: string;
   zones: readonly ZoneCode[];
+  /** Restreint la cause à ces sous-zones ; absent = toutes les sous-zones des zones. */
+  subzones?: readonly string[];
 }
 
 /** « Autres pertes » : toujours disponible, dans toutes les zones (§9.2). */
@@ -119,6 +121,12 @@ export const CAUSES: readonly CauseSeed[] = [
     description: "Retour dans la mauvaise chambre, mal filmé ou mal daté",
     zones: ["STOCKAGE"],
   },
+  // Ajoutées le 06/11/2026 depuis le §12 du cahier des charges
+  { code: "STO_PEREMPTION", name: "Péremption (date dépassée)", zones: ["STOCKAGE"] },
+  { code: "STO_CHAINE_FROID", name: "Rupture de la chaîne du froid", zones: ["STOCKAGE"] },
+  { code: "STO_ROTATION", name: "Mauvaise rotation", zones: ["STOCKAGE"] },
+  { code: "STO_MAUVAIS_STOCKAGE", name: "Mauvais stockage", zones: ["STOCKAGE"] },
+  { code: "STO_EXCEDENT", name: "Stock excédentaire", zones: ["STOCKAGE"] },
 
   // Stockage et Cuisine
   {
@@ -130,7 +138,14 @@ export const CAUSES: readonly CauseSeed[] = [
 
   // Cuisine / Production
   { code: "CUI_FOUR_SALE", name: "Four mal nettoyé (miettes sales)", zones: ["CUISINE"] },
-  { code: "CUI_CHUTE_GASTRO", name: "Chute de gastro", zones: ["CUISINE"] },
+  { code: "CUI_CHUTE_GASTRO", name: "Chute de gastro", description: "Gastro tombé", zones: ["CUISINE"] },
+  {
+    code: "CUI_CHUTES_DECOUPE",
+    name: "Chutes de découpe",
+    description: "Parures et chutes non réutilisables",
+    zones: ["CUISINE"],
+    subzones: ["CUI_DEBOITAGE"],
+  },
   {
     code: "CUI_SURPLUS_NON_REUTILISABLE",
     name: "Surplus non réutilisable (week-end / fin de semaine de production)",
@@ -147,7 +162,7 @@ export const CAUSES: readonly CauseSeed[] = [
 
   // Conditionnement (réponses du 06/11/2026 + §9.4 du cahier des charges)
   { code: "CON_SURPRODUCTION", name: "Surplus de production", zones: ["CONDITIONNEMENT"] },
-  { code: "CON_CHUTES", name: "Chutes", zones: ["CONDITIONNEMENT"] },
+  { code: "CON_CHUTE", name: "Chute de produit", description: "Barquette ou produit tombé", zones: ["CONDITIONNEMENT"] },
   { code: "CON_DOSEUSE", name: "Pertes liées à la doseuse", zones: ["CONDITIONNEMENT"] },
   { code: "CON_SCELLAGE", name: "Défaut de scellage", zones: ["CONDITIONNEMENT"] },
   { code: "CON_TEST_OXYGENE", name: "Barquettes de test d'oxygène", zones: ["CONDITIONNEMENT"] },

@@ -15,7 +15,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
-import { zones } from "./organisation";
+import { subzones, zones } from "./organisation";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -116,6 +116,23 @@ export const causeZones = pgTable(
       .references(() => zones.id),
   },
   (t) => [primaryKey({ columns: [t.causeId, t.zoneId] })],
+);
+
+/**
+ * Restriction facultative d'une cause à certaines sous-zones (ex. « Chutes de découpe » au déboîtage).
+ * Sans ligne ici, la cause est proposée dans toutes les sous-zones de ses zones.
+ */
+export const causeSubzones = pgTable(
+  "cause_subzones",
+  {
+    causeId: uuid("cause_id")
+      .notNull()
+      .references(() => causes.id),
+    subzoneId: uuid("subzone_id")
+      .notNull()
+      .references(() => subzones.id),
+  },
+  (t) => [primaryKey({ columns: [t.causeId, t.subzoneId] })],
 );
 
 // ─── Destinations ────────────────────────────────────────────────────────────

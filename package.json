@@ -15,7 +15,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:check": "tsx scripts/db-check.ts",
-    "db:seed": "tsx scripts/db-seed.ts"
+    "db:seed": "tsx scripts/db-seed.ts",
+    "db:reset": "tsx scripts/db-reset.ts && npm run db:migrate && npm run db:seed"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   },
   "homepage": "https://github.com/Mounia-Agronomist-Datascientist/Gestion_pertes_alimentaires#readme",
   "dependencies": {
+    "@node-rs/argon2": "^2.2.2",
     "drizzle-orm": "^0.45.4",
     "next": "^16.4.5",
     "postgres": "^4.1.0",

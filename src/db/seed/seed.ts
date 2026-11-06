@@ -98,6 +98,24 @@ export async function seed(db: Db): Promise<void> {
       .values(CAUSES.flatMap((c) => c.zones.map((z) => ({ causeId: causeId.get(c.code)!, zoneId: zoneId.get(z)! }))))
       .onConflictDoNothing();
 
+    const causesWithSubzones = CAUSES.filter((c) => c.subzones?.length);
+    if (causesWithSubzones.length > 0) {
+      const subzoneRows = await tx.select({ id: schema.subzones.id, code: schema.subzones.code }).from(schema.subzones);
+      const subzoneId = new Map(subzoneRows.map((s) => [s.code, s.id]));
+      await tx
+        .insert(schema.causeSubzones)
+        .values(
+          causesWithSubzones.flatMap((c) =>
+            c.subzones!.map((code) => {
+              const id = subzoneId.get(code);
+              if (!id) throw new Error(`Sous-zone inconnue dans les causes : ${code}`);
+              return { causeId: causeId.get(c.code)!, subzoneId: id };
+            }),
+          ),
+        )
+        .onConflictDoNothing();
+    }
+
     await tx
       .insert(schema.destinations)
       .values(DESTINATIONS.map((d, i) => ({ ...d, displayOrder: i })))
