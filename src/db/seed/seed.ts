@@ -1,7 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
-import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { generateProductionCalendar } from "@/domain/semaine-production";
 import * as schema from "../schema";
+import type { Db } from "../types";
 import {
   CALENDAR_YEARS,
   CAUSES,
@@ -17,8 +17,6 @@ import {
   UNITS,
   ZONES,
 } from "./data";
-
-type Db = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 /**
  * Initialise les référentiels. Idempotent : un élément déjà présent (même code) n'est jamais
