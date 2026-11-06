@@ -121,8 +121,10 @@ Unicité : (`external_id`) si non nul ; (`category`,`code`) si non nul. Index tr
 
 **container_types** — `id`, `code`, `name` (ex. « GN 1/1 inox 65 mm »), `active`.
 
-**container_tares** — `id`, `container_type_id`, `tare_kg` numeric, `valid_from`, `valid_to` null, `created_by`.
-Une modification de tare = nouvelle ligne (version) ; l'ancienne est clôturée.
+**container_tares** — `id`, `container_type_id`, `container_count` smallint (nombre de gastros),
+`tare_total_kg` numeric (tare totale pour ce nombre), `valid_from`, `valid_to` null, `created_by`.
+Unicité (`container_type_id`, `container_count`, `valid_from`). La tare varie selon le nombre de gastros
+(elle n'est pas proportionnelle). Une modification de tare = nouvelle ligne (version) ; l'ancienne est clôturée.
 
 ### Déclarations
 
@@ -164,8 +166,8 @@ communes), `closed_at`.
 
 Index : (`production_week_id`, `team_id`), (`zone_id`, `production_week_id`), (`cause_id`), (`product_id`).
 
-**declaration_containers** — `id`, `declaration_id`, `container_tare_id` (version utilisée), `count`,
-`tare_kg_snapshot`.
+**declaration_containers** — `id`, `declaration_id`, `container_tare_id` (ligne de tare utilisée, qui porte
+le type, le nombre et la version), `count`, `tare_kg_snapshot`.
 
 **declaration_destinations** — `id`, `declaration_id`, `destination_id`, `quantity`, `unit_code`, `net_kg` null,
 `recovered_amount` numeric null (Phase 3).

@@ -6,16 +6,17 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 
 | # | Point | Proposition | Statut |
 |---|---|---|---|
-| T1 🔴 | Pile technique | Next.js + TypeScript + PostgreSQL + Drizzle (ARCHITECTURE.md §2) | À valider |
-| H1 🔴 | Hébergement de production | Plateforme managée UE (app + PostgreSQL managé) | À décider |
-| G1 🔴 | Dépôt GitHub | URL du dépôt (privé recommandé) à fournir | À fournir |
+| T1 | Pile technique | Next.js + TypeScript + PostgreSQL + Drizzle (ARCHITECTURE.md §2) | ✅ Validé 06/11/2026 |
+| H1 🟠 | Hébergement de production | Plateforme managée UE (app + PostgreSQL managé) | À décider avant la mise en production |
+| G1 | Dépôt GitHub | github.com/Mounia-Agronomist-Datascientist/Gestion_pertes_alimentaires | ✅ |
+| D1 | Base de développement | PostgreSQL 18 (Postgres.app) sur le poste local | ✅ |
 
 ## Règles métier (cf. §29 du cahier des charges)
 
 | # | Point | Proposition / hypothèse | Bloque |
 |---|---|---|---|
-| 11 🔴 | Numérotation des semaines | N° = semaine ISO du lundi contenu dans la semaine jeudi→mercredi (vérifié sur l'exemple S46 du 05/11/2026). Calendrier stocké en base et corrigeable | Phase 1 |
-| 5 🟠 | Tares des gastros | Fichier de référence à transmettre. Question : la tare est-elle **unitaire** par type, ou le fichier donne-t-il une tare **selon le nombre** de gastros (1, 2, 3…) ? | Saisie gastro |
+| 11 ✅ | Numérotation des semaines | Validé : n° et année = semaine ISO du lundi contenu dans la semaine jeudi→mercredi (S46 = 05/11/2026, S53 = 24/12/2026, S01-2027 = 31/12/2026). Calendrier stocké en base et corrigeable | — |
+| 5 🟠 | Tares des gastros | Validé : tare par type de gastro, **variable selon le nombre** (table type × nombre). Reste à fournir : le fichier de référence ; conduite à tenir si le nombre dépasse la table | Saisie gastro |
 | 2 🟠 | Responsabilité équipe/zone | Paramètre par sous-zone : équipe obligatoire / facultative / aucune. Paramétrage initial à fournir (ex. Réception, Stockage, Plonge = facultative ?) | Phase 1 |
 | 1 🟠 | Comptes partagés | Mot de passe par équipe géré par l'admin ; rotation à chaque départ ; révocation des sessions. Durée de session sur appareil ? | Phase 1 |
 | C1 🟠 | Correction par une équipe | Délai pendant lequel une équipe peut corriger sa déclaration (ex. jusqu'à la fin de la semaine de production), au-delà correction par un responsable | Phase 1 |

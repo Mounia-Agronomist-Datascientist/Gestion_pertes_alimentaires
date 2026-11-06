@@ -9,11 +9,13 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
 - Les semaines sont stockées **explicitement** dans la table `production_weeks` (date de début, date de fin,
   année, numéro). La semaine d'une perte est retrouvée par **recherche dans ce calendrier** à partir de la
   date réelle de la perte — jamais par la fonction ISO.
-- ⚠️ **Règle de numérotation proposée pour générer le calendrier** : le numéro de la semaine de production
-  est le numéro de semaine ISO **du lundi qu'elle contient** (jeudi de début + 4 jours).
-  - Vérification sur l'exemple du cahier des charges : jeudi 5 novembre 2026 est en semaine ISO **45**,
-    mais le lundi 9 novembre est en semaine ISO **46** → **S46** ✅ (cohérent avec l'exemple).
-  - Conséquence en fin d'année : la semaine du jeudi 31/12/2026 au mercredi 06/01/2027 serait **S01-2027**.
+- ✅ **Règle de numérotation validée (06/11/2026)** : le numéro et l'année de la semaine de production sont
+  ceux de la semaine ISO **du lundi qu'elle contient** (jeudi de début + 4 jours).
+  - Jeudi 5 novembre 2026 : semaine ISO 45, mais le lundi 9 novembre est en ISO 46 → **S46-2026** ✅.
+  - Jeudi 24/12/2026 → mercredi 30/12/2026 : **S53-2026** ✅ (2026 compte 53 semaines ISO).
+  - Jeudi 31/12/2026 → mercredi 06/01/2027 : **S01-2027** ✅.
+  - Référence de l'entreprise : calendrier des jours de production du portail interne La Brigade
+    (`/apps/calendrier-jours-production`). En cas de divergence, c'est ce calendrier qui fait foi.
 - L'administrateur peut corriger une semaine du calendrier (avec journalisation) ; le générateur ne sert
   qu'à pré-remplir.
 - Déclaration tardive : `declared_at` (horodatage de saisie) appartient à une semaine postérieure à la
@@ -40,8 +42,11 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
 
 1. L'utilisateur choisit un ou plusieurs types de gastro et leur nombre.
 2. Il saisit le poids brut total mesuré.
-3. `tare totale = Σ (nombre × tare unitaire du type)` ⚠️ (ou valeur lue dans la table « tare selon la
-   quantité » si le fichier de référence le prévoit — à valider à réception du fichier).
+3. ✅ La tare **n'est pas proportionnelle** : le référentiel donne, pour chaque type de gastro, la tare
+   **selon le nombre de gastros** (table type × nombre → tare totale). Pour chaque type :
+   `tare du type = valeur lue dans la table pour (type, nombre)` ; `tare totale = Σ tares des types`.
+   ⚠️ Comportement si le nombre saisi dépasse la table : à définir à réception du fichier
+   (proposition : refus avec message, pas d'extrapolation).
 4. `poids net = poids brut − tare totale`.
 5. Si le poids net ≤ 0 → erreur bloquante (« le poids brut doit être supérieur à la tare »).
 6. L'identifiant **de la version de tare** utilisée est conservé dans la déclaration.
