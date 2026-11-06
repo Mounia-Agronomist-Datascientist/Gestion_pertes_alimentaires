@@ -8,9 +8,11 @@ import { ForbiddenError } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
 import { getDeclarationDetail, listDeclarations } from "@/modules/declarations/queries";
 import {
+  BatchLineError,
   cancelDeclaration,
   correctDeclaration,
   createDeclaration,
+  createDeclarationBatch,
   DeclarationConflictError,
   DeclarationError,
 } from "@/modules/declarations/service";
@@ -483,5 +485,62 @@ describe("déclaration de perte", () => {
     it("la direction ne lit pas le détail des déclarations", async () => {
       expect(await listDeclarations(t.db, direction)).toEqual([]);
     });
+  });
+});
+
+describe("déclaration groupée", () => {
+  let t: Awaited<ReturnType<typeof createTestDb>>;
+  let teamC: AuthUser;
+  const ref: Record<string, string> = {};
+  const NOW = new Date("2026-11-12T16:00:00Z");
+
+  beforeAll(async () => {
+    t = await createTestDb();
+    await seed(t.db);
+    for (const r of await t.db.select().from(s.subzones)) ref[`sz:${r.code}`] = r.id;
+    for (const r of await t.db.select().from(s.causes)) if (r.code) ref[`cause:${r.code}`] = r.id;
+    for (const r of await t.db.select().from(s.destinations)) ref[`dest:${r.code}`] = r.id;
+    const [team] = await t.db.select().from(s.teams).where(eq(s.teams.letter, "C"));
+    teamC = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, { login: "equipe-c", displayName: "equipe-c", roleCode: "equipe", teamId: team!.id, password: PASSWORD }),
+    );
+  });
+
+  afterAll(async () => {
+    await t.close();
+  });
+
+  const line = (quantity: number, causeCode = "ERREUR_PREPARATION") => ({
+    occurredOn: "2026-11-12",
+    subzoneId: ref["sz:CUI_CUISINE"],
+    product: { freeLabel: "Produit test", category: "sous_recette" },
+    method: "pesee",
+    quantity,
+    unitCode: "kg",
+    causeId: ref[`cause:${causeCode}`],
+    destinations: [{ destinationId: ref["dest:ALCHIMISTES"], quantity }],
+  });
+
+  it("enregistre toutes les lignes dans un même lot", async () => {
+    const created = await createDeclarationBatch(t.db, teamC, [line(1), line(2), line(3)], NOW);
+    expect(created).toHaveLength(3);
+    const rows = await t.db.select().from(s.lossDeclarations);
+    expect(new Set(rows.map((r) => r.batchId)).size).toBe(1);
+    expect(rows[0]!.batchId).not.toBeNull();
+    expect(await t.db.$count(s.declarationRevisions)).toBe(3);
+  });
+
+  it("n'enregistre rien si une seule ligne est invalide, et indique laquelle", async () => {
+    const before = await t.db.$count(s.lossDeclarations);
+    const error = await createDeclarationBatch(t.db, teamC, [line(1), line(2, "CON_SCELLAGE"), line(3)], NOW).catch((e) => e);
+    expect(error).toBeInstanceOf(BatchLineError);
+    expect(error.lineIndex).toBe(1);
+    expect(error.message).toMatch(/^Ligne 2 : .*zone/);
+    expect(await t.db.$count(s.lossDeclarations)).toBe(before);
+  });
+
+  it("refuse une liste vide", async () => {
+    await expect(createDeclarationBatch(t.db, teamC, [], NOW)).rejects.toThrow(/vide/);
   });
 });

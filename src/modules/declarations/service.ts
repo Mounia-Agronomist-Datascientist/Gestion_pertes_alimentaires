@@ -5,11 +5,11 @@
 import { and, eq, gte, inArray, isNull, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { validateDestinationSplit } from "@/domain/destinations";
+import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
-import { computeNetWeight, type GastroLine, type SupportTare } from "@/domain/tares";
-import { convertToKg, type KgStatus, type UnitKind } from "@/domain/unites";
+import { computeNetWeight, type GastroLine, type SupportTare, TareError } from "@/domain/tares";
+import { convertToKg, type KgStatus, QuantityError, type UnitKind } from "@/domain/unites";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
@@ -323,6 +323,40 @@ function summarize(declaration: typeof s.lossDeclarations.$inferSelect): Created
   };
 }
 
+/** Insère une nouvelle déclaration validée (version 1, instantané, audit) dans une transaction ouverte. */
+async function insertNewDeclaration(
+  tx: Db,
+  user: AuthUser,
+  prepared: PreparedDeclaration,
+  now: Date,
+  batchId: string | null = null,
+): Promise<CreatedDeclaration> {
+  const [declaration] = await tx
+    .insert(s.lossDeclarations)
+    .values({ ...prepared.values, status: "validee", revision: 1, createdBy: user.id, batchId })
+    .returning();
+  if (!declaration) throw new Error("Enregistrement impossible");
+
+  const snapshot = await writeVersionLines(tx, declaration, prepared);
+  await tx.insert(s.declarationRevisions).values({
+    declarationId: declaration.id,
+    revision: 1,
+    status: declaration.status,
+    data: snapshot,
+    changedBy: user.id,
+    changedAt: now,
+  });
+  await writeAudit(tx, {
+    userId: user.id,
+    action: "create",
+    entity: "loss_declaration",
+    entityId: declaration.id,
+    after: snapshot,
+    occurredAt: now,
+  });
+  return summarize(declaration);
+}
+
 export async function createDeclaration(
   db: Db,
   user: AuthUser,
@@ -331,32 +365,62 @@ export async function createDeclaration(
 ): Promise<CreatedDeclaration> {
   requirePermission(user, "declaration.create");
   const prepared = await prepareDeclaration(db, user, rawInput, now, now);
+  return db.transaction((tx) => insertNewDeclaration(tx, user, prepared, now));
+}
+
+// ─── Déclaration groupée (docs/ECRANS_PHASE1.md E4) ───────────────────────────
+
+export const MAX_BATCH_LINES = 50;
+
+/** Erreurs dues à la saisie (affichables), par opposition aux pannes techniques. */
+export function isInputError(e: unknown): e is Error {
+  return [DeclarationError, TareError, QuantityError, DestinationError, ForbiddenError].some((E) => e instanceof E);
+}
+
+/** Une ligne du lot est invalide : rien n'a été enregistré. `lineIndex` commence à 0. */
+export class BatchLineError extends DeclarationError {
+  constructor(
+    readonly lineIndex: number,
+    message: string,
+  ) {
+    super(`Ligne ${lineIndex + 1} : ${message}`);
+  }
+}
+
+/**
+ * Enregistre plusieurs pertes d'un coup. Toutes les lignes sont contrôlées avant la moindre écriture,
+ * puis enregistrées dans une seule transaction : soit tout est enregistré, soit rien.
+ */
+export async function createDeclarationBatch(
+  db: Db,
+  user: AuthUser,
+  rawInputs: readonly unknown[],
+  now: Date = new Date(),
+): Promise<CreatedDeclaration[]> {
+  requirePermission(user, "declaration.create");
+  if (rawInputs.length === 0) throw new DeclarationError("La liste est vide");
+  if (rawInputs.length > MAX_BATCH_LINES) {
+    throw new DeclarationError(`Au plus ${MAX_BATCH_LINES} pertes à la fois`);
+  }
+
+  const prepared: PreparedDeclaration[] = [];
+  for (const [index, raw] of rawInputs.entries()) {
+    try {
+      prepared.push(await prepareDeclaration(db, user, raw, now, now));
+    } catch (e) {
+      if (!isInputError(e)) throw e;
+      throw new BatchLineError(index, e.message);
+    }
+  }
 
   return db.transaction(async (tx) => {
-    const [declaration] = await tx
-      .insert(s.lossDeclarations)
-      .values({ ...prepared.values, status: "validee", revision: 1, createdBy: user.id })
+    const [batch] = await tx
+      .insert(s.declarationBatches)
+      .values({ createdBy: user.id, defaults: { lines: prepared.length }, closedAt: now, createdAt: now })
       .returning();
-    if (!declaration) throw new Error("Enregistrement impossible");
-
-    const snapshot = await writeVersionLines(tx, declaration, prepared);
-    await tx.insert(s.declarationRevisions).values({
-      declarationId: declaration.id,
-      revision: 1,
-      status: declaration.status,
-      data: snapshot,
-      changedBy: user.id,
-      changedAt: now,
-    });
-    await writeAudit(tx, {
-      userId: user.id,
-      action: "create",
-      entity: "loss_declaration",
-      entityId: declaration.id,
-      after: snapshot,
-      occurredAt: now,
-    });
-    return summarize(declaration);
+    const created: CreatedDeclaration[] = [];
+    for (const p of prepared) created.push(await insertNewDeclaration(tx, user, p, now, batch!.id));
+    return created;
   });
 }
 
