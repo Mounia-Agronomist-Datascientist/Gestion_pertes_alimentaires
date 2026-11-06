@@ -1,4 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
+import { defaultProductionDays } from "@/domain/plages-reutilisation";
 import { generateProductionCalendar } from "@/domain/semaine-production";
 import * as schema from "../schema";
 import type { Db } from "../types";
@@ -48,6 +49,13 @@ export async function seed(db: Db): Promise<void> {
     await tx
       .insert(schema.productionWeeks)
       .values(CALENDAR_YEARS.flatMap(generateProductionCalendar))
+      .onConflictDoNothing();
+
+    // Jours de production par défaut ; un jour déjà présent (éventuellement ajusté) n'est pas modifié.
+    const weekRows = await tx.select().from(schema.productionWeeks);
+    await tx
+      .insert(schema.productionDays)
+      .values(weekRows.flatMap((w) => defaultProductionDays(w.startDate).map((day) => ({ day, productionWeekId: w.id }))))
       .onConflictDoNothing();
 
     await tx

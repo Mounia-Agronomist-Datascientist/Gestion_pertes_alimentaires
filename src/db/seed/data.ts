@@ -237,6 +237,8 @@ export const PERMISSIONS = [
   { code: "user.manage", label: "Gérer les comptes" },
   { code: "audit.read", label: "Consulter le journal d'audit" },
   { code: "indicators.read", label: "Indicateurs économiques et environnementaux" },
+  { code: "alerts.read.all", label: "Voir les alertes « rien de noté » de toutes les équipes" },
+  { code: "alerts.resolve", label: "Lever une alerte « rien de noté » avec motif" },
 ] as const;
 
 type PermissionCode = (typeof PERMISSIONS)[number]["code"];
@@ -255,6 +257,8 @@ export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
     "stats.compare_teams",
     "audit.read",
     "indicators.read",
+    "alerts.read.all",
+    "alerts.resolve",
   ],
   admin: PERMISSIONS.map((p) => p.code),
   direction: ["stats.global", "stats.compare_teams", "indicators.read"],

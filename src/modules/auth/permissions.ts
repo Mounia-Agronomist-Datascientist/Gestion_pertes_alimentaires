@@ -17,7 +17,9 @@ export type PermissionCode =
   | "referentiel.manage"
   | "user.manage"
   | "audit.read"
-  | "indicators.read";
+  | "indicators.read"
+  | "alerts.read.all"
+  | "alerts.resolve";
 
 export interface AuthUser {
   id: string;
