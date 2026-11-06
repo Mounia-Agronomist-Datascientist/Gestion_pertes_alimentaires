@@ -19,12 +19,12 @@ mémorisation du dernier contexte (zone, sous-zone).
 1. **Zone** — tuiles (dernière zone utilisée en premier).
 2. **Sous-zone** — tuiles filtrées par zone.
 3. **Équipe** — masqué si compte équipe ; facultatif/absent selon `team_mode` de la sous-zone.
-4. **Produit** — onglets par catégorie autorisée pour la zone ; recherche par nom / code / réf. Melba ;
-   en Phase 1, liste issue du référentiel simple. Bouton « Produit non trouvé » → libellé libre signalé
-   (à revoir par l'admin).
+4. **Produit** — recherche par nom / code / réf. Melba dans le référentiel ; bouton « Produit absent de la
+   liste » → nom libre + type de produit, signalé « hors liste » pour revue par l'administrateur.
 5. **Quantité + méthode de mesure** — méthodes proposées selon la sous-zone :
    - *Pesée* : quantité + unité (kg par défaut).
-   - *Gastro* : type(s) de gastro + nombre + poids brut → affichage immédiat « Tare 2,40 kg — Net 12,60 kg ».
+   - *Pesée dans des gastros* : échelle (sans / classique / à four), nombre de gastros par type (boutons − et +),
+     poids brut → affichage immédiat « Tare 32 kg — Net 28,5 kg ».
    - *Comptage* : nombre + unité (pièces, barquettes) → conversion affichée si poids unitaire connu,
      sinon mention « non converti en kg ».
    - *Estimation manuelle*.

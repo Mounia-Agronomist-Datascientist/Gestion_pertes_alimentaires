@@ -40,10 +40,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {can(user, "declaration.create") && (
         <section className="grid gap-3 sm:grid-cols-2">
-          <div aria-disabled className="btn-tile opacity-60">
+          <Link href="/declarer" className="btn-tile">
             Déclarer une perte
-            <span className="text-sm font-normal">Bientôt disponible</span>
-          </div>
+            <span className="text-sm font-normal">Au fil de l&apos;eau, une perte à la fois</span>
+          </Link>
           <div aria-disabled className="btn-tile opacity-60">
             Déclarer plusieurs pertes
             <span className="text-sm font-normal">Bientôt disponible</span>

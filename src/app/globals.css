@@ -18,6 +18,10 @@ body {
     @apply min-h-14 rounded-xl bg-teal-700 px-4 text-lg font-semibold text-white hover:bg-teal-800 disabled:opacity-60;
   }
 
+  .btn-secondary {
+    @apply min-h-14 rounded-xl border-2 border-teal-700 bg-white px-4 text-lg font-semibold text-teal-800 hover:bg-teal-50 disabled:opacity-60;
+  }
+
   .btn-tile {
     @apply flex min-h-24 flex-col items-start justify-center gap-1 rounded-2xl bg-teal-700 p-4 text-xl font-semibold text-white;
   }
