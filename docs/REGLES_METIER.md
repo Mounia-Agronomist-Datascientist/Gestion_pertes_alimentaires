@@ -11,6 +11,8 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
   date réelle de la perte — jamais par la fonction ISO.
 - ✅ **Règle de numérotation validée (06/11/2026)** : le numéro et l'année de la semaine de production sont
   ceux de la semaine ISO **du lundi qu'elle contient** (jeudi de début + 4 jours).
+  - Conséquence : **S01-2026 a commencé le jeudi 25/12/2025** (elle contient le lundi 29/12/2025,
+    premier jour de la semaine ISO 1 de 2026) ⚠️ à confirmer avec le calendrier du portail.
   - Jeudi 5 novembre 2026 : semaine ISO 45, mais le lundi 9 novembre est en ISO 46 → **S46-2026** ✅.
   - Jeudi 24/12/2026 → mercredi 30/12/2026 : **S53-2026** ✅ (2026 compte 53 semaines ISO).
   - Jeudi 31/12/2026 → mercredi 06/01/2027 : **S01-2027** ✅.

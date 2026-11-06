@@ -1,0 +1,106 @@
+{
+  "id": "267f71aa-b5ce-4bf9-a205-49b30ef7c0c0",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.production_weeks": {
+      "name": "production_weeks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "year": {
+          "name": "year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number": {
+          "name": "number",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "production_weeks_year_number_key": {
+          "name": "production_weeks_year_number_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "year",
+            "number"
+          ]
+        },
+        "production_weeks_start_date_key": {
+          "name": "production_weeks_start_date_key",
+          "nullsNotDistinct": false,
+          "columns": [
+            "start_date"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "production_weeks_seven_days": {
+          "name": "production_weeks_seven_days",
+          "value": "\"production_weeks\".\"end_date\" = \"production_weeks\".\"start_date\" + 6"
+        },
+        "production_weeks_starts_thursday": {
+          "name": "production_weeks_starts_thursday",
+          "value": "extract(isodow from \"production_weeks\".\"start_date\") = 4"
+        },
+        "production_weeks_number_range": {
+          "name": "production_weeks_number_range",
+          "value": "\"production_weeks\".\"number\" between 1 and 53"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
