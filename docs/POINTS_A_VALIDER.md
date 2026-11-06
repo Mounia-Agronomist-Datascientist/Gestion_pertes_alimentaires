@@ -30,7 +30,7 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | 4 🟠 | Poids unitaires et densités | Valeurs disponibles par produit/catégorie ; sinon quantités laissées non converties | Phase 1–2 |
 | 12 🟠 | Utilisateurs | Comptes prévus : 8 comptes équipe (un par chef d'équipe) + 4 responsables de zone (Réception, Stockage, Conditionnement, Plonge) + 1 administrateur. Reste à nommer : responsable(s) de production, direction | Phase 1 |
 | 6 ⚪ | Melba | Exports disponibles, identifiants stables, rendements, coûts | Phase 2 |
-| 7 ⚪ | Sous-recettes | Outil du collègue à étudier — **aucun développement avant** | Phase 2 |
+| 7 🟠 | Sous-recettes | Outil du collègue analysé (docs/INTEGRATION_OUTIL_SOUS_RECETTES.md). Reste : exemple de données réelles, présence des identifiants Melba, avenir de l'outil actuel | Phase 2 |
 | 3 ⚪ | Main-d'œuvre | Méthode d'imputation — désactivée tant que non définie | Phase 3 |
 | 9 ⚪ | Récupération financière | Ventes à déduire du coût net | Phase 3 |
 | 8 ⚪ | Volumes de production | Source des dénominateurs des ratios | Phase 4 |
