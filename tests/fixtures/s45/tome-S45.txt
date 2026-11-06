@@ -1,0 +1,4325 @@
+--- page 1 ---
+2026 S45_EN01_EQ - Beaufort 10 mois, Cantal 3 mois, Comté 12
+mois
+1 recette(s) (1 portion(s))
+Lait
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Beaufort 10 mois barre 25g crock'cheese 1.00 portion (25 g) 0.63 €
+Comté 12 mois barre 25g crock'cheese 1.00 portion (25 g) 0.49 €
+Cantal 3 mois barre 25g crock'cheese 1.00 portion (25 g) 0.41 €
+Recette totale 75.00 g 1.53 €
+2026 S45_EN02_EQ - Yaourt nature Bastidara
+1 recette(s) (1 portion(s))
+Lait
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Yaourt nature fermier Bastidarra 2.00 pot (125 g) 0.74 €
+Recette totale 250.00 g 0.74 €
+2026 S45_EN03_EQ - Biscuits à la noix de coco
+1 recette(s) (1 portion(s))
+Lait Gluten
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+PZB_Biscuits à la noix de coco 1.00 sachet (40 g) 0.90 €
+Recette totale 40.00 g 0.90 €
+2026 S45_EN04_EQ - Balls cookie 3 chocolats
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Monka balls - Cookie 3 chocolats 1.00 3x18g (54 g) 1.50 €
+Recette totale 54.00 g 1.50 €
+--- page 2 ---
+2026 S45_EN06_EQ- Préparation pomme poire
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Rue Traversette_Préparation pomme poire 1.00 Pot (100 g) 1.38 €
+Recette totale 100.00 g 1.38 €
+2026 S45_EN07_FB - Financier aux amandes
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Financier amande 1.00 25g unité (25 g) 0.42 €
+Recette totale 25.00 g 0.42 €
+2026 S45_EN08_FB - Tranche de cake marbré
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Tranche de cake marbré 80g 1.00 80g unité (80 g) 1.01 €
+Recette totale 80.00 g 1.01 €
+2026 S45_EN09_FB - Barre de céréales pépites de chocolat et
+cranberries
+1 recette(s) (1 portion(s))
+Fruits à coques Gluten
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Barres de céréales cranberries et chocolat
+Biscuiterie de Sommières 1.00 Unité (30 g) 0.90 €
+Recette totale 30.00 g 0.90 €
+2026 S45_EN10_FB - Biscuits à la mimolette
+1 recette(s) (1 portion(s))
+--- page 3 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Biscuit à la mimolette 1.00 Unité (30 g) 0.90 €
+Recette totale 30.00 g 0.90 €
+2026 S45_EN11_FB - Biscuits au comté et thym
+1 recette(s) (1 portion(s))
+Lait Gluten
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+PZB_Biscuit au Comté et thym 1.00 unité (40 g) 0.90 €
+Recette totale 40.00 g 0.90 €
+2026 S45_EN12_FB - Préparation pomme fraise
+1 recette(s) (100 g)
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Rue Traversette_Préparation pomme fraise 1.00 Pot (100 g) 1.38 €
+Recette totale 100.00 g 1.38 €
+Étapes de production
+Preparation : Faire chauffer la crème et le lait Blanchir les jaunes d'oeufs avec le sucre et la vanille. Rajouter petit à petit
+le mélange au lait chaud (pour ne pas cuireles oeufs) Filtrer la recette et la couler en petit bocaux .
+Cuire :Atteindre 90° à coeur au four vapeur (sonde)
+.
+2026 S45_EN13_LC - Beaufort 10 mois, Cantal 3 mois, Comté 12
+mois
+1 recette(s) (1 portion(s))
+Lait
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Beaufort 10 mois barre 25g crock'cheese 1.00 portion (25 g) 0.63 €
+Comté 12 mois barre 25g crock'cheese 1.00 portion (25 g) 0.49 €
+Cantal 3 mois barre 25g crock'cheese 1.00 portion (25 g) 0.41 €
+--- page 4 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Recette totale 75.00 g 1.53 €
+2026 S45_EN14_LC - Yaourt nature Bastidara
+1 recette(s) (1 portion(s))
+Lait
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Yaourt nature fermier Bastidarra 2.00 pot (125 g) 0.74 €
+Recette totale 250.00 g 0.74 €
+2026 S45_EN15_LC - Mélange saint germain
+1 recette(s) (1 portion(s))
+Fruits à coques
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Mélange Saint Germain 1.00 sachet (50 g) 0.69 €
+Recette totale 50.00 g 0.69 €
+2026 S45_EN16_LC - Croustipois
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Crousti pois 1.00 sachet (60 g) 0.92 €
+Recette totale 60.00 g 0.92 €
+2026 S45_EN18_LC - Préparation pomme poire
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Rue Traversette_Préparation pomme poire 1.00 Pot (100 g) 1.38 €
+Recette totale 100.00 g 1.38 €
+2026 S45_EN19_MN - Crackers aux pois chiches et romarin
+1 recette(s) (1 portion(s))
+--- page 5 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Crackers aux pois chiches et romarin Graam 1.00 sachet (30 g) 0.89 €
+Recette totale 30.00 g 0.89 €
+2026 S45_EN20_MN - Chips au brocolis
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Chips brocolis 1.00 unité (40 g) 1.15 €
+Recette totale 40.00 g 1.15 €
+2026 S45_EN21_MN - Yaourt nature Bastidara
+1 recette(s) (1 portion(s))
+Lait
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Yaourt nature fermier Bastidarra 2.00 pot (125 g) 0.74 €
+Recette totale 250.00 g 0.74 €
+2026 S45_EN22_MN - Biscuits pur beurre au sel de Guérande
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Biscuit pur beurre au sel de guérande 1.00 Unité (30 g) 1.00 €
+Recette totale 30.00 g 1.00 €
+2026 S45_EN23_MN - Biscuits à la mimolette
+1 recette(s) (1 portion(s))
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Biscuit à la mimolette 1.00 Unité (30 g) 0.90 €
+Recette totale 30.00 g 0.90 €
+--- page 6 ---
+2026 S45_EN24_MN - Préparation pomme fraise
+1 recette(s) (100 g)
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Rue Traversette_Préparation pomme fraise 1.00 Pot (100 g) 1.38 €
+Recette totale 100.00 g 1.38 €
+Étapes de production
+Preparation : Faire chauffer la crème et le lait Blanchir les jaunes d'oeufs avec le sucre et la vanille. Rajouter petit à petit
+le mélange au lait chaud (pour ne pas cuireles oeufs) Filtrer la recette et la couler en petit bocaux .
+Cuire :Atteindre 90° à coeur au four vapeur (sonde)
+.
+2026 S45_FB01-Tagliatelles complètes à la bolognaise aux légumes
+racines
+1 recette(s) (310 g)
+Lait Gluten Céleri Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: Tagliatelles complètes (sous recette) 140.00 g 0.37 €
+Assaisonnement pasta grana basilic (sous-
+recette) 10.00 g 0.09 €
+Sauce: légumes racines comme une bolognaise
+(sous recette) 160.00 g 0.92 €
+Recette totale 310.00 g 1.38 €
+Commentaire
+S49: 4.41
+Féculent: Tagliatelles complètes (sous recette)
+140 g
+Gluten
+Ingrédients Quantité pour 140
+g
+Unité Coût
+Tagliatelles complètes biovence ✅ 77.39 g 0.37 €
+--- page 7 ---
+Ingrédients Quantité pour 140
+g
+Unité Coût
+Huile d'olive extra vierge 0.39 g 0.00 €
+Recette totale 77.78 g 0.37 €
+Poids net 140.00 g
+Étapes de production
+MATÉRIEL: PROGRAMME: T°C: TEMPS:
+Commentaire
+S45(Féculent: Tagliatelles complètes
+(sous recette): surplus 6,31Kg (+14%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+130% à 80% (84,32% en
+réel)___S23(Tagliatelles complètes
+(sous recette): surplus 12,79Kg
+(+33,4%) par rapport aux quantités
+déboitées ... je vais augmenter le gain:
+gain passé de 105% à 130% (140,88%
+en réel)___S16(Tagliatelles complètes
+(sous recette): surplus 1,69Kg (+7,6%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+110% à 105% (108,14% en
+réel)___S15(Tagliatelles complètes
+(sous recette): manque 1,18Kg (-4,4%)
+par rapport aux quantités déboitées ... je
+vais réduire le gain: gain passé de
+120% à 110% (110,41% en
+réel)___S08(Tagliatelles complètes
+(sous recette): manque 1,74Kg (-6,9%)
+par rapport aux quantités déboitées ... je
+vais réduire le gain: gain passé de
+140% à 120% (123,37% en
+réel)___S07(Tagliatelles complètes
+(sous recette): manque 1,65Kg (-7,6%)
+par rapport aux quantités déboitées
+Assaisonnement pasta grana basilic (sous-recette)
+42 g
+Lait Oeufs
+Ingrédients Quantité pour 42 g Unité Coût
+Grana Padano râpé AOP 28,4% MG 23.58 g 0.30 €
+huile olive colza 17.68 g 0.05 €
+basilic sg 2.95 g 0.02 €
+Recette totale 44.21 g 0.37 €
+--- page 8 ---
+Ingrédients Quantité pour 42 g Unité Coût
+Poids net 42.00 g
+Commentaire
+S23(Assaisonnement pasta grana basilic (sous-recette): manque 0,26Kg (-18,7%) par rapport aux quantités déboitées ...
+je vais augmenter la perte: perte passée de 0% à -5% (-18,71% en réel)___S23(___S05(Assaisonnement pasta grana
+basilic (sous-recette): manque 0,29Kg (-5,3%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte
+passée de -2% à -5% (-7,23% en réel)___S49(Assaisonnement pasta grana basilic (sous-recette): manque 0,28Kg
+(-3,2%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de 1% à -2% (-2,24% en
+réel)___S46(Assaisonnement pasta grana basilic (sous-recette): DINGUERIE/CREATION DE MATIEREsurplus 0,34Kg
+(+3,6%) par rapport aux quantités déboitées. RESULTAT IMOSSIBLE, malgré tout, je vais réduire la perte: perte passée
+de -1% à 1% (GAIN: 2,59% en réel !!!!!!!)___S38(Assaisonnement pasta (sous-recette): manque 0,01Kg (-0,2%) par
+rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de 0% à -1% (-0,1
+Sauce: légumes racines comme une bolognaise (sous recette)
+500 g
+Céleri
+Ingrédients Quantité pour 500
+g
+Unité Coût
+céleri rave pelé cube 10X10 ✅ 67.27 g 0.23 €
+panais cube 20 x 20 🟢 67.27 g 0.24 €
+carotte rondelle ✅ 100.91 g 0.20 €
+oignon émincé ✅ 50.46 g 0.13 €
+ail pelé ✅ 8.41 g 0.08 €
+Préparation hachée de bœuf (15% MG) 🟢 151.37 g 1.80 €
+Base tomates concassees fines LM (pulpe tomate
+fine) 117.73 g 0.15 €
+herbes de Provence 1.68 g 0.02 €
+huile colza 20.18 g 0.03 €
+sel fin 1.68 g 0.00 €
+poivre noir 🟢 0.05 g 0.00 €
+eau au poids 30.27 g 0.00 €
+Recette totale 617.28 g 2.87 €
+Poids net 500.00 g
+Étapes de production
+MATERIEL: four PROGRAMME: Sec T°C: 180° TEMPS: 15 minutes
+Commentaire
+--- page 9 ---
+Melanger les courgette avec gimgembre,huile d'olive ,coriandre et
+sel .
+Plaque les courgette en plaque GN
+Cuire au four 15 minutes a 180°C
+S45(Sauce: légumes racines comme
+une bolognaise (sous recette): surplus
+3,4Kg (+1,6%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -21% à -19% (-17,93%
+en réel)___S21(légumes racines
+comme une bolognaise (sous recette):
+manque 14,99Kg (-4,8%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-21% à -25% (-24,31% en
+réel)___S13(légumes racines comme
+une bolognaise (sous recette): surplus
+9,78Kg (+7,1%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -26% à -21%
+(-19,97% en réel)___S05(légumes
+racines comme une bolognaise (sous
+recette): manque 6,65Kg (-5,3%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -20% à 26% (-24,27% en
+réel)___S25(Duo de poivrons et
+courgettes comme une bolognaise
+(sous recette): manque 16,25Kg
+(-12,2%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -17% à -20% (-27,16%
+en réel)___S21
+2026 S45_FB02-Boles de Picolat et sauce catalane
+1 recette(s) (310 g)
+Lait Gluten Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Boles de Picolat B/V (sous recette) 2.00 recette(s) (45 g) 1.09 €
+Sauce catalane (sous-recette) 220.00 g 0.74 €
+Recette totale 310.00 g 1.83 €
+Étapes de production
+Boles de Picolat: cuisson à couvert avec four en chaleur mixte à 140°C
+Commentaire
+S14: 4,1
+Attention, vu avec Mathieu, un picola fait
+49.3gr
+S24: réduction de 25% du piment suite
+aux retours de la S14. Attention à la
+--- page 10 ---
+cuisson des boles pour les garder
+moelleuses
+S24: 4,15 (boles sèches)
+S32: 4,51 / Faire une tentative de
+cuisson à couvert avec four en chaleur
+mixte à 140°C
+Boles de Picolat B/V (sous recette)
+7 recette(s) (45 g)
+Lait Gluten Oeufs
+Ingrédients Quantité pour 7
+recette(s) Unité Coût
+Boles de Picolat (veau/bœuf) 🟢 7.00 pièce (50 g) 3.82 €
+Recette totale 350.00 g 3.82 €
+Poids net 315.00 g
+Étapes de production
+Mettre en plaques GN
+Commentaire
+S13(Boles de Picolat B/V (sous recette):
+surplus 2,07Kg (+3,8%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -13% à -10%
+(-8,35% en réel)___S17(Boles de
+Picolat B/V (sous recette): surplus 2,2Kg
+(+3,9%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -15% à -13% (-11,66%
+en réel)))
+Sauce catalane (sous-recette)
+510 g
+Ingrédients Quantité pour 510
+g
+Unité Coût
+carotte cube 10X10 ✅ 101.72 g 0.20 €
+oignon émincé ✅ 152.58 g 0.39 €
+ail pelé ✅ 13.56 g 0.13 €
+persil hache sg 1.02 g 0.01 €
+Tomate pelée concassée 5/1 67.81 g 0.08 €
+double concentré de tomate 4/4 16.95 g 0.04 €
+--- page 11 ---
+Ingrédients Quantité pour 510
+g
+Unité Coût
+vin blanc de France 11° 🟢 5.09 g 0.01 €
+piment d'Espelette AOP 🟢 0.05 g 0.01 €
+olives vertes denoyautees 20.34 g 0.10 €
+haricot blanc cuit sous-vide BIO FR 🟢 169.53 g 0.68 €
+huile colza 16.95 g 0.02 €
+fond brun végétal [CONTIENT DU BLÉ] 3.73 g 0.06 €
+eau au poids 101.72 g 0.00 €
+Recette totale 671.05 g 1.72 €
+Poids net 510.00 g
+Étapes de production
+MATERIEL: Sauteuse PROGRAMME: Braiser T°C: 150°c TEMPS: 30
+minutes
+Faire revenir dans l'huile d'olive les oignons et l'ail.
+Déglacer au vin blanc.
+Ajouter les tomate , le concentré de tomate , le sel poivre et les
+clou de girofe piquer dans un oignon (pour éviter de les
+retrouver dans la préparation , plus facile pour les enlever
+après cuisson)
+Rajouter les chipirons et laisser cuir a couvert pendant au moin 30
+minutes.
+Vérifier l'assaisonnement.
+Débarasser en plaque GN.
+Commentaire
+S14: perte passée de 18 à 14% (10.2%
+en théorie)
+S32: perte passée de -14% à -11%
+(-7,87% en réel)
+S40: perte passée de -11% à -24%
+(-23,67% en réel)
+2026 S45_FB03-Boulettes végétales à la tomate, sauce tomate
+ricotta et riz noir de Camargue
+1 recette(s) (312.39 g)
+Lait Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Végétarien: Boulette de soja à la tomate basilic
+(sous recette) 5.00 recette(s) (17.48 g) 0.49 €
+Féculent: Riz noir de Camargue aux olives vertes
+(sous-recette) 100.00 g 0.22 €
+Sauce: Sauce tomate ricotta V1 (sous-recette) 125.00 g 0.42 €
+Recette totale 312.40 g 1.13 €
+--- page 12 ---
+Commentaire
+S23: 4.09
+Végétarien: Boulette de soja à la tomate basilic (sous recette)
+5 recette(s) (17.48 g)
+Ingrédients Quantité pour 5
+recette(s) Unité Coût
+Boulette soja tomate basilic 19/20G 5.00 pieces (19 g) 0.49 €
+Recette totale 95.00 g 0.49 €
+Poids net 87.40 g
+Commentaire
+S44(Végétarien: Boulette de soja à la tomate basilic (sous recette): surplus 1,48Kg (+4,4%) par rapport aux quantités
+déboitées ... je vais réduire la perte: perte passée de -10% à -8% (-6,03% en réel))
+Féculent: Riz noir de Camargue aux olives vertes (sous-recette)
+100 g
+Ingrédients Quantité pour 100
+g
+Unité Coût
+olives vertes denoyautees 6.19 g 0.03 €
+riz long noir ◼ ◼ IGP camargue ✅ 40.22 g 0.17 €
+Huile d'olive extra vierge 3.09 g 0.02 €
+Recette totale 49.50 g 0.22 €
+Poids net 100.00 g
+Commentaire
+S45(Féculent: Riz noir de Camargue aux olives vertes (sous-recette): surplus 0,15Kg (+1,7%) par rapport aux quantités
+déboitées ... je vais augmenter le gain: gain passé de 100% à 102% (103,47% en réel)___S45(Féculent: Riz noir de
+Camargue aux olives vertes (sous-recette): surplus 0,65Kg (+7,4%) par rapport aux quantités déboitées ... je vais
+augmenter le gain: gain passé de 95% à 100% (104,02% en réel)___S22(Riz long étuvé de Camargue aux olives vertes
+(sous-recette): manque 0,81Kg (-6,4%) par rapport aux quantités déboitées ... je vais réduire le gain: gain passé de 110%
+à 100% (96,58% en réel)___S43(Riz long étuvé de Camargue aux olives vertes (sous-recette): surplus 3,3Kg (+23,1%)
+par rapport aux quantités déboitées ... je vais augmenter le gain: gain passé de 100% à 110% (118,79% en
+réel)___S35(Riz long étuvé de Camargue aux olives vertes (sous-recette): manque 0,61Kg (-5,4%) par rapport aux
+quantités déboitées ... je vais réduire le gain: gain passé de 130% à 100% (100,58% en r
+--- page 13 ---
+Sauce: Sauce tomate ricotta V1 (sous-recette)
+305 g
+Lait Oeufs
+Ingrédients Quantité pour 305
+g
+Unité Coût
+oignon émincé ✅ 35.26 g 0.09 €
+ail pelé ✅ 2.35 g 0.02 €
+crème fraiche épaisse 30% 23.51 g 0.08 €
+fromage blanc 3,3 %mg 23.51 g 0.05 €
+ricotta 70.52 g 0.26 €
+Grana Padano râpé AOP 28,4% MG 16.45 g 0.21 €
+basilic sg 7.05 g 0.06 €
+Base tomates concassees fines LM (pulpe tomate
+fine) 199.81 g 0.25 €
+huile colza 2.35 g 0.00 €
+sel fin 2.35 g 0.00 €
+eau au poids 23.51 g 0.00 €
+Recette totale 406.67 g 1.03 €
+Poids net 305.00 g
+Étapes de production
+MATÉRIEL: Sauteuse PROGRAMME: V3 Garniture T°C: — TEMPS: 15
+Faire revenir les aubergines dans un fond d'huile avec l'ail.
+Ajouter les capres.
+Mouiller avec la sauce tomate .
+Laisser mijoter 15min à couvert
+Ajouter la ricotta, le parmesan , le persil et Basilic en fin de
+cuisson.
+Vérifier l'assaisonnement.
+Débarasser en plaque GN
+Commentaire
+S45(Sauce: Sauce tomate ricotta V1
+(sous-recette): manque 7,33Kg (-7,9%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -20% à -25% (-26,29% en
+réel)___S45(Sauce: Sauce tomate
+ricotta V1 (sous-recette): manque
+4,15Kg (-4,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -17% à -20%
+(-20,1% en réel)___S43(Sauce: Sauce
+tomate ricotta V1 (sous-recette):
+manque 3,07Kg (-3,9%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -13% à -17%
+(-15,9% en réel)___S27(Sauce: Sauce
+tomate ricotta V1 (sous-recette): surplus
+2,87Kg (+2,8%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -15% à -13%
+--- page 14 ---
+(-10,86% en réel)___S18(Sauce tomate
+ricotta V1 (sous-recette): surplus 6,67Kg
+(+7,4%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -20% à -15% (-12,08%
+en réel)___S10(Sauce tomate ricotta V1
+(sous-recette): surplus 4,69Kg (+6,8
+2026 S45_FB04-Haut de cuisse de poulet rôti, jus au thym, légumes
+vapeur et semoule végétale
+1 recette(s) (340.1 g)
+Lait Fruits à coques Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Haut de cuisse de poulet rôti nature
+(sous-recette) 1.00 recette(s) (105.1 g) 0.70 €
+Légume rôti: Semoule chou-fleur - four sec 220°C
+- 15' - 1/2 sachet/ pt gastro trou (sous-recette) 77.00 g 0.36 €
+légume vapeur: petit pois (sous-recette) 33.00 g 0.08 €
+Légume vapeur: Carotte rondelle (sous recette) 33.00 g 0.09 €
+Topping: amandes effilées torréfiées (sous
+recette) 12.00 g 0.13 €
+Sauce: sauce poulette au thym(sous recette) 80.00 g 0.14 €
+Recette totale 340.11 g 1.51 €
+Commentaire
+S41: 4.33 - S49 / remplacement sauce moutarde allége par sauce moutarde au céleri
+Viande: Haut de cuisse de poulet rôti nature (sous-recette)
+3 recette(s) (105.1 g)
+Ingrédients Quantité pour 3
+recette(s) Unité Coût
+Haut de cuisse poulet 140/160G ICI DEJ JNE 🟢 3.00 piece (150 g) 2.11 €
+sel fin 0.45 g 0.00 €
+Recette totale 450.45 g 2.11 €
+Poids net 315.32 g
+Étapes de production
+ouvrire les poche sous vide
+Commentaire
+--- page 15 ---
+plaquer le poulet en. plaque GN
+programme ( coloration final ) S13(Haut de cuisse rôti nature (sous-
+recette): manque 3,77Kg (-2,5%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -29% à -30% (-30,37% en
+réel)___S43(Haut de cuisse rôti nature
+(sous-recette): manque 2,44Kg (-2,9%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -28% à -29% (-29,32% en
+réel)___S33(Haut de cuisse rôti nature
+(sous-recette): manque 4,57Kg (-7,4%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -25% à -28% (-30,53% en
+réel)___S13(Haut de cuisse rôti nature
+(sous-recette): surplus 1,41Kg (+1,1%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-26% à -25% (-24,77% en réel)___Haut
+de cuisse rotie (sous-recette): manque
+1,44Kg (-2,3%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -25% à -26%
+(-26,72% en réel)))))
+Légume rôti: Semoule chou-fleur - four sec 220°C - 15' - 1/2 sachet/
+pt gastro trou (sous-recette)
+224 g
+Ingrédients Quantité pour 224
+g
+Unité Coût
+semoule de chou-fleur CE2 FR 320.54 g 1.03 €
+huile colza 12.82 g 0.02 €
+sel fin 0.96 g 0.00 €
+Recette totale 334.33 g 1.05 €
+Poids net 224.00 g
+Commentaire
+S45(Légume rôti: Semoule chou-fleur - four sec 220°C - 15' - 1/2 sachet/ pt gastro trou (sous-recette): surplus 3,21Kg
+(+2,9%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -36% à -33% (-32,88% en
+réel)___S37(Légume rôti: Semoule chou-fleur - four sec 220°C - 15' - 1/2 sachet/ pt gastro trou (sous-recette): manque
+13,05Kg (-14,6%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -28% à -36%
+(-38,5% en réel)___S32(Légume rôti: Semoule chou-fleur - four sec 220°C - 15' - 1/2 sachet/ pt gastro trou (sous-recette):
+surplus 4,8Kg (+7,2%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -37% à -28%
+(-26,94% en réel)___S29(Légume rôti: Semoule chou-fleur - four sec 220°C - 15' - 1/2 sachet/ pt gastro trou (sous-
+--- page 16 ---
+recette): manque 9,51Kg (-20,2%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de
+-20% à -37% (-36,19% en réel)___S24(Semoule de chou-fleur - fou
+légume vapeur: petit pois (sous-recette)
+96 g
+Ingrédients Quantité pour 96 g Unité Coût
+petit pois doux FR CE2 ✅ 133.33 g 0.24 €
+Recette totale 133.33 g 0.24 €
+Poids net 96.00 g
+Étapes de production
+metre les peti pois en four vapeur a 100°c 8min a la sorti verifier la cuisson
+puis rajouter le sel
+Commentaire
+S45(légume vapeur: petit pois (sous-
+recette): surplus 1,94Kg (+4,3%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-31% à -28% (-26,29% en
+réel)___S42(légume vapeur: petit pois
+(sous-recette): surplus 0,64Kg (+5,2%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-33% à -31% (-29,51% en
+réel)___S42(légume vapeur: petit pois
+(sous-recette): surplus 2,11Kg (+7%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-33% à -28% (-23% en
+réel)___S40(légume vapeur: petit pois
+(sous-recette): surplus 2,66Kg (+7,8%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-39% à -33% (-31,36% en
+réel)___S39(légume vapeur: petit pois
+(sous-recette): surplus 0,28Kg (+0,9%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-37% à -39% (-36,41% en
+réel)___S37(légume vapeur: petit pois
+(sous-recette): manque 0,93Kg (-6,2%)
+par rapport aux quan
+Légume vapeur: Carotte rondelle (sous recette)
+146 g
+--- page 17 ---
+Ingrédients Quantité pour 146
+g
+Unité Coût
+carotte rondelle ✅ 201.80 g 0.39 €
+sel fin 1.41 g 0.00 €
+Huile d'olive extra vierge 2.42 g 0.01 €
+Recette totale 205.63 g 0.41 €
+Poids net 146.00 g
+Étapes de production
+MATERIEL: Four PROGRAMME: Manuel Vapeur T°C: 100°c TEMPS: 15
+minutes
+Assaisonner à la sortie du four.
+POUR LA LEGUMERIE :
+CAROTTES GROS CUBES …………………………KG
+PDT GROS CUBES …………………………………….KG
+Commentaire
+S45(Légume vapeur: Carotte pdj (sous
+recette): surplus 0,5Kg (+1,1%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-30% à -29% (-27,58% en réel))
+Topping: amandes effilées torréfiées (sous recette)
+36 g
+Fruits à coques
+Ingrédients Quantité pour 36 g Unité Coût
+Amandes effilées blanches 40.00 g 0.40 €
+Recette totale 40.00 g 0.40 €
+Poids net 36.00 g
+Commentaire
+S35(Topping: amandes effilées (sous recette): manque 0,11Kg (-2,2%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -31% à -10% (-32,49% en réel)___S34(Topping: amandes effilées (sous recette):
+manque 0,31Kg (-7,7%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -25% à -31%
+(-30,75% en réel)___S32(Topping: amandes effilées (sous recette): manque 0,55Kg (-15,3%) par rapport aux quantités
+déboitées ... je vais augmenter la perte: perte passée de -10% à -25% (-23,73% en réel)___S21(Amandes effilées (sous
+recette): surplus 0,81Kg (+10,6%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -15% à
+-10% (-3,23% en réel)___S21(Amandes effilées (sous recette): manque 0,07Kg (-1,8%) par rapport aux quantités
+déboitées ... je vais augmenter la perte: perte passée de -15% à -10% (-16,49% en réel)___S18(Amandes effilées (sous
+recette): manque 0,68Kg (-5,6%) par rapport aux quantités déboi
+Sauce: sauce poulette au thym(sous recette)
+250 g
+--- page 18 ---
+Lait Gluten Céleri
+Ingrédients Quantité pour 250
+g
+Unité Coût
+oignon émincé ✅ 32.63 g 0.08 €
+crème fraiche épaisse 30% 23.31 g 0.08 €
+fromage blanc 3,3 %mg 23.31 g 0.05 €
+Lait demi-écrémé 🔵 69.93 g 0.05 €
+thym flocon 🟢 0.70 g 0.01 €
+amidon de maïs maizena 1.17 g 0.00 €
+fond blanc végétal 11.65 g 0.14 €
+vin blanc de France 11° 🟢 2.33 g 0.00 €
+eau au poids 139.85 g 0.00 €
+Recette totale 304.88 g 0.42 €
+Poids net 250.00 g
+Étapes de production
+MATERIEL : Sauteuse
+PROGRAMME : ÉTOILE sauce numero du plats
+T°C: —
+TEMPS: 15 minutes
+Faire revenir les échalotes dans un peut d'huile d'olive .
+Déglacer au vin blanc.(laisser s'evaporer un peu)
+Ajouter les fond blanc+ eau (attention mettre le bon poids en eau)
+Ajouter le lait et la créme
+Lier a la mazeina.
+Ajouter le persil + sel + poivre
+Vérffier l'assaisonnement.
+Débarasser en plaque GN.
+Commentaire
+S45(Sauce: sauce poulette au
+thym(sous recette): surplus 16,62Kg
+(+14,7%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -29% à -18% (-14,69%
+en réel)___S37(Sauce: sauce poulette
+au thym(sous recette): manque 11,91Kg
+(-14,2%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -16% à -29% (-27,92%
+en réel)___S02(Sauce poulette au persil
+(sous recette): manque 1,97Kg (-2,1%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -13% à -16% (-14,84% en
+réel)___S46(Sauce poulette au persil
+(sous recette): surplus 3,27Kg (+3,8%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-16% à -13% (-11,54% en
+réel)___S38(Sauce poulette au persil
+(sous recette): manque 6,22Kg (-6,5%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -10% à -16% (-15,81% en
+réel)___S06Sauce poulette au persil
+--- page 19 ---
+(sous recette): surplus 6,83Kg (+7,6%)
+par ra
+2026 S45_FB05-Boulette de volaille, trio de quinoa et courge
+butternut mijotée
+1 recette(s) (350.3 g)
+Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Boulette de volaille (sous-recette) 3.00 recette(s) (23.1 g) 0.35 €
+Légume sauteuse: butternut, tomate, oignon,
+origan (sous-recette) 191.00 g 0.73 €
+Féculent: Trio de Quinoa ROK (sous-recette) 90.00 g 0.18 €
+Recette totale 350.30 g 1.26 €
+Commentaire
+S26: 4,28. pas assez de viande, un peu fade
+S34: 4,28 / viande +50% dans la préparation et ajout de basilic
+S42: 4,31 / remplacement de l'aubergine par de la courge butternut et du basilic par du cumin
+S50: 4,22 - S06: 4.37 - S14: 4.44
+Viande: Boulette de volaille (sous-recette)
+12 recette(s) (23.1 g)
+Ingrédients Quantité pour 12
+recette(s) Unité Coût
+Boulette de dinde et poulet, oignon et herbes 30gr
+🟢
+12.00 pièce (30 g) 1.42 €
+Recette totale 360.00 g 1.42 €
+Poids net 277.20 g
+Commentaire
+S42(Viande: Boulette de volaille (sous-recette): manque 1,51Kg (-2,7%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -23,33% à -23% (-25,43% en réel)___S22(Boule à la dinde (sous-recette): manque
+11,75Kg (-9,8%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -16% à -23%
+(-22,62% en réel)___S09(Boule à la dinde (sous-recette): manque 0,76Kg (-0,9%) par rapport aux quantités déboitées ...
+je vais augmenter la perte: perte passée de -14% à -15% (-14,77% en réel)___S01(Boule à la dinde (sous-recette):
+surplus 1,37Kg (+2,3%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -15% à -14%
+(-12,23% en réel)___S40(Boule à la dinde (sous-recette): manque 8,16Kg (-11,4%) par rapport aux quantités déboitées ...
+je vais augmenter la perte: perte passée de -10% à -15% (-20,29% en réel))))))
+--- page 20 ---
+Légume sauteuse: butternut, tomate, oignon, origan (sous-recette)
+864 g
+Gluten Céleri
+Ingrédients Quantité pour 864
+g
+Unité Coût
+courge butternut cube 20X20 (sans peau) 🟢 641.08 g 2.18 €
+oignon émincé ✅ 170.95 g 0.44 €
+ail pelé ✅ 12.82 g 0.12 €
+Base tomates concassees fines LM (pulpe tomate
+fine) 256.43 g 0.32 €
+fond blanc végétal 10.68 g 0.13 €
+origan poudre 1.28 g 0.02 €
+huile colza 42.74 g 0.06 €
+sel fin 0.43 g 0.00 €
+poivre noir 🟢 0.43 g 0.01 €
+Recette totale 1.14 kg 3.28 €
+Poids net 864.00 g
+Commentaire
+S45(Légume sauteuse: butternut, tomate, oignon, origan (sous-recette): surplus 5,41Kg (+2,8%) par rapport aux
+quantités déboitées ... je vais réduire la perte: perte passée de -26% à -24% (-22,61% en réel)___S46(base gratin courge
+butternut (sous-recette): manque 1,31Kg (-0,5%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte
+passée de -23% à -26% (-23,38% en réel)___S14(base gratin courge butternut (sous-recette): surplus 14,73Kg (+6,5%)
+par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -25% à -23% (-20,14% en réel)___S26:
+perte passée de 15% à 19% (18,32% en réel)___S32: haché passé de 50 à 75g et basilic de 1 à 2g___S50: ajout de 30g
+de pomme de terre et réduction de 30g de pulpe tomate. suppression du cumin)))
+Féculent: Trio de Quinoa ROK (sous-recette)
+90 g
+Ingrédients Quantité pour 90 g Unité Coût
+trio de quinoa 34.76 g 0.17 €
+sel fin 0.35 g 0.00 €
+Huile d'olive extra vierge 2.09 g 0.01 €
+Recette totale 37.19 g 0.18 €
+Poids net 90.00 g
+--- page 21 ---
+Étapes de production
+MATERIEL : FOUR PROGRAMME : PROGRAMME RIZ CUISON VAPEUR
+TEMPERATURE A COEUR : PROGRAMME AUTOMATIQUE TEMPS : -
+Penser à ajouter le sel avant cuisson !!!!
+Commentaire
+S46(Féculent: Trio de Quinoa ROK
+(sous-recette): surplus 4,98Kg (+25,1%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+130% à 142% (153,66% en
+réel)___S46(Féculent: Trio de Quinoa
+ROK (sous-recette): surplus 5,14Kg
+(+48,7%) par rapport aux quantités
+déboitées ... je vais augmenter le gain:
+gain passé de 130% à 141% (151,53%
+en réel)___S45(Féculent: Trio de
+Quinoa ROK (sous-recette): surplus
+2,21Kg (+51,7%) par rapport aux
+quantités déboitées ... je vais augmenter
+le gain: gain passé de 125% à 150%
+(175,64% en réel)___S44(Féculent: Trio
+de Quinoa ROK (sous-recette): surplus
+0,68Kg (+10,2%) par rapport aux
+quantités déboitées ... je vais augmenter
+le gain: gain passé de 125% à 130%
+(141,94% en réel)___S38(Féculent: Trio
+de Quinoa ROK (sous-recette): manque
+0,71Kg (-6%) par rapport aux quantités
+déboitées ... je vais réduire le gain: gain
+passé de 138% à 125% (123,61% en
+réel)___S34(Féculent: Trio de Quinoa
+ROK (sous-recette): surplus 0,02Kg
+(+0,3%) pa
+2026 S45_FB06-La choutiflette de la brigade
+1 recette(s) (341 g)
+Lait Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel ( sous-recette) 1.00 recette(s) (1 g) 0.07 €
+Appareil tartiflette Chou-fleur V2 (sous recette) 315.00 g 1.26 €
+Topping: Crumble de fromage à tartiflette surgelé
+(sous recette) 25.00 g 0.26 €
+Recette totale 341.00 g 1.58 €
+Commentaire
+S42: 4,45 - S06: 4.35 - S46: 4.44 - S02: 4.37
+--- page 22 ---
+Petit plat à gratin format individuel ( sous-recette)
+7 recette(s) (1 g)
+Ingrédients Quantité pour 7
+recette(s) Unité Coût
+Petit plat à gratin format individuel 7.00 pièce (1 g) 0.48 €
+Recette totale 7.01 g 0.48 €
+Appareil tartiflette Chou-fleur V2 (sous recette)
+1205 g
+Lait Moutarde
+Ingrédients Quantité pour 1205
+g
+Unité Coût
+oignon émincé ✅ 147.73 g 0.38 €
+pomme de terre entière pelée ✅ 295.47 g 0.62 €
+lardons fumés sans nitrites 🟢 166.20 g 2.07 €
+crème fraiche épaisse 30% 18.47 g 0.07 €
+fromage blanc 3,3 %mg 18.47 g 0.04 €
+Lait demi-écrémé 🔵 110.80 g 0.08 €
+chou-fleur fleurette CE23/50 FR SG ✅ 738.66 g 1.39 €
+vin blanc de France 11° 🟢 92.33 g 0.12 €
+amidon de maïs maizena 18.47 g 0.06 €
+poivre blanc moulu 🟢 0.07 g 0.00 €
+Recette totale 1.61 kg 4.81 €
+Poids net 1.21 kg
+Commentaire
+S45(Appareil tartiflette Chou-fleur V2 (sous recette): surplus 39,63Kg (+15,5%) par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de -31% à -25% (-20,3% en réel)___S10(Appareil tartiflette Chou-fleur V2 (sous
+recette): surplus 2,01Kg (+0,6%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -29% à
+-31% (-28,58% en réel)___S46(Appareil tartiflette Chou-fleur V2 (sous recette): manque 26,31Kg (-10,5%) par rapport
+aux quantités déboitées ... je vais augmenter la perte: perte passée de -21% à -29% (-29,29% en réel)___S22(Appareil
+tartiflette Chou-fleur V2 (sous recette): surplus 19,62Kg (+5,5%) par rapport aux quantités déboitées ... je vais réduire la
+perte: perte passée de -23% à -21% (-18,79% en réel)___S14(Appareil tartiflette Chou-fleur V2 (sous recette): manque
+8,38Kg (-2,8%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -15% à -18% (-17,36%
+en réel)___S14: perte passée de 13 à 15%)))
+--- page 23 ---
+Topping: Crumble de fromage à tartiflette surgelé (sous recette)
+160 g
+Lait
+Ingrédients Quantité pour 160
+g
+Unité Coût
+Fromage tartiflette en dès IQF 45% MG 177.78 g 1.63 €
+Recette totale 177.78 g 1.63 €
+Poids net 160.00 g
+2026 S45_FB07-Cappelletti à la crème de saumon fumé et son trio de
+légumes verts
+1 recette(s) (340 g)
+Lait Gluten Oeufs Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: Cappelletti au saumon (sous-recette) 130.00 g 0.57 €
+Légume vapeur: Brocoli, haricot vert et petit pois
+(sous recette) 120.00 g 0.32 €
+Sauce: crème aux deux saumons (sous recette) 90.00 g 0.41 €
+Recette totale 340.00 g 1.29 €
+Féculent: Cappelletti au saumon (sous-recette)
+130 g
+Lait Gluten Oeufs Poissons
+Ingrédients Quantité pour 130
+g
+Unité Coût
+cappelletti au saumon fumé sg 🟢 121.38 g 0.56 €
+huile colza 2.43 g 0.00 €
+Recette totale 123.81 g 0.57 €
+Poids net 130.00 g
+Commentaire
+S45(Féculent: Cappelletti au saumon (sous-recette): manque 1,88Kg (-7,4%) par rapport aux quantités déboitées ... je
+vais réduire le gain: gain passé de 8% à 5% (0,03% en réel)___S34(Cappelletti 5 fromage (sous-recette): surplus 3,11Kg
+(+5,9%) par rapport aux quantités déboitées ... je vais augmenter le gain: gain passé de 4% à 8% (10,09% en
+réel)___S26(Cappelletti 5 fromage (sous-recette): manque 7,34Kg (-10,3%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de 10% à 4% (-1,32% en réel)___S23(Cappelletti 5 fromage (sous-recette): manque
+--- page 24 ---
+8,45Kg (-16%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de 15% à 5% (-3,35% en
+réel)___S21(Cappelletti 5 fromage (sous-recette): manque 1,17Kg (-2,9%) par rapport aux quantités déboitées ... je vais
+réduire le gain: gain passé de 20% à 15% (16,51% en réel)___S18(Cappelletti 5 fromage (sous-recette):
+DINGUERIE/CREATION DE MATIEREsurplus 34,2Kg (+38%) par rapport aux quantités déb
+Légume vapeur: Brocoli, haricot vert et petit pois (sous recette)
+120 g
+Ingrédients Quantité pour 120
+g
+Unité Coût
+brocoli fleurette FR CE2 ✅ 63.49 g 0.15 €
+Haricot vert fin CE2 (peu fibreux) ✅ 63.49 g 0.09 €
+petit pois doux FR CE2 ✅ 44.44 g 0.08 €
+Recette totale 171.43 g 0.32 €
+Poids net 120.00 g
+Commentaire
+S45(Légume vapeur: Brocoli, haricot vert et petit pois (sous recette): surplus 3,28Kg (+10,1%) par rapport aux quantités
+déboitées ... je vais réduire la perte: perte passée de -26% à -30% (-27,63% en réel)___S45(Légume vapeur: Brocoli,
+haricot vert et petit pois (sous recette): manque 3,28Kg (-10,1%) par rapport aux quantités déboitées ... je vais augmenter
+la perte: perte passée de -17% à -26% (-24,3% en réel)___S44(Légume vapeur: Brocoli, haricot vert et petit pois (sous
+recette): manque 5,82Kg (-5,3%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -15%
+à -17% (-19,09% en réel)___S39(Légume vapeur: Brocoli, haricot vert et petit pois (sous recette): surplus 2,07Kg (+2,6%)
+par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -16% à -15% (-13,24% en
+réel)___S36(Légume vapeur: Brocoli, haricot vert et petit pois (sous recette): surplus 3,37Kg (+3,1%) par rapport aux
+quantités déboitées ... je vais réduire la perte: per
+Sauce: crème aux deux saumons (sous recette)
+90 g
+Lait Poissons
+Ingrédients Quantité pour 90 g Unité Coût
+ail pelé ✅ 0.75 g 0.01 €
+oignon émincé ✅ 18.64 g 0.05 €
+crème fraiche épaisse 30% 18.64 g 0.07 €
+fromage blanc 3,3 %mg 18.64 g 0.04 €
+Lait demi-écrémé 🔵 18.64 g 0.01 €
+aneth sg 0.75 g 0.01 €
+--- page 25 ---
+Ingrédients Quantité pour 90 g Unité Coût
+Cube de saumon sans peau sans arêtes (
+élevage ) 🟢
+14.91 g 0.10 €
+chute de saumon atlantique fumé à cuire🟢 11.18 g 0.13 €
+jus de citron jaune bio 0.75 g 0.00 €
+amidon de maïs maizena 0.56 g 0.00 €
+Recette totale 103.45 g 0.41 €
+Poids net 90.00 g
+Commentaire
+S45(Sauce: crème aux deux saumons (sous recette): manque 0,41Kg (-2%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -12% à -13% (-13,76% en réel)___S45(Sauce: crème aux deux saumons (sous
+recette): surplus 1,58Kg (+6,9%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -18% à
+-12% (-9,28% en réel)___S39(Sauce: crème aux deux saumons (sous recette): manque 7,89Kg (-4,6%) par rapport aux
+quantités déboitées ... je vais augmenter la perte: perte passée de -13% à -18% (-16,46% en réel)___S39(Sauce: crème
+aux deux saumons (sous recette): manque 36,1Kg (-16%) par rapport aux quantités déboitées ... je vais augmenter la
+perte: perte passée de -10% à -13% (-24,44% en réel)___S39(Sauce: crème aux deux saumons (sous recette): surplus
+63,1Kg (+28%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -32% à -10% (-7,52% en
+réel)___S31(Sauce: aux deux saumons (sous recette): manque 11,79Kg (-9,6%)
+2026 S45_FB08-Filet mignon de porc à la crème de pruneaux et son
+duo de légumes
+1 recette(s) (310 g)
+Lait Moutarde Sulfites
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Filet mignon de porc au rub american ribs
+cuit au four (sous recette) 80.00 g 1.21 €
+Légume rôti: chou de Bruxelles (sous recette) 70.00 g 0.15 €
+Légume vapeur: Haricots verts (sous recette) 70.00 g 0.12 €
+Sauce: aux pruneaux à mixer (sous recette) 90.00 g 0.35 €
+Recette totale 310.00 g 1.82 €
+Commentaire
+2025: S49/4.36
+Viande: Filet mignon de porc au rub american ribs cuit au four (sous
+recette)
+--- page 26 ---
+80 g
+Ingrédients Quantité pour 80 g Unité Coût
+filet mignon de porc Pyreneus excellence VPF ✅ 111.50 g 1.17 €
+Mélange rub american ribs 1.67 g 0.04 €
+huile colza 1.11 g 0.00 €
+Recette totale 114.29 g 1.21 €
+Poids net 80.00 g
+Étapes de production
+MATERIEL : Four PROGRAMME : Rôtie viande blanche TEMPERATURE :
+-- TEMPS : selon programme
+Tailler les filets mignons en plaque GN
+Assaisoner la viande (sel, poivre, thym et huile d'olive)
+Cuire au four Sec 180°C selon programme cuisson à la sonde
+70°C à coeur
+Commentaire
+S45(Viande: Filet mignon de porc au rub
+american ribs cuit au four (sous recette):
+manque 0,82Kg (-1,8%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -25% à -30%
+(-26,32% en réel)___S45(Viande: Filet
+mignon de porc au rub american ribs
+cuit au four (sous recette): manque
+0,88Kg (-2,2%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -26% à -25%
+(-24,51% en réel)___S11(Filet mignon
+de porc au rub american ribs cuit au four
+(sous recette): surplus 4,3Kg (+10,5%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-33% à -26% (-25,98% en
+réel)___S01(Filet mignon de porc au rub
+american ribs cuit au four (sous recette):
+manque 2,23Kg (-10,9%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-25% à -33% (-33,16% en
+réel)___S47(Filet mignon de porc au rub
+american ribs cuit au four (sous recette):
+manque 3,96Kg (-15%) par rapport aux
+quantités déboitée
+Légume rôti: chou de Bruxelles (sous recette)
+70 g
+Ingrédients Quantité pour 70 g Unité Coût
+choux de Bruxelles sg 77.47 g 0.14 €
+--- page 27 ---
+Ingrédients Quantité pour 70 g Unité Coût
+fond brun végétal [CONTIENT DU BLÉ] 0.77 g 0.01 €
+eau au poids 3.87 g 0.00 €
+sel fin 0.23 g 0.00 €
+Recette totale 82.35 g 0.15 €
+Poids net 70.00 g
+Étapes de production
+Cuisine:
+Plaquer les choux de bruxelles en Gn simple
+Préparer le mélange fond brun + eau et arroser les choux
+Programme légumes rôtis au four
+Commentaire
+S45(Légume rôti: chou de Bruxelles
+(sous recette): surplus 6,76Kg (+21%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-23% à -15% (-6,84% en
+réel)___S45(Légume rôti: chou de
+Bruxelles (sous recette): manque
+1,16Kg (-3,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -22% à -23%
+(-23,25% en réel)___S45(Légume rôti:
+chou de Bruxelles (sous recette):
+manque 1,82Kg (-5,7%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -20% à -22%
+(-23,13% en réel)___S43(Légume rôti:
+chou de Bruxelles (sous recette):
+surplus 0,33Kg (+1,4%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -25% à -20%
+(-17,66% en réel)___S38(Légume rôti:
+chou de Bruxelles (sous recette):
+manque 0,47Kg (-8,8%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -18% à -25%
+(-25,21% en réel)___S24(Légume rôti:
+chou de Bruxelles (sous recette): surplu
+Légume vapeur: Haricots verts (sous recette)
+70 g
+Ingrédients Quantité pour 70 g Unité Coût
+Haricot vert fin CE2 (peu fibreux) ✅ 80.46 g 0.12 €
+Recette totale 80.46 g 0.12 €
+Poids net 70.00 g
+--- page 28 ---
+Étapes de production
+MATÉRIEL: Four PROGRAMME: Vapeur T°C: -- TEMPS: 10 minutes
+Assaisonner aprés cuisson.
+Commentaire
+S45(Légume vapeur: Haricots verts
+(sous recette): surplus 4,57Kg (+14,1%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-19% à -13% (-7,6% en
+réel)___S45(Légume vapeur: Haricots
+verts (sous recette): manque 0,35Kg
+(-1,1%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -20% à -19% (-18,15%
+en réel)___S45(Légume vapeur:
+Haricots verts (sous recette): manque
+0Kg (0%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -21% à -20% (-18,15%
+en réel)___S44(Légume vapeur:
+Haricots verts (sous recette): manque
+3,12Kg (-5,7%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -19% à -21%
+(-23,6% en réel)___S43(Légume
+vapeur: Haricots verts (sous recette):
+surplus 9,2Kg (+14,7%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -36% à -19%
+(-18,5% en réel)___S41(Légume
+vapeur: Haricots verts (sous recette):
+manque 21,21Kg (-23
+Sauce: aux pruneaux à mixer (sous recette)
+90 g
+Lait Moutarde Sulfites
+Ingrédients Quantité pour 90 g Unité Coût
+Échalote pelée ✅ 14.61 g 0.07 €
+crème fraiche épaisse 30% 8.77 g 0.03 €
+fromage blanc 3,3 %mg 7.31 g 0.02 €
+moutarde à l'ancienne (5kg) 🟢 1.46 g 0.00 €
+fond brun végétal [CONTIENT DU BLÉ] 4.38 g 0.06 €
+pruneaux dénoyautés petit calibre 21.92 g 0.14 €
+Vinaigre de vin 1.46 g 0.00 €
+amidon de maïs maizena 1.46 g 0.00 €
+--- page 29 ---
+Ingrédients Quantité pour 90 g Unité Coût
+huile colza 7.31 g 0.01 €
+eau au poids 43.83 g 0.00 €
+Recette totale 112.50 g 0.35 €
+Poids net 90.00 g
+Étapes de production
+En rondeau ou sauteuse :
+Suer l'échalote, ajouter le fond et la crème, cuire 15mn à couvert à reprise
+d'ébullition, crémer, mixer, assaisonner et débarrasser en plaques GN.
+Commentaire
+S45(Sauce: aux pruneaux à mixer (sous
+recette): manque 4,66Kg (-12,2%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -15% à -20% (-25,36% en
+réel)___S45(Sauce: aux pruneaux à
+mixer (sous recette): manque 4,4Kg
+(-12,2%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -10% à -15% (-20,97%
+en réel)___S29(Sauce: aux pruneaux à
+mixer (sous recette): surplus 0,75Kg
+(+5%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -13% à -10% (-6,91%
+en réel)___S21(___S13(Sauce aux
+pruneaux à mixer (sous recette): surplus
+0,59Kg (+2,1%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -14% à -13%
+(-12,17% en réel)___S05(Sauce aux
+pruneaux à mixer (sous recette): surplus
+0,99Kg (+3,6%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -15% à -14%
+(-10,68% en réel)___S49(Sauce aux
+pruneaux à mixer (sous recette):
+DINGUERIE/CREATION DE
+2026 S45_FB09-Filet de poulet à la crème d'artichauts et panais rôti
+1 recette(s) (310.55 g)
+Lait Gluten Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Filet de poulet rubs burger booster au
+four (sous recette) 1.00 recette(s) (87.55 g) 1.20 €
+Légume rôti: Panais (sous recette) 43.00 g 0.23 €
+--- page 30 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: boulgour ROK (sous recette) 80.00 g 0.05 €
+Sauce: crème d'artichaut avec peu de moutarde
+(sous recette) 100.00 g 0.31 €
+Recette totale 310.56 g 1.79 €
+Viande: Filet de poulet rubs burger booster au four (sous recette)
+1 recette(s) (87.55 g)
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+filet de poulet s/p 120/140g X10 s/v 🟢 130.00 g 1.16 €
+mélange rubs burger booster 1.50 g 0.03 €
+Huile d'olive extra vierge 3.00 g 0.02 €
+sel fin 0.20 g 0.00 €
+Recette totale 134.70 g 1.20 €
+Poids net 87.56 g
+Étapes de production
+MATÉRIEL: Four PROGRAMME: Viande blanche rotir à basse temperature T°C: Sonde TEMPS: Sonde
+Plaquer le poulet et l'assaisonner.
+Légume rôti: Panais (sous recette)
+43 g
+Ingrédients Quantité pour 43 g Unité Coût
+panais cube 20 x 20 🟢 65.34 g 0.23 €
+huile colza 0.65 g 0.00 €
+sel fin 0.16 g 0.00 €
+Recette totale 66.15 g 0.23 €
+Poids net 43.00 g
+Étapes de production
+MATERIEL: FOUR PROGRAMME: Cuisson rotie T°C: Auto TEMPS: —
+Mélanger les légumes un bac gastro
+Commentaire
+S44(Légume rôti: Panais (sous recette):
+manque 1,27Kg (-4,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+--- page 31 ---
+Huile plus sel
+Cuir au four
+la perte: perte passée de -30% à -35%
+(-33,19% en réel)___S44(Légume rôti:
+Panais (sous recette): manque 0,3Kg
+(-4%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -30% à -31% (-32,81%
+en réel)___S08(Panais rôti (sous
+recette): manque 1,85Kg (-9,1%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -36% à -42% (-41,85% en
+réel)___S06(Panais rôti (sous recette):
+manque 0,59Kg (-5%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -32% à -36%
+(-35,4% en réel)___S05(Panais rôti
+(sous recette): surplus 2,4Kg (+11,4%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-40% à -32% (-29,9% en
+réel)___S45(Panais rôti (sous recette):
+manque 18,55Kg (-44,3%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+Féculent: boulgour ROK (sous recette)
+160 g
+Gluten
+Ingrédients Quantité pour 160
+g
+Unité Coût
+boulgour 67.28 g 0.10 €
+sel fin 0.81 g 0.00 €
+Recette totale 68.09 g 0.10 €
+Poids net 160.00 g
+Étapes de production
+Cuisson FOUR
+Nom du programme à utiliser: Boulgour
+Vapeur 100%
+Température: 99°C
+Temps de cuisson: 30 minutes
+Type de matériel à utiliser pour cuisson: Moyen bac à trou
+Niveau de Remplissage: 1 sac de 2,5KG + 3,5L d'eau par gastro
+Commentaire
+S46(Féculent: boulgour ROK (sous
+recette): surplus 1,17Kg (+23,2%) par
+rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+136% à 135% (134,14% en
+réel)___S45(Féculent: boulgour ROK
+(sous recette): surplus 0,57Kg (+10,1%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+136% à 125% (132,92% en
+--- page 32 ---
+réel)___S45(Féculent: boulgour ROK
+(sous recette): surplus 0,28Kg (+10,8%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+136% à 149% (161,54% en
+réel)___S42(Féculent: boulgour ROK
+(sous recette): surplus 1Kg (+9,9%) par
+rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+154% à 136% (117,2% en
+réel)___S41(Féculent: boulgour ROK
+(sous recette): surplus 2,79Kg (+36,9%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+135% à 154% (154,26% en
+réel)___S40(Féculent: boulgour ROK
+(sous recette): manque 6,47Kg (-21,3%)
+par rapport aux quantités déboitées .
+Sauce: crème d'artichaut avec peu de moutarde (sous recette)
+100 g
+Lait Moutarde
+Ingrédients Quantité pour 100
+g
+Unité Coût
+gingembre 0.37 g 0.00 €
+ail pelé ✅ 0.75 g 0.01 €
+oignon émincé ✅ 3.73 g 0.01 €
+crème fraiche épaisse 30% 9.33 g 0.03 €
+fromage blanc 3,3 %mg 9.33 g 0.02 €
+Lait demi-écrémé 🔵 18.66 g 0.01 €
+fond d'artichaut 🟠 55.99 g 0.21 €
+piment fort 0.01 g 0.00 €
+moutarde à l'ancienne (5kg) 🟢 2.99 g 0.01 €
+jus de citron jaune bio 1.49 g 0.01 €
+sel fin 0.26 g 0.00 €
+huile colza 1.87 g 0.00 €
+jus de cuisson légumes 18.66 g 0.00 €
+Recette totale 123.46 g 0.31 €
+Poids net 100.00 g
+--- page 33 ---
+Commentaire
+S45(Sauce: crème d'artichaut avec peu de moutarde (sous recette): surplus 1,81Kg (+7,9%) par rapport aux quantités
+déboitées ... je vais réduire la perte: perte passée de -27% à -19% (-16,51% en réel)___S30(Sauce: crème d'artichaut
+avec peu de moutarde (sous recette): manque 3,06Kg (-9,3%) par rapport aux quantités déboitées ... je vais augmenter la
+perte: perte passée de -18% à -27% (-25,59% en réel)___S22(Crème d'artichaut avec peu de moutarde (sous recette):
+surplus 0,6Kg (+1,3%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -19% à -18%
+(-17,5% en réel)___S40(Crème d'artichaut au citron (sous recette): manque 5,47Kg (-12,2%) par rapport aux quantités
+déboitées ... je vais augmenter la perte: perte passée de -14% à -19% (-24,5% en réel)___S17: perte passée de 20% à
+17% (14,4% en réel)___S25: perte passée de 17% à 14% (12,18% en réel)))))
+2026 S45_PJ01-Tarte cheesecake vanille chocolat
+1 recette(s) (73 g)
+Lait Fruits à coques Gluten Soja Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Fond cookies ( sous-recette) 1.00 recette(s) (30 g) 0.51 €
+Crème cheescake vanille ( sous-recette) 38.00 g 0.26 €
+Copeaux chocolat décor ( sous-recette ) 5.00 g 0.08 €
+Recette totale 73.00 g 0.84 €
+Étapes de production
+Précuire les fond 10 m - 180°C
+Ajouter 40 g creme fromage blanc
+6 g copeaux chocolat
+170 °C - 12 m v3 sec 0%
+Fond cookies ( sous-recette)
+1 recette(s) (30 g)
+Lait Fruits à coques Gluten Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Fond de tartelette cookie à bord droit D.82 1.00 Pièce (30 g) 0.51 €
+Recette totale 30.00 g 0.51 €
+Commentaire
+S21()
+--- page 34 ---
+Crème cheescake vanille ( sous-recette)
+38 g
+Lait Oeufs
+Ingrédients Quantité pour 38 g Unité Coût
+crème liquide 35% MG UHT ✅ 15.91 g 0.06 €
+erythritol 3.47 g 0.03 €
+amidon de maïs maizena 1.45 g 0.00 €
+oeuf entier liquide plein air 4.34 g 0.01 €
+Extrait de vanille avec graines 🟢 0.29 g 0.01 €
+fromage frais saint moret 10.99 g 0.11 €
+fromage blanc 3,3 %mg 5.78 g 0.01 €
+Recette totale 42.22 g 0.26 €
+Poids net 38.00 g
+Commentaire
+S45(Crème cheescake vanille ( sous-recette): manque 1,95Kg (-20,8%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de 0% à -10% (-20,8% en réel)___S21())
+Copeaux chocolat décor ( sous-recette )
+5 g
+Soja
+Ingrédients Quantité pour 5 g Unité Coût
+Copeaux de chocolat noir 5.00 g 0.08 €
+Recette totale 5.00 g 0.08 €
+Commentaire
+S21()
+2026 S45_PJ02-Feuilleté façon tatin
+1 recette(s) (70 g)
+Lait Fruits à coques Gluten
+--- page 35 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+disque de pâte feuilletée 12 cm ( sous recette) 1.00 recette(s) (25 g) 0.49 €
+Mélange pomme-vanille pour flan sucré ( sous-
+recette) 45.00 g 0.38 €
+Recette totale 70.00 g 0.88 €
+Étapes de production
+Passer pomme vapeur 10m et jetter dans caramel , couvrir et cuire en remuant de tmps en tmps .
+Decongeler pate feuilleté et emportepiecer les bords
+Sur chaque pate feuilleté deposer 50 g de pomme
+Cuire 200 °C - 15 m v2
+pomme plaqué dans plaque fine à trou
+préparation beurre sucre vanille dans 4 moyen à mélangé avec les pommes et passage en sec 12 min à 180-190°C
+(évite la présence de liquide)
+préchauffage obligatoire à 230°C
+cuire à 200°c 13MIN ENVIRON
+disque de pâte feuilletée 12 cm ( sous recette)
+1 recette(s) (25 g)
+Lait Fruits à coques Gluten
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+disque de pâte feuilletée 13 cm 1.00 piece de 50gr (50 g) 0.49 €
+Recette totale 50.00 g 0.49 €
+Poids net 25.00 g
+Commentaire
+S25(disque de pâte feuilletée 12 cm ( sous recette): manque 1,85Kg (-12,3%) par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée de -47% à -50% (-53,54% en réel))
+Mélange pomme-vanille pour flan sucré ( sous-recette)
+45 g
+Lait
+Ingrédients Quantité pour 45 g Unité Coût
+pomme quartier sous-vide ✅ 72.99 g 0.34 €
+beurre doux rouleau 1.46 g 0.01 €
+--- page 36 ---
+Ingrédients Quantité pour 45 g Unité Coût
+sucre blanc poudre 7.30 g 0.01 €
+graines de vanille Bourbon 0.07 g 0.03 €
+Recette totale 81.82 g 0.38 €
+Poids net 45.00 g
+Commentaire
+2025 S01 : perte 15% passée à 20% (21,15% réel)
+2026 S45_PJ03-Moelleux praliné poire
+1 recette(s) (95 g)
+Lait Fruits à coques Gluten Soja Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rectangulaire cake ( sous-recette) 1.00 recette(s) (0 g) 0.12 €
+praliné (sous recette) 20.00 g 0.17 €
+Gateau aux yaourt (sous-recette) 55.00 g 0.28 €
+Poire au sirop ( sous-recette) 20.00 g 0.11 €
+Recette totale 95.00 g 0.67 €
+Étapes de production
+Mélanger au batteur tout les éléments du cake et ajouter praliné à la pate
+Par biodeg :
+20 g de poire
+85 g appareil180°C - 29 m en V2
+Moule rectangulaire cake ( sous-recette)
+3 recette(s) (0 g)
+Ingrédients Quantité pour 3
+recette(s) Unité Coût
+MOULE RECTANGULAIRE INDIVIDUEL
+BIODEG 167mL 3.00 pièces (1 mg) 0.35 €
+Recette totale 0.00 g 0.35 €
+praliné (sous recette)
+20 g
+--- page 37 ---
+Fruits à coques Soja
+Ingrédients Quantité pour 20 g Unité Coût
+praliné a l'ancienne amande/noisette 21.98 g 0.17 €
+Recette totale 21.98 g 0.17 €
+Poids net 20.00 g
+Étapes de production
+Faire chauffer le lait d'avoine avec le praliné, ajouter l'agar agar
+préalablement réhydraté. A reprise de l'ébulition, cuire quelques minutes.
+après cuisson mettre a refroidir puis passer a la girafe afin d obtenir une
+préparation un peu plus lisse Débarrasser en bacs GN.
+Commentaire
+S45(praliné (sous recette) : manque
+0,3Kg (-6%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -6% à -9% (-11,6% en
+réel))
+Gateau aux yaourt (sous-recette)
+55 g
+Lait Gluten Oeufs
+Ingrédients Quantité pour 55 g Unité Coût
+farine de blé T65 la moisson 18.17 g 0.02 €
+oeuf entier liquide plein air 13.98 g 0.05 €
+levure chimique 0.93 g 0.01 €
+huile de tournesol 5L 5.59 g 0.01 €
+fromage blanc 3,3 %mg 17.71 g 0.04 €
+sucre blanc poudre 3.73 g 0.00 €
+erythritol 4.66 g 0.04 €
+graines de vanille Bourbon 0.09 g 0.04 €
+Extrait de vanille avec graines 🟢 1.40 g 0.07 €
+Recette totale 66.27 g 0.28 €
+Poids net 55.00 g
+Commentaire
+S45(Gateau aux yaourt (sous-recette): manque 0,68Kg (-4,6%) par rapport aux quantités déboitées ... je vais augmenter
+la perte: perte passée de -14% à -17% (-17,94% en réel)___S44(Gateau aux yaourt (sous-recette): manque 1,03Kg
+(-6,7%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -14% à -21% (-19,77% en
+réel)))
+--- page 38 ---
+Poire au sirop ( sous-recette)
+20 g
+Ingrédients Quantité pour 20 g Unité Coût
+Poire en cubes boite 5/1 St Mamet 21.51 g 0.11 €
+Recette totale 21.51 g 0.11 €
+Poids net 20.00 g
+Commentaire
+S17(Poire au sirop ( sous-recette): manque 5,91Kg (-100%) par rapport aux quantités déboitées ... je vais augmenter la
+perte: perte passée de -7% à -54% (-100% en réel)___S14())
+2026 S45_PJ04-Cake aux olives
+1 recette(s) (90 g)
+Lait Gluten Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rectangulaire cake ( sous-recette) 1.00 recette(s) (0 g) 0.12 €
+Cake salé base l sans sel (sous-recette) 70.00 g 0.21 €
+Garniture cake au olives (sous-recette) 20.00 g 0.10 €
+Recette totale 90.00 g 0.43 €
+Étapes de production
+Haché grossierement les olives au robot coupe ou en rondelle ( kronen)
+Faire la pate à cake en mettant tout les ingredients au batteur et mélanger avec la feuille , ajouter les olives à la
+pate.
+Mettre 105 g de pate/ moule biodeg
+Cuisson 20 m - 180°C V3 sec 0%
+Cake salé base l sans sel (sous-recette)
+70 g
+Lait Gluten Oeufs
+Ingrédients Quantité pour 70 g Unité Coût
+farine de blé T65 la moisson 22.43 g 0.02 €
+huile colza 8.72 g 0.01 €
+--- page 39 ---
+Ingrédients Quantité pour 70 g Unité Coût
+oeuf entier liquide plein air 24.92 g 0.08 €
+Lait demi-écrémé 🔵 15.58 g 0.01 €
+levure chimique 1.25 g 0.01 €
+emmental râpé français 12.46 g 0.07 €
+Recette totale 85.37 g 0.21 €
+Poids net 70.00 g
+Garniture cake au olives (sous-recette)
+20 g
+Ingrédients Quantité pour 20 g Unité Coût
+olives vertes denoyautees 9.87 g 0.05 €
+olives noires dénoyautées Bon et engagé ✅ 9.87 g 0.04 €
+herbes de Provence 0.66 g 0.01 €
+Recette totale 20.41 g 0.10 €
+Poids net 20.00 g
+2026 S45_PJ05-Pain suédois, pesto rouge et mozza
+1 recette(s) (97.35 g)
+Lait Fruits à coques Gluten Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Pain suedois (sous-recette) 1.00 recette(s) (35.35 g) 0.20 €
+Pesto rosso garniture (sous-recette) 42.00 g 0.34 €
+Topping: Mozzarella rapée (sous-recette) 20.00 g 0.11 €
+Recette totale 97.35 g 0.65 €
+Étapes de production
+Pesto rosso : mixer grossierement
+Toast + pesto : 90 g
+20 g de mozza
+8 m - 200°C V3
+--- page 40 ---
+Pain suedois (sous-recette)
+1 recette(s) (35.35 g)
+Gluten
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+pain suédois carré 1.00 Pièce (35 g) 0.20 €
+Recette totale 35.00 g 0.20 €
+Poids net 35.35 g
+Commentaire
+S34(Pain suedois (sous-recette) : surplus 0,17Kg (+2,1%) par rapport aux quantités déboitées ... je vais augmenter le
+gain: gain passé de 0% à 1% (2,07% en réel)___S34(Pain suedois (sous-recette) : surplus 0,17Kg (+2,1%) par rapport
+aux quantités déboitées ... je vais augmenter le gain: gain passé de 0% à 1% (2,07% en réel)))
+Pesto rosso garniture (sous-recette)
+42 g
+Lait Fruits à coques Oeufs
+Ingrédients Quantité pour 42 g Unité Coût
+basilic pdj 3.10 g 0.10 €
+Grana Padano râpé AOP 28,4% MG 8.87 g 0.11 €
+amandes entières natures décortiquées 4.43 g 0.04 €
+double concentré de tomate 4/4 11.09 g 0.03 €
+Base tomates concassees fines LM (pulpe tomate
+fine) 22.17 g 0.03 €
+Huile d'olive extra vierge 4.43 g 0.02 €
+ail pelé ✅ 0.44 g 0.00 €
+Recette totale 54.55 g 0.34 €
+Poids net 42.00 g
+Commentaire
+S45(Pesto rosso garniture (sous-recette): manque 0,95Kg (-6,7%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -16% à -23% (-21,6% en réel)___S40(Pesto rosso garniture (sous-recette): surplus
+0,22Kg (+3,2%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -18% à -16% (-15,35% en
+réel)))
+--- page 41 ---
+Topping: Mozzarella rapée (sous-recette)
+20 g
+Lait
+Ingrédients Quantité pour 20 g Unité Coût
+mozzarella râpée B&E 20.41 g 0.11 €
+Recette totale 20.41 g 0.11 €
+Poids net 20.00 g
+Commentaire
+S31(Mozzarella rapée déco (sous-recette): DINGUERIE/CREATION DE MATIEREsurplus 0,71Kg (+14,1%) par rapport
+aux quantités déboitées. RESULTAT IMOSSIBLE, malgré tout, je vais réduire la perte: perte passée de -10% à -2%
+(GAIN: 5,82% en réel !!!!!!!)___S27(Mozzarella rapée déco (sous-recette): surplus 1,25Kg (+7,2%) par rapport aux
+quantités déboitées ... je vais réduire la perte: perte passée de -8% à -10% (-1,4% en réel)___S27(Mozzarella rapée déco
+(sous-recette): surplus 0,05Kg (+1,8%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de
+-8% à -10% (-6,31% en réel)___S26(Mozzarella rapée déco (sous-recette): manque 3,03Kg (-15,7%) par rapport aux
+quantités déboitées ... je vais augmenter la perte: perte passée de -5% à -10% (-19,87% en réel)))))
+2026 S45_PJ06-Tarte salée légumes grillés grana padano
+1 recette(s) (76.88 g)
+Lait Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+fond de tarte stick SALE ( sous-recette) 1.00 recette(s) (26.88 g) 0.55 €
+Brunoise de légumes provencaux (sous-recette) 20.00 g 0.21 €
+Appareil à quiche (sous-recette) 20.00 g 0.07 €
+Grana padano poudre déco (sous-recette) 10.00 g 0.28 €
+Recette totale 76.88 g 1.11 €
+Étapes de production
+Brunoise légumes 210°C - 10 m
+Melanger legumes refroidis avec parmesan
+Dans un stick :
+35 g brunoise grana
+30 g appareil
+25 m - 160°C v3
+--- page 42 ---
+fond de tarte stick SALE ( sous-recette)
+1 recette(s) (26.88 g)
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+fond de tartelette brise salé format stick cru 30g 1.00 pièce (32 g) 0.55 €
+Recette totale 32.00 g 0.55 €
+Poids net 26.88 g
+Commentaire
+S43(fond de tarte stick SALE ( sous-recette): manque 8,8Kg (-100%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -16% à -58% (-100% en réel)___S35(___S34(fond de tarte stick SALE ( sous-
+recette): manque 0,47Kg (-7,8%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -13%
+à -16% (-19,77% en réel)___S34(fond de tarte stick SALE ( sous-recette): manque 0,45Kg (-7,8%) par rapport aux
+quantités déboitées ... je vais augmenter la perte: perte passée de -9,5% à -13% (-16,54% en réel)___S14()))))
+Brunoise de légumes provencaux (sous-recette)
+20 g
+Ingrédients Quantité pour 20 g Unité Coût
+Brunoise provençale 34.63 g 0.20 €
+Huile d'olive extra vierge 1.73 g 0.01 €
+Recette totale 36.36 g 0.21 €
+Poids net 20.00 g
+Commentaire
+S45(Brunoise de légumes provencaux (sous-recette): manque 2,02Kg (-28,4%) par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée de -30% à -45% (-48,59% en réel))
+Appareil à quiche (sous-recette)
+20 g
+Lait Oeufs
+Ingrédients Quantité pour 20 g Unité Coût
+oeuf entier liquide plein air 8.87 g 0.03 €
+crème fraiche épaisse 30% 6.66 g 0.02 €
+Lait demi-écrémé 🔵 16.64 g 0.01 €
+--- page 43 ---
+Ingrédients Quantité pour 20 g Unité Coût
+poivre blanc moulu 🟢 0.02 g 0.00 €
+muscade moulue 0.04 g 0.00 €
+sel fin 0.02 g 0.00 €
+Recette totale 32.26 g 0.07 €
+Poids net 20.00 g
+Commentaire
+S45(Appareil à quiche (sous-recette): surplus 0,23Kg (+4,3%) par rapport aux quantités déboitées ... je vais réduire la
+perte: perte passée de -39% à -38% (-36,35% en réel)___S34(Appareil à quiche (sous-recette): manque 1,21Kg (-12,7%)
+par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -28% à -39% (-37,13% en
+réel)___S33(Appareil à quiche (sous-recette): manque 0,31Kg (-7,2%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -28% à -30% (-33,17% en réel)___S33(Appareil à quiche (sous-recette): surplus
+0,6Kg (+13,1%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -35% à -28% (-26,51% en
+réel)___S18(Appareil à quiche (sous-recette): surplus 7,75Kg (+4%) par rapport aux quantités déboitées ... je vais réduire
+la perte: perte passée de -30% à -29% (-27,2% en réel)___S10Appareil à quiche (sous-recette): surplus 7,2Kg (+10,4%)
+par rapport aux quantités déboitées ... je vais réduire la pert
+Grana padano poudre déco (sous-recette)
+10 g
+Lait Oeufs
+Ingrédients Quantité pour 10 g Unité Coût
+saupoudrer de parmesan - 0.00 €
+Grana Padano râpé AOP 28,4% MG 22.22 g 0.28 €
+Recette totale 22.22 g 0.28 €
+Poids net 10.00 g
+Commentaire
+S43(Grana padano poudre déco (sous-recette): manque 3,36Kg (-100%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -10% à -55% (-100% en réel)___S35(___S26(Grana padano poudre déco (sous-
+recette): manque 1,83Kg (-15,3%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -5%
+à -10% (-19,5% en réel))))
+2026 S45_PJ07-Flan abricot, fleur d'oranger et amandes grillées
+1 recette(s) (115 g)
+Lait Fruits à coques Oeufs
+--- page 44 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rond biodeg ( sous-recette) 1.00 recette(s) (0 g) 0.10 €
+Abricot en sirop (sous-recette) 35.00 g 0.23 €
+Gateau au fromage blanc fleur d'oranger (sous-
+recette) 70.00 g 0.37 €
+Topping: amandes effilées torréfiées (sous
+recette) 10.00 g 0.11 €
+Recette totale 115.00 g 0.81 €
+Étapes de production
+Couper les abricots en des
+Faire la creme fromage blanc avec fleur oranger( tout mélanger )
+Torréfié amandes et mixer grossierement
+Dans chaque biodeg :
+35 g abricot
+80 g fromage blanc app
+10 g d'amandes
+Cuisson : 170°C - 15 m v2
+Moule rond biodeg ( sous-recette)
+5 recette(s) (0 g)
+Ingrédients Quantité pour 5
+recette(s) Unité Coût
+MOULE ROND INDIVIDUEL BIODEG 180mL 5.00 pièces (1 mg) 0.48 €
+Recette totale 0.01 g 0.48 €
+Poids net 0.00 g
+Commentaire
+S46(Moule rond biodeg ( sous-recette): manque 0Kg (-5,6%) par rapport aux quantités déboitées ... je vais augmenter la
+perte: perte passée de 0% à -3% (-5,63% en réel)___S43(Moule rond biodeg ( sous-recette): manque 0Kg (-9,3%) par
+rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -14% à 0% (-21,98% en
+réel)___S43(Moule rond biodeg ( sous-recette): manque 0Kg (-5,7%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -14% à 0% (-18,88% en réel)___S40(Moule rond biodeg ( sous-recette): manque
+0Kg (-4%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -12% à -14% (-15,5% en
+réel)___S39(Moule rond biodeg ( sous-recette): manque 0Kg (-9,4%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -12% à 0% (-20,25% en réel)___S39(Moule rond biodeg ( sous-recette): manque
+0Kg (-15,1%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée d
+Abricot en sirop (sous-recette)
+35 g
+--- page 45 ---
+Ingrédients Quantité pour 35 g Unité Coût
+Abricot demi-fruit au sirop léger 5/1 38.89 g 0.23 €
+Recette totale 38.89 g 0.23 €
+Poids net 35.00 g
+Gateau au fromage blanc fleur d'oranger (sous-recette)
+70 g
+Lait Oeufs
+Ingrédients Quantité pour 70 g Unité Coût
+fromage blanc 3,3 %mg 24.55 g 0.05 €
+amidon de maïs maizena 3.93 g 0.01 €
+oeuf entier liquide plein air 19.64 g 0.07 €
+erythritol 7.86 g 0.08 €
+crème liquide 35% MG UHT ✅ 24.55 g 0.10 €
+graines de vanille Bourbon 0.05 g 0.02 €
+Extrait de vanille avec graines 🟢 0.98 g 0.05 €
+Arôme fleur d'oranger 🟢 0.79 g 0.00 €
+Recette totale 82.35 g 0.37 €
+Poids net 70.00 g
+2026 S45_PJ08-Moelleux chocolat
+1 recette(s) (85 g)
+Lait Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rond biodeg ( sous-recette) 1.00 recette(s) (0 g) 0.10 €
+Moelleux chocolat lc ( sous-recette) 85.00 g 0.67 €
+Recette totale 85.00 g 0.77 €
+Étapes de production
+Chauffer la crème et l'erytritol
+Ajouter le chocolat et mixer jusqu'à ce que ce soit bien fondu.
+Ajouter l'oeufs et Cacao + levure
+Mixer a nouveau
+95 g / biodeg
+--- page 46 ---
+15 m - 180 °C v3 sec 0%
+Moelleux chocolat lc ( sous-recette)
+85 g
+Lait Oeufs
+Ingrédients Quantité pour 85 g Unité Coût
+crème liquide 35% MG UHT ✅ 29.46 g 0.12 €
+oeuf entier liquide plein air 35.35 g 0.12 €
+erythritol 8.84 g 0.08 €
+cacao en poudre 0.88 g 0.01 €
+levure chimique 0.44 g 0.00 €
+Chocolat de couverture 50% cacao 25.04 g 0.34 €
+Recette totale 100.00 g 0.67 €
+Poids net 85.00 g
+Commentaire
+S45(Moelleux chocolat lc ( sous-recette): manque 0,72Kg (-2,8%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -13% à -15% (-15,48% en réel))
+2026 S45_PJ09-Gâteau fromage blanc myrtille
+1 recette(s) (90 g)
+Lait Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rond biodeg ( sous-recette) 1.00 recette(s) (0 g) 0.10 €
+Gateau au fromage blanc (sous-recette) 75.00 g 0.41 €
+Myrtille pour purée fruits (sous-recette) 15.00 g 0.12 €
+Recette totale 90.00 g 0.63 €
+Étapes de production
+Appareil : tout mixer jusqu'a ce que ce soit lisse
+Biodeg ( 12/grille ) :
+85 g d'appareil
+15 g myrtille
+170°C - 15 m V3
+--- page 47 ---
+Gateau au fromage blanc (sous-recette)
+75 g
+Lait Oeufs
+Ingrédients Quantité pour 75 g Unité Coût
+fromage blanc 3,3 %mg 27.20 g 0.06 €
+amidon de maïs maizena 4.35 g 0.01 €
+oeuf entier liquide plein air 21.76 g 0.07 €
+erythritol 8.70 g 0.08 €
+crème liquide 35% MG UHT ✅ 27.20 g 0.11 €
+graines de vanille Bourbon 0.05 g 0.02 €
+Extrait de vanille avec graines 🟢 1.09 g 0.05 €
+Recette totale 90.36 g 0.41 €
+Poids net 75.00 g
+Commentaire
+S42(Gateau au fromage blanc (sous-recette): manque 0,56Kg (-2,2%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -15% à -17% (-16,89% en réel))
+Myrtille pour purée fruits (sous-recette)
+15 g
+Ingrédients Quantité pour 15 g Unité Coût
+myrtille sauvage 15.79 g 0.12 €
+Recette totale 15.79 g 0.12 €
+Poids net 15.00 g
+2026 S45_PJ10-Flan carotte morbier
+1 recette(s) (120 g)
+Lait Gluten Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rond biodeg ( sous-recette) 1.00 recette(s) (0 g) 0.10 €
+Légume vapeur: Carotte rondelle (sous recette) 50.00 g 0.14 €
+--- page 48 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+appareil flan légume sans sel ( sous-recette) 55.00 g 0.22 €
+Topping: Morbier pépite IQF (sous-recette) 15.00 g 0.12 €
+Recette totale 120.00 g 0.58 €
+Étapes de production
+Carotte vapeur
+Carotte cuite : 50x nmr recette
+110 g appareil ( mixer carotte cuite et app flan )
+15 g comté
+200°C- 15 m v3
+appareil flan légume sans sel ( sous-recette)
+55 g
+Lait Gluten Oeufs
+Ingrédients Quantité pour 55 g Unité Coût
+crème fraiche épaisse 30% 31.86 g 0.11 €
+oeuf entier liquide plein air 28.67 g 0.10 €
+farine de blé T65 la moisson 6.37 g 0.01 €
+poivre blanc moulu 🟢 0.08 g 0.00 €
+muscade moulue 0.10 g 0.00 €
+Recette totale 67.07 g 0.22 €
+Poids net 55.00 g
+Topping: Morbier pépite IQF (sous-recette)
+35 g
+Lait
+Ingrédients Quantité pour 35 g Unité Coût
+Morbier pépites IQF 5*5 🧊 38.89 g 0.29 €
+Recette totale 38.89 g 0.29 €
+Poids net 35.00 g
+Étapes de production Commentaire
+--- page 49 ---
+TAILLER EN CUBE POUR LES BARQUETTES S06(Fromage raclette pépite IQF (sous-
+recette): manque 0,23Kg (-2,4%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de 0% à -10% (-2,45% en
+réel)___S50(Fromage raclette pépite
+IQF (sous-recette):
+DINGUERIE/CREATION DE
+MATIEREsurplus 1,1Kg (+15,8%) par
+rapport aux quantités déboitées.
+RESULTAT IMOSSIBLE, malgré tout, je
+vais réduire la perte: perte passée de
+-10% à 0% (GAIN: 9,08% en réel !!!!!!!)))
+2026 S45_PJ11-Cake lardons fromage
+1 recette(s) (80 g)
+Lait Fruits à coques Gluten Oeufs Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rectangulaire cake ( sous-recette) 1.00 recette(s) (0 g) 0.12 €
+Cake salé lc base ( sous-recette) 60.00 g 0.24 €
+garniture cake lardons sans nitrite (sous-recette) 20.00 g 0.44 €
+Recette totale 80.00 g 0.80 €
+Étapes de production
+Cuire les lardons en four mixte 50% d'humidité 180°C dans des bacs gastro à trou
+Faite la pate à cake et ajouter les lardons refroidi
+90 g d'appareil / cake
+Cuisson 15 m - 180°C
+( poids lardons : 22 x nombre de recettes )
+Cake salé lc base ( sous-recette)
+60 g
+Lait Fruits à coques Gluten Oeufs
+Ingrédients Quantité pour 60 g Unité Coût
+amandes en poudre blanchie 9.84 g 0.08 €
+farine de blé T65 la moisson 11.81 g 0.01 €
+huile colza 5.91 g 0.01 €
+--- page 50 ---
+Ingrédients Quantité pour 60 g Unité Coût
+oeuf entier liquide plein air 19.69 g 0.07 €
+Lait demi-écrémé 🔵 12.31 g 0.01 €
+levure chimique 1.18 g 0.01 €
+emmental râpé français 9.84 g 0.06 €
+Recette totale 70.59 g 0.24 €
+Poids net 60.00 g
+garniture cake lardons sans nitrite (sous-recette)
+20 g
+Moutarde
+Ingrédients Quantité pour 20 g Unité Coût
+lardons fumés sans nitrites 🟢 35.09 g 0.44 €
+Recette totale 35.09 g 0.44 €
+Poids net 20.00 g
+Commentaire
+S39(garniture cake lardons sans nitrite (sous-recette): manque 0,25Kg (-9,4%) par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée de -40% à -43% (-45,63% en réel))
+2026 S45_PJ12-Gratiné polenta jambon blanc raclette
+1 recette(s) (120 g)
+Lait Céleri Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Moule rond biodeg ( sous-recette) 1.00 recette(s) (0 g) 0.10 €
+Gratiné de polenta à la raclette (sous recette) 100.00 g 0.27 €
+Dés de jambon sans nitrite (sous-recette) 20.00 g 0.23 €
+Recette totale 120.00 g 0.60 €
+Étapes de production
+Chauffer la partie liquide SAUF LES OEUFS
+Une fois chaud ajouter polenta et cuire jusqu'a epaissisement
+Ajouter oeufs/comté/jambon
+140/biodeg
+210°C - 10 m v3 sec 0%
+--- page 51 ---
+Gratiné de polenta à la raclette (sous recette)
+100 g
+Lait Céleri Oeufs
+Ingrédients Quantité pour 100
+g
+Unité Coût
+Lait demi-écrémé 🔵 54.11 g 0.04 €
+crème fraiche épaisse 30% 6.49 g 0.02 €
+oeuf entier liquide plein air 21.65 g 0.07 €
+Raclette small pépites IQF 5*5 🧊 14.07 g 0.10 €
+polenta fine 15.15 g 0.03 €
+bouillon de légumes 1.08 g 0.01 €
+eau au poids 54.11 g 0.00 €
+Recette totale 166.67 g 0.27 €
+Poids net 100.00 g
+Commentaire
+S39(Gratiné de polenta (sous recette): manque 2,1Kg (-9,4%) par rapport aux quantités déboitées ... je vais augmenter la
+perte: perte passée de -35,8% à -40% (-41,82% en réel)___S47(Gratiné de polenta (sous recette): surplus 20Kg
+(+13,1%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -22% à -15% (-11,77% en
+réel)___S39(Gratiné de polenta (sous recette): surplus 9,28Kg (+5,7%) par rapport aux quantités déboitées ... je vais
+réduire la perte: perte passée de -24% à -22% (-19,64% en réel))))
+Dés de jambon sans nitrite (sous-recette)
+20 g
+Ingrédients Quantité pour 20 g Unité Coût
+Dès de jambon cuit IGP sans nitrite 🟢 21.98 g 0.23 €
+Recette totale 21.98 g 0.23 €
+Poids net 20.00 g
+Commentaire
+S28: TOP, on ne change rien. Perte melba -16%, perte réelle: -11,34%.
+--- page 52 ---
+2026 S45_PO01-Filet de colin et sa tombée de poireaux au vin blanc
+1 recette(s) (315 g)
+Lait Moutarde Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Poisson: Dos de colin alaska (100-120g) cuit Four
+Sec 120°C / 75°C à coeur (sous recette) 1.00 recette(s) (77 g) 0.57 €
+Légume sauteuse: tombée de poireaux aux
+champignons crème vin blanc+ (sous recette) 238.00 g 0.69 €
+Recette totale 315.00 g 1.27 €
+Commentaire
+S10: 4,41 - S42: 4,19 - S50: 4,31 - S06: 4.27 /quinoa remplacé par riz noir de camargue - S14: 4.12 - S22: 4.21 - S30:
+4.18 /division par 2 crème, FB et augmentation maïzena - S38: / suppressiond es 55g de riz
+S46: 4.33 - S02: 4.12
+Poisson: Dos de colin alaska (100-120g) cuit Four Sec 120°C / 75°C à
+coeur (sous recette)
+3 recette(s) (77 g)
+Poissons
+Ingrédients Quantité pour 3
+recette(s) Unité Coût
+Dos de colin d'ALASKA MSC 110gr ✅ 3.00 piece (110 g) 1.72 €
+Recette totale 330.00 g 1.72 €
+Poids net 231.00 g
+Commentaire
+S40(Poisson: Filet de colin alaska (100-110g) cuit Four Sec 120°C / 70°C à coeur (sous recette): surplus 1,29Kg (+1,2%)
+par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -33% à -30% (-26,79% en
+réel)___S35(Plein filet de colin alaska cuit vapeur (sous recette): manque 13,3Kg (-16%) par rapport aux quantités
+déboitées ... je vais augmenter la perte: perte passée de -35% à -40% (-44,99% en réel)___S25(Plein filet de colin alaska
+cuit vapeur (sous recette): manque 3,85Kg (-3,5%) par rapport aux quantités déboitées ... je vais augmenter la perte:
+perte passée de -36% à -37% (-38,22% en réel)___S10(Plein filet de colin alaska cuit vapeur (sous recette): manque
+21,01Kg (-17,7%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -31% à -37%
+(-43,2% en réel)___S23: perte passée de 34% à 42% (41,93% en réel)S30: TOP, on ne change rien. Perte melba -36%,
+perte réelle: -33,82%.S39: perte passée de -36% à -33% (-31,89% en réel) sui
+Légume sauteuse: tombée de poireaux aux champignons crème vin
+blanc+ (sous recette)
+--- page 53 ---
+651 g
+Lait Moutarde
+Ingrédients Quantité pour 651
+g
+Unité Coût
+poireaux rondelles CE2 sg ✅ 304.06 g 0.41 €
+champignon émincé ✅ 270.28 g 0.93 €
+crème fraiche épaisse 30% 50.68 g 0.18 €
+fromage blanc 3,3 %mg 50.68 g 0.11 €
+vin blanc de France 11° 🟢 84.46 g 0.11 €
+moutarde à l'ancienne (5kg) 🟢 25.34 g 0.04 €
+amidon de maïs maizena 23.65 g 0.07 €
+huile colza 33.78 g 0.05 €
+sel fin 2.53 g 0.00 €
+Recette totale 845.45 g 1.90 €
+Poids net 651.00 g
+Étapes de production
+MATERIEL : Sauteuse PROGRAMME : Manuel TEMPERATURE A COEUR
+: 150c° TEMPS : 15 minutes - Faire revenir les poireaux dans l'huile
+Ajouter les champignons
+Ajouter la crème puis laisser cuire une dizaine de minutes
+Commentaire
+S45(Légume sauteuse: tombée de
+poireaux aux champignons crème vin
+blanc+ (sous recette): surplus 79,88Kg
+(+31,4%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -30% à -23% (-0,48%
+en réel)___S45(Légume sauteuse:
+tombée de poireaux aux champignons
+crème vin blanc+ (sous recette):
+manque 43,34Kg (-19,4%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-14% à -30% (-30,69% en
+réel)___S10(tombée de poireaux aux
+champignons crème vin blanc+ (sous
+recette): surplus 18,12Kg (+5%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-20% à -14% (-15,2% en
+réel)___S46(tombée de poireaux aux
+champignons crème vin blanc+ (sous
+recette): manque 6,01Kg (-2%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -18% à -20% (-19,66% en
+--- page 54 ---
+réel)___S30(tombée de poireaux aux
+champignons crème vin blanc+ (sous
+recette): surplus 4,66Kg (+2,8%) par
+rapport aux quantités déboit
+2026 S45_PO02-Filet de colin, crème citron aneth, purée de carottes
+et brocolis
+1 recette(s) (310.3 g)
+Lait Sulfites Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Poisson: Filet de colin (plein) alaska (110-130g)
+cuit Four Sec 120°C / 75°C à coeur (sous recette) 1.00 recette(s) (79.3 g) 0.78 €
+Légume vapeur: Brocolis ROK (sous-recette) 85.00 g 0.27 €
+Purée: carotte (sous recette) 86.00 g 0.26 €
+Sauce: creme miel citron aneth light ***A
+MIXER*** (sous recette) 60.00 g 0.27 €
+Recette totale 310.30 g 1.58 €
+Commentaire
+S10 et S35: 4,30 S18: 4,23 artichauts trop durs ou qqfois filandreux ou poilu, poisson sec S26: 4,24 - S34: 4,36 - S42:
+4,24 / attention à bien dfaire cuire les artichauts
+2024: S50: 4,24
+2025: S06: 4,03 - S14: 4,46 / artichauts remplacés par brocolis - S22: 4.42 - S30: 4.33 - S38: 4.37 - S46: 4.47
+Poisson: Filet de colin (plein) alaska (110-130g) cuit Four Sec 120°C /
+75°C à coeur (sous recette)
+4 recette(s) (79.3 g)
+Poissons
+Ingrédients Quantité pour 4
+recette(s) Unité Coût
+Plein filet de colin d'Alaska sans peau sans arêtes
+MSC 130 g🟢
+4.00 pièce (130 g) 3.11 €
+Recette totale 520.00 g 3.11 €
+Poids net 317.20 g
+Commentaire
+S39(Poisson: Filet de colin (plein) alaska (110-130g) cuit Four Sec 120°C / 75°C à coeur (sous recette): surplus 4,68Kg
+(+4%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -40% à -39% (-37,58% en
+réel)___S22(Filet de colin (plein) alaska (110-130g) cuit Four Sec 120°C / 75°C à coeur (sous recette): surplus 6,14Kg
+--- page 55 ---
+(+4,2%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -40% à -33% (-32,49% en
+réel)___S09(Filet de colin (plein) alaska (110-130g) cuit Four Sec 120°C / 70°C à coeur (sous recette): surplus 8,22Kg
+(+4,3%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -25% à -21% (-17,41% en
+réel)___S11(Plein filet de colin alaska cuit Four Sec 120°C / 66°C à coeur (sous recette): manque 232,63Kg (-98,1%) par
+rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -64% à -30% (-98,08% en
+réel)___S11(Plein filet de colin alaska cuit Four Sec 120°C / 66°C à coeur (
+Légume vapeur: Brocolis ROK (sous-recette)
+340 g
+Ingrédients Quantité pour 340
+g
+Unité Coût
+brocoli fleurette FR CE2 ✅ 478.87 g 1.10 €
+Recette totale 478.87 g 1.10 €
+Poids net 340.00 g
+Étapes de production
+Consignes de cuisson
+Cuisson FOUR
+Nom du programme à utiliser: Brocoli
+Vapeur 100%
+Température: 99°C
+Temps de cuisson: 30 minutes
+Type de matériel à utiliser pour cuisson: moyen bac à trou
+Niveau de Remplissage: 2 sacs de 2.5kg par bac gastro
+Commentaire
+S45(Légume vapeur: Brocolis ROK
+(sous-recette): surplus 2,02Kg (+2,2%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-25% à -29% (-26,9% en
+réel)___S45(Légume vapeur: Brocolis
+ROK (sous-recette): surplus 13,5Kg
+(+11,5%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -39% à -25% (-23,1%
+en réel)___S44(Légume vapeur:
+Brocolis ROK (sous-recette): manque
+13,22Kg (-9%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -33% à -39% (-39,04%
+en réel)___S43(Légume vapeur:
+Brocolis ROK (sous-recette): surplus
+4,83Kg (+3,9%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -35% à -33%
+(-30,84% en réel)___S42(Légume
+vapeur: Brocolis ROK (sous-recette):
+surplus 6,39Kg (+8,8%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -35% à -30%
+(-25,04% en réel)___S40(Légume
+vapeur: Brocolis ROK (sous-recette):
+manque 1,24Kg (-5,5%) par
+--- page 56 ---
+Purée: carotte (sous recette)
+172 g
+Ingrédients Quantité pour 172
+g
+Unité Coût
+pomme de terre entière pelée ✅ 74.82 g 0.16 €
+carotte rondelle ✅ 149.63 g 0.29 €
+ail pelé ✅ 2.49 g 0.02 €
+oignon émincé ✅ 12.47 g 0.03 €
+huile colza 12.47 g 0.02 €
+sel fin 1.25 g 0.00 €
+eau au poids 7.48 g 0.00 €
+Recette totale 260.61 g 0.52 €
+Poids net 172.00 g
+Étapes de production
+MATERIEL : Sauteuse . PROGRAMME: Légumes braise T°C : 170°
+TEMPS : 30 Minutes
+Rissoler en sauteuse les oignons et les carottes
+Ajouter le miel et le cumin.
+Mouiller avec 3L d'eau et cuire à couvert
+Mixer l'ensemble afin d'obtenir une purée
+Vérifier l'assaisonner.
+Débarrasser en plaques GN.
+Commentaire
+S45(Purée: carotte (sous recette):
+surplus 5,33Kg (+16,9%) par rapport
+aux quantités déboitées ... je vais
+réduire la perte: perte passée de -32% à
+-34% (-33,65% en réel)___S45(Purée:
+carotte (sous recette): manque 3,98Kg
+(-11,6%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -20% à -32% (-29,25%
+en réel)___S18(Purée de carotte (sous
+recette): surplus 1,11Kg (+2,6%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-21% à -20% (-18,1% en
+réel)___S10(Purée de carotte (sous
+recette): surplus 4,5Kg (+11,7%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-28% à -21% (-16,26% en
+réel)___S02(Purée de carotte (sous
+recette): manque 7,68Kg (-19,5%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -10% à -28% (-27,57% en
+réel)___S46(Purée de carotte (sous
+recette): surplus 6,11Kg (+15,4%) par
+--- page 57 ---
+rapport aux quantités déboitées ... je
+vais réduire la perte: p
+Sauce: creme miel citron aneth light ***A MIXER*** (sous recette)
+120 g
+Lait Sulfites
+Ingrédients Quantité pour 120
+g
+Unité Coût
+oignon émincé ✅ 44.30 g 0.11 €
+crème fraiche épaisse 30% 44.30 g 0.16 €
+fromage blanc 3,3 %mg 44.30 g 0.09 €
+Pate de citron confit en poche 🟢 (min commande
+51kg)
+8.86 g 0.06 €
+aneth sg 3.54 g 0.03 €
+jus de citron jaune bio 7.53 g 0.03 €
+miel liquide 6.65 g 0.03 €
+huile colza 8.86 g 0.01 €
+sel fin 0.66 g 0.00 €
+Recette totale 169.01 g 0.53 €
+Poids net 120.00 g
+Étapes de production
+MATERIEL: Rondeau/Sauteuse PROGRAMME: -- / Sauce T°C: -- TEMPS:
+5 minutes
+Faire revenir les oignons , ail et gingembre dans l'huile d'olive.
+Ajouter les carottes.
+Ajouter le choux chinois et les pequillos.
+Vérifier l'assaisonnement.
+Enfin de cuisson ajouter le basilic.
+Débarasser en plaque GN.
+Commentaire
+S45(Sauce: creme miel citron aneth
+light A MIXER (sous recette): manque
+4,68Kg (-13,1%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -16% à -29%
+(-26,98% en réel)___S10(Sauce creme
+miel citron aneth light A MIXER (sous
+recette): surplus 8,95Kg (+8,4%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-22,5% à -16% (-11,38% en
+réel)___S02(Sauce creme miel citron
+aneth light A MIXER (sous recette):
+manque 4,76Kg (-5,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -17% à -22,5%
+(-21,68% en réel)___S46(Sauce creme
+miel citron aneth light A MIXER (sous
+recette): surplus 4,34Kg (+6,1%) par
+rapport aux quantités déboitées ... je
+--- page 58 ---
+vais réduire la perte: perte passée de
+-22% à -17% (-15,38% en
+réel)___S14(Sauce creme miel citron
+aneth light A MIXER (sous recette):
+manque 5,83Kg (-7,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: pe
+2026 S45_PO03-Crumble d'épinards et filet de colin façon haddock
+1 recette(s) (311 g)
+Lait Gluten Céleri Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel 1.00 pièce (1 g) 0.07 €
+Poisson: mélange épinard/poireaux haddock
+persil pour crumble (sous recette) 265.00 g 1.46 €
+Crumble salé graines de tournesol (sous-recette) 45.00 g 0.17 €
+Recette totale 311.00 g 1.70 €
+Commentaire
+S18: 4,19
+S27: remplacement du poireau par des épinards
+Poisson: mélange épinard/poireaux haddock persil pour crumble
+(sous recette)
+505 g
+Lait Gluten Céleri Poissons
+Ingrédients Quantité pour 505
+g
+Unité Coût
+poireaux émincé 🟢 108.17 g 0.39 €
+oignon émincé ✅ 48.67 g 0.12 €
+ail pelé ✅ 5.41 g 0.05 €
+Lait demi-écrémé 🔵 81.12 g 0.06 €
+crème fraiche épaisse 30% 33.80 g 0.12 €
+fromage blanc 3,3 %mg 33.80 g 0.07 €
+filet de colin (lieu) fumé façon haddock 135.21 g 1.65 €
+epinards palets en branches CE2 ✅ 189.29 g 0.26 €
+--- page 59 ---
+Ingrédients Quantité pour 505
+g
+Unité Coût
+persil hache sg 1.35 g 0.01 €
+fumet de poisson épisaveurs (déshydraté) 🟢 1.35 g 0.01 €
+amidon de maïs maizena 7.44 g 0.02 €
+poivre noir 🟢 0.41 g 0.01 €
+sel fin 0.27 g 0.00 €
+eau au poids 27.04 g 0.00 €
+Recette totale 673.33 g 2.79 €
+Poids net 505.00 g
+Commentaire
+S45(Poisson: mélange épinard/poireaux haddock persil pour crumble (sous recette): manque 12,69Kg (-10,1%) par
+rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -17% à -25% (-25,42% en réel)___S18:
+perte passée de 22% à 12% (8,66% en réel)___S27: crème divisée par deux et ajout fromage blancS27: perte passée de
+-12% à -19% (-12,13% en réel))
+Crumble salé graines de tournesol (sous-recette)
+105 g
+Lait Gluten
+Ingrédients Quantité pour 105
+g
+Unité Coût
+emmental râpé français 25.70 g 0.15 €
+farine de blé T65 la moisson 38.55 g 0.04 €
+Huile d'olive extra vierge 13.36 g 0.07 €
+graines de tournesol 25.70 g 0.13 €
+eau au poids 13.36 g 0.00 €
+Recette totale 116.67 g 0.40 €
+Poids net 105.00 g
+2026 S45_PO04-Filet de colin, riz rouge de Camargue et sa tombée
+de poireaux au vin blanc
+1 recette(s) (360 g)
+Lait Moutarde Poissons
+--- page 60 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Poisson: Dos de colin alaska (100-120g) cuit Four
+Sec 120°C / 75°C à coeur (sous recette) 1.00 recette(s) (77 g) 0.57 €
+Féculent: Riz rouge de Camargue avec huile
+d'olive (sous recette) 108.00 g 0.19 €
+Légume sauteuse: tombée de poireaux aux
+champignons crème vin blanc+ (sous recette) 175.00 g 0.51 €
+Recette totale 360.00 g 1.27 €
+Commentaire
+S10: 4,41 - S42: 4,19 - S50: 4,31 - S06: 4.27 /quinoa remplacé par riz noir de camargue - S14: 4.12 - S22: 4.21 - S30:
+4.18 /division par 2 crème, FB et augmentation maïzena - S38: 3.88 / suppressiond es 55g de riz - S46: 4.11
+Féculent: Riz rouge de Camargue avec huile d'olive (sous recette)
+108 g
+Ingrédients Quantité pour 108
+g
+Unité Coût
+riz long rouge 🟥 🟥 IGP camargue ✅ 41.76 g 0.17 €
+sel fin 0.42 g 0.00 €
+Huile d'olive extra vierge 4.18 g 0.02 €
+Recette totale 46.35 g 0.19 €
+Poids net 108.00 g
+Étapes de production
+MATERIEL : Four PROGRAMME : Cuisson vapeur du riz TEMPERATURE
+A COEUR : Sonde a coeur TEMPS : 20 MIN
+Remplire lles gastronormes avec 2KG de riz
+Ajouter le sel
+Mettre 4L d'eau (pour 2kg de riz)
+Cuire au four selon programme avec sonde.
+Commentaire
+S45(Féculent: Riz rouge de Camargue
+avec huile d'olive (sous recette): surplus
+10,51Kg (+62,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+le gain: gain passé de 98% à 133%
+(168,33% en réel)___S45(Féculent: Riz
+rouge de Camargue avec huile d'olive
+(sous recette): manque 1,95Kg (-11,7%)
+par rapport aux quantités déboitées ... je
+vais réduire le gain: gain passé de 110%
+à 98% (85,39% en
+réel)___S37(Féculent: Riz rouge de
+Camargue avec huile d'olive (sous
+recette): surplus 5,58Kg (+33,9%) par
+rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+95% à 110% (116,42% en
+réel)___S29(Riz rouge de Camargue
+(sous recette): manque 1,99Kg (-13,2%)
+--- page 61 ---
+par rapport aux quantités déboitées ... je
+vais réduire le gain: gain passé de
+130% à 95% (99,72% en
+réel)___S11(___S10(Riz rouge de
+Camargue (sous recette): surplus
+2,17Kg (+14,4%) par rapport aux
+quantités déboitées ... je vais augmenter
+le gain: gain passé de 110% à 100%
+(105,78% en réel)___S02(Riz rouge de
+Cam
+2026 S45_PO05-Filet de colin, crème citron aneth, semoule et
+brocolis
+1 recette(s) (310.3 g)
+Lait Gluten Sulfites Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Poisson: Filet de colin (plein) alaska (110-130g)
+cuit Four Sec 120°C / 75°C à coeur (sous recette) 1.00 recette(s) (79.3 g) 0.78 €
+Légume vapeur: Brocolis ROK (sous-recette) 85.00 g 0.27 €
+Féculent: Semoule (sous-recette) 86.00 g 0.07 €
+Sauce: creme miel citron aneth light ***A
+MIXER*** (sous recette) 60.00 g 0.27 €
+Recette totale 310.30 g 1.39 €
+Commentaire
+S10 et S35: 4,30 S18: 4,23 artichauts trop durs ou qqfois filandreux ou poilu, poisson sec S26: 4,24 - S34: 4,36 - S42:
+4,24 / attention à bien dfaire cuire les artichauts
+2024: S50: 4,24
+2025: S06: 4,03 - S14: 4,46 / artichauts remplacés par brocolis - S22: 4.42 - S30: 4.33 - S38: 4.37 - S46: 4.47
+Féculent: Semoule (sous-recette)
+172 g
+Gluten
+Ingrédients Quantité pour 172
+g
+Unité Coût
+Semoule à couscous / semoule de blé dur
+moyenne
+77.67 g 0.10 €
+sel fin 0.83 g 0.00 €
+Huile d'olive extra vierge 9.71 g 0.05 €
+--- page 62 ---
+Ingrédients Quantité pour 172
+g
+Unité Coût
+Recette totale 88.21 g 0.15 €
+Poids net 172.00 g
+Étapes de production
+Préparation à froid :
+Mettre la semoule avec l'huile d'olive et le sel.
+Rajouter l'eau bouillante, couvrir .
+Mettre 15min au four en 100% vapeur .
+Egréner et mettre à refroidir.
+Commentaire
+S45(Féculent: Semoule (sous-recette) :
+manque 0,44Kg (-2%) par rapport aux
+quantités déboitées ... je vais réduire le
+gain: gain passé de 130% à 95%
+(98,97% en réel)___S41(Féculent:
+Semoule (sous-recette) : surplus 0,51Kg
+(+4,7%) par rapport aux quantités
+déboitées ... je vais augmenter le gain:
+gain passé de 120% à 130% (130,3%
+en réel)___S41(Féculent: Semoule
+(sous-recette) : surplus 0,53Kg (+4,7%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+111% à 120% (120,88% en
+réel)___S41(Féculent: Semoule (sous-
+recette) : surplus 1,27Kg (+9,9%) par
+rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+105% à 111% (116,82% en
+réel)___S40(Féculent: Semoule (sous-
+recette) : surplus 1,97Kg (+11,2%) par
+rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+80% à 70% (74,98% en
+réel)___S40(Féculent: Semoule (sous-
+recette) : manque 5,4Kg (-31,4%) par
+rapport aux quantités déboitées ... je
+vais réduire le gain: gain pa
+2026 S45_PO06-Crumble de filet de colin façon haddock et
+d'épinards
+1 recette(s) (301 g)
+Lait Gluten Céleri Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel 1.00 pièce (1 g) 0.07 €
+Poisson: mélange épinard/poireaux haddock
+persil pour crumble (sous recette) 240.00 g 1.32 €
+Crumble salé graines de tournesol (sous-recette) 60.00 g 0.23 €
+--- page 63 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Recette totale 301.00 g 1.62 €
+Commentaire
+S18: 4,19
+S27: remplacement du poireau par des épinards
+2026 S45_PR01-Choutiflette gratinée
+1 recette(s) (331 g)
+Lait Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel ( sous-recette) 1.00 recette(s) (1 g) 0.07 €
+Appareil tartiflette Chou-fleur V2 (sous recette) 285.00 g 1.14 €
+Viande: lardons sans nitrites (sous recette) 20.00 g 0.48 €
+Topping: Crumble de fromage à tartiflette surgelé
+(sous recette) 25.00 g 0.26 €
+Recette totale 331.00 g 1.94 €
+Commentaire
+S42: 4,45 - S06: 4.35 - S46: 4.44 - S02: 4.37
+Viande: lardons sans nitrites (sous recette)
+40 g
+Moutarde
+Ingrédients Quantité pour 40 g Unité Coût
+lardons fumés sans nitrites 🟢 76.92 g 0.96 €
+Recette totale 76.92 g 0.96 €
+Poids net 40.00 g
+Commentaire
+S46(Viande: lardons sans nitrites (sous recette): manque 0,47Kg (-11,8%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -43% à -48% (-49,75% en réel)___S13(lardons sans nitrites (sous recette): manque
+2,08Kg (-11,6%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -35% à -43%
+(-42,53% en réel)___S46(lardons francais (sous recette): manque 0,86Kg (-24,1%) par rapport aux quantités déboitées ...
+je vais augmenter la perte: perte passée de -30% à -35% (-41,06% en réel))))
+--- page 64 ---
+2026 S45_PR02-Boulette de volaille et courge butternut mijotée à la
+tomate
+1 recette(s) (350.6 g)
+Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Boulette de volaille (sous-recette) 6.00 recette(s) (23.1 g) 0.71 €
+Légume sauteuse: butternut, tomate, oignon,
+origan (sous-recette) 212.00 g 0.81 €
+Recette totale 350.60 g 1.51 €
+Commentaire
+S26: 4,28. pas assez de viande, un peu fade
+S34: 4,28 / viande +50% dans la préparation et ajout de basilic
+S42: 4,31 / remplacement de l'aubergine par de la courge butternut et du basilic par du cumin
+S50: 4,22 - S06: 4.37 - S14: 4.44
+2026 S45_PR03-Boles de Picolat et garniture à la catalane
+1 recette(s) (355 g)
+Lait Gluten Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Boles de Picolat B/V (sous recette) 3.00 recette(s) (45 g) 1.64 €
+Légume rôti: Courgette (sous recette) 75.00 g 0.20 €
+Sauce catalane (sous-recette) 145.00 g 0.49 €
+Recette totale 355.00 g 2.32 €
+Étapes de production
+Boles de Picolat: cuisson à couvert avec four en chaleur mixte à 140°C
+Commentaire
+S14: 4,1
+Attention, vu avec Mathieu, un picola fait
+49.3gr
+S24: réduction de 25% du piment suite
+aux retours de la S14. Attention à la
+cuisson des boles pour les garder
+moelleuses
+S24: 4,15 (boles sèches)
+S32: 4,51 / Faire une tentative de
+cuisson à couvert avec four en chaleur
+--- page 65 ---
+mixte à 140°C
+Légume rôti: Courgette (sous recette)
+150 g
+Ingrédients Quantité pour 150
+g
+Unité Coût
+courgette verte 🟢 244.38 g 0.37 €
+Huile d'olive extra vierge 4.89 g 0.03 €
+sel fin 0.73 g 0.00 €
+Recette totale 250.00 g 0.40 €
+Poids net 150.00 g
+Étapes de production
+Cuisson FOUR
+Nom du programme à utiliser: Courgette rotie
+Vapeur 100%
+Température: 180°C
+Temps de cuisson: 30 minutes
+Type de matériel à utiliser pour cuisson: moyen bac à trou
+Niveau de Remplissage: remplir j'usqu'au trait
+Mettre les courgette en plaque GN.
+Assaisonner et mettre aux four en suivant le programme indiquer.
+Commentaire
+S45(Légume rôti: Courgette (sous
+recette) : manque 15,77Kg (-22,1%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -22% à -40% (-39,27% en
+réel)___S37(Légume rôti: Courgette
+(sous recette) : surplus 1,25Kg (+2,7%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-44% à -22% (0% en
+réel)___S35(Légume rôti: Courgette
+(sous recette) : surplus 7,38Kg (+6,6%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-48% à -44% (-42,09% en
+réel)___S29(Légume rôti: Courgette
+(sous recette) : manque 9,83Kg
+(-15,3%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -39% à -48% (-48,31%
+en réel)___S27(Légume rôti: Courgette
+(sous recette) : manque 5,66Kg (-6,2%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -33% à -39% (-37,12% en
+réel)___S21(Courgette rotie (sous
+recette) : surplus 1,08Kg (+1,1%) par
+rapport aux quantités déboit
+--- page 66 ---
+2026 S45_PR04-Tartiflette revisitée par la brigade
+1 recette(s) (331 g)
+Lait Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel ( sous-recette) 1.00 recette(s) (1 g) 0.07 €
+Légume vapeur: pomme de terre (sous recette) 90.00 g 0.28 €
+Légume sauteuse: Appareil à gratin de poireau,
+oignons et lardons (sous recette) 195.00 g 1.00 €
+Viande: lardons sans nitrites (sous recette) 20.00 g 0.48 €
+Topping: Crumble de fromage à tartiflette surgelé
+(sous recette) 25.00 g 0.26 €
+Recette totale 331.00 g 2.08 €
+Étapes de production
+Cuisine:
+montage du gratin, -320gr d'appareil tartiflette
+-2 tranche de rebochon Surgelé
+Puis Flash 10 min à 200° degré
+Commentaire
+S06: 4,0
+S14: 4,42 / modification de l'appareil à
+tartiflette (ajout vin, fromage blanc light
+et lardon, diminution crème fraiche) ⇒
+nette amélioration de la note
+S42: 4,60 - S50: 4,22 - S06: 4.38 - S14:
+4.44 - S46: 4.35
+2026 S02: 4.25
+Légume vapeur: pomme de terre (sous recette)
+180 g
+Ingrédients Quantité pour 180
+g
+Unité Coût
+pomme de terre entière pelée ✅ 264.71 g 0.56 €
+Recette totale 264.71 g 0.56 €
+Poids net 180.00 g
+Étapes de production
+MATÉRIEL: Four
+PROGRAMME: Vapeur
+T°C: 99°c
+TEMPS: 20 minutes
+Commentaire
+S45(Légume vapeur: pomme de terre
+(sous recette) : surplus 1,37Kg (+3,4%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-33% à -32% (-30,7% en
+réel)___S44(Légume vapeur: pomme
+--- page 67 ---
+de terre (sous recette) : surplus 2,22Kg
+(+14,8%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -33% à -15% (-12,26%
+en réel)___S11(Pomme de terre agata
+cuisson 100%vapeur (sous recette) :
+manque 5,56Kg (-10,1%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-25% à -33% (-32,58% en
+réel)___S02(Pomme de terre agata
+cuisson 100%vapeur (sous recette) :
+surplus 1,23Kg (+5,3%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -27% à -25%
+(-23,16% en réel)___S46(Pomme de
+terre agata cuisson (sous recette) :
+surplus 2,35Kg (+10,9%) par rapport
+aux quantités déboitées ... je vais
+réduire la perte: perte passée de -31% à
+-27% (-23,47% en réel)___S28(Pomme
+de terre agata cuisson (
+Légume sauteuse: Appareil à gratin de poireau, oignons et lardons
+(sous recette)
+390 g
+Lait Moutarde
+Ingrédients Quantité pour 390
+g
+Unité Coût
+poireaux émincé 🟢 134.25 g 0.49 €
+oignon émincé ✅ 134.25 g 0.34 €
+lardons fumés sans nitrites 🟢 71.60 g 0.89 €
+crème fraiche épaisse 30% 26.85 g 0.10 €
+fromage blanc 3,3 %mg 44.75 g 0.09 €
+Lait demi-écrémé 🔵 53.70 g 0.04 €
+vin blanc de France 11° 🟢 17.90 g 0.02 €
+amidon de maïs maizena 3.58 g 0.01 €
+muscade moulue 0.45 g 0.01 €
+poivre blanc moulu 🟢 0.18 g 0.00 €
+Recette totale 487.50 g 2.00 €
+--- page 68 ---
+Ingrédients Quantité pour 390
+g
+Unité Coût
+Poids net 390.00 g
+Étapes de production
+MATÉRIEL: Sauteuse PROGRAMME: Manuel T°C: 140
+TEMPS: 10 minutes
+Realiser une tombée de poireau
+Rectifier l'assaisonement
+Débarasser en plaque GN
+Commentaire
+S45(Légume sauteuse: Appareil à gratin
+de poireau, oignons et lardons (sous
+recette): surplus 3,91Kg (+5,2%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-24% à -20% (-20,04% en
+réel)___S10(Appareil à gratin de
+poireau, oignons et lardons (sous
+recette): surplus 12,62Kg (+17,1%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-32% à -24% (-20,4% en
+réel)___S02(Appareil à gratin de
+poireau, oignons et lardons (sous
+recette): surplus 2,95Kg (+5,3%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-34% à -32% (-30,53% en
+réel)___S46(Appareil à gratin de
+poireau, oignons et lardons (sous
+recette): surplus 5,57Kg (+10,9%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-37% à -34% (-30,13% en
+réel)___S22(Appareil à gratin de
+poireau, oignons et lardons (sous
+recette): manque 1,75Kg (-6,7%) par
+rapport aux quantités déboitées ... je
+vais augmenter la per
+2026 S45_PR05-Haut de cuisse de poulet, sauce tomate ricotta et riz
+de Camargue IGP
+1 recette(s) (342.23 g)
+Lait Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Haut de cuisse de poulet rôti au thym
+(sous-recette) 1.00 recette(s) (102.23 g) 0.71 €
+Légume rôti: Carotte (sous-recette) 30.00 g 0.10 €
+Féculent: riz long étuvé de Camargue (sous-
+recette) 110.00 g 0.13 €
+--- page 69 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Sauce: Sauce tomate ricotta V1 (sous-recette) 100.00 g 0.34 €
+Recette totale 342.24 g 1.28 €
+Commentaire
+S23: 4.09
+Viande: Haut de cuisse de poulet rôti au thym (sous-recette)
+2 recette(s) (102.23 g)
+Ingrédients Quantité pour 2
+recette(s) Unité Coût
+Haut de cuisse poulet 140/160G ICI DEJ JNE 🟢 2.00 piece (150 g) 1.41 €
+thym flocon 🟢 0.50 g 0.01 €
+sel fin 0.20 g 0.00 €
+Recette totale 300.70 g 1.41 €
+Poids net 204.48 g
+Étapes de production
+Haut de cuisse de poulet Four Sec 1er cuisson 180°C 25 à 30 min puis
+Flash à 220 °C 3 à 5 min GN simple à trou
+Commentaire
+S33(Viande: Haut de cuisse de poulet
+rôti au thym (sous-recette): manque
+0,6Kg (-1,1%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -31% à -32% (-31,76%
+en réel)___S23(Haut de cuisse rotie au
+thym (sous-recette): surplus 0,15Kg
+(+0,1%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -24,91% à -25%
+(-24,16% en réel)___S11(Haut de
+cuisse rotie au thym (sous-recette):
+manque 2,26Kg (-3,4%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -26% à -29%
+(-28,49% en réel)___S35(Haut de
+cuisse rotie au thym (sous-recette):
+manque 4,96Kg (-6,8%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -26% à -29%
+(-31,07% en réel)))))
+--- page 70 ---
+Légume rôti: Carotte (sous-recette)
+58 g
+Ingrédients Quantité pour 58 g Unité Coût
+carotte rondelle ✅ 95.69 g 0.19 €
+huile colza 9.57 g 0.01 €
+sel fin 0.19 g 0.00 €
+Recette totale 105.45 g 0.20 €
+Poids net 58.00 g
+Étapes de production
+MATERIEL: Four PROGRAMME: Légume rôti T°C: 110°C TEMPS: 30
+minutes
+Plaquer les carottes
+Assaisonner
+Cuisson au four
+Commentaire
+S45(Légume rôti: Carotte (sous-recette):
+surplus 3,87Kg (+8,8%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -60% à -45%
+(-42,21% en réel)___S42(Légume rôti:
+Carotte (sous-recette): manque 5,43Kg
+(-14,1%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -57% à -60% (-63,07%
+en réel)___S34(Légume rôti: Carotte
+(sous-recette): manque 11,14Kg
+(-25,2%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -40% à -57% (-55,14%
+en réel)___S26(Légume rôti: Carotte
+(sous-recette): manque 7,78Kg (-10,1%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -36% à -40% (-42,46% en
+réel)___S18(Carotte rôtie (sous-
+recette): manque 7,5Kg (-15%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -25% à -36% (-36,24% en
+réel)___S41(Carotte rôtie (sous-
+recette): surplus 12,47Kg (+24,4%) par
+rapport aux quantités déboitées ... je
+vais ré
+Féculent: riz long étuvé de Camargue (sous-recette)
+427 g
+--- page 71 ---
+Ingrédients Quantité pour 427
+g
+Unité Coût
+riz long incollable 🟨 🟨 IGP camargue ✅ 157.28 g 0.51 €
+sel fin 1.45 g 0.00 €
+Recette totale 158.74 g 0.51 €
+Poids net 427.00 g
+Étapes de production
+Cuisson FOUR
+Nom du programme à utiliser: Riz long étuvé de camargue
+Vapeur 100%
+Température: 99°C
+Temps de cuisson: 30 minutes
+Type de matériel à utiliser pour cuisson: Moyen bac plein
+Niveau de Remplissage: 1 sac de 2,5KG + 3,5L d'eau par gastro
+Commentaire
+S46(Féculent: riz long étuvé de
+Camargue (sous-recette): surplus
+8,74Kg (+37,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+le gain: gain passé de 151% à 169%
+(186,93% en réel)___S45(Féculent: riz
+long étuvé de Camargue (sous-recette):
+manque 4,29Kg (-18,9%) par rapport
+aux quantités déboitées ... je vais
+réduire le gain: gain passé de 195% à
+140% (139,3% en
+réel)___S45(Féculent: riz long étuvé de
+Camargue (sous-recette): manque
+4,47Kg (-29,6%) par rapport aux
+quantités déboitées ... je vais réduire le
+gain: gain passé de 195% à 151%
+(107,58% en réel)___S44(Féculent: riz
+long étuvé de Camargue (sous-recette):
+manque 6,23Kg (-23,8%) par rapport
+aux quantités déboitées ... je vais
+réduire le gain: gain passé de 195% à
+120% (124,87% en
+réel)___S44(Féculent: riz long étuvé de
+Camargue (sous-recette): manque
+0,82Kg (-13,5%) par rapport aux
+quantités déboitées ... je vais réduire le
+gain: gain passé de 195% à 180%
+(155,03% en réel)___S41(Féculent: riz
+long étuvé de Camargue
+2026 S45_PR06-Emincé de dinde, crème de gingembre et petit
+épeautre du Ventoux
+1 recette(s) (330 g)
+Lait Fruits à coques Gluten Céleri
+--- page 72 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Cuisson longue 4h45 : Sauté de dinde (sous
+recette) 85.00 g 1.07 €
+Féculent: Petit épeautre sans sel (sous recette) 78.00 g 0.11 €
+Légume vapeur: Brocolis SG/carottes (sous
+recette) 80.00 g 0.24 €
+Sauce: Crème fond blanc gingembre ***A
+MIXER*** (sous recette) 80.00 g 0.20 €
+Topping: amandes effilées torréfiées (sous
+recette) 7.00 g 0.08 €
+Recette totale 330.00 g 1.70 €
+Cuisson longue 4h45 : Sauté de dinde (sous recette)
+155 g
+Ingrédients Quantité pour 155
+g
+Unité Coût
+Sauté blanquette dinde s/os s/peau 🟢 277.06 g 1.94 €
+huile colza 2.77 g 0.00 €
+poivre noir 🟢 0.14 g 0.00 €
+sel fin 0.42 g 0.00 €
+eau au poids 138.53 g 0.00 €
+Recette totale 418.92 g 1.95 €
+Poids net 155.00 g
+Étapes de production
+Process Cuisson Longue Dinde:
+Méthode: FOUR
+Programme: Cuisson longue dinde 4h45 + maintien 72h
+Préparation cuisson longue:
+A mettre par grand bac gastro:
+10 kg Sauté blanquette dinde s/os s/peau
+15 g sel fin
+100 g huile colza
+5 kg eau au poids
+5 g Poivre noir
+Bien mélanger l'ensemble des éléments
+Commentaire
+S45(Cuisson longue 4h45 : Sauté de
+dinde (sous recette): manque 3,14Kg
+(-3,8%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -62% à -63% (-63,46%
+en réel)___S43(Cuisson longue 4h45 :
+Sauté de dinde (sous recette): manque
+7,5Kg (-9,6%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -59% à -62% (-62,94%
+en réel)___S36(Cuisson longue 4h45 :
+Sauté de dinde (sous recette): surplus
+1,62Kg (+1,2%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -61% à -59%
+(-56,43% en réel)___S35(Cuisson
+--- page 73 ---
+longue 4h45 : Sauté de dinde (sous
+recette): surplus 4,64Kg (+6,5%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-61% à -60% (-58,48% en
+réel)___S35(___S28(Cuisson longue
+4h45 : Sauté de dinde (sous recette):
+manque 11,91Kg (-13,1%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-57% à -61% (-62,62% en
+réel)___S27(Cuisson longu
+Féculent: Petit épeautre sans sel (sous recette)
+156 g
+Gluten
+Ingrédients Quantité pour 156
+g
+Unité Coût
+petit épeautre sec du Ventoux 58.87 g 0.23 €
+Recette totale 58.87 g 0.23 €
+Poids net 156.00 g
+Étapes de production
+Cuisson FOUR
+Nom du programme à utiliser: Cuisson petit épeautre
+Vapeur 100%
+Température: 99°C
+Temps de cuisson: 45 minutes
+Type de matériel à utiliser pour cuisson: moyen bac
+Niveau de Remplissage: 1 sacs de 2.5kg par bac gastro + 3,5L d'eau
+Commentaire
+S43(Féculent: Petit épeautre sans sel
+(sous recette): surplus 0,48Kg (+4,8%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+160% à 165% (172,4% en
+réel)___S43(Féculent: Petit épeautre
+sans sel (sous recette): surplus 0,78Kg
+(+7,8%) par rapport aux quantités
+déboitées ... je vais augmenter le gain:
+gain passé de 145% à 160% (164% en
+réel)___S37(Féculent: Petit épeautre
+sans sel (sous recette): surplus 3,22Kg
+(+21,5%) par rapport aux quantités
+déboitées ... je vais augmenter le gain:
+gain passé de 130% à 145% (131,4%
+en réel)___S35(Féculent: Petit épeautre
+sans sel (sous recette): surplus 13,14Kg
+(+65%) par rapport aux quantités
+déboitées ... je vais augmenter le gain:
+gain passé de 70% à 130% (135,34%
+en réel)___S29(Féculent: Petit épeautre
+sans sel (sous recette): manque 3,16Kg
+(-21,1%) par rapport aux quantités
+déboitées ... je vais réduire le gain: gain
+--- page 74 ---
+passé de 120% à 70% (73,68% en
+réel)___S26(Féculent: Petit épeautre
+ROK (sous recette) : surplus
+Légume vapeur: Brocolis SG/carottes (sous recette)
+316 g
+Ingrédients Quantité pour 316
+g
+Unité Coût
+carotte rondelle ✅ 200.08 g 0.39 €
+brocoli fleurette FR CE2 ✅ 250.10 g 0.57 €
+sel fin 1.25 g 0.00 €
+Recette totale 451.43 g 0.96 €
+Poids net 316.00 g
+Étapes de production
+Cuisson FOUR
+Nom du programme à utiliser: Duo brocolis SG/carottes
+Vapeur 100%
+Température: 99°C
+Temps de cuisson: 30 minutes
+Type de matériel à utiliser pour cuisson: moyen bac à trou
+Niveau de Remplissage: 5kg par bac gastro
+Commentaire
+S46(Légume vapeur: Brocolis
+SG/carottes (sous recette): surplus
+0,96Kg (+0,6%) par rapport aux
+quantités déboitées ... je vais réduire la
+perte: perte passée de -31% à -30%
+(-27,46% en réel)___S45(Légume
+vapeur: Brocolis SG/carottes (sous
+recette): surplus 5,31Kg (+4,2%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-31% à -28% (-25,03% en
+réel)___S41(Légume vapeur: Brocolis
+SG/carottes (sous recette): manque
+3,39Kg (-4,7%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -27% à -31%
+(-30,41% en réel)___S38(Légume
+vapeur: Brocolis SG/carottes (sous
+recette): surplus 32,59Kg (+13,8%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-39% à -27% (-25,84% en
+réel)___S37(Légume vapeur: Brocolis
+SG/carottes (sous recette): manque
+7,92Kg (-8,4%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -35% à -39%
+(-40,08% en réel)___S33(Légume
+vapeur: Brocolis S
+--- page 75 ---
+Sauce: Crème fond blanc gingembre ***A MIXER*** (sous recette)
+250 g
+Lait Gluten Céleri
+Ingrédients Quantité pour 250
+g
+Unité Coût
+gingembre 11.65 g 0.04 €
+oignon émincé ✅ 31.06 g 0.08 €
+crème fraiche épaisse 30% 54.35 g 0.20 €
+fromage blanc 3,3 %mg 54.35 g 0.11 €
+fond blanc végétal 6.21 g 0.07 €
+vin blanc de France 11° 🟢 15.53 g 0.02 €
+amidon de maïs maizena 3.88 g 0.01 €
+mélange rubs asian 3.49 g 0.07 €
+huile colza 15.53 g 0.02 €
+eau au poids 116.46 g 0.00 €
+Recette totale 312.50 g 0.63 €
+Poids net 250.00 g
+Commentaire
+S45(Sauce: Crème fond blanc gingembre A MIXER (sous recette): manque 3,44Kg (-4,5%) par rapport aux quantités
+déboitées ... je vais augmenter la perte: perte passée de -17% à -20% (-20,77% en réel)___S43(Sauce: Crème fond
+blanc gingembre A MIXER (sous recette): manque 3,05Kg (-2,3%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -15% à -17% (-15,48% en réel)___S37(Sauce: Crème fond blanc gingembre A
+MIXER (sous recette): manque 0,58Kg (-0,8%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte
+passée de -14% à -15% (-13,33% en réel)___S35(Sauce: Crème fond blanc gingembre A MIXER (sous recette): surplus
+0,11Kg (+0,1%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -15% à -14% (-12,61% en
+réel)___S29(Sauce: Crème fond blanc gingembre A MIXER (sous recette): manque 4,86Kg (-7,4%) par rapport aux
+quantités déboitées ... je vais augmenter la perte: perte passée de -
+2026 S45_QD01-Haut de cuisse de poulet rôti au thym, légumes
+vapeur et semoule de chou-fleur
+1 recette(s) (338.1 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Haut de cuisse de poulet rôti nature
+(sous-recette) 1.00 recette(s) (105.1 g) 0.70 €
+--- page 76 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Légume rôti: Semoule chou-fleur - four sec 220°C
+- 15' - 1/2 sachet/ pt gastro trou (sous-recette) 77.00 g 0.36 €
+légume vapeur: petit pois (sous-recette) 33.00 g 0.08 €
+Légume vapeur: Carotte rondelle (sous recette) 33.00 g 0.09 €
+Sauce: sauce poulette au thym(sous recette) 90.00 g 0.15 €
+Recette totale 338.11 g 1.39 €
+Commentaire
+S41: 4.33 - S49 / remplacement sauce moutarde allége par sauce moutarde au céleri
+2026 S45_QD02-Mijoté de porc et lentilles vertes aux champignons
+1 recette(s) (360 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Cuisson longue 5h45: Sauté de porc au thym
+(sous recette) 70.00 g 0.67 €
+Légume sauteuse: lentilles vertes et champignons
+au jus de viande (sous-recette) 210.00 g 0.50 €
+Lentilles à la crème à ajouter (sous recette) 50.00 g 0.15 €
+Légume sauteuse: carotte et champignon rôtie à
+la persillade (sous-recette) 30.00 g 0.12 €
+Recette totale 360.00 g 1.44 €
+Commentaire
+S03 : 4,3 . quelques commentaires sur le chou que certains ne digèrent pas et un peu trop salé S11: J'ai retiré la manip
+de choux pour faire simplement un deux manip car il y a déjà des légumes dans le mélange de haricots. Gain de 5cts
+S11: 4,3
+S19: 4,23
+S27: 4,15/ modification des haricots lingots à la tomate en rajoutant des "légumes été"
+S35: 4.17
+S43: passage sur légumes d'hiver avec les haricots lingots
+S07: 4,33 - S17: 4.37 - S25: 4.22 - S33: 4.23 /crépinette remplacée par sauté de porc - S41: 4.25 - S49:4.18
+Cuisson longue 5h45: Sauté de porc au thym (sous recette)
+280 g
+--- page 77 ---
+Ingrédients Quantité pour 280
+g
+Unité Coût
+Sauté de porc VPF Pyreneus excellence VPF ✅ 460.83 g 2.67 €
+thym flocon 🟢 0.46 g 0.01 €
+huile colza 6.91 g 0.01 €
+gros sel 1.15 g 0.00 €
+eau au poids 230.41 g 0.00 €
+poivre noir 🟢 0.23 g 0.00 €
+Recette totale 700.00 g 2.69 €
+Poids net 280.00 g
+Étapes de production
+10000g Cube de sauté de porc
+10g thym flocon
+150g huile olive/colza
+50g sel fin
+5g poivre noir
+5000g eau au poids
+NE PAS METTRE PLUS D'EAU QUE 5L par BAC
+BIEN MELANGER LA VIANDE AVEC L'EAU ET LES AROMATES
+CUISSON LONGUE PROGRAMME FOUR:
+Cuisson longue 5h45 + maintien 72H
+Commentaire
+S43(Cuisson longue 5h45: Sauté de
+porc au thym (sous recette): manque
+3,34Kg (-2,6%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -59% à -60%
+(-60,07% en réel)___S43(Cuisson
+longue 5h45: Sauté de porc au thym
+(sous recette): manque 5,72Kg (-8,5%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -59% à -62% (-62,49% en
+réel)___S38(Cuisson longue 5h45:
+Sauté de porc au thym (sous recette):
+manque 8,34Kg (-3,9%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -60% à -59%
+(-57,49% en réel)___S35(Cuisson
+longue 5h45: Sauté de porc au thym
+(sous recette): surplus 4,2Kg (+3,7%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-60,8% à -60% (-59,18% en
+réel)___S30(Cuisson longue 5h45:
+Sauté de porc au thym (sous recette):
+manque 64,19Kg (-58%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de 0% à -60%
+(-58,04% en rée
+Légume sauteuse: lentilles vertes et champignons au jus de viande
+(sous-recette)
+--- page 78 ---
+685 g
+Gluten Céleri
+Ingrédients Quantité pour 685
+g
+Unité Coût
+champignon émincé ✅ 110.54 g 0.38 €
+carotte cube 10X10 ✅ 157.91 g 0.31 €
+gingembre 9.47 g 0.04 €
+ail pelé ✅ 4.74 g 0.05 €
+oignon émincé ✅ 63.16 g 0.16 €
+persil hache sg 6.32 g 0.05 €
+Lentilles preparees 5/1 CE2 🟢 (commande à la
+palette)
+252.66 g 0.48 €
+fond blanc végétal 10.42 g 0.13 €
+huile colza 31.58 g 0.05 €
+sel fin 0.95 g 0.00 €
+eau au poids 157.91 g 0.00 €
+herbes de Provence 0.22 g 0.00 €
+Recette totale 805.88 g 1.64 €
+Poids net 685.00 g
+Étapes de production
+MATÉRIEL: Sauteuse PROGRAMME: Sauce T°C: 160°C TEMPS: 15 à 20
+minutes
+NE passe pas en doseuse CBE, passe petite doseuse sauce
+Commentaire
+S45(Légume sauteuse: lentilles vertes
+et champignons au jus de viande (sous-
+recette): manque 12,48Kg (-6,5%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -12% à -15% (-15,41% en
+réel)___S37(Lentilles vertes et
+champignons au jus de viande (sous-
+recette): manque 4,71Kg (-3,8%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -10% à -12% (-12,76% en
+réel)___S29(Lentilles vertes et
+champignons au jus de viande (sous-
+recette): surplus 22,94Kg (+14,3%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-15% à -10% (-0,75% en
+réel)___S13(___S49(Haricots lingot et
+champignons à la tomate (sous-recette):
+--- page 79 ---
+surplus 15,44Kg (+5,9%) par rapport
+aux quantités déboitées ... je vais
+réduire la perte: perte passée de -15% à
+-10% (-7,38% en réel)___S43(Haricots
+lingot et champignons à la tomate
+(sous-recette): manque 2,75Kg (-2%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: p
+Lentilles à la crème à ajouter (sous recette)
+50 g
+Lait
+Ingrédients Quantité pour 50 g Unité Coût
+Lentilles preparees 5/1 CE2 🟢 (commande à la
+palette)
+39.22 g 0.07 €
+crème fraiche épaisse 30% 19.61 g 0.07 €
+Recette totale 58.82 g 0.14 €
+Poids net 50.00 g
+Étapes de production
+MATÉRIEL: Sauteuse PROGRAMME: Sauce T°C: -- TEMPS: 15 minutes
+Faire revenir dans le beurre les oignon , l'ail, et le gingembre.
+Ajouter les épices,curcuma, cumin et garam masala.
+Ajouter la sauce tomate , creme de coco et l'eau.
+Ajouter les lentilles
+Ajouter les graine de courges.
+Vérifier l'assaisonnement.
+Débarasser en plaque GN.
+Commentaire
+S36(Lentilles à la crème à ajouter (sous
+recette): manque 2Kg (-11,8%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -10% à -15% (-20,62% en
+réel)___S39(Lentilles à mélanger (sous
+recette): surplus 0,33Kg (+5,2%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-16% à -10% (-11,64% en
+réel)___S38(Lentilles à mélanger (sous
+recette): surplus 0,36Kg (+4%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-16% à -15% (-12,64% en
+réel)___S31(Lentilles à mélanger (sous
+recette): manque 0,36Kg (-12,3%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -10% à -16% (-21,08% en
+réel)___S23(Lentilles à mélanger (sous
+recette): surplus 0,03Kg (+1,3%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-11% à -10% (-9,81% en
+--- page 80 ---
+réel)___S10Lentilles à mélanger (sous
+recette): manque 0,21Kg (-1,6%) par
+rapport aux quantités déboitées ..
+Légume sauteuse: carotte et champignon rôtie à la persillade (sous-
+recette)
+98 g
+Lait
+Ingrédients Quantité pour 98 g Unité Coût
+ail pelé ✅ 2.48 g 0.02 €
+beurre doux rouleau 2.48 g 0.02 €
+carotte cube 10X10 ✅ 61.93 g 0.12 €
+sel fin 0.62 g 0.00 €
+persil hache sg 1.24 g 0.01 €
+champignon émincé ✅ 61.93 g 0.21 €
+Recette totale 130.67 g 0.39 €
+Poids net 98.00 g
+Étapes de production
+MATERIEL: Four PROGRAMME: Vapeur T°C: 92°C TEMPS: 1h15
+Mettre 2,5 part poche + ail + sel 15 gr
+PROGRAMME 4 POUR LA MACHINE SOUS VIDE
+passer 5 minute a 210°C (jour de prod)
+Commentaire
+S37(Poêlée de carotte et champignon
+rôtie à la persillade (sous-recette):
+manque 2,33Kg (-15,7%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-10% à -25% (-24,16% en
+réel)___S29(Poêlée de carotte et
+champignon rôtie à la persillade (sous-
+recette): surplus 2,7Kg (+17,7%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-20% à -10% (-0,98% en réel)))
+2026 S45_QD03-Choutiflette de la brigade
+1 recette(s) (356 g)
+Lait Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel ( sous-recette) 1.00 recette(s) (1 g) 0.07 €
+--- page 81 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Appareil tartiflette Chou-fleur V2 (sous recette) 320.00 g 1.28 €
+Topping: Crumble de fromage à tartiflette surgelé
+(sous recette) 35.00 g 0.36 €
+Recette totale 356.00 g 1.70 €
+Commentaire
+S42: 4,45 - S06: 4.35 - S46: 4.44 - S02: 4.37
+2026 S45_QD04-Manchon de canard confit, haricots verts et écrasé
+de pommes de terre
+1 recette(s) (339 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Légume vapeur: Haricot vert (sous-recette) 90.00 g 0.17 €
+Sauce: Persillade avec persil surg (sous recette) 10.00 g 0.08 €
+Viande: manchon de canard au four (sous-
+recette) 1.00 recette(s) (79 g) 0.90 €
+Purée: Ecrasé de pommes de terre au romarin
+(sous recette) 70.00 g 0.18 €
+Sauce: Champignons, échalote et crème fraîche
+***TOUT MIXER*** (sous-recette) 90.00 g 0.33 €
+Recette totale 339.00 g 1.65 €
+Étapes de production
+POUR LE CONDITIONNEMENT :
+Verifier le poids des manchons de canard - 90 gr
+1 : Ecrasé de pdt…………………………………………..140 gr
+2 : Manchons de canard………………………………..1 piéce
+3 : Sauce champignon……………………………….Monter à 310 gr
+Déboitage process cuisine :
+Manchons de canard: dans leur poche et les flasher avant de les ouvrir et retirer la graisse: 20 min four vapeur
+et débarasser en bac gastro a trou
+Sauce champignon: Ne pas la mixer
+Ecrasée de pommes de terre : cuire les pommes de terre four vapeur 20 min ,puis les passer a la sauteur avec le
+beurre le lait la creme et le romarin ,mixer jusqu a l obtention d une purée salé poivrer et gouter
+--- page 82 ---
+Légume vapeur: Haricot vert (sous-recette)
+250 g
+Ingrédients Quantité pour 250
+g
+Unité Coût
+Haricot vert fin CE2 (peu fibreux) ✅ 312.50 g 0.46 €
+Recette totale 312.50 g 0.46 €
+Poids net 250.00 g
+Étapes de production
+MATERIEL : FOUR
+PROGRAMME : VAPEUR
+T°C: 99°C
+TEMPS: 20 minutes
+Avant cuisson : Ajouter l'assaisonnement (SEL)
+Commentaire
+S46(Légume vapeur: Haricot vert (sous-
+recette): manque 9,89Kg (-9,9%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -12% à -20% (-20,7% en
+réel)___S45(Légume vapeur: Haricot
+vert (sous-recette): manque 4,58Kg
+(-10,7%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -12% à -22% (-21,37%
+en réel)___S42(Légume vapeur: Haricot
+vert (sous-recette): manque 1,83Kg
+(-4,3%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -10% à -12% (-13,88%
+en réel)___S34(Légume vapeur: Haricot
+vert (sous-recette): surplus 3,1Kg
+(+10,3%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -17% à -10% (-7% en
+réel)___S30(Légume vapeur: Haricot
+vert (sous-recette): manque 7,5Kg
+(-13,6%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de 0% à -17% (-13,64%
+en réel)___S30(___S29(Légume
+vapeur: Haricot vert (sous-recette):
+manque 3,11Kg (-15,6
+Sauce: Persillade avec persil surg (sous recette)
+10 g
+Ingrédients Quantité pour 10 g Unité Coût
+ail pelé ✅ 2.81 g 0.03 €
+--- page 83 ---
+Ingrédients Quantité pour 10 g Unité Coût
+Huile d'olive extra vierge 4.21 g 0.02 €
+persil hache sg 3.51 g 0.03 €
+Recette totale 10.53 g 0.08 €
+Poids net 10.00 g
+Étapes de production
+Mélanger tout les ingrèdients et mixer le tout ajouter du sel et du pooiuvre
+Viande: manchon de canard au four (sous-recette)
+3 recette(s) (79 g)
+Ingrédients Quantité pour 3
+recette(s) Unité Coût
+Manchon de canard confit 3.00 pièce (100 g) 2.69 €
+Recette totale 300.00 g 2.69 €
+Poids net 237.00 g
+Commentaire
+S45(Viande: manchon de canard au four (sous-recette): surplus 1,05Kg (+2,3%) par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de -25% à -21% (-20,43% en réel)___S35: TOP, on ne change rien. Perte melba -25%,
+perte réelle: -22,82%.)
+Purée: Ecrasé de pommes de terre au romarin (sous recette)
+250 g
+Lait
+Ingrédients Quantité pour 250
+g
+Unité Coût
+beurre doux rouleau 12.04 g 0.09 €
+Lait demi-écrémé 🔵 48.15 g 0.04 €
+romarin frais 0.24 g 0.01 €
+pomme de terre entière pelée ✅ 240.77 g 0.51 €
+Recette totale 301.20 g 0.64 €
+Poids net 250.00 g
+Commentaire
+--- page 84 ---
+S45(Purée: Ecrasé de pommes de terre au romarin (sous recette) : surplus 0,2Kg (+0,4%) par rapport aux quantités
+déboitées ... je vais réduire la perte: perte passée de -18% à -17% (-15,86% en réel)___S35: perte passée de -15% à
+-18% (-16,82% en réel))
+Sauce: Champignons, échalote et crème fraîche ***TOUT MIXER***
+(sous-recette)
+230 g
+Lait Gluten Céleri
+Ingrédients Quantité pour 230
+g
+Unité Coût
+champignon émincé ✅ 124.46 g 0.43 €
+ail pelé ✅ 12.45 g 0.12 €
+Échalote pelée ✅ 24.89 g 0.12 €
+crème fraiche épaisse 30% 12.45 g 0.04 €
+fromage blanc 3,3 %mg 12.45 g 0.03 €
+vin blanc de France 11° 🟢 12.45 g 0.02 €
+fond blanc végétal 3.73 g 0.04 €
+huile olive colza 2.49 g 0.01 €
+persil hache sg 4.98 g 0.04 €
+amidon de maïs maizena 1.24 g 0.00 €
+eau au poids 49.78 g 0.00 €
+Recette totale 261.36 g 0.85 €
+Poids net 230.00 g
+Étapes de production
+faire revenir les oignons et champignon
+ajouter le fond puis cremé
+Commentaire
+S45(Sauce: Champignons, échalote et
+crème fraîche TOUT MIXER (sous-
+recette) : surplus 6,47Kg (+15,5%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-26% à -12% (-9,47% en
+réel)___S16(Sauce Champignons,
+échalote et crème fraîche (sous-recette)
+: manque 0,31Kg (-0,6%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-29% à -26% (-24,18% en
+réel)___S08(Sauce Champignons,
+échalote et crème fraîche (sous-recette)
+--- page 85 ---
+: manque 13,06Kg (-20,2%) par rapport
+aux quantités déboitées ... je vais
+augmenter la perte: perte passée de
+-10% à -29% (-28,14% en réel)___S17:
+perte passée de 27% à 21% (15,85% en
+réel)___S35: ajout de 1g de fond blanc
+végétal et 3g de crème fraiche
+remplacée par 3g de fB pour baisser
+AGS___S35: RESULTAT IMOSSIBLE,
+malgré tout, je vais réduire la perte:
+perte passée de -21% à -10% (GAIN:
+18,88% en réel !!!!!!!))))
+2026 S45_QD05-Filet de colin au four et sa tombée de poireaux au
+vin blanc
+1 recette(s) (340 g)
+Lait Sésame Moutarde Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Poisson: Dos de colin alaska (100-120g) cuit Four
+Sec 120°C / 75°C à coeur (sous recette) 1.00 recette(s) (77 g) 0.57 €
+Légume sauteuse: tombée de poireaux aux
+champignons crème vin blanc+ (sous recette) 238.00 g 0.69 €
+Crème à ajouter à la sauce (sous recette) 20.00 g 0.10 €
+Topping: sésame blanc à torréfier (sous-recette) 5.00 g 0.03 €
+Recette totale 340.00 g 1.40 €
+Commentaire
+S10: 4,41 - S42: 4,19 - S50: 4,31 - S06: 4.27 /quinoa remplacé par riz noir de camargue - S14: 4.12 - S22: 4.21 - S30:
+4.18 /division par 2 crème, FB et augmentation maïzena - S38: / suppressiond es 55g de riz
+S46: 4.33 - S02: 4.12
+Crème à ajouter à la sauce (sous recette)
+20 g
+Lait
+Ingrédients Quantité pour 20 g Unité Coût
+crème fraiche épaisse 30% 27.03 g 0.10 €
+Recette totale 27.03 g 0.10 €
+Poids net 20.00 g
+Étapes de production Commentaire
+--- page 86 ---
+MATÉRIEL: Sauteuse PROGRAMME: Sauce T°C: -- TEMPS: 15 minutes
+Faire revenir dans le beurre les oignon , l'ail, et le gingembre.
+Ajouter les épices,curcuma, cumin et garam masala.
+Ajouter la sauce tomate , creme de coco et l'eau.
+Ajouter les lentilles
+Ajouter les graine de courges.
+Vérifier l'assaisonnement.
+Débarasser en plaque GN.
+S37(Crème à ajouter à la sauce (sous
+recette): manque 0,88Kg (-14,1%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -20% à -26% (-31,29% en
+réel)___S39(Lentilles à mélanger (sous
+recette): surplus 0,33Kg (+5,2%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-16% à -10% (-11,64% en
+réel)___S38(Lentilles à mélanger (sous
+recette): surplus 0,36Kg (+4%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-16% à -15% (-12,64% en
+réel)___S31(Lentilles à mélanger (sous
+recette): manque 0,36Kg (-12,3%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -10% à -16% (-21,08% en
+réel)___S23(Lentilles à mélanger (sous
+recette): surplus 0,03Kg (+1,3%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-11% à -10% (-9,81% en
+réel)___S10Lentilles à mélanger (sous
+recette): manque 0,21Kg (-1,6%) par
+rapport aux quantités déboitées ...
+Topping: sésame blanc à torréfier (sous-recette)
+5 g
+Sésame
+Ingrédients Quantité pour 5 g Unité Coût
+graines de sésame blanc 5.56 g 0.03 €
+Recette totale 5.56 g 0.03 €
+Poids net 5.00 g
+Commentaire
+S44(Topping: sésame blanc à torréfier (sous-recette): DINGUERIE/CREATION DE MATIEREsurplus 0,48Kg (+25,8%) par
+rapport aux quantités déboitées. RESULTAT IMOSSIBLE, malgré tout, je vais réduire la perte: perte passée de -16% à
+-10% (GAIN: 5,68% en réel !!!!!!!)___S41(Topping: sésame blanc déco (sous-recette): manque 0,62Kg (-29,5%) par
+rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -2% à -16% (-30,92% en
+réel)___S28(Topping: sésame blanc déco (sous-recette): manque 0,03Kg (-3,2%) par rapport aux quantités déboitées ...
+je vais augmenter la perte: perte passée de 0% à -2% (-3,24% en réel)___S11())))
+--- page 87 ---
+2026 S45_QD06-Filet de colin, crème citron-aneth, purée de carottes
+et brocolis
+1 recette(s) (340.3 g)
+Lait Sulfites Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Poisson: Filet de colin (plein) alaska (110-130g)
+cuit Four Sec 120°C / 75°C à coeur (sous recette) 1.00 recette(s) (79.3 g) 0.78 €
+Légume vapeur: Brocolis ROK (sous-recette) 85.00 g 0.27 €
+Purée: carotte (sous recette) 86.00 g 0.26 €
+Sauce: creme miel citron aneth ***A MIXER***
+(sous recette) 90.00 g 0.45 €
+Recette totale 340.30 g 1.77 €
+Commentaire
+S10 et S35: 4,30 S18: 4,23 artichauts trop durs ou qqfois filandreux ou poilu, poisson sec S26: 4,24 - S34: 4,36 - S42:
+4,24 / attention à bien dfaire cuire les artichauts
+2024: S50: 4,24
+2025: S06: 4,03 - S14: 4,46 / artichauts remplacés par brocolis - S22: 4.42 - S30: 4.33 - S38: 4.37 - S46: 4.47
+Sauce: creme miel citron aneth ***A MIXER*** (sous recette)
+180 g
+Lait Sulfites
+Ingrédients Quantité pour 180
+g
+Unité Coût
+oignon émincé ✅ 67.40 g 0.17 €
+crème fraiche épaisse 30% 134.81 g 0.48 €
+Pate de citron confit en poche 🟢 (min commande
+51kg)
+13.48 g 0.09 €
+aneth sg 5.39 g 0.04 €
+jus de citron jaune bio 11.46 g 0.04 €
+miel liquide 10.11 g 0.05 €
+huile colza 13.48 g 0.02 €
+sel fin 1.01 g 0.00 €
+Recette totale 257.14 g 0.91 €
+Poids net 180.00 g
+--- page 88 ---
+Étapes de production
+MATERIEL: Rondeau/Sauteuse PROGRAMME: -- / Sauce T°C: -- TEMPS:
+5 minutes
+Monter la crème à frémissement
+Ajouter le jus de citron et l'aneth
+Ajouter le miel liquide
+Ajouter le citron confit (épépiné)
+Mixer la préparation
+Débarasser en plaque GN
+Commentaire
+S45(Sauce: creme miel citron aneth A
+MIXER (sous recette): manque 8,04Kg
+(-20,5%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -10% à -30% (-28,43%
+en réel))
+2026 S45_QD07-Linguine à la sauce bolognaise aux légumes racines
+1 recette(s) (360 g)
+Lait Céleri Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: Linguines (sous-recette) 168.00 g 0.20 €
+Assaisonnement pasta grana basilic (sous-
+recette) 12.00 g 0.11 €
+Sauce: légumes racines comme une bolognaise
+(sous recette) 180.00 g 1.03 €
+Recette totale 360.00 g 1.34 €
+Commentaire
+S49: 4.41
+Féculent: Linguines (sous-recette)
+448 g
+Ingrédients Quantité pour 448
+g
+Unité Coût
+linguine 253.77 g 0.49 €
+huile olive colza 17.75 g 0.05 €
+Recette totale 271.52 g 0.54 €
+Poids net 448.00 g
+Étapes de production
+MATERIEL: Sauteuse / pâtes PROGRAMME: cuisson des pâtes T°C:
+Automatique TEMPS: 10 minutes
+Refroidir les pâtes et les assaisonner avec le pesto .
+Commentaire
+S46(Féculent: Linguines (sous-recette):
+manque 0,89Kg (-5,6%) par rapport aux
+quantités déboitées ... je vais réduire le
+gain: gain passé de 80% à 65%
+--- page 89 ---
+(70,01% en réel)___S45(Féculent:
+Linguines (sous-recette): manque
+4,76Kg (-8,9%) par rapport aux
+quantités déboitées ... je vais réduire le
+gain: gain passé de 105% à 80%
+(86,74% en réel)___S43(Féculent:
+Linguines (sous-recette): manque
+6,18Kg (-16,6%) par rapport aux
+quantités déboitées ... je vais réduire le
+gain: gain passé de 155% à 105%
+(112,74% en réel)___S40(Féculent:
+Linguines (sous-recette): surplus 3,3Kg
+(+18,6%) par rapport aux quantités
+déboitées ... je vais augmenter le gain:
+gain passé de 140% à 155% (160,96%
+en réel)___S37(Féculent: Linguines
+(sous-recette): surplus 4,44Kg (+15,8%)
+par rapport aux quantités déboitées ... je
+vais augmenter le gain: gain passé de
+130% à 140% (146,88% en
+réel)___S35(Féculent: Linguines (sous-
+recette): surplus 15,35Kg (+49,6%) par
+rapport aux quantités déboitées ... je
+vais augmenter le gain
+2026 S45_QD08-Mijoté de porc, riz long de Camargue, jus au thym et
+lentilles vertes aux champignons
+1 recette(s) (350 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Cuisson longue 5h45: Sauté de porc au thym
+(sous recette) 70.00 g 0.67 €
+Légume sauteuse: lentilles vertes et champignons
+au jus de viande (sous-recette) 139.00 g 0.33 €
+Légume sauteuse: carotte et champignon rôtie à
+la persillade (sous-recette) 20.00 g 0.08 €
+Féculent: riz long étuvé de Camargue (sous-
+recette) 121.00 g 0.14 €
+Recette totale 350.00 g 1.23 €
+Commentaire
+S03 : 4,3 . quelques commentaires sur le chou que certains ne digèrent pas et un peu trop salé S11: J'ai retiré la manip
+de choux pour faire simplement un deux manip car il y a déjà des légumes dans le mélange de haricots. Gain de 5cts
+S11: 4,3
+S19: 4,23
+--- page 90 ---
+S27: 4,15/ modification des haricots lingots à la tomate en rajoutant des "légumes été"
+S35: 4.17
+S43: passage sur légumes d'hiver avec les haricots lingots
+S07: 4,33 - S17: 4.37 - S25: 4.22 - S33: 4.23 /crépinette remplacée par sauté de porc - S41: 4.25 - S49:4.18
+2026 S45_QD09-Filet de colin, crème citron-aneth, semoule et
+brocolis
+1 recette(s) (340.3 g)
+Lait Gluten Sulfites Poissons
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Poisson: Filet de colin (plein) alaska (110-130g)
+cuit Four Sec 120°C / 75°C à coeur (sous recette) 1.00 recette(s) (79.3 g) 0.78 €
+Légume vapeur: Brocolis ROK (sous-recette) 85.00 g 0.27 €
+Féculent: Semoule (sous-recette) 86.00 g 0.07 €
+Sauce: creme miel citron aneth ***A MIXER***
+(sous recette) 90.00 g 0.45 €
+Recette totale 340.30 g 1.58 €
+Commentaire
+S10 et S35: 4,30 S18: 4,23 artichauts trop durs ou qqfois filandreux ou poilu, poisson sec S26: 4,24 - S34: 4,36 - S42:
+4,24 / attention à bien dfaire cuire les artichauts
+2024: S50: 4,24
+2025: S06: 4,03 - S14: 4,46 / artichauts remplacés par brocolis - S22: 4.42 - S30: 4.33 - S38: 4.37 - S46: 4.47
+2026 S45_VG01-Farfalle semi-complètes à la crème de petits pois
+aux herbes
+1 recette(s) (310 g)
+Lait Gluten Céleri Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: farfalle semi-complète (sous recette) 120.00 g 0.17 €
+Garniture: pâtes huile d'olive basilic et sel (sous
+recette) 5.00 g 0.04 €
+Sauce: Crème de petit pois au fromage et aux
+herbes ***A MIXER*** (sous recette) 185.00 g 0.64 €
+Recette totale 310.00 g 0.85 €
+--- page 91 ---
+Féculent: farfalle semi-complète (sous recette)
+120 g
+Gluten
+Ingrédients Quantité pour 120
+g
+Unité Coût
+papillon semi-complete bio 🟢 53.56 g 0.17 €
+sel fin 0.25 g 0.00 €
+Recette totale 53.81 g 0.17 €
+Poids net 120.00 g
+Commentaire
+S45(Féculent: farfalle semi-complète (sous recette): manque 7,15Kg (-28,1%) par rapport aux quantités déboitées ... je
+vais réduire le gain: gain passé de 160% à 123% (86,99% en réel)___S44(Féculent: farfalle semi-complète (sous
+recette): surplus 11,91Kg (+74,1%) par rapport aux quantités déboitées ... je vais augmenter le gain: gain passé de 115%
+à 160% (164,92% en réel)___S28(Farfalle semi-complète (sous recette): surplus 1,63Kg (+40%) par rapport aux
+quantités déboitées ... je vais augmenter le gain: gain passé de 100% à 115% (124,94% en réel)___S21(Farfalle semi-
+complète (sous recette): manque 1,79Kg (-25,2%) par rapport aux quantités déboitées ... je vais réduire le gain: gain
+passé de 120% à 100% (64,6% en réel)___S18(Farfalle semi-complète (sous recette): surplus 2,68Kg (+11,9%) par
+rapport aux quantités déboitées ... je vais augmenter le gain: gain passé de 10% à 120% (21% en réel)___S18(Farfalle
+semi-complète (sous recette): manque 11,09Kg (-100%) par rapport aux quantités d
+Garniture: pâtes huile d'olive basilic et sel (sous recette)
+5 g
+Ingrédients Quantité pour 5 g Unité Coût
+basilic sg 2.62 g 0.02 €
+Huile d'olive extra vierge 2.62 g 0.01 €
+sel fin 0.03 g 0.00 €
+Recette totale 5.26 g 0.04 €
+Poids net 5.00 g
+Sauce: Crème de petit pois au fromage et aux herbes ***A MIXER***
+(sous recette)
+185 g
+Lait Gluten Céleri Oeufs
+--- page 92 ---
+Ingrédients Quantité pour 185
+g
+Unité Coût
+oignon émincé ✅ 7.43 g 0.02 €
+ail pelé ✅ 5.57 g 0.05 €
+fromage blanc 3,3 %mg 37.15 g 0.08 €
+crème fraiche épaisse 30% 18.57 g 0.07 €
+Lait demi-écrémé 🔵 37.15 g 0.03 €
+Grana Padano râpé AOP 28,4% MG 14.86 g 0.19 €
+persil hache sg 1.86 g 0.02 €
+basilic sg 1.86 g 0.02 €
+ciboulette sg 1.86 g 0.01 €
+petit pois doux FR CE2 ✅ 55.72 g 0.10 €
+fond blanc végétal 4.64 g 0.06 €
+huile colza 7.43 g 0.01 €
+eau au poids 37.15 g 0.00 €
+Recette totale 231.25 g 0.64 €
+Poids net 185.00 g
+Commentaire
+S45(Sauce: Crème de petit pois au fromage et aux herbes A MIXER (sous recette): manque 8,34Kg (-6,6%) par rapport
+aux quantités déboitées ... je vais augmenter la perte: perte passée de -19% à -20% (-20,29% en réel)___S11(Crème de
+petit pois au fromage et aux herbes (sous recette): surplus 2,23Kg (+6,7%) par rapport aux quantités déboitées ... je vais
+réduire la perte: perte passée de -24% à -19% (-18,91% en réel)___S03(Crème de petit pois au fromage et aux herbes
+(sous recette): surplus 0,97Kg (+2,8%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de
+-31% à -24% (-20,33% en réel)___S47(Crème de petit pois au fromage aux herbes (sous recette): manque 4,02Kg
+(-16,5%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte passée de -17,5% à -31% (-31,08% en
+réel)___S44(Crème de petit pois au fromage aux herbes (sous recette): surplus 2,92Kg (+2,7%) par rapport aux quantités
+déboitées ... je vais réduire la perte: perte passée de
+2026 S45_VG02-Risotto savoyard aux côtes de blettes
+1 recette(s) (310 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+ⓥ Préparation riz pour risotto (sous recette) 120.00 g 0.16 €
+Base risotto raclette 2026 (sous recette) 90.00 g 0.38 €
+--- page 93 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Légume sauteuse: Tombée de blettes,
+champignons et carottes (sous recette) 100.00 g 0.46 €
+Recette totale 310.00 g 1.00 €
+Commentaire
+S13: 4,5 - S21: 4,47 - S29: 4,36 - S37: 4,31 - S45: 4,34 - S01: 4.38 - S09: 4.17 - S17: 4.42 - S25: 4.35 - S33: 4.37 - S41:
+4.41 - S49: 4.14 / Riz +20G, sauce -20g (pour gain prix)
+S05: nouvelle recette avec persillade au amandes et champignons en topping
+ⓥ Préparation riz pour risotto (sous recette)
+120 g
+Céleri
+Ingrédients Quantité pour 120
+g
+Unité Coût
+riz spécial risotto ⬜ ⬜ IGP camargue ✅ 47.30 g 0.15 €
+bouillon de légumes 1.35 g 0.01 €
+eau au poids 101.35 g 0.00 €
+Recette totale 150.00 g 0.16 €
+Poids net 120.00 g
+Commentaire
+S45(ⓥ Préparation riz pour risotto (sous recette): manque 8,6Kg (-10,9%) par rapport aux quantités déboitées ... je vais
+augmenter la perte: perte passée de -10% à -20% (-19,81% en réel)___S43(ⓥ Préparation riz pour risotto (sous recette):
+surplus 6,2Kg (+9,3%) par rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -13% à -10%
+(-4,94% en réel)___S39(ⓥ Préparation riz pour risotto (sous recette): manque 1,85Kg (-2%) par rapport aux quantités
+déboitées ... je vais augmenter la perte: perte passée de -10% à -13% (-11,84% en réel)___S31(ⓥ Préparation riz pour
+risotto (sous recette): manque 1,49Kg (-3,3%) par rapport aux quantités déboitées ... je vais augmenter la perte: perte
+passée de -6% à -10% (-9,15% en réel)___S27(ⓥ Préparation riz pour risotto (sous recette): surplus 2,62Kg (+3,9%) par
+rapport aux quantités déboitées ... je vais réduire la perte: perte passée de -8% à -6% (-3,01% en réel)___S27(ⓥ
+Préparation riz pour risotto (sous recette): surplus 5,23K
+Base risotto raclette 2026 (sous recette)
+90 g
+Lait Gluten Céleri
+Ingrédients Quantité pour 90 g Unité Coût
+carotte cube 10X10 ✅ 24.39 g 0.05 €
+--- page 94 ---
+Ingrédients Quantité pour 90 g Unité Coût
+oignon émincé ✅ 40.65 g 0.10 €
+fromage blanc 3,3 %mg 16.26 g 0.03 €
+crème fraiche épaisse 30% 16.26 g 0.06 €
+Raclette small pépites IQF 5*5 🧊 12.19 g 0.08 €
+vin blanc de France 11° 🟢 8.13 g 0.01 €
+fond blanc végétal 2.44 g 0.03 €
+huile colza 8.13 g 0.01 €
+sel fin 0.12 g 0.00 €
+Recette totale 128.57 g 0.38 €
+Poids net 90.00 g
+Étapes de production
+MATERIEL: Sauteuse PROGRAMME: risotto T°C: Automatique TEMPS:
+Automatique
+Dans une sauteuse faire sueur les oignons avec le beurre ajouter
+le riz arborio en remuant régulièrement
+Ajouter le vin blanc et le bouillon de légumes remuer
+régulierement.
+Passer un coup les carottes et champignons au four vapeur.
+Ajouter le mais.
+Ajouter le parmesan en poudre et remuer énergiquement sortir et
+reserve dans des GN.
+Commentaire
+S45(Base risotto raclette 2026 (sous
+recette): manque 6,82Kg (-10,3%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -20% à -30% (-28,25% en
+réel)___S45(Base risotto raclette 2026
+(sous recette): manque 0,84Kg (-1,2%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -19% à -20% (-18,05% en
+réel)___S21(Base risotto nature 2026
+(sous recette): surplus 12,43Kg
+(+14,7%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -30% à -19% (-18,79%
+en réel)___S13(Base risotto nature
+2026 (sous recette): surplus 6,5Kg
+(+6,2%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -32% à -30% (-27,8%
+en réel)___S05(Base risotto nature
+2026 (sous recette): manque 11,33Kg
+(-11,8%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -22% à -32% (-31,22%
+en réel)___S49(Base risotto
+champignons 2024 (sous recette):
+manque 9,75Kg (-4,4%) par ra
+--- page 95 ---
+Légume sauteuse: Tombée de blettes, champignons et carottes
+(sous recette)
+100 g
+Ingrédients Quantité pour 100
+g
+Unité Coût
+champignon émincé ✅ 40.16 g 0.14 €
+cote de blette émincé 60.23 g 0.23 €
+carotte cube 10X10 ✅ 40.16 g 0.08 €
+ail pelé ✅ 1.00 g 0.01 €
+huile colza 1.00 g 0.00 €
+sel fin 0.30 g 0.00 €
+Recette totale 142.86 g 0.46 €
+Poids net 100.00 g
+Étapes de production
+MATERIEL: Sauteuse
+PROGRAMME: Etoile V? garniture
+T°C: —
+TEMPS: 10 à 15 minute
+Dans un filet d’huile d’olive faire revenir l’ail .
+Ajouter les carottes et finir par les courgettes
+Vérrifier l'assaisonnement .
+Débarasser en bac GN
+Commentaire
+S45(Légume sauteuse: Tombée de
+blettes, champignons et carottes (sous
+recette): manque 10,8Kg (-14%) par
+rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -17% à -30% (-28,62% en
+réel)___S19: perte passée de 30% à
+17% (12,32% en réel))
+2026 S45_VG03-Curry de courge butternut et lentilles vertes
+1 recette(s) (320 g)
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Curry de lentilles épicé (sous recette) 220.00 g 0.54 €
+Légume rôti: butternut (sous recette) 100.00 g 0.49 €
+Recette totale 320.00 g 1.03 €
+Commentaire
+S25: 4.25 - S33: 4.28 - S41: 4.27
+--- page 96 ---
+Curry de lentilles épicé (sous recette)
+220 g
+Ingrédients Quantité pour 220
+g
+Unité Coût
+oignon émincé ✅ 30.36 g 0.08 €
+ail pelé ✅ 2.02 g 0.02 €
+Base tomates concassees fines LM (pulpe tomate
+fine) 50.60 g 0.06 €
+Lentilles preparees 5/1 CE2 🟢 (commande à la
+palette)
+70.84 g 0.13 €
+pois chiche cuit BIO local sous-vide 🟢 30.36 g 0.08 €
+Lait de coco thai kitchen poche 35.42 g 0.13 €
+épices à colombo 1.62 g 0.01 €
+piment fort 0.04 g 0.00 €
+Menthe sg 1.52 g 0.01 €
+huile colza 1.01 g 0.00 €
+sel fin 0.71 g 0.00 €
+Recette totale 224.49 g 0.54 €
+Poids net 220.00 g
+Étapes de production
+MATERIEL: Sauteuse
+PROGRAMME: Manuel
+T°C: 150C°
+TEMPS: 20 minutes
+Faire suer les oignons et l'ail
+Retirer les oignons sués
+Colorer la viande Hachée
+Remettre les oignons sués
+Ajouter les épices
+Ajouter la tomate concassée
+Ajouter la crème de coco
+Monter à frémissement
+Ajouter les chou fleur SV
+Rectifier l'assaisonement
+Débarasser en plaque GN
+Commentaire
+S45(Curry de lentilles épicé (sous
+recette): DINGUERIE/CREATION DE
+MATIEREsurplus 22Kg (+17,2%) par
+rapport aux quantités déboitées.
+RESULTAT IMOSSIBLE, malgré tout, je
+vais réduire la perte: perte passée de
+-10% à -2% (GAIN: 5,49% en réel
+!!!!!!!)___S29(Curry de lentilles épicé
+(sous recette): surplus 11,71Kg (+7,7%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-13% à -10% (-3,29% en
+réel)___S21(Curry de lentilles épicé
+(sous recette): surplus 11,33Kg (+5%)
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-17% à -13% (-12,88% en
+réel)___S13(Curry de lentilles épicé
+(sous recette): surplus 9,31Kg (+3,6%)
+--- page 97 ---
+par rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-18% à -17% (-13,69% en
+réel)___S05(Curry de lentilles épicé
+(sous recette): manque 16,51Kg (-8,3%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -9% à -18% (-16,55% en
+réel)___S41(Curry de lentil
+Légume rôti: butternut (sous recette)
+100 g
+Ingrédients Quantité pour 100
+g
+Unité Coût
+courge butternut cube 20X20 (sans peau) 🟢 141.81 g 0.48 €
+huile colza 7.09 g 0.01 €
+sel fin 0.35 g 0.00 €
+Recette totale 149.25 g 0.49 €
+Poids net 100.00 g
+Étapes de production
+MATERIEL: Four PROGRAMME: Legumes rotis T°C: — TEMPS: —
+Commentaire
+S46(Légume rôti: butternut (sous
+recette): surplus 1,62Kg (+2,6%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-35% à -33% (-31,93% en
+réel)___S45(Légume rôti: butternut
+(sous recette): surplus 15,39Kg
+(+19,5%) par rapport aux quantités
+déboitées ... je vais réduire la perte:
+perte passée de -35% à -25% (-22,32%
+en réel)___S41(Légume rôti: butternut
+(sous recette): manque 5,12Kg (-17,6%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -35% à -45% (-46,43% en
+réel)___S40(Légume rôti: butternut
+(sous recette): manque 2,17Kg (-16,4%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -30% à -35% (-41,47% en
+réel)___S23(Légume rôtie: butternut
+(sous recette): manque 0,19Kg (-0,7%)
+par rapport aux quantités déboitées ... je
+vais augmenter la perte: perte passée
+de -29% à -30% (-29,52% en
+--- page 98 ---
+réel)___S22(Légume rôtie: butternut
+(sous recette): manque 10,22Kg
+(-22,3%) par rapport aux quanti
+2026 S45_VG04-Falafels à la crème de gingembre et légumes vapeur
+1 recette(s) (310.24 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Végétarien: Falafels (sous recette / mettre à la
+pièce) 4.00 recette(s) (16.05 g) 0.73 €
+Légume vapeur: Brocolis SG/carottes (sous
+recette) 156.00 g 0.48 €
+Sauce: Crème fond blanc gingembre ***A
+MIXER*** (sous recette) 90.00 g 0.23 €
+Recette totale 310.24 g 1.43 €
+Végétarien: Falafels (sous recette / mettre à la pièce)
+4 recette(s) (16.05 g)
+Ingrédients Quantité pour 4
+recette(s) Unité Coût
+falafel de pois chiches Bio 🟢 4.00 pièce (22 g) 0.73 €
+Recette totale 88.00 g 0.73 €
+Poids net 64.24 g
+Étapes de production
+MATERIEL: Four PROGRAMME: FRITE T°C: — TEMPS: —
+Commentaire
+S45(Végétarien: Falafels (sous recette /
+mettre à la pièce): manque 1,43Kg
+(-4,6%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -27,27% à -27%
+(-30,01% en réel)___S46(Falafels (sous
+recette / mettre à la pièce): manque 1Kg
+(-2%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -18% à -20% (-19,61%
+en réel)___S35(Falafels (sous recette /
+mettre à la pièce): manque 7,5Kg
+(-17,4%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -10% à -18% (-25,7%
+en réel)___S33(Falafels (sous recette /
+mettre à la pièce): manque 0,16Kg
+--- page 99 ---
+(-1,3%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -9% à -10% (-10,14%
+en réel)___S15(Falafels (sous recette /
+mettre à la pièce): manque 13,5Kg
+(-100%) par rapport aux quantités
+déboitées ... je vais augmenter la perte:
+perte passée de -9% à -55% (-100% en
+réel)___S21 : perte passée de 8% à
+10% (9,49% en réel))))))
+2026 S45_VG05-Linguine et sauce tomate aux légumes racines
+1 recette(s) (310 g)
+Lait Céleri Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: Linguines (sous-recette) 140.00 g 0.17 €
+Assaisonnement pasta grana basilic (sous-
+recette) 10.00 g 0.09 €
+sauce: légumes racines comme une bolognaise
+sans viande (sous recette) 160.00 g 0.40 €
+Recette totale 310.00 g 0.66 €
+Commentaire
+S49: 4.41
+sauce: légumes racines comme une bolognaise sans viande (sous
+recette)
+160 g
+Céleri
+Ingrédients Quantité pour 160
+g
+Unité Coût
+céleri rave pelé cube 10X10 ✅ 25.73 g 0.09 €
+carotte rondelle ✅ 38.60 g 0.08 €
+panais cube 20 x 20 🟢 25.73 g 0.09 €
+oignon émincé ✅ 19.30 g 0.05 €
+ail pelé ✅ 3.22 g 0.03 €
+Base tomates concassees fines LM (pulpe tomate
+fine) 45.03 g 0.06 €
+--- page 100 ---
+Ingrédients Quantité pour 160
+g
+Unité Coût
+herbes de Provence 0.19 g 0.00 €
+huile colza 7.72 g 0.01 €
+sel fin 0.64 g 0.00 €
+poivre noir 🟢 0.02 g 0.00 €
+eau au poids 11.58 g 0.00 €
+Recette totale 177.78 g 0.40 €
+Poids net 160.00 g
+Étapes de production
+MATERIEL: four PROGRAMME: Sec T°C: 180° TEMPS: 15 minutes
+Melanger les courgette avec gimgembre,huile d'olive ,coriandre et
+sel .
+Plaque les courgette en plaque GN
+Cuire au four 15 minutes a 180°C
+Commentaire
+S45(sauce: légumes racines comme
+une bolognaise sans viande (sous
+recette): surplus 4,04Kg (+17%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-20% à -10% (-3,87% en
+réel)___S18(légumes racines comme
+une bolognaise sans viande (sous
+recette): DINGUERIE/CREATION DE
+MATIEREsurplus 37,61Kg (+33%) par
+rapport aux quantités déboitées.
+RESULTAT IMOSSIBLE, malgré tout, je
+vais réduire la perte: perte passée de
+-21% à -20% (GAIN: 5,09% en réel
+!!!!!!!)___S10(légumes racines comme
+une bolognaise sans viande (sous
+recette): surplus 10,67Kg (+7,8%) par
+rapport aux quantités déboitées ... je
+vais réduire la perte: perte passée de
+-26% à -21% (-18,63% en
+réel)___S05(légumes racines comme
+une bolognaise (sous recette): manque
+6,65Kg (-5,3%) par rapport aux
+quantités déboitées ... je vais augmenter
+la perte: perte passée de -20% à 26%
+(-24,27% en réel)___S25(Duo de
+poivrons et courgettes comme une
+bolognaise (sous recette): manque
+16,25Kg (-12,2%) par rapport au
+2026 S45_VG06-Gratin de boulgour et courge butternut au morbier
+1 recette(s) (321 g)
+Lait Gluten Céleri
+--- page 101 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel ( sous-recette) 1.00 recette(s) (1 g) 0.07 €
+Légume sauteuse: butternut, tomate, oignon,
+origan (sous-recette) 220.00 g 0.84 €
+Féculent: boulgour ROK (sous recette) 80.00 g 0.05 €
+Topping: Morbier pépite IQF (sous-recette) 20.00 g 0.17 €
+Recette totale 321.00 g 1.12 €
+Commentaire
+S26: 4,28. pas assez de viande, un peu fade
+S34: 4,28 / viande +50% dans la préparation et ajout de basilic
+S42: 4,31 / remplacement de l'aubergine par de la courge butternut et du basilic par du cumin
+S50: 4,22 - S06: 4.37 - S14: 4.44
+2026 S45_VI01-Haut de cuisse de poulet rôti, jus au thym, légumes
+vapeur et semoule de chou-fleur
+1 recette(s) (315.1 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Haut de cuisse de poulet rôti nature
+(sous-recette) 1.00 recette(s) (105.1 g) 0.70 €
+Légume rôti: Semoule chou-fleur - four sec 220°C
+- 15' - 1/2 sachet/ pt gastro trou (sous-recette) 70.00 g 0.33 €
+légume vapeur: petit pois (sous-recette) 30.00 g 0.07 €
+Légume vapeur: Carotte rondelle (sous recette) 30.00 g 0.08 €
+Sauce: sauce poulette au thym(sous recette) 80.00 g 0.14 €
+Recette totale 315.11 g 1.33 €
+Commentaire
+S41: 4.33 - S49 / remplacement sauce moutarde allége par sauce moutarde au céleri
+2026 S45_VI02-Mijoté de porc au thym, lentilles vertes aux
+champignons
+1 recette(s) (310 g)
+Lait Gluten Céleri
+--- page 102 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Cuisson longue 5h45: Sauté de porc au thym
+(sous recette) 70.00 g 0.67 €
+Légume sauteuse: lentilles vertes et champignons
+au jus de viande (sous-recette) 210.00 g 0.50 €
+Légume sauteuse: carotte et champignon rôtie à
+la persillade (sous-recette) 30.00 g 0.12 €
+Recette totale 310.00 g 1.29 €
+Commentaire
+S03 : 4,3 . quelques commentaires sur le chou que certains ne digèrent pas et un peu trop salé S11: J'ai retiré la manip
+de choux pour faire simplement un deux manip car il y a déjà des légumes dans le mélange de haricots. Gain de 5cts
+S11: 4,3
+S19: 4,23
+S27: 4,15/ modification des haricots lingots à la tomate en rajoutant des "légumes été"
+S35: 4.17
+S43: passage sur légumes d'hiver avec les haricots lingots
+S07: 4,33 - S17: 4.37 - S25: 4.22 - S33: 4.23 /crépinette remplacée par sauté de porc - S41: 4.25 - S49:4.18
+2026 S45_VI03-Choutiflette
+1 recette(s) (311 g)
+Lait Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel ( sous-recette) 1.00 recette(s) (1 g) 0.07 €
+Appareil tartiflette Chou-fleur V2 (sous recette) 285.00 g 1.14 €
+Topping: Crumble de fromage à tartiflette surgelé
+(sous recette) 25.00 g 0.26 €
+Recette totale 311.00 g 1.46 €
+Commentaire
+S42: 4,45 - S06: 4.35 - S46: 4.44 - S02: 4.37
+2026 S45_VI04-Boulette de volaille et courge butternut mijotée
+1 recette(s) (310.3 g)
+Gluten Céleri
+--- page 103 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Boulette de volaille (sous-recette) 3.00 recette(s) (23.1 g) 0.35 €
+Légume sauteuse: butternut, tomate, oignon,
+origan (sous-recette) 241.00 g 0.92 €
+Recette totale 310.30 g 1.27 €
+Commentaire
+S26: 4,28. pas assez de viande, un peu fade
+S34: 4,28 / viande +50% dans la préparation et ajout de basilic
+S42: 4,31 / remplacement de l'aubergine par de la courge butternut et du basilic par du cumin
+S50: 4,22 - S06: 4.37 - S14: 4.44
+2026 S45_VI05-Boles de Picolat à la catalane
+1 recette(s) (310 g)
+Lait Gluten Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Boles de Picolat B/V (sous recette) 2.00 recette(s) (45 g) 1.09 €
+Légume rôti: Courgette (sous recette) 75.00 g 0.20 €
+Sauce catalane (sous-recette) 145.00 g 0.49 €
+Recette totale 310.00 g 1.78 €
+Étapes de production
+Boles de Picolat: cuisson à couvert avec four en chaleur mixte à 140°C
+Commentaire
+S14: 4,1
+Attention, vu avec Mathieu, un picola fait
+49.3gr
+S24: réduction de 25% du piment suite
+aux retours de la S14. Attention à la
+cuisson des boles pour les garder
+moelleuses
+S24: 4,15 (boles sèches)
+S32: 4,51 / Faire une tentative de
+cuisson à couvert avec four en chaleur
+mixte à 140°C
+2026 S45_VI06-Manchon de canard, haricots verts et écrasé de
+pommes de terre
+--- page 104 ---
+1 recette(s) (319 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Légume vapeur: Haricot vert (sous-recette) 100.00 g 0.18 €
+Viande: manchon de canard au four (sous-
+recette) 1.00 recette(s) (79 g) 0.90 €
+Purée: Ecrasé de pommes de terre au romarin
+(sous recette) 70.00 g 0.18 €
+Sauce: Champignons, échalote et crème fraîche
+***TOUT MIXER*** (sous-recette) 70.00 g 0.26 €
+Recette totale 319.00 g 1.52 €
+Étapes de production
+POUR LE CONDITIONNEMENT :
+Verifier le poids des manchons de canard - 90 gr
+1 : Ecrasé de pdt…………………………………………..140 gr
+2 : Manchons de canard………………………………..1 piéce
+3 : Sauce champignon……………………………….Monter à 310 gr
+Déboitage process cuisine :
+Manchons de canard: dans leur poche et les flasher avant de les ouvrir et retirer la graisse: 20 min four vapeur
+et débarasser en bac gastro a trou
+Sauce champignon: Ne pas la mixer
+Ecrasée de pommes de terre : cuire les pommes de terre four vapeur 20 min ,puis les passer a la sauteur avec le
+beurre le lait la creme et le romarin ,mixer jusqu a l obtention d une purée salé poivrer et gouter
+2026 S45_VI07-Linguine à la bolognaise aux légumes racines
+1 recette(s) (310 g)
+Lait Céleri Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: Linguines (sous-recette) 140.00 g 0.17 €
+Assaisonnement pasta grana basilic (sous-
+recette) 10.00 g 0.09 €
+Sauce: légumes racines comme une bolognaise
+(sous recette) 160.00 g 0.92 €
+Recette totale 310.00 g 1.18 €
+Commentaire
+--- page 105 ---
+S49: 4.41
+2026 S45_VI08-Mijoté de porc au thym, riz long de Camargue,
+lentilles vertes aux champignons
+1 recette(s) (310 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Cuisson longue 5h45: Sauté de porc au thym
+(sous recette) 70.00 g 0.67 €
+Légume sauteuse: lentilles vertes et champignons
+au jus de viande (sous-recette) 126.00 g 0.30 €
+Légume sauteuse: carotte et champignon rôtie à
+la persillade (sous-recette) 18.00 g 0.07 €
+Féculent: riz long étuvé de Camargue (sous-
+recette) 96.00 g 0.11 €
+Recette totale 310.00 g 1.16 €
+Commentaire
+S03 : 4,3 . quelques commentaires sur le chou que certains ne digèrent pas et un peu trop salé S11: J'ai retiré la manip
+de choux pour faire simplement un deux manip car il y a déjà des légumes dans le mélange de haricots. Gain de 5cts
+S11: 4,3
+S19: 4,23
+S27: 4,15/ modification des haricots lingots à la tomate en rajoutant des "légumes été"
+S35: 4.17
+S43: passage sur légumes d'hiver avec les haricots lingots
+S07: 4,33 - S17: 4.37 - S25: 4.22 - S33: 4.23 /crépinette remplacée par sauté de porc - S41: 4.25 - S49:4.18
+2026 S45_VI09-Tartiflette
+1 recette(s) (311 g)
+Lait Moutarde
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Petit plat à gratin format individuel ( sous-recette) 1.00 recette(s) (1 g) 0.07 €
+Légume vapeur: pomme de terre (sous recette) 90.00 g 0.28 €
+Légume sauteuse: Appareil à gratin de poireau,
+oignons et lardons (sous recette) 195.00 g 1.00 €
+Topping: Crumble de fromage à tartiflette surgelé
+(sous recette) 25.00 g 0.26 €
+--- page 106 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Recette totale 311.00 g 1.60 €
+Étapes de production
+Cuisine:
+montage du gratin, -320gr d'appareil tartiflette
+-2 tranche de rebochon Surgelé
+Puis Flash 10 min à 200° degré
+Commentaire
+S06: 4,0
+S14: 4,42 / modification de l'appareil à
+tartiflette (ajout vin, fromage blanc light
+et lardon, diminution crème fraiche) ⇒
+nette amélioration de la note
+S42: 4,60 - S50: 4,22 - S06: 4.38 - S14:
+4.44 - S46: 4.35
+2026 S02: 4.25
+2026 S45_VI10-Haut de cuisse de poulet, sauce tomate ricotta et riz
+de Camargue
+1 recette(s) (310.23 g)
+Lait Oeufs
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Viande: Haut de cuisse de poulet rôti au thym
+(sous-recette) 1.00 recette(s) (102.23 g) 0.71 €
+Légume rôti: Carotte (sous-recette) 28.00 g 0.10 €
+Féculent: riz long étuvé de Camargue (sous-
+recette) 100.00 g 0.12 €
+Sauce: Sauce tomate ricotta V1 (sous-recette) 80.00 g 0.27 €
+Recette totale 310.24 g 1.19 €
+Commentaire
+S23: 4.09
+2026 S45_VI11-Emincé de dinde à la crème de gingembre et petit
+épeautre du Ventoux
+1 recette(s) (315 g)
+Lait Fruits à coques Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Cuisson longue 4h45 : Sauté de dinde (sous
+recette) 70.00 g 0.88 €
+--- page 107 ---
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Féculent: Petit épeautre sans sel (sous recette) 78.00 g 0.11 €
+Légume vapeur: Brocolis SG/carottes (sous
+recette) 80.00 g 0.24 €
+Sauce: Crème fond blanc gingembre ***A
+MIXER*** (sous recette) 80.00 g 0.20 €
+Topping: amandes effilées torréfiées (sous
+recette) 7.00 g 0.08 €
+Recette totale 315.00 g 1.51 €
+2026 S45_VI12-Manchon de canard et écrasé de pommes de terre
+romarin
+1 recette(s) (319 g)
+Lait Gluten Céleri
+Ingrédients Quantité pour 1
+recette(s) Unité Coût
+Légume vapeur: Haricot vert (sous-recette) 60.00 g 0.11 €
+Viande: manchon de canard au four (sous-
+recette) 1.00 recette(s) (79 g) 0.90 €
+Purée: Ecrasé de pommes de terre au romarin
+(sous recette) 110.00 g 0.28 €
+Sauce: Champignons, échalote et crème fraîche
+***TOUT MIXER*** (sous-recette) 70.00 g 0.26 €
+Recette totale 319.00 g 1.55 €
+Étapes de production
+Déboitage process cuisine :
+Manchons de canard: dans leur poche et les flasher avant de les ouvrir et retirer la graisse: 20 min four vapeur
+et débarasser en bac gastro a trou
+Sauce champignon: Ne pas la mixer
+Ecrasée de pommes de terre : cuire les pommes de terre four vapeur 20 min ,puis les passer a la sauteur avec le
+beurre le lait la creme et le romarin ,mixer jusqu a l obtention d une purée salé poivrer et gouter

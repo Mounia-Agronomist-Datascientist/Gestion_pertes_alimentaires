@@ -133,6 +133,26 @@ Impression « Imprimer les recettes » de Melba pour une semaine (exemple reçu 
    **dénominateurs** pour les taux de perte (Phase 4).
 5. « Recette totale » / « Poids net » donnent le **rendement** utile au calcul des coûts (Phase 3).
 
+### 5.5 Sources complémentaires (analysées le 06/11/2026, en lecture seule — ne jamais modifier)
+
+**Tome S45 avec coûts.** Le tome S45 contient une colonne **« Coût »** par ingrédient, par sous-recette et
+par recette (ex. VI01 : 1,33 € pour 315 g). Il raisonne en proportions (une recette = une portion).
+→ Source directe des coûts matières pour la Phase 3.
+
+**Google Sheet « Décompte barquettes »** — un onglet par **jour de production** (`2026 S45A Jeudi`,
+`S45B Vendredi`, `S45C Lundi`, `S45D Mardi`, `S45E Mercredi`) et un récapitulatif `Semaine 45`.
+Par code de plat et par jour : **équipe**, barquettes prévues, barquettes faites, **surplus**, barquettes
+**à rattraper avec leur cause**, **non-conformités** (NC), ligne de conditionnement.
+- Donne les **jours réellement travaillés** de chaque semaine (généralement jeudi, vendredi, lundi, mardi,
+  mercredi ; certaines semaines diffèrent : samedi, jours fériés…). Historique conservé depuis S51-2025.
+- Donne les **volumes produits par équipe et par jour** : dénominateurs des taux de perte (Phase 4) et
+  rapprochement surplus / non-conformités avec les pertes déclarées.
+
+**Google Sheet « Déboitage 2026 Sxx Auto »** — un onglet par groupe de plats (= une équipe), avec par
+sous-recette et par ingrédient : zone de stockage (BOF, Sec, Surgelé…), kg à déboîter par code, facteurs
+de poids Melba. Ne contient que le **dernier jour** de production (pas d'historique).
+→ Volumes déboîtés par équipe = quantités par barquette de ce fichier × barquettes du « Décompte barquettes ».
+
 ## 6. Intégration proposée (Phase 2)
 
 ```

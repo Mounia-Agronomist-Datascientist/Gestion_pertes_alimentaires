@@ -24,6 +24,9 @@
 - 2026-11-06 : délai de 7 jours pour les équipes ; aucun prénom dans l'application ; administration des
   comptes, des équipes par semaine et des causes (avec propositions des équipes).
 
+- 2026-11-06 : extrait de test S45 (plan + tome, sans données personnelles) ; analyse du « Décompte barquettes »
+  et du « Déboitage » ; règle d'alerte « rien de noté » documentée.
+
 ## Fonctionnalités terminées
 
 | Date | Fonctionnalité | Tests |

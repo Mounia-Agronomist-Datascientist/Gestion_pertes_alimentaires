@@ -88,8 +88,15 @@ Toutes les saisies sont conservées pour la traçabilité et le suivi des perfor
   est affiché (« Saisie le jour même », « Saisie 2 jours après la perte »).
 - Délai maximal : **7 jours** après la date de la perte, pour déclarer comme pour corriger ou annuler.
   Au-delà, seul un responsable (zone, production, administrateur) peut le faire.
-- ⚠️ Alerte en cas d'absence de déclaration, avec une valeur forfaitaire de 150 kg : principe retenu,
-  modalités à préciser (docs/POINTS_A_VALIDER.md A1).
+- Alerte « rien de noté » (réponses du 06/11/2026) :
+  - contrôle **chaque jour de production**, pour chaque équipe active (les 8 équipes travaillent tous les
+    jours ouvrés, en horaires décalés de 5h00 à 20h45) ;
+  - une équipe sans aucune déclaration un jour donné reçoit une **perte estimée forfaitaire de 150 kg**,
+    comptée à part et toujours signalée comme estimation (jamais confondue avec une perte déclarée) ;
+  - l'alerte est visible par l'**administratrice**, le **responsable de production** et le **chef de
+    l'équipe concernée** ;
+  - les jours de production viennent du « Décompte barquettes » (onglets par jour) ou du calendrier ;
+  - ⚠️ à confirmer : « mercredi et vendredi … 600 kg par semaine » (voir docs/POINTS_A_VALIDER.md A1).
 
 ## R6 — Statuts et corrections
 

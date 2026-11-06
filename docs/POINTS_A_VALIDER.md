@@ -24,7 +24,8 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | C4 ✅ | Causes du stockage | Ajoutées : péremption, rupture de la chaîne du froid, mauvaise rotation, mauvais stockage, stock excédentaire | — |
 | 1 🟠 | Comptes partagés | Mot de passe par équipe géré par l'admin ; rotation à chaque départ ; révocation des sessions. Durée de session proposée : 30 jours glissants pour les comptes équipe et responsables de zone, 12 h pour les autres | Phase 1 |
 | C1 ✅ | Délai des équipes | Déclaration le jour même attendue ; 7 jours maximum pour déclarer, corriger ou annuler ; au-delà, un responsable | — |
-| A1 🟠 | Alerte « rien de noté » (150 kg) | À préciser : période contrôlée (jour ou semaine de production), comment savoir qu'une équipe travaillait ce jour-là, les 150 kg sont-ils seulement un seuil d'alerte ou une perte estimée ajoutée aux statistiques, qui reçoit l'alerte | Alertes |
+| A1 🟠 | Alerte « rien de noté » (150 kg) | Validé : contrôle quotidien, 150 kg de perte estimée par jour sans déclaration, visible par l'administratrice, le responsable de production et le chef d'équipe. **Reste à lever une incohérence** : 5 jours de production × 150 kg = 750 kg, alors que la semaine vide est annoncée à 600 kg, avec la mention « mercredi et vendredi » | Alertes |
+| P3 🟠 | Jours de production | Source à retenir pour savoir quels jours sont travaillés : onglets du « Décompte barquettes » (jours réels, a posteriori) ou calendrier du portail (prévu, à l'avance) | Alertes |
 | C2 ✅ | Causes initiales | Listes reçues pour toutes les zones et chargées (26 causes, voir src/db/seed/data.ts) | — |
 | P1 🔴 | Référentiel produits Phase 1 | Le référentiel est vide : les saisies se font en « hors liste ». Il faut une liste de départ (export Melba même partiel : identifiant, nom, catégorie, unité, poids unitaire si connu) | Mise en service |
 | P2 🟠 | Estimation par contenant | Pour convertir « 2 gastros pleins » en kg, il faudrait un poids moyen par produit et par type de gastro. À défaut, la quantité reste en nombre de gastros (non convertie) | Phase 1–2 |
@@ -34,5 +35,6 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | 7 🟠 | Sous-recettes | Analysé (docs/INTEGRATION_OUTIL_SOUS_RECETTES.md) : notre application remplace l'outil du collègue et lira le plan de production (Google Sheet, lecture seule) et le tome Melba. Reste : export structuré ou API Melba, identifiants Melba, code Apps Script du collègue, calendrier d'import | Phase 2 |
 | 3 ⚪ | Main-d'œuvre | Méthode d'imputation — désactivée tant que non définie | Phase 3 |
 | 9 ⚪ | Récupération financière | Ventes à déduire du coût net | Phase 3 |
-| 8 ⚪ | Volumes de production | Source des dénominateurs des ratios | Phase 4 |
+| 13 ⚪ | Coûts matières | Le tome S45 contient les coûts par ingrédient, sous-recette et recette : à confirmer comme source officielle des coûts | Phase 3 |
+| 8 🟠 | Volumes de production | Sources identifiées : « Décompte barquettes » (barquettes par code, équipe et jour, surplus, NC) et « Déboitage » (kg par barquette). Reste : mode d'accès automatique (lecture du Google Sheet par l'application ou export) | Phase 4 |
 | 10 ⚪ | Facteurs carbone | Sources (ADEME / Base Empreinte) et niveau de précision | Phase 5 |
