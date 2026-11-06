@@ -13,7 +13,7 @@ import { convertToKg, type KgStatus, QuantityError, type UnitKind } from "@/doma
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
-import { canModifyDeclaration, canReadDeclaration } from "./access";
+import { canModifyDeclaration, canReadDeclaration, isBoundByTeamDelay, isWithinTeamDelay, TEAM_DELAY_DAYS } from "./access";
 import { declarationInputSchema } from "./input";
 
 /** Erreur de saisie, affichable telle quelle à l'utilisateur. */
@@ -61,6 +61,11 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
   const today = toProductionLocalDate(now);
   if (input.occurredOn > today) {
     throw new DeclarationError("La date de la perte ne peut pas être dans le futur");
+  }
+  if (isBoundByTeamDelay(user) && !isWithinTeamDelay(input.occurredOn, today)) {
+    throw new DeclarationError(
+      `Une perte de plus de ${TEAM_DELAY_DAYS} jours ne peut être déclarée que par un responsable`,
+    );
   }
   const [lossWeek, declaredWeek] = await Promise.all([
     findStoredProductionWeek(db, input.occurredOn),
@@ -447,8 +452,7 @@ async function loadForChange(db: Db, user: AuthUser, id: string, options: Change
   if (!existing || !canReadDeclaration(user, existing)) throw new DeclarationError("Déclaration introuvable");
   if (existing.status === "annulee") throw new DeclarationError("Cette déclaration est annulée : elle ne peut plus être modifiée");
 
-  const [declaredWeek] = await db.select().from(s.productionWeeks).where(eq(s.productionWeeks.id, existing.declaredWeekId));
-  if (!canModifyDeclaration(user, existing, declaredWeek!.endDate, toProductionLocalDate(now))) {
+  if (!canModifyDeclaration(user, existing, toProductionLocalDate(now))) {
     throw new ForbiddenError("Vous ne pouvez plus modifier cette déclaration : demandez à un responsable");
   }
   if (existing.revision !== options.expectedRevision) throw new DeclarationConflictError();

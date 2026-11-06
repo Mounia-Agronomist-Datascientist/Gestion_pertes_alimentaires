@@ -26,7 +26,8 @@ describe("données initiales des référentiels", () => {
   it("crée les 8 équipes avec lettre et couleur", async () => {
     const teams = await t.db.select().from(s.teams).orderBy(s.teams.displayOrder);
     expect(teams.map((x) => x.letter).join("")).toBe("ABCDEFGH");
-    expect(teams[2]).toMatchObject({ colorName: "Rose", managersLabel: "Sarah / Lahcen" });
+    // Aucun prénom dans l'application (décision du 06/11/2026).
+    expect(teams[2]).toMatchObject({ colorName: "Rose", managersLabel: null });
   });
 
   it("sépare l'épicerie des deux stockages secs extérieurs", async () => {

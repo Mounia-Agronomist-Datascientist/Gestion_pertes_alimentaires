@@ -135,3 +135,12 @@ describe("date locale de production", () => {
     expect(toProductionLocalDate(new Date("2026-11-11T23:30:00Z"))).toBe("2026-11-12");
   });
 });
+
+describe("écart en jours", () => {
+  it("compte les jours entre deux dates, y compris d'une année à l'autre", async () => {
+    const { daysBetween } = await import("@/domain/semaine-production");
+    expect(daysBetween("2026-11-12", "2026-11-12")).toBe(0);
+    expect(daysBetween("2026-11-12", "2026-11-19")).toBe(7);
+    expect(daysBetween("2026-12-30", "2027-01-02")).toBe(3);
+  });
+});

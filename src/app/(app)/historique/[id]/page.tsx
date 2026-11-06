@@ -121,6 +121,11 @@ export default async function DeclarationDetailPage({
         <dt className="text-slate-500">Saisie</dt>
         <dd>
           {fmtDateTime(d.declaredAt)} par {detail.authorName}
+          <span className={`block text-sm ${detail.delayDays > 0 ? "text-amber-700" : "text-slate-500"}`}>
+            {detail.delayDays === 0
+              ? "Saisie le jour même"
+              : `Saisie ${detail.delayDays} jour${detail.delayDays > 1 ? "s" : ""} après la perte`}
+          </span>
         </dd>
         {d.comment && (
           <>

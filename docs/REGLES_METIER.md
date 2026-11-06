@@ -82,6 +82,15 @@ Toutes les saisies sont conservées pour la traçabilité et le suivi des perfor
 - Les statistiques historiques ne sont jamais recalculées silencieusement avec de nouveaux prix ou de
   nouvelles tares.
 
+## R5 bis — Délai de déclaration des équipes (validé le 06/11/2026)
+
+- Les équipes doivent déclarer leurs pertes **le jour même**. Le nombre de jours entre la perte et sa saisie
+  est affiché (« Saisie le jour même », « Saisie 2 jours après la perte »).
+- Délai maximal : **7 jours** après la date de la perte, pour déclarer comme pour corriger ou annuler.
+  Au-delà, seul un responsable (zone, production, administrateur) peut le faire.
+- ⚠️ Alerte en cas d'absence de déclaration, avec une valeur forfaitaire de 150 kg : principe retenu,
+  modalités à préciser (docs/POINTS_A_VALIDER.md A1).
+
 ## R6 — Statuts et corrections
 
 ```

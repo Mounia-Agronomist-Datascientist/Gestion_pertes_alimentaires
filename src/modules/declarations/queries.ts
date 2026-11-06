@@ -4,7 +4,7 @@
 import { and, desc, eq, inArray, or, type SQL } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { toProductionLocalDate } from "@/domain/semaine-production";
+import { daysBetween, toProductionLocalDate } from "@/domain/semaine-production";
 import { type AuthUser, declarationReadScope } from "@/modules/auth/permissions";
 import { canModifyDeclaration, canReadDeclaration } from "./access";
 
@@ -92,7 +92,7 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
   const d = row.declaration;
 
   const [weeks, containers, destinations, revisions] = await Promise.all([
-    db.select().from(s.productionWeeks).where(inArray(s.productionWeeks.id, [d.productionWeekId, d.declaredWeekId])),
+    db.select().from(s.productionWeeks).where(eq(s.productionWeeks.id, d.productionWeekId)),
     db
       .select({
         containerTypeId: s.containerTypes.id,
@@ -130,7 +130,6 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
       .orderBy(desc(s.declarationRevisions.revision)),
   ]);
   const productionWeek = weeks.find((w) => w.id === d.productionWeekId)!;
-  const declaredWeek = weeks.find((w) => w.id === d.declaredWeekId)!;
 
   return {
     ...row,
@@ -138,7 +137,9 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
     containers,
     destinations,
     revisions,
-    canModify: d.status !== "annulee" && canModifyDeclaration(user, d, declaredWeek.endDate, toProductionLocalDate(now)),
+    canModify: d.status !== "annulee" && canModifyDeclaration(user, d, toProductionLocalDate(now)),
+    /** Jours entre la perte et sa saisie (0 = saisie le jour même). */
+    delayDays: daysBetween(d.occurredOn, toProductionLocalDate(d.declaredAt)),
   };
 }
 

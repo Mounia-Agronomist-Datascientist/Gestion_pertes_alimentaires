@@ -372,9 +372,9 @@ describe("déclaration de perte", () => {
 
   describe("corrections, annulations et historique", () => {
     let teamA: AuthUser;
-    // Mercredi 18/11/2026 : dernier jour de S47 ; jeudi 19/11 : S48.
-    const LAST_DAY_S47 = new Date("2026-11-18T15:00:00Z");
-    const FIRST_DAY_S48 = new Date("2026-11-19T08:00:00Z");
+    // Perte du 12/11 : dernier jour du délai le 19/11, hors délai le 20/11.
+    const DAY_7 = new Date("2026-11-19T15:00:00Z");
+    const DAY_8 = new Date("2026-11-20T08:00:00Z");
 
     beforeAll(async () => {
       teamA = await loadAuthUser(
@@ -438,15 +438,29 @@ describe("déclaration de perte", () => {
       expect((await listDeclarations(t.db, teamA)).some((d) => d.id === created.id)).toBe(false);
     });
 
-    it("une équipe corrige jusqu'à la fin de la semaine de saisie ; ensuite, un responsable", async () => {
-      const created = await createDeclaration(t.db, teamC, cuisine(), NOW);
-      expect((await getDeclarationDetail(t.db, teamC, created.id, LAST_DAY_S47))?.canModify).toBe(true);
-      expect((await getDeclarationDetail(t.db, teamC, created.id, FIRST_DAY_S48))?.canModify).toBe(false);
+    it("une équipe corrige pendant 7 jours après la perte ; ensuite, un responsable", async () => {
+      const created = await createDeclaration(t.db, teamC, cuisine(), NOW); // perte du 12/11
+      expect((await getDeclarationDetail(t.db, teamC, created.id, DAY_7))?.canModify).toBe(true);
+      expect((await getDeclarationDetail(t.db, teamC, created.id, DAY_8))?.canModify).toBe(false);
       await expect(
-        correctDeclaration(t.db, teamC, created.id, cuisine(), { reason: "trop tard", expectedRevision: 1 }, FIRST_DAY_S48),
+        correctDeclaration(t.db, teamC, created.id, cuisine(), { reason: "trop tard", expectedRevision: 1 }, DAY_8),
       ).rejects.toThrow(/responsable/);
-      await correctDeclaration(t.db, admin, created.id, cuisine({ teamId: ref("team:C") }), { reason: "correction responsable", expectedRevision: 1 }, FIRST_DAY_S48);
+      await correctDeclaration(t.db, admin, created.id, cuisine({ teamId: ref("team:C") }), { reason: "correction responsable", expectedRevision: 1 }, DAY_8);
       expect((await load(created.id)).revision).toBe(2);
+    });
+
+    it("une équipe déclare une perte jusqu'à 7 jours après ; au-delà, seul un responsable le peut", async () => {
+      expect((await createDeclaration(t.db, teamC, cuisine({ occurredOn: "2026-11-05" }), NOW)).isLate).toBe(true);
+      await expect(createDeclaration(t.db, teamC, cuisine({ occurredOn: "2026-11-04" }), NOW)).rejects.toThrow(/plus de 7 jours/);
+      const byAdmin = await createDeclaration(t.db, admin, cuisine({ occurredOn: "2026-11-04", teamId: ref("team:C") }), NOW);
+      expect(byAdmin.id).toBeTruthy();
+    });
+
+    it("indique le nombre de jours entre la perte et sa saisie", async () => {
+      const sameDay = await createDeclaration(t.db, teamC, cuisine(), NOW);
+      const twoDays = await createDeclaration(t.db, teamC, cuisine({ occurredOn: "2026-11-10" }), NOW);
+      expect((await getDeclarationDetail(t.db, teamC, sameDay.id, NOW))?.delayDays).toBe(0);
+      expect((await getDeclarationDetail(t.db, teamC, twoDays.id, NOW))?.delayDays).toBe(2);
     });
 
     it("un responsable de zone corrige dans sa zone uniquement", async () => {

@@ -22,7 +22,7 @@ const zoneId = (code: string) => zones.find((z) => z.code === code)!.id;
 const accounts = [
   ...teams.map((t) => ({
     login: `equipe-${t.letter.toLowerCase()}`,
-    displayName: `Équipe ${t.letter} – ${t.colorName}`,
+    displayName: `Chef d'équipe – Équipe ${t.colorName} (${t.letter})`,
     roleCode: "equipe",
     teamId: t.id,
   })),
@@ -30,7 +30,7 @@ const accounts = [
   { login: "resp-stockage", displayName: "Responsable Stockage", roleCode: "resp_zone", zoneIds: [zoneId("STOCKAGE")] },
   { login: "resp-conditionnement", displayName: "Responsable Conditionnement", roleCode: "resp_zone", zoneIds: [zoneId("CONDITIONNEMENT")] },
   { login: "resp-plonge", displayName: "Responsable Plonge", roleCode: "resp_zone", zoneIds: [zoneId("PLONGE")] },
-  { login: "admin", displayName: "Administrateur", roleCode: "admin" },
+  { login: "admin", displayName: "Administration", roleCode: "admin" },
 ];
 
 const file = "comptes-dev.local.md";

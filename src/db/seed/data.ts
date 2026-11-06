@@ -16,14 +16,14 @@ export const UNITS = [
 ] as const;
 
 export const TEAMS = [
-  { letter: "A", colorName: "Bleue", colorHex: "#2563eb", usualStart: "05:00", usualEnd: "12:00", managersLabel: "Alexandre" },
-  { letter: "B", colorName: "Rouge", colorHex: "#dc2626", usualStart: "06:15", usualEnd: "13:15", managersLabel: "Julien F / Julien T" },
-  { letter: "C", colorName: "Rose", colorHex: "#ec4899", usualStart: "07:30", usualEnd: "14:30", managersLabel: "Sarah / Lahcen" },
-  { letter: "D", colorName: "Jaune", colorHex: "#eab308", usualStart: "08:45", usualEnd: "15:45", managersLabel: "Sanaa / Elvis" },
-  { letter: "E", colorName: "Orange", colorHex: "#f97316", usualStart: "10:00", usualEnd: "17:00", managersLabel: "Manuela / Geoffrey" },
-  { letter: "F", colorName: "Violette", colorHex: "#7c3aed", usualStart: "11:15", usualEnd: "18:15", managersLabel: "Hervé / Antonin" },
-  { letter: "G", colorName: "Verte", colorHex: "#16a34a", usualStart: "12:30", usualEnd: "19:30", managersLabel: "Ludovic / Théo" },
-  { letter: "H", colorName: "Turquoise", colorHex: "#14b8a6", usualStart: "13:45", usualEnd: "20:45", managersLabel: "Candy / Hugo" },
+  { letter: "A", colorName: "Bleue", colorHex: "#2563eb", usualStart: "05:00", usualEnd: "12:00" },
+  { letter: "B", colorName: "Rouge", colorHex: "#dc2626", usualStart: "06:15", usualEnd: "13:15" },
+  { letter: "C", colorName: "Rose", colorHex: "#ec4899", usualStart: "07:30", usualEnd: "14:30" },
+  { letter: "D", colorName: "Jaune", colorHex: "#eab308", usualStart: "08:45", usualEnd: "15:45" },
+  { letter: "E", colorName: "Orange", colorHex: "#f97316", usualStart: "10:00", usualEnd: "17:00" },
+  { letter: "F", colorName: "Violette", colorHex: "#7c3aed", usualStart: "11:15", usualEnd: "18:15" },
+  { letter: "G", colorName: "Verte", colorHex: "#16a34a", usualStart: "12:30", usualEnd: "19:30" },
+  { letter: "H", colorName: "Turquoise", colorHex: "#14b8a6", usualStart: "13:45", usualEnd: "20:45" },
 ] as const;
 
 /**

@@ -47,6 +47,11 @@ export function addDays(date: LocalDate, days: number): LocalDate {
   return fromUtc(new Date(toUtc(date).getTime() + days * DAY_MS));
 }
 
+/** Nombre de jours de `from` à `to` (négatif si `to` est antérieur). */
+export function daysBetween(from: LocalDate, to: LocalDate): number {
+  return Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / DAY_MS);
+}
+
 /** Jour de la semaine ISO : 1 = lundi … 7 = dimanche. */
 function isoWeekday(date: LocalDate): number {
   const day = toUtc(date).getUTCDay();
