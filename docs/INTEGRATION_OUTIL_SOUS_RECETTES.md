@@ -105,14 +105,30 @@ Impression « Imprimer les recettes » de Melba pour une semaine (exemple reçu 
   `PJ` (petits-déjeuners), `EN` (encas, suffixés `_EQ`, `_FB`, `_LC`, `_MN`).
 - **Absents du PDF : identifiants Melba, coûts.**
 
-### 5.3 Conséquences pour le modèle de données
+### 5.3 Réponses de l'entreprise (06/11/2026)
 
-1. Les codes `VI01`, `PO03`… sont des **emplacements de la semaine**, pas des identifiants : `VI01` de S46
-   et `VI01` de S47 sont deux plats différents. Une recette de la semaine est identifiée par
-   (semaine, code) ; son lien avec une recette Melba stable reste à établir (identifiant Melba).
+- **Pas de clé API Melba** : l'import se fera à partir des fichiers (plan de production + tome).
+- Le **plan de production** donne l'affectation recette → équipe ; le **tome** donne séparément le détail
+  de chaque recette et de ses sous-recettes.
+- **Pas de code unique par sous-recette** aujourd'hui.
+- Les codes de plats (`VG01`, `PO01`…) sont **permanents** : ils correspondent aux formules proposées aux
+  clients (végétarien, etc.). **Leur contenu change chaque semaine.**
+- Le tome est disponible **chaque mardi, une semaine avant le début de la production**.
+- Toutes les recettes et sous-recettes des semaines passées doivent être **historisées** (au minimum
+  celles concernées par des pertes).
+
+### 5.4 Conséquences pour le modèle de données
+
+1. Un code de plat (`VI01`) désigne une **formule permanente** ; le plat réellement produit est
+   (semaine, code) → nom, composition, équipe. Chaque semaine importée est un **instantané figé** : une
+   perte pointe vers la version de la semaine, jamais vers une recette « courante » qui aurait changé.
+   Les statistiques peuvent ainsi être faites par formule (`VI01` sur l'année) ou par plat d'une semaine.
 2. Un groupe de codes = un même plat décliné dans plusieurs programmes, produit par une seule équipe.
 3. Une même sous-recette sert à plusieurs plats (ex. « Légume vapeur : Brocolis ROK » dans 6 plats) :
-   conforme au §13.1, la sous-recette n'appartient ni à une recette ni à une équipe.
+   conforme au §13.1, la sous-recette n'appartient ni à une recette ni à une équipe. Faute de code Melba,
+   une sous-recette est identifiée dans une semaine par son **nom normalisé** ; d'une semaine à l'autre,
+   le même nom normalisé permet de suivre une sous-recette dans le temps (identification « au mieux »,
+   signalée comme telle dans les statistiques).
 4. Les quantités prévues (barquettes par code, kg par sous-recette, quantités d'ingrédients) servent de
    **dénominateurs** pour les taux de perte (Phase 4).
 5. « Recette totale » / « Poids net » donnent le **rendement** utile au calcul des coûts (Phase 3).
@@ -139,11 +155,10 @@ Google Sheet « Plan de production » (lecture seule)     Tome Melba de la semai
 
 ## 7. Points encore ouverts
 
-1. **Format du tome** : le PDF se lit, mais sa mise en page peut changer. Melba propose-t-il le même
-   contenu en **export Excel/CSV**, ou l'accès à son **API** (§16.1) ? C'est la solution la plus fiable.
-2. **Identifiants Melba** des recettes, sous-recettes et ingrédients : présents dans un export ou l'API ?
-3. **Code de l'outil du collègue** (Apps Script) : il construisait déjà la table « recette → sous-recette →
+1. **Format du tome** : pas d'API ; reste à savoir si Melba propose un export Excel/CSV du même contenu.
+   À défaut, lecture du PDF avec prévisualisation et rapport d'anomalies à chaque import.
+2. **Code de l'outil du collègue** (Apps Script) : il construisait déjà la table « recette → sous-recette →
    ingrédient » ; sa logique de lecture du tome pourrait être reprise plutôt que réécrite.
-4. **Calendrier d'import** : à quel moment de la semaine le plan (colonne équipe) et le tome sont-ils définitifs ?
-5. **Données d'exemple pour les tests** : peut-on conserver dans le dépôt (privé) un extrait anonymisé
+3. **Plan de production** : la colonne équipe est-elle définitive au moment où le tome arrive (mardi) ?
+4. **Données d'exemple pour les tests** : peut-on conserver dans le dépôt (privé) un extrait anonymisé
    d'une semaine pour tester l'import ?
