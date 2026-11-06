@@ -108,8 +108,16 @@ pertes/
 - Dates : `date` pour la date réelle de la perte, `timestamptz` pour les horodatages ; fuseau `Europe/Paris`.
 - Toute mutation passe par un service qui : vérifie la permission → valide (Zod) → écrit en transaction →
   écrit le journal d'audit.
-- Commits : style *Conventional Commits* en français (`feat(declarations): …`, `fix: …`, `docs: …`).
-  Un commit = une étape cohérente, testée.
+- Commits : un commit = une étape cohérente et testée, avec un titre clair en français au format
+  *Conventional Commits* : `type(module): ce qui change`, puis un détail en liste si nécessaire.
+  | Type | Usage | Exemple |
+  |---|---|---|
+  | `feat` | nouvelle fonctionnalité | `feat(causes): chutes de découpe au déboîtage` |
+  | `fix` | correction d'anomalie | `fix(tares): refuser un poids brut inférieur à la tare` |
+  | `docs` | documentation seule | `docs: règle d'historisation des saisies` |
+  | `chore` | outillage, configuration | `chore: application servie sur le port 3001` |
+  | `test` | tests seuls | `test(auth): droits d'une équipe sur une autre équipe` |
+  | `refactor` | réorganisation sans changement de comportement | |
 - Migrations : jamais d'édition d'une migration déjà appliquée ; une migration destructive exige une
   sauvegarde préalable et une note dans `docs/SUIVI.md`.
 

@@ -166,6 +166,10 @@ communes), `closed_at`.
 
 Index : (`production_week_id`, `team_id`), (`zone_id`, `production_week_id`), (`cause_id`), (`product_id`).
 
+**declaration_revisions** — `id`, `declaration_id`, `revision` (1, 2, 3…), `data` jsonb (copie complète de la
+déclaration, de ses tares et de ses destinations à cette version), `status`, `changed_by`, `changed_at`, `reason`.
+Unicité (`declaration_id`, `revision`). Insertion seule.
+
 **declaration_containers** — `id`, `declaration_id`, `container_tare_id` (ligne de tare utilisée, qui porte
 le type, le nombre et la version), `count`, `tare_kg_snapshot`.
 

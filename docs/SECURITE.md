@@ -7,8 +7,8 @@ Stockée en base (`roles`, `permissions`, `role_permissions`), initialisée par 
 
 | Permission | Équipe | Resp. zone | Resp. prod. | Admin | Direction |
 |---|:-:|:-:|:-:|:-:|:-:|
-| Déclarer une perte | ✅ (son équipe) | ✅ (ses zones) | ✅ | ✅ | — |
-| Lire le détail des déclarations | son équipe | ses zones | toutes | toutes | — |
+| Déclarer une perte | ✅ (toutes zones, attribuée à l'équipe en cuisine) | ✅ (ses zones) | ✅ | ✅ | — |
+| Lire le détail des déclarations | celles attribuées à son équipe + celles qu'elle a saisies | ses zones | toutes | toutes | — |
 | Corriger / annuler une déclaration | son équipe, ⚠️ délai à définir | ses zones | ✅ | ✅ | — |
 | Proposer une cause | ✅ | ✅ | ✅ | ✅ | — |
 | Valider une cause proposée | — | — | — | ✅ | — |
@@ -38,7 +38,9 @@ Stockée en base (`roles`, `permissions`, `role_permissions`), initialisée par 
 - Sessions : jeton aléatoire 256 bits, seul son hachage est stocké ; cookie `httpOnly`, `Secure`,
   `SameSite=Lax` ; expiration glissante (durée à valider : proposition 30 jours sur appareil d'équipe,
   12 h pour les comptes admin).
-- Limitation des tentatives de connexion (5 échecs / 15 min par identifiant et par IP) et journalisation.
+- Limitation des tentatives de connexion : 5 échecs en 15 min **par identifiant** bloquent cet identifiant
+  15 min ; tout est journalisé. Pas de blocage par adresse IP : tous les appareils de l'usine sortent
+  probablement par la même adresse, un blocage par IP bloquerait toutes les équipes à la fois.
 - Comptes partagés : l'admin peut réinitialiser le mot de passe et **révoquer toutes les sessions** d'un compte
   (ex. départ d'un salarié). Procédure de rotation à valider (point 1 du CDC).
 - Protection CSRF native des Server Actions + vérification de l'origine.

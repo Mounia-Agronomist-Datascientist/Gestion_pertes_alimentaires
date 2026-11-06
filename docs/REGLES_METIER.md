@@ -67,7 +67,22 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
 - Seules les destinations marquées « récupération financière » (Too Good To Go, vente flash) peuvent porter un
   montant récupéré (Phase 3). Don et personnel : jamais de recette financière.
 
-## R5 — Statuts et corrections
+## R5 — Historisation et traçabilité
+
+Toutes les saisies sont conservées pour la traçabilité et le suivi des performances dans le temps :
+
+- **Rien n'est jamais supprimé** : ni déclaration, ni équipe, ni zone, ni cause, ni tare (désactivation seulement).
+- Chaque déclaration garde sa date réelle, sa date de saisie, son auteur et un **instantané** des données
+  utilisées (nom et référence du produit, tare, densité, poids unitaire, coûts en Phase 3).
+- Chaque modification crée une **nouvelle version** complète de la déclaration (table `declaration_revisions`) :
+  on peut afficher l'état exact d'une déclaration à n'importe quelle date et savoir qui a changé quoi, quand
+  et pourquoi.
+- Toute action sensible (connexion, saisie, correction, annulation, modification de référentiel, de compte
+  ou de tare) est inscrite dans le journal d'audit, en insertion seule.
+- Les statistiques historiques ne sont jamais recalculées silencieusement avec de nouveaux prix ou de
+  nouvelles tares.
+
+## R6 — Statuts et corrections
 
 ```
 brouillon ──valider──▶ validée ──corriger──▶ corrigée ──corriger──▶ corrigée …
@@ -81,9 +96,15 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
   après validation).
 - Les coûts et références stockés dans une déclaration ne sont **jamais** recalculés automatiquement.
 
-## R6 — Attribution à une équipe
+## R7 — Attribution à une équipe
 
+- Responsables (validé le 06/11/2026) :
+  - Réception, Stockage, Conditionnement, Plonge : **un responsable par zone** (compte « responsable de zone ») ;
+  - Cuisine / Production : **un responsable par équipe**, le chef d'équipe (compte équipe). Les 8 équipes sont
+    indépendantes et gèrent leurs propres pertes dans toutes les sous-zones où elles interviennent.
 - Compte équipe : l'équipe est préremplie et non modifiable.
+- Un compte équipe peut aussi déclarer une perte constatée hors cuisine (ex. au conditionnement) ; elle est
+  alors attribuée à la zone, et l'équipe reste enregistrée comme auteur de la saisie.
 - ✅ Chaque sous-zone porte un paramètre `team_mode` (validé le 06/11/2026) :
   - `equipe` — Cuisine / Production (déboîtage → salle blanche) : la perte est attribuée à l'une des 8 équipes ;
   - `zone` — Réception, Stockage, Conditionnement, Plonge : la perte est attribuée à la zone et à son
