@@ -28,7 +28,9 @@ export default function AdminPage() {
           </Link>
         ))}
       </div>
-      <p className="text-sm text-slate-500">À venir : journal d&apos;audit.</p>
+      <Link href="/journal" className="text-teal-800 underline">
+        Consulter le journal d&apos;audit
+      </Link>
     </>
   );
 }

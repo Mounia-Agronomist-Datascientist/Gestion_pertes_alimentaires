@@ -98,6 +98,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </Link>
       )}
 
+      {can(user, "audit.read") && (
+        <Link href="/journal" className="text-center text-slate-700 underline">
+          Journal d&apos;audit
+        </Link>
+      )}
       <Link href="/mot-de-passe" className="text-slate-600 underline">
         Changer le mot de passe
       </Link>

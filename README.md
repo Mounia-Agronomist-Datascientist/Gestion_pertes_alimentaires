@@ -4,7 +4,7 @@ Application web interne (PWA) permettant aux équipes de production de déclarer
 rapidement leurs pertes, et aux responsables de les analyser (quantités, coûts,
 causes, destinations, impact environnemental).
 
-> **État du projet : Phase 1 en cours — une équipe peut se connecter et déclarer une perte.**
+> **État du projet : Phase 1 terminée côté développement, en ligne (Netlify + Neon) — essais avec les équipes à venir.**
 
 ## Documentation
 
@@ -26,7 +26,7 @@ causes, destinations, impact environnemental).
 | Phase | Objet | Statut |
 |---|---|---|
 | 0 | Cadrage technique | ✅ |
-| 1 | Déclarations de pertes (application utilisable) | 🟡 En cours — déclarations, historique, corrections, comptes, équipes et causes faits ; reste l'administration des produits, tares, destinations et zones |
+| 1 | Déclarations de pertes (application utilisable) | ✅ Développée — déclarations, historique, corrections, alertes, administration complète, journal d'audit ; reste l'essai pilote avec les équipes |
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ⏳ |
 | 3 | Calcul des coûts | ⏳ |
 | 4 | Tableaux de bord et statistiques | ⏳ |

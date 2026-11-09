@@ -78,4 +78,5 @@ Prévu initialement :
 - Gastros et tares (versions datées) — **réalisé** (créer un nouveau type de contenant : à faire si besoin).
 - Calendrier des semaines de production (génération + correction).
 - Comptes utilisateurs (création, réinitialisation de mot de passe, désactivation).
-- Journal d'audit (consultation).
+- Journal d'audit (consultation) — **réalisé** : page `/journal`, ouverte aussi au rôle responsable production
+  (permission `audit.read`).
