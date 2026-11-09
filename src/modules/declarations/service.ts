@@ -550,3 +550,89 @@ export async function cancelDeclaration(
     await writeAudit(tx, { userId: user.id, action: "cancel", entity: "loss_declaration", entityId: id, before, after, reason, occurredAt: now });
   });
 }
+
+/**
+ * Rattache des déclarations « hors liste » à un produit du référentiel (administration).
+ * Chaque déclaration reçoit une nouvelle version : le nom libre saisi reste dans l'historique, les mesures
+ * ne changent pas. Le poids en kg est recalculé avec les données du produit (poids unitaire, densité) quand
+ * la quantité n'a pas été pesée. Tout ou rien : une déclaration déjà modifiée entre-temps fait tout échouer.
+ */
+export async function linkDeclarationsToProduct(
+  db: Db,
+  user: AuthUser,
+  input: { declarationIds: string[]; productId: string },
+  now: Date = new Date(),
+): Promise<number> {
+  requirePermission(user, "referentiel.manage");
+  const [product] = await db.select().from(s.products).where(eq(s.products.id, input.productId));
+  if (!product || !product.active) throw new DeclarationError("Produit inconnu ou désactivé");
+  const ids = [...new Set(input.declarationIds)];
+  if (ids.length === 0) throw new DeclarationError("Aucune déclaration à rattacher");
+  const reason = `Rattachement au produit du référentiel « ${product.name} »`;
+
+  return db.transaction(async (tx) => {
+    const rows = await tx.select().from(s.lossDeclarations).where(inArray(s.lossDeclarations.id, ids));
+    if (rows.length !== ids.length || rows.some((d) => !d.productUnlisted || d.status === "annulee")) {
+      throw new DeclarationConflictError();
+    }
+    for (const existing of rows) {
+      const before = await currentSnapshot(tx, existing);
+      let measurement: Pick<typeof existing, "netKg" | "kgStatus" | "conversionFactorUsed" | "measurementMethod"> = {
+        netKg: existing.netKg,
+        kgStatus: existing.kgStatus,
+        conversionFactorUsed: existing.conversionFactorUsed,
+        measurementMethod: existing.measurementMethod,
+      };
+      if (existing.tareTotalKg == null) {
+        const [unit] = await tx.select().from(s.units).where(eq(s.units.code, existing.unitCode));
+        const conversion = convertToKg(existing.quantity, { code: unit!.code, kind: unit!.kind as UnitKind, toBaseFactor: unit!.toBaseFactor }, {
+          isConsumable: product.category === "consommable",
+          unitWeightKg: product.unitWeightKg,
+          densityKgPerL: product.densityKgPerL,
+        });
+        const counted = existing.measurementMethod === "comptage" || existing.measurementMethod === "conversion_reference";
+        measurement = {
+          netKg: conversion.netKg,
+          kgStatus: conversion.kgStatus,
+          conversionFactorUsed: conversion.factorUsed,
+          measurementMethod: counted ? (conversion.kgStatus === "converti" ? "conversion_reference" : "comptage") : existing.measurementMethod,
+        };
+      } else if (product.category === "consommable") {
+        throw new DeclarationError("Une pesée en gastros ne peut pas être rattachée à un consommable");
+      }
+
+      const revision = existing.revision + 1;
+      const [declaration] = await tx
+        .update(s.lossDeclarations)
+        .set({
+          productId: product.id,
+          productUnlisted: false,
+          productCategory: product.category,
+          productName: product.name,
+          productExternalId: product.externalId,
+          productCode: product.code,
+          productVariant: product.variant,
+          ...measurement,
+          status: "corrigee",
+          revision,
+          updatedAt: now,
+        })
+        .where(and(eq(s.lossDeclarations.id, existing.id), eq(s.lossDeclarations.revision, existing.revision)))
+        .returning();
+      if (!declaration) throw new DeclarationConflictError();
+
+      const kgPerUnit = declaration.netKg != null ? declaration.netKg / declaration.netQuantity : null;
+      const after = await writeVersionLines(tx, declaration, {
+        containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
+        destinations: before.destinations.map((d) => ({
+          destinationId: d.destinationId,
+          quantity: d.quantity,
+          netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
+        })),
+      });
+      await tx.insert(s.declarationRevisions).values({ declarationId: existing.id, revision, status: "corrigee", data: after, changedBy: user.id, changedAt: now, reason });
+      await writeAudit(tx, { userId: user.id, action: "link_product", entity: "loss_declaration", entityId: existing.id, before, after, reason, occurredAt: now });
+    }
+    return rows.length;
+  });
+}

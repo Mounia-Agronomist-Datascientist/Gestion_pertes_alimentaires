@@ -5,9 +5,11 @@ import { db } from "@/db/client";
 import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
 import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
 import { setProductionDay } from "@/modules/admin/production-days";
+import { createProduct, linkUnlistedGroup, setProductActive, updateProduct } from "@/modules/admin/products";
 import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
+import { DeclarationError } from "@/modules/declarations/service";
 
 export interface AccountActionState {
   error?: string;
@@ -124,4 +126,63 @@ export async function causeAction(_prev: CauseActionState, formData: FormData): 
     if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
     throw e;
   }
+}
+
+// ─── Produits ────────────────────────────────────────────────────────────────
+
+export interface ProductActionState {
+  error?: string;
+  message?: string;
+}
+
+export async function productAction(_prev: ProductActionState, formData: FormData): Promise<ProductActionState> {
+  const admin = await requireUser();
+  const intent = String(formData.get("intent"));
+  const productId = String(formData.get("productId") ?? "");
+  const groupKey = String(formData.get("groupKey") ?? "");
+  const fields = () => ({
+    name: String(formData.get("name") ?? ""),
+    category: String(formData.get("category") ?? "") as never,
+    code: String(formData.get("code") ?? ""),
+    variant: String(formData.get("variant") ?? ""),
+    defaultUnit: String(formData.get("defaultUnit") ?? ""),
+    unitWeightKg: String(formData.get("unitWeightKg") ?? ""),
+    densityKgPerL: String(formData.get("densityKgPerL") ?? ""),
+  });
+  let message: string;
+  try {
+    switch (intent) {
+      case "create":
+        message = `Produit « ${(await createProduct(db, admin, fields())).name} » créé.`;
+        break;
+      case "update":
+        await updateProduct(db, admin, productId, fields());
+        message = "Produit modifié. Les déclarations passées gardent l'ancien nom.";
+        break;
+      case "activate":
+      case "deactivate":
+        await setProductActive(db, admin, productId, intent === "activate");
+        message = intent === "activate" ? "Produit réactivé." : "Produit désactivé : il n'est plus proposé.";
+        break;
+      case "link": {
+        if (!productId) return { error: "Choisissez le produit de la liste" };
+        const n = await linkUnlistedGroup(db, admin, groupKey, productId);
+        message = `${n} saisie${n > 1 ? "s rattachées" : " rattachée"} au produit.`;
+        break;
+      }
+      case "create_link": {
+        const product = await createProduct(db, admin, fields());
+        const n = await linkUnlistedGroup(db, admin, groupKey, product.id);
+        message = `Produit « ${product.name} » créé ; ${n} saisie${n > 1 ? "s rattachées" : " rattachée"}.`;
+        break;
+      }
+      default:
+        return { error: "Action inconnue" };
+    }
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError || e instanceof DeclarationError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/admin/produits");
+  return { message };
 }

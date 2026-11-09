@@ -67,7 +67,13 @@ Prévu initialement :
 - Causes (par zone, activation) + **file des causes proposées** à valider/rejeter/fusionner.
 - Destinations.
 - Unités.
-- Produits (référentiel simple, saisie manuelle — l'import arrive en Phase 2).
+- Produits (référentiel simple, saisie manuelle — l'import arrive en Phase 2) — **réalisé** :
+  - les saisies « hors liste » sont regroupées par nom (sans tenir compte des accents ni des majuscules) et
+    par type de produit ; chaque groupe se rattache à un produit existant ou à un produit créé à partir du nom ;
+  - le rattachement crée une nouvelle version de chaque déclaration (motif « Rattachement au produit du
+    référentiel ») : le nom saisi reste dans l'historique, les mesures et tares ne changent pas ; le poids en
+    kg est recalculé avec le poids unitaire ou la densité du produit quand la quantité n'a pas été pesée.
+- Jours de production (jours fériés, samedis travaillés) — **réalisé**.
 - Gastros et tares (versions datées).
 - Calendrier des semaines de production (génération + correction).
 - Comptes utilisateurs (création, réinitialisation de mot de passe, désactivation).

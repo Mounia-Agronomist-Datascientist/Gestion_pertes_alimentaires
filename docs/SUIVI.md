@@ -52,6 +52,7 @@
 | 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
 | 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
+| 2026-11-09 | Administration des produits : création, modification, désactivation (doublons de nom ou de code refusés, poids unitaire et densité seulement si connus) ; saisies « hors liste » regroupées par nom et rattachées à un produit (existant ou créé) avec une nouvelle version de chaque déclaration et conversion en kg si possible | 6 tests d'intégration ; création + rattachement vérifiés dans le navigateur (mobile) et en base |
 | 2026-11-09 | Administration des jours de production : retirer un jour férié, ajouter un samedi travaillé, navigation par semaine, motif et audit ; pris en compte par les alertes | 4 tests d'intégration ; ajout puis retrait d'un samedi vérifiés dans le navigateur (mobile) |
 | 2026-11-09 | Mise en ligne sur Netlify + Neon : adresse de base contrôlée sans être affichée dans les journaux, adaptateur Next.js de Netlify déclaré | Application en ligne, connexion admin et changement de mot de passe faits par l'administratrice |
 | 2026-11-09 | Préparation de la mise en ligne : `db:setup` (sans comptes de test), sauvegarde/restauration chiffrées, workflows GitHub (tests, sauvegarde, alertes, base), en-têtes de sécurité | Base vide initialisée localement ; sauvegarde → restauration identique ; build de production et en-têtes vérifiés |
@@ -64,7 +65,7 @@
 - ESLint/Prettier pas encore configurés (prévu au début de la Phase 1).
 - En mode groupé, les lignes non validées restent sur l'appareil (stockage du navigateur) : elles sont
   perdues si l'on vide les données du navigateur avant de valider.
-- Le référentiel des produits est vide : toutes les saisies sont « hors liste » en attendant une liste de départ.
+- Le référentiel des produits se saisit à la main (Administration → Produits) en attendant l'import de la Phase 2.
 - L'estimation par contenant (« 2 gastros pleins ») n'est pas convertie en kg : il faudrait un poids de
   référence par produit et par contenant.
 - La base de développement a été réinitialisée le 06/11/2026 (comptes renommés par fonction) ; elle contient
