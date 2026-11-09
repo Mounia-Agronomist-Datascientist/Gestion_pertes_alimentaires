@@ -127,7 +127,8 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 - Chaque semaine de production a donc deux **plages** : jeudi → vendredi (un samedi travaillé y est rattaché)
   et lundi → mercredi. Les jours de production viennent de la table `production_days` (pré-remplie jeudi,
   vendredi, lundi, mardi, mercredi, notés A à E comme sur le calendrier du portail). Les jours fériés sont
-  traités au cas par cas par l'entreprise : pour l'instant, toutes les semaines sont considérées normales.
+  traités au cas par cas par l'entreprise : l'administration retire un jour non travaillé ou ajoute un samedi
+  travaillé dans *Administration → Jours de production* (modification tracée dans le journal d'audit).
 - Le lendemain du dernier jour d'une plage, chaque équipe active dont **au moins un jour de production de la
   plage n'a aucune déclaration** reçoit une **perte estimée de 150 kg** pour la plage (une seule fois, quel que
   soit le nombre de jours manquants ; confirmé le 09/11/2026). Une semaine sans rien : 2 × 150 kg = 300 kg.

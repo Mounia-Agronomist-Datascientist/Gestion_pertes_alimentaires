@@ -25,7 +25,7 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | 1 🟠 | Comptes partagés | Mot de passe par équipe géré par l'admin ; rotation à chaque départ ; révocation des sessions. Durée de session proposée : 30 jours glissants pour les comptes équipe et responsables de zone, 12 h pour les autres | Phase 1 |
 | C1 ✅ | Délai des équipes | Déclaration le jour même attendue ; 7 jours maximum pour déclarer, corriger ou annuler ; au-delà, un responsable | — |
 | A1 ✅ | Alerte « saisie incomplète » | 150 kg par plage dès qu'un jour de production de la plage n'a aucune déclaration (300 kg max. par semaine) ; régularisée quand tous les jours sont rattrapés dans le délai | — |
-| P3 ✅ | Jours de production | Calendrier du portail : jeudi (A), vendredi (B), lundi (C), mardi (D), mercredi (E). Fériés au cas par cas : semaines normales pour l'instant ; écran d'ajustement à prévoir | — |
+| P3 ✅ | Jours de production | Calendrier du portail : jeudi (A), vendredi (B), lundi (C), mardi (D), mercredi (E). Fériés au cas par cas : semaines normales par défaut ; ajustement dans Administration → Jours de production (réalisé le 09/11/2026) | — |
 | P4 🟠 | Date de mise en service des alertes | Après les essais des équipes et la vérification du bon fonctionnement | Mise en service |
 | C2 ✅ | Causes initiales | Listes reçues pour toutes les zones et chargées (26 causes, voir src/db/seed/data.ts) | — |
 | P1 🔴 | Référentiel produits Phase 1 | Le référentiel est vide : les saisies se font en « hors liste ». Il faut une liste de départ (export Melba même partiel : identifiant, nom, catégorie, unité, poids unitaire si connu) | Mise en service |

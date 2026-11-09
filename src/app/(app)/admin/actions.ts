@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
 import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
+import { setProductionDay } from "@/modules/admin/production-days";
 import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
@@ -60,6 +61,16 @@ export async function teamWeekAction(formData: FormData): Promise<void> {
     note: String(formData.get("note") ?? ""),
   });
   revalidatePath("/admin/equipes");
+}
+
+export async function productionDayAction(formData: FormData): Promise<void> {
+  const admin = await requireUser();
+  await setProductionDay(db, admin, {
+    day: String(formData.get("day")),
+    isProductionDay: formData.get("production") === "1",
+    note: String(formData.get("note") ?? ""),
+  });
+  revalidatePath("/admin/calendrier");
 }
 
 // ─── Causes ──────────────────────────────────────────────────────────────────
