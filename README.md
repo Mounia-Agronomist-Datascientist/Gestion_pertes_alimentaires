@@ -13,6 +13,7 @@ causes, destinations, impact environnemental).
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture, technologies retenues, structure du projet, conventions, environnements, sauvegardes |
 | [docs/SCHEMA_BDD.md](docs/SCHEMA_BDD.md) | Schéma initial de la base de données |
 | [docs/ECRANS_PHASE1.md](docs/ECRANS_PHASE1.md) | Écrans et parcours de la Phase 1 |
+| [docs/PHASE2.md](docs/PHASE2.md) | Phase 2 : import du plan de production et du tome Melba (décisions, étapes) |
 | [docs/SECURITE.md](docs/SECURITE.md) | Rôles, matrice d'autorisation, règles de sécurité |
 | [docs/PLAN_TESTS.md](docs/PLAN_TESTS.md) | Stratégie et plan de tests |
 | [docs/REGLES_METIER.md](docs/REGLES_METIER.md) | Règles de calcul centralisées (semaines, unités, tares, destinations) |
@@ -27,7 +28,7 @@ causes, destinations, impact environnemental).
 |---|---|---|
 | 0 | Cadrage technique | ✅ |
 | 1 | Déclarations de pertes (application utilisable) | ✅ Développée — déclarations, historique, corrections, alertes, administration complète, journal d'audit ; reste l'essai pilote avec les équipes |
-| 2 | Référentiels et imports (Melba, CSV/Excel) | ⏳ |
+| 2 | Référentiels et imports (Melba, CSV/Excel) | 🟡 En cours — lecture du tome PDF faite |
 | 3 | Calcul des coûts | ⏳ |
 | 4 | Tableaux de bord et statistiques | ⏳ |
 | 5 | Valorisation et environnement | ⏳ |

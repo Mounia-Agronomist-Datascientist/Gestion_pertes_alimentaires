@@ -6,6 +6,7 @@ l'import du plan de production et du tome Melba (Phase 2). Le dépôt est privé
 | Fichier | Source | Traitement |
 |---|---|---|
 | `plan-production-S45.json` | Google Sheet « Plan de production », onglet S45 (lecture seule) | Blocs utiles uniquement : plats → équipe et barquettes, petits-déjeuners, barquettes par code |
+| `tome-S45.items.json` | Même tome, texte positionné (`scripts/extract-tome-fixture.ts`) | Titres, rendements et tableaux uniquement : étapes, commentaires, en-têtes et lien Melba retirés |
 | `tome-S45.txt` | Melba « Imprimer les recettes », S45 (PDF de 107 pages) | Texte extrait ; en-têtes et pieds de page d'impression supprimés (date, lien Melba avec paramètres internes) |
 
 Vérifié : aucune adresse e-mail. Un prénom présent dans un commentaire du tome a été remplacé par
