@@ -27,7 +27,7 @@
 | PWA | Manifest + service worker minimal | Installation sur l'écran d'accueil ; pas de hors-ligne en V1 (§24.6) |
 | Tests unitaires / intégration | **Vitest** + **PGlite** (PostgreSQL embarqué en WebAssembly) | Les tests d'intégration tournent sur un vrai moteur PostgreSQL sans Docker ni installation |
 | Tests de bout en bout | **Playwright** | Parcours de déclaration sur viewport mobile et desktop |
-| Imports (Phase 2) | `pdfjs-dist` (tome Melba), lecteur Excel à choisir (plan de production) | Lecture côté serveur avec prévisualisation |
+| Imports (Phase 2) | `pdfjs-dist` (tome Melba), `exceljs` (plan de production) | Lecture côté serveur avec prévisualisation |
 | Graphiques (Phase 4) | Recharts ou équivalent | Décidé en Phase 4 |
 
 ### Alternatives écartées

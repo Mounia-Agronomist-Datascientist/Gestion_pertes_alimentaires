@@ -16,3 +16,6 @@ next-env.d.ts
 
 # Construction Netlify locale
 .netlify
+
+# Fichiers réels déposés pour les essais locaux (plan de production, tome) : jamais commités
+imports-local/

@@ -20,7 +20,7 @@ Analyse détaillée des sources : [INTEGRATION_OUTIL_SOUS_RECETTES.md](INTEGRATI
 | Étape | Contenu | État |
 |---|---|---|
 | 2.1 | Lecture du tome PDF : recettes, sous-recettes, ingrédients, quantités, poids unitaires, coûts, rendement (brut / net) ; rapport d'anomalies | ✅ Lecture faite (`src/modules/imports/tome/`) ; enregistrement en 2.3 |
-| 2.2 | Lecture du plan de production (Excel de l'onglet) : groupes de codes → équipe, barquettes par code | ⏳ |
+| 2.2 | Lecture du plan de production (Excel de l'onglet) : groupes de codes → équipe, barquettes par code | ✅ Lecture faite (`src/modules/imports/plan/`) ; à confirmer sur un vrai téléchargement Excel |
 | 2.3 | Modèle de données par semaine (instantanés figés) et migration | ⏳ |
 | 2.4 | Écran d'import : dépôt des deux fichiers, aperçu, anomalies, validation ; un nouvel import d'une semaine validée crée une nouvelle version tracée | ⏳ |
 | 2.5 | Saisie : produits proposés selon l'équipe et la semaine (plat → sous-recette → ingrédient) | ⏳ |
@@ -53,3 +53,25 @@ Cas particuliers gérés :
 
 Données de test : `tests/fixtures/s45/tome-S45.items.json`, produit par `scripts/extract-tome-fixture.ts`
 (titres, rendements et tableaux uniquement : ni commentaires, ni en-têtes, ni lien Melba).
+
+## Lecture du plan de production (2.2)
+
+Le fichier déposé est le **classeur entier** téléchargé depuis Google Sheets (Fichier → Télécharger →
+Microsoft Excel) : seul l'onglet de la semaine (`S45`, `S2552`…) est lu ; les autres onglets, dont celui des
+chefs d'équipe (noms, adresses e-mail), ne sont ni lus ni enregistrés.
+
+Dans l'onglet, les colonnes sont repérées par leur titre et non par leur position :
+- blocs « Référence PLATS » (plats puis petits-déjeuners) : groupe de codes → **équipe** (colonne « Equipe »)
+  et **barquettes du groupe** (colonne « Nb de barq. ») ;
+- bloc des barquettes par code, plus bas : code → barquettes de la semaine, barquettes du premier jour.
+
+Anomalies signalées : onglet qui n'est pas une semaine, équipe non renseignée ou inconnue, code présent dans
+deux groupes, code avec des barquettes mais sans groupe.
+
+Vérifié sur l'extrait S45 : 18 groupes de plats, 12 de petits-déjeuners, 60 codes, 8 équipes, aucune anomalie.
+
+## Essais en local
+
+Pour essayer les lectures sur de vrais fichiers sans les enregistrer dans GitHub, les déposer dans le dossier
+`imports-local/` du projet (ignoré par Git). En production, les fichiers seront déposés dans l'écran d'import
+(étape 2.4) et ne seront pas conservés : seules les données lues et validées sont enregistrées.
