@@ -5,6 +5,11 @@
 set -euo pipefail
 : "${DATABASE_URL:?DATABASE_URL manquant}"
 : "${BACKUP_PASSPHRASE:?BACKUP_PASSPHRASE manquant}"
+# Contrôle du format sans jamais afficher l'adresse (elle contient le mot de passe).
+case "$DATABASE_URL" in
+  postgres://*|postgresql://*) ;;
+  *) echo "DATABASE_URL doit commencer par postgresql:// (sans guillemets, espace ni texte avant)" >&2; exit 1 ;;
+esac
 dir="${1:-backups}"
 mkdir -p "$dir"
 file="$dir/pertes-$(date -u +%Y%m%d-%H%M).dump.enc"

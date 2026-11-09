@@ -3,6 +3,10 @@
 # Usage : TARGET_URL=... BACKUP_PASSPHRASE=... RESTORE_CONFIRM=oui scripts/restore.sh <fichier.dump.enc>
 set -euo pipefail
 : "${TARGET_URL:?TARGET_URL manquant (base à remplacer)}"
+case "$TARGET_URL" in
+  postgres://*|postgresql://*) ;;
+  *) echo "TARGET_URL doit commencer par postgresql:// (sans guillemets, espace ni texte avant)" >&2; exit 1 ;;
+esac
 : "${BACKUP_PASSPHRASE:?BACKUP_PASSPHRASE manquant}"
 file="${1:?Fichier de sauvegarde manquant}"
 if [ "${RESTORE_CONFIRM:-}" != "oui" ]; then
