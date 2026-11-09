@@ -28,7 +28,7 @@ d'aucun service propre à Netlify, ce qui facilitera la migration vers la platef
 
 | Élément | Fichier | Vérifié |
 |---|---|---|
-| Configuration Netlify | `netlify.toml` | — (au premier déploiement) |
+| Configuration Netlify (adaptateur Next.js `@netlify/plugin-nextjs` déclaré) | `netlify.toml` | Construction Netlify locale (`netlify build --offline`) |
 | En-têtes de sécurité (HTTPS strict, page non intégrable, etc.) | `next.config.ts` | Build de production local |
 | Connexion Neon (adresse poolée, peu de connexions par instance) | `src/db/client.ts` | — |
 | Initialisation / mise à jour de la base : migrations, référentiels, compte `admin` (mot de passe provisoire), **jamais de comptes de test** | `npm run db:setup` | Base vide locale : refus sans mot de passe, création unique |

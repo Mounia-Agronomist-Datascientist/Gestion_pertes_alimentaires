@@ -1,4 +1,4 @@
-# Déploiement Netlify (docs/HEBERGEMENT.md). Next.js est détecté automatiquement.
+# Déploiement Netlify (docs/HEBERGEMENT.md). Adaptateur Next.js déclaré ci-dessous.
 [build]
   command = "npm run build"
   publish = ".next"
@@ -6,3 +6,8 @@
 [build.environment]
   NODE_VERSION = "22"
   NEXT_TELEMETRY_DISABLED = "1"
+
+# Adaptateur Next.js de Netlify, déclaré explicitement : sans lui, Netlify publie seulement les
+# fichiers statiques et toutes les pages répondent « Page not found ».
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

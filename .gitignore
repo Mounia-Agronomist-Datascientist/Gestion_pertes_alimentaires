@@ -13,3 +13,6 @@ backups/
 next-env.d.ts
 *.tsbuildinfo
 *.local.md
+
+# Construction Netlify locale
+.netlify
