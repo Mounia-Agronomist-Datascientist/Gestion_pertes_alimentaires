@@ -5,6 +5,17 @@ import { db } from "@/db/client";
 import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
 import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
 import { setContainerActive, setContainerMaxCount, setContainerTare } from "@/modules/admin/containers";
+import {
+  createDestination,
+  createSubzone,
+  moveDestination,
+  moveSubzone,
+  renameZone,
+  setDestinationActive,
+  setSubzoneActive,
+  updateDestination,
+  updateSubzone,
+} from "@/modules/admin/places";
 import { setProductionDay } from "@/modules/admin/production-days";
 import { createProduct, linkUnlistedGroup, setProductActive, updateProduct } from "@/modules/admin/products";
 import { setTeamWeekActive } from "@/modules/admin/teams";
@@ -230,5 +241,90 @@ export async function tareAction(_prev: TareActionState, formData: FormData): Pr
     throw e;
   }
   revalidatePath("/admin/tares");
+  return { message };
+}
+
+// ─── Destinations, zones et postes ───────────────────────────────────────────
+
+export interface PlaceActionState {
+  error?: string;
+  message?: string;
+}
+
+export async function destinationAction(_prev: PlaceActionState, formData: FormData): Promise<PlaceActionState> {
+  const admin = await requireUser();
+  const intent = String(formData.get("intent"));
+  const id = String(formData.get("id") ?? "");
+  const fields = () => ({
+    name: String(formData.get("name") ?? ""),
+    kind: String(formData.get("kind") ?? "") as never,
+    financialRecovery: formData.get("financialRecovery") === "on",
+  });
+  let message: string | undefined;
+  try {
+    switch (intent) {
+      case "create":
+        message = `Destination « ${(await createDestination(db, admin, fields())).name} » créée.`;
+        break;
+      case "update":
+        await updateDestination(db, admin, id, fields());
+        message = "Destination modifiée.";
+        break;
+      case "activate":
+      case "deactivate":
+        await setDestinationActive(db, admin, id, intent === "activate");
+        message = intent === "activate" ? "Destination réactivée." : "Destination désactivée : elle n'est plus proposée.";
+        break;
+      case "up":
+      case "down":
+        await moveDestination(db, admin, id, intent);
+        break;
+      default:
+        return { error: "Action inconnue" };
+    }
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/admin/destinations");
+  return { message };
+}
+
+export async function zoneAction(_prev: PlaceActionState, formData: FormData): Promise<PlaceActionState> {
+  const admin = await requireUser();
+  const intent = String(formData.get("intent"));
+  const id = String(formData.get("id") ?? "");
+  const fields = () => ({ name: String(formData.get("name") ?? ""), description: String(formData.get("description") ?? "") });
+  let message: string | undefined;
+  try {
+    switch (intent) {
+      case "rename_zone":
+        await renameZone(db, admin, id, formData.get("name"));
+        message = "Zone renommée.";
+        break;
+      case "create":
+        message = `Poste « ${(await createSubzone(db, admin, String(formData.get("zoneId")), fields())).name} » créé.`;
+        break;
+      case "update":
+        await updateSubzone(db, admin, id, fields());
+        message = "Poste modifié.";
+        break;
+      case "activate":
+      case "deactivate":
+        await setSubzoneActive(db, admin, id, intent === "activate");
+        message = intent === "activate" ? "Poste réactivé." : "Poste désactivé : il n'est plus proposé.";
+        break;
+      case "up":
+      case "down":
+        await moveSubzone(db, admin, id, intent);
+        break;
+      default:
+        return { error: "Action inconnue" };
+    }
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/admin/zones");
   return { message };
 }

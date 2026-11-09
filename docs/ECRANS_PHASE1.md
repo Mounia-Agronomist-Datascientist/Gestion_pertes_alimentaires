@@ -63,9 +63,10 @@ Prévu initialement :
 
 ## E6 — Administration (ordinateur principalement)
 - Équipes (couleurs, horaires, responsables, activation par semaine).
-- Zones et sous-zones (ordre, `team_mode`, méthodes proposées, activation).
+- Zones et sous-zones (ordre, `team_mode`, méthodes proposées, activation) — **réalisé** : renommage, nouveau
+  poste, ordre, désactivation ; le `team_mode` (règle R7 validée) et les méthodes proposées ne se modifient pas ici.
 - Causes (par zone, activation) + **file des causes proposées** à valider/rejeter/fusionner.
-- Destinations.
+- Destinations — **réalisé** : le type d'une destination déjà utilisée ne change plus (statistiques passées).
 - Unités.
 - Produits (référentiel simple, saisie manuelle — l'import arrive en Phase 2) — **réalisé** :
   - les saisies « hors liste » sont regroupées par nom (sans tenir compte des accents ni des majuscules) et

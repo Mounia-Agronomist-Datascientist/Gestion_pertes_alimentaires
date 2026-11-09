@@ -22,6 +22,11 @@ body {
     @apply min-h-14 rounded-xl border-2 border-teal-700 bg-white px-4 text-lg font-semibold text-teal-800 hover:bg-teal-50 disabled:opacity-60;
   }
 
+  /** Petit bouton carré pour changer l'ordre d'une liste (↑ ↓). */
+  .btn-order {
+    @apply flex size-11 items-center justify-center rounded-lg bg-slate-100 text-lg font-semibold text-slate-700 disabled:opacity-30;
+  }
+
   .btn-tile {
     @apply flex min-h-24 flex-col items-start justify-center gap-1 rounded-2xl bg-teal-700 p-4 text-xl font-semibold text-white;
   }
