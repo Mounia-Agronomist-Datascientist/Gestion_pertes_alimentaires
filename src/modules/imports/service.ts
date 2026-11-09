@@ -164,3 +164,26 @@ export async function teamWeekRecipes(db: Db, productionWeekId: string, teamId: 
     .where(and(eq(s.weekRecipes.importId, current.id), eq(s.weekRecipes.teamId, teamId)))
     .orderBy(asc(s.weekRecipes.code));
 }
+
+/** Imports enregistrés, du plus récent au plus ancien (écran d'import). */
+export async function listWeekImports(db: Db, admin: AuthUser, limit = 20) {
+  requirePermission(admin, "referentiel.manage");
+  return db
+    .select({
+      id: s.weeklyImports.id,
+      version: s.weeklyImports.version,
+      status: s.weeklyImports.status,
+      createdAt: s.weeklyImports.createdAt,
+      tomeFileName: s.weeklyImports.tomeFileName,
+      planSheetName: s.weeklyImports.planSheetName,
+      anomalies: s.weeklyImports.anomalies,
+      weekYear: s.productionWeeks.year,
+      weekNumber: s.productionWeeks.number,
+      createdByName: s.users.displayName,
+    })
+    .from(s.weeklyImports)
+    .innerJoin(s.productionWeeks, eq(s.weeklyImports.productionWeekId, s.productionWeeks.id))
+    .innerJoin(s.users, eq(s.weeklyImports.createdBy, s.users.id))
+    .orderBy(desc(s.weeklyImports.createdAt))
+    .limit(limit);
+}

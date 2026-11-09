@@ -5,6 +5,9 @@
 import type { PlanParseResult } from "./plan/parse-plan";
 import type { TomeParseResult, TomeRecipe, TomeSubRecipe } from "./tome/parse-tome";
 
+/** Encas (règle R9) : codes « EN… », hors plan de production, proposés en conditionnement, réception et stockage. */
+export const isSnackCode = (code: string) => /^EN\d/.test(code);
+
 export interface WeekImportRecipe extends TomeRecipe {
   team: string | null;
   planGroup: string | null;
@@ -59,7 +62,7 @@ export function buildWeekImport(tome: TomeParseResult, plan: PlanParseResult): W
   const tomeCodes = new Set(tome.recipes.map((r) => r.code));
   const missingInTome = [...new Set([...groupOf.keys(), ...volumeOf.keys()])].filter((c) => !tomeCodes.has(c));
   if (missingInTome.length) warnings.push(`Codes du plan absents du tome (aucune recette) : ${missingInTome.join(", ")}`);
-  const withoutTeam = recipes.filter((r) => !r.team).map((r) => r.code);
+  const withoutTeam = recipes.filter((r) => !r.team && !isSnackCode(r.code)).map((r) => r.code);
   if (withoutTeam.length) {
     warnings.push(`Recettes du tome sans équipe dans le plan (non proposées aux équipes) : ${withoutTeam.join(", ")}`);
   }

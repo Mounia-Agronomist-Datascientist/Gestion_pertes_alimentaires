@@ -7,25 +7,48 @@
 import ExcelJS from "exceljs";
 import type { Grid } from "./parse-plan";
 
-/** Noms des onglets du classeur, dans l'ordre. */
-export async function listWorkbookSheets(data: Uint8Array): Promise<string[]> {
-  const workbook = await load(data);
-  return workbook.worksheets.map((w) => w.name);
+export interface OpenedWorkbook {
+  /** Noms des onglets, dans l'ordre. */
+  sheetNames: string[];
+  /** Contenu d'un onglet, cellule par cellule, tel qu'affiché ; null si l'onglet n'existe pas. */
+  readSheet(name: string): Grid | null;
 }
 
-/** Contenu d'un onglet, cellule par cellule, tel qu'affiché (résultat des formules). */
+/** Ouvre le classeur une seule fois (il peut peser plusieurs Mo) ; les onglets sont lus à la demande. */
+export async function openWorkbook(data: Uint8Array): Promise<OpenedWorkbook> {
+  const workbook = await load(data);
+  return {
+    sheetNames: workbook.worksheets.map((w) => w.name),
+    readSheet(name) {
+      const sheet = workbook.getWorksheet(name);
+      if (!sheet) return null;
+      const grid: string[][] = [];
+      sheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+        const values: string[] = [];
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          values[colNumber - 1] = displayedText(cell);
+        });
+        grid[rowNumber - 1] = Array.from(values, (v) => v ?? "");
+      });
+      return Array.from(grid, (row) => row ?? []);
+    },
+  };
+}
+
+/** Noms des onglets du classeur, dans l'ordre. */
+export async function listWorkbookSheets(data: Uint8Array): Promise<string[]> {
+  return (await openWorkbook(data)).sheetNames;
+}
+
+/** Contenu d'un onglet (raccourci de `openWorkbook`). */
 export async function readWorkbookSheet(data: Uint8Array, sheetName: string): Promise<Grid | null> {
-  const sheet = (await load(data)).getWorksheet(sheetName);
-  if (!sheet) return null;
-  const grid: string[][] = [];
-  sheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-    const values: string[] = [];
-    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-      values[colNumber - 1] = displayedText(cell);
-    });
-    grid[rowNumber - 1] = Array.from(values, (v) => v ?? "");
-  });
-  return Array.from(grid, (row) => row ?? []);
+  return (await openWorkbook(data)).readSheet(sheetName);
+}
+
+/** Nom de l'onglet d'une semaine : « S45 » pour l'année du plan, « S2552 » pour une autre année. */
+export function expectedSheetNames(year: number, week: number): string[] {
+  const ww = String(week).padStart(2, "0");
+  return [`S${ww}`, `S${String(year).slice(-2)}${ww}`];
 }
 
 /**

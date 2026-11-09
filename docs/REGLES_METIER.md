@@ -146,3 +146,11 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 - Visible par l'administratrice et le responsable de production (toutes les équipes) et par chaque équipe (les siennes).
 - Mise en service : variable `ALERTES_DEBUT` (aucune plage antérieure n'est contrôlée). Évaluation à chaque
   affichage de l'accueil et par la tâche quotidienne `npm run alertes:evaluer` (à planifier vers 22h).
+
+## R9 — Encas (validé le 09/11/2026)
+
+- Les encas sont les recettes du tome dont le code commence par `EN` (`EN01_EQ`, `EN07_FB`…). Ils ne figurent
+  pas dans le plan de production : ils n'appartiennent à aucune équipe de cuisine.
+- Ils sont proposés **uniquement** dans les zones **Conditionnement**, **Réception** et **Stockage** ; jamais
+  aux équipes de cuisine.
+- À l'import, leur absence du plan est normale : elle n'est pas signalée comme une anomalie.

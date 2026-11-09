@@ -22,7 +22,7 @@ Analyse détaillée des sources : [INTEGRATION_OUTIL_SOUS_RECETTES.md](INTEGRATI
 | 2.1 | Lecture du tome PDF : recettes, sous-recettes, ingrédients, quantités, poids unitaires, coûts, rendement (brut / net) ; rapport d'anomalies | ✅ Lecture faite (`src/modules/imports/tome/`) ; enregistrement en 2.3 |
 | 2.2 | Lecture du plan de production (Excel de l'onglet) : groupes de codes → équipe, barquettes par code | ✅ Lecture faite (`src/modules/imports/plan/`), vérifiée sur le vrai classeur |
 | 2.3 | Modèle de données par semaine (instantanés figés) et migration | ✅ Migration `0007`, rapprochement (`merge.ts`) et enregistrement (`service.ts`) |
-| 2.4 | Écran d'import : dépôt des deux fichiers, aperçu, anomalies, validation ; un nouvel import d'une semaine validée crée une nouvelle version tracée | ⏳ |
+| 2.4 | Écran d'import : dépôt des deux fichiers, aperçu, anomalies, validation ; un nouvel import d'une semaine validée crée une nouvelle version tracée | ✅ Administration → Import de la semaine |
 | 2.5 | Saisie : produits proposés selon l'équipe et la semaine (plat → sous-recette → ingrédient) | ⏳ |
 | 2.6 | Coût de la semaine conservé avec chaque perte (préparation de la Phase 3) | ⏳ |
 
@@ -89,8 +89,27 @@ Pour essayer les lectures sur de vrais fichiers sans les enregistrer dans GitHub
 - **Rapprochement** du tome et du plan : chaque plat reçoit son équipe, son groupe et ses barquettes.
   - Bloquant : tome vide, tome et onglet de semaines différentes, onglet sans plats, semaine absente du calendrier.
   - À vérifier (n'empêche pas la validation, conservé avec l'import) : anomalies de lecture, codes du plan
-    absents du tome, recettes du tome sans équipe (en S45 : les 22 encas `EN…`, qui ne sont pas dans le plan).
+    absents du tome, plats du tome sans équipe. Les encas (`EN…`, 22 en S45) ne sont jamais dans le plan : c'est normal
+    (règle R9), ils ne sont pas signalés et seront proposés en conditionnement, réception et stockage.
 - **Instantané figé** : plats, sous-recettes et compositions de la semaine, avec les coûts du tome.
 - **Réimport** de la même semaine : nouvelle version, l'ancienne passe en « remplacée » (rien n'est effacé),
   trace dans le journal d'audit.
 - Import réservé à l'administration (permission `referentiel.manage`).
+
+## Écran d'import (2.4)
+
+Administration → **Import de la semaine** :
+1. déposer le tome (PDF) ; 2. déposer le classeur du plan (Excel) — l'onglet de la semaine du tome est choisi
+automatiquement ; 3. aperçu : plats par équipe avec barquettes, nombre d'encas et de sous-recettes, erreurs
+bloquantes, points à vérifier, avertissement si la semaine est déjà importée ; 4. valider.
+
+**Les fichiers sont lus dans le navigateur** et ne sont jamais envoyés au serveur : seules les données lues
+(environ 150 Ko pour une semaine, contre près de 10 Mo de fichiers) partent, ce qui respecte la limite d'envoi
+de Netlify et garde sur l'ordinateur les autres onglets du classeur. Le serveur revérifie la forme des données
+(`payload.ts`) et refait lui-même le rapprochement avant d'enregistrer.
+
+Le travailleur de pdfjs est copié dans `public/` à chaque installation (`postinstall` → `scripts/copy-pdf-worker.mjs`).
+
+Vérifié avec les vrais fichiers (tome S45 et classeur du 09/11/2026) dans le navigateur : lecture en quelques
+secondes, onglet S45 choisi seul, 60 plats sur 8 équipes, 22 encas, 105 sous-recettes, import enregistré
+(82 plats, 695 lignes) ; affichage mobile vérifié ; construction Netlify locale réussie.

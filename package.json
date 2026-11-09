@@ -19,7 +19,8 @@
     "db:reset": "tsx scripts/db-reset.ts && npm run db:migrate && npm run db:seed && rm -f comptes-dev.local.md && npm run db:dev-accounts",
     "db:dev-accounts": "tsx scripts/create-dev-accounts.ts",
     "alertes:evaluer": "tsx scripts/evaluate-alerts.ts",
-    "db:setup": "tsx scripts/db-setup.ts"
+    "db:setup": "tsx scripts/db-setup.ts",
+    "postinstall": "node scripts/copy-pdf-worker.mjs"
   },
   "repository": {
     "type": "git",
