@@ -187,7 +187,7 @@ l'utilisateur applicatif).
 
 | Phase | Tables |
 |---|---|
-| 2 | `imports`, `import_rows` (prévisualisation, anomalies), `product_versions`, `recipes`, `recipe_components` (sous-recette ↔ recette, N-N avec quantités), `week_product_plans` (références prévues par semaine et éventuellement par équipe), `external_feed_mappings` (adaptateur pour l'outil du collègue) |
+| 2 | **Réalisé (0007)** : `weekly_imports` (une version par import, une seule en vigueur par semaine), `week_recipes` (plat de la semaine : code, nom, équipe, groupe du plan, barquettes, portion, coût), `week_sub_recipes` (nom normalisé, quantité de référence, poids brut / net, coût), `week_recipe_lines` (composition d'un plat ou d'une sous-recette : quantité, unité, poids unitaire, coût, lien vers la sous-recette détaillée). L'aperçu n'est pas stocké : il est recalculé à partir des fichiers déposés. |
 | 3 | `cost_versions` (coût par référence et période), `labour_rates` (par groupe de zones, dates d'effet), `packaging_items`, `packaging_costs`, `declaration_cost_snapshots` |
 | 4 | `production_volumes` (dénominateurs des ratios par semaine) |
 | 5 | `emission_factors` (valeur, unité, source, version, hypothèses), `alchimistes_collections` (poids externes, rapprochement — jamais additionnés aux pertes) |

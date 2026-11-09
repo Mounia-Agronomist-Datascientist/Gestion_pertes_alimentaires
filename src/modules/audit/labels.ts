@@ -12,6 +12,7 @@ export const AUDIT_ENTITY_LABELS: Record<string, string> = {
   team: "Équipe",
   production_day: "Jour de production",
   missing_declaration_alert: "Alerte « saisie incomplète »",
+  weekly_import: "Import de la semaine",
 };
 
 export const AUDIT_ACTION_LABELS: Record<string, string> = {
@@ -40,6 +41,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   alert_created: "Alerte créée",
   alert_regularized: "Alerte régularisée",
   alert_cancelled: "Alerte levée",
+  import_week: "Import plan + tome",
 };
 
 export const auditEntityLabel = (entity: string) => AUDIT_ENTITY_LABELS[entity] ?? entity;

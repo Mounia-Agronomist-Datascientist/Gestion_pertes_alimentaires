@@ -1,12 +1,9 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { PdfItem } from "@/modules/imports/tome/pdf-items";
 import { parseTome, tomeKey, unitWeightInGrams } from "@/modules/imports/tome/parse-tome";
+import { s45TomeItems } from "../helpers/s45";
 
-// Texte positionné du tome S45 (scripts/extract-tome-fixture.ts) : tableaux seulement, sans commentaires.
-const rows = JSON.parse(readFileSync("tests/fixtures/s45/tome-S45.items.json", "utf8")) as [number, number, number, number, number, string][];
-const items: PdfItem[] = rows.map(([page, x, y, width, size, text]) => ({ page, x, y, width, size, text }));
-const tome = parseTome(items);
+const tome = parseTome(s45TomeItems());
 const recipe = (code: string) => tome.recipes.find((r) => r.code === code)!;
 const subRecipe = (name: string) => tome.subRecipes.find((s) => s.key === tomeKey(name))!;
 

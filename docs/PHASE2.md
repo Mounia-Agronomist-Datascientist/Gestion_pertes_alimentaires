@@ -21,7 +21,7 @@ Analyse détaillée des sources : [INTEGRATION_OUTIL_SOUS_RECETTES.md](INTEGRATI
 |---|---|---|
 | 2.1 | Lecture du tome PDF : recettes, sous-recettes, ingrédients, quantités, poids unitaires, coûts, rendement (brut / net) ; rapport d'anomalies | ✅ Lecture faite (`src/modules/imports/tome/`) ; enregistrement en 2.3 |
 | 2.2 | Lecture du plan de production (Excel de l'onglet) : groupes de codes → équipe, barquettes par code | ✅ Lecture faite (`src/modules/imports/plan/`), vérifiée sur le vrai classeur |
-| 2.3 | Modèle de données par semaine (instantanés figés) et migration | ⏳ |
+| 2.3 | Modèle de données par semaine (instantanés figés) et migration | ✅ Migration `0007`, rapprochement (`merge.ts`) et enregistrement (`service.ts`) |
 | 2.4 | Écran d'import : dépôt des deux fichiers, aperçu, anomalies, validation ; un nouvel import d'une semaine validée crée une nouvelle version tracée | ⏳ |
 | 2.5 | Saisie : produits proposés selon l'équipe et la semaine (plat → sous-recette → ingrédient) | ⏳ |
 | 2.6 | Coût de la semaine conservé avec chaque perte (préparation de la Phase 3) | ⏳ |
@@ -83,3 +83,14 @@ Vérifié sur le vrai classeur téléchargé le 09/11/2026 (57 onglets) :
 Pour essayer les lectures sur de vrais fichiers sans les enregistrer dans GitHub, les déposer dans le dossier
 `imports-local/` du projet (ignoré par Git). En production, les fichiers seront déposés dans l'écran d'import
 (étape 2.4) et ne seront pas conservés : seules les données lues et validées sont enregistrées.
+
+## Enregistrement d'une semaine (2.3)
+
+- **Rapprochement** du tome et du plan : chaque plat reçoit son équipe, son groupe et ses barquettes.
+  - Bloquant : tome vide, tome et onglet de semaines différentes, onglet sans plats, semaine absente du calendrier.
+  - À vérifier (n'empêche pas la validation, conservé avec l'import) : anomalies de lecture, codes du plan
+    absents du tome, recettes du tome sans équipe (en S45 : les 22 encas `EN…`, qui ne sont pas dans le plan).
+- **Instantané figé** : plats, sous-recettes et compositions de la semaine, avec les coûts du tome.
+- **Réimport** de la même semaine : nouvelle version, l'ancienne passe en « remplacée » (rien n'est effacé),
+  trace dans le journal d'audit.
+- Import réservé à l'administration (permission `referentiel.manage`).

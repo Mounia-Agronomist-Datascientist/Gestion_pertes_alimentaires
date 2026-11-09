@@ -1,24 +1,6 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { type Grid, parsePlan, parsePlanNumber } from "@/modules/imports/plan/parse-plan";
-
-/** Reconstitue l'onglet S45 à partir de l'extrait : chaque bloc est replacé à sa position d'origine. */
-function s45Grid(): string[][] {
-  const fixture = JSON.parse(readFileSync("tests/fixtures/s45/plan-production-S45.json", "utf8")) as {
-    blocks: Record<string, { range: string; rows: string[][] }>;
-  };
-  const grid: string[][] = [];
-  for (const { range, rows } of Object.values(fixture.blocks)) {
-    const [, colLetter, rowNumber] = range.match(/!([A-Z])(\d+)/)!;
-    const top = Number(rowNumber) - 1;
-    const left = colLetter!.charCodeAt(0) - 65;
-    rows.forEach((values, i) => {
-      const row = (grid[top + i] ??= []);
-      values.forEach((v, j) => (row[left + j] = v));
-    });
-  }
-  return Array.from(grid, (row) => Array.from(row ?? [], (v) => v ?? ""));
-}
+import { s45PlanGrid as s45Grid } from "../helpers/s45";
 
 describe("lecture du plan de production S45", () => {
   const plan = parsePlan("S45", s45Grid());

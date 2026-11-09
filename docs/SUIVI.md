@@ -52,6 +52,7 @@
 | 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
 | 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
+| 2026-11-09 | Phase 2 — enregistrement d'une semaine importée : rapprochement tome + plan (équipe, barquettes, anomalies bloquantes ou à vérifier), instantané figé par semaine, nouvelle version tracée en cas de réimport | 3 tests unitaires + 3 tests d'intégration ; S45 : 82 plats, 105 sous-recettes, 695 lignes |
 | 2026-11-09 | Phase 2 — lecture du plan de production (classeur Excel, onglet de la semaine) : groupes de codes → équipe et barquettes, barquettes par code, anomalies | 8 tests unitaires ; extrait S45 : 30 groupes, 60 codes, 0 anomalie |
 | 2026-11-09 | Phase 2 — lecture du tome Melba (PDF) : recettes, sous-recettes, ingrédients, poids unitaires, coûts, poids brut/net, anomalies ; commentaires jamais lus | 9 tests unitaires ; tome S45 réel : 82 recettes, 105 sous-recettes, 0 anomalie, coûts cohérents |
 | 2026-11-09 | Journal d'audit consultable (administration et responsable production) : filtres objet / auteur / période, pagination, champs modifiés en clair, détail avant/après sans aucune donnée de mot de passe, lien vers la déclaration | 2 tests unitaires + 4 tests d'intégration ; filtres et absence d'empreinte de mot de passe vérifiés dans le navigateur (mobile) |
@@ -91,6 +92,7 @@
 | `0001_referentiels_phase1` | Création des 18 tables de référentiels, comptes et audit | Aucune modification de `production_weeks` |
 | `0004_lignes_versionnees` | Colonne `revision` sur les tares et destinations des déclarations | Lignes existantes rattachées à la version 1 |
 | `0006_alertes_jours_manquants` | Colonne `missing_days` sur les alertes | Alertes existantes : liste vide, recalculée à la prochaine évaluation |
+| `0007_import_hebdomadaire` | Tables `weekly_imports`, `week_recipes`, `week_sub_recipes`, `week_recipe_lines` | Nouvelles tables vides ; aucune donnée existante modifiée |
 | `0005_alertes_rien_de_note` | Tables `production_days` et `missing_declaration_alerts` | Aucune modification des tables existantes |
 | `0003_declarations` | Création des 5 tables de déclarations, tares utilisées, destinations, versions et lots | Aucune modification des tables existantes |
 | `0002_causes_par_sous_zone` | Création de `cause_subzones` | Aucune modification des tables existantes ; base de dév. recréée (aucune donnée réelle) |

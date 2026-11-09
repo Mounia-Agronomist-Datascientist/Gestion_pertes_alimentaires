@@ -50,6 +50,13 @@
       "when": 1794215307340,
       "tag": "0006_alertes_jours_manquants",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794239319301,
+      "tag": "0007_import_hebdomadaire",
+      "breakpoints": true
     }
   ]
 }
