@@ -74,7 +74,7 @@ Prévu initialement :
     référentiel ») : le nom saisi reste dans l'historique, les mesures et tares ne changent pas ; le poids en
     kg est recalculé avec le poids unitaire ou la densité du produit quand la quantité n'a pas été pesée.
 - Jours de production (jours fériés, samedis travaillés) — **réalisé**.
-- Gastros et tares (versions datées).
+- Gastros et tares (versions datées) — **réalisé** (créer un nouveau type de contenant : à faire si besoin).
 - Calendrier des semaines de production (génération + correction).
 - Comptes utilisateurs (création, réinitialisation de mot de passe, désactivation).
 - Journal d'audit (consultation).

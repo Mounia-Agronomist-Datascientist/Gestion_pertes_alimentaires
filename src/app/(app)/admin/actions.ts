@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
 import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
+import { setContainerActive, setContainerMaxCount, setContainerTare } from "@/modules/admin/containers";
 import { setProductionDay } from "@/modules/admin/production-days";
 import { createProduct, linkUnlistedGroup, setProductActive, updateProduct } from "@/modules/admin/products";
 import { setTeamWeekActive } from "@/modules/admin/teams";
@@ -184,5 +185,50 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
     throw e;
   }
   revalidatePath("/admin/produits");
+  return { message };
+}
+
+// ─── Gastros et tares ────────────────────────────────────────────────────────
+
+export interface TareActionState {
+  error?: string;
+  message?: string;
+}
+
+export async function tareAction(_prev: TareActionState, formData: FormData): Promise<TareActionState> {
+  const admin = await requireUser();
+  const intent = String(formData.get("intent"));
+  const containerTypeId = String(formData.get("containerTypeId") ?? "");
+  const name = String(formData.get("name") ?? "");
+  let message: string;
+  try {
+    switch (intent) {
+      case "tare": {
+        const tare = await setContainerTare(db, admin, {
+          containerTypeId,
+          unitTareKg: String(formData.get("unitTareKg") ?? ""),
+          validFrom: String(formData.get("validFrom") ?? ""),
+          note: String(formData.get("note") ?? ""),
+        });
+        message = `${name} : ${tare.unitTareKg.toLocaleString("fr-FR")} kg à partir du ${new Date(`${tare.validFrom}T12:00:00Z`).toLocaleDateString("fr-FR")}.`;
+        break;
+      }
+      case "max":
+        await setContainerMaxCount(db, admin, containerTypeId, formData.get("maxCount"));
+        message = `${name} : nombre maximum enregistré.`;
+        break;
+      case "activate":
+      case "deactivate":
+        await setContainerActive(db, admin, containerTypeId, intent === "activate");
+        message = intent === "activate" ? `${name} réactivé.` : `${name} désactivé : il n'est plus proposé à la saisie.`;
+        break;
+      default:
+        return { error: "Action inconnue" };
+    }
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/admin/tares");
   return { message };
 }

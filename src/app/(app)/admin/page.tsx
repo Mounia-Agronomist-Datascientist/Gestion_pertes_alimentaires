@@ -6,6 +6,7 @@ const SECTIONS = [
   { href: "/admin/comptes", title: "Comptes", text: "Créer un compte, réinitialiser un mot de passe, désactiver" },
   { href: "/admin/equipes", title: "Équipes par semaine", text: "Désactiver une équipe pendant une semaine creuse" },
   { href: "/admin/produits", title: "Produits", text: "Liste des produits et saisies « hors liste » à rattacher" },
+  { href: "/admin/tares", title: "Gastros et tares", text: "Poids des gastros et des échelles, à partir d'une date" },
   { href: "/admin/calendrier", title: "Jours de production", text: "Retirer un jour férié, ajouter un samedi travaillé" },
   { href: "/admin/causes", title: "Causes", text: "Gérer les causes par zone et valider les propositions" },
 ];
@@ -25,7 +26,7 @@ export default function AdminPage() {
           </Link>
         ))}
       </div>
-      <p className="text-sm text-slate-500">À venir : tares des gastros, destinations, zones, journal d&apos;audit.</p>
+      <p className="text-sm text-slate-500">À venir : destinations, zones, journal d&apos;audit.</p>
     </>
   );
 }

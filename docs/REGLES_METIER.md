@@ -55,6 +55,11 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
 6. `tare totale = tare de l'échelle éventuelle + Σ tares des types` ; `poids net = poids brut − tare totale`.
 7. Si le poids net ≤ 0 → erreur bloquante (« le poids brut doit être supérieur à la tare »).
 8. L'identifiant **de la version de tare** utilisée est conservé dans la déclaration.
+9. Les tares sont **datées** (Administration → Gastros et tares) : une nouvelle tare s'applique à partir d'une
+   date postérieure à la dernière version, la précédente est clôturée la veille. Une tare qui a servi n'est
+   jamais réécrite ; une tare jamais utilisée peut être corrigée à la même date (erreur de saisie). Les pertes
+   déjà enregistrées gardent la tare de l'époque ; une correction ultérieure utilise la tare en vigueur à la
+   date de la perte.
 
 ## R4 — Répartition entre destinations
 
