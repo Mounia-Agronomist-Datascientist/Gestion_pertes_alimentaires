@@ -154,7 +154,7 @@ pertes/
 
 ## 7. Sauvegardes (proposition)
 
-- Sauvegarde automatique quotidienne de la base (snapshot managé ou `pg_dump` planifié).
+- Sauvegarde automatique quotidienne de la base : `pg_dump` chiffré par GitHub Actions (voir docs/HEBERGEMENT.md).
 - Rétention : 7 quotidiennes, 4 hebdomadaires, 12 mensuelles.
 - Copie hors du fournisseur principal au moins hebdomadaire.
 - Sauvegarde manuelle obligatoire avant toute migration de production (`scripts/backup.sh`).

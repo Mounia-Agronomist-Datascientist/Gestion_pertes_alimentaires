@@ -1,0 +1,22 @@
+# Évaluation quotidienne des alertes « saisie incomplète », après la fin de l'équipe H (20h45).
+# Secret : DATABASE_URL_DIRECT. Variable du dépôt : ALERTES_DEBUT (vide = aucune alerte).
+name: Alertes quotidiennes
+on:
+  schedule:
+    - cron: "30 21 * * *" # 21h30 UTC (22h30 ou 23h30 à Paris)
+  workflow_dispatch:
+jobs:
+  alertes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run alertes:evaluer
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+          ALERTES_DEBUT: ${{ vars.ALERTES_DEBUT }}

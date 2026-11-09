@@ -24,19 +24,64 @@ plateforme utilisée par le développeur de l'entreprise pour centraliser les ou
 Alternative si un point bloque : Render ou Koyeb (application) avec la même base Neon. Le code ne dépend
 d'aucun service propre à Netlify, ce qui facilitera la migration vers la plateforme du développeur.
 
-## Ce que je prépare dans le projet
+## Ce qui est prêt dans le projet
 
-- Configuration de déploiement et en-têtes de sécurité (HTTPS strict, protection contre l'intégration de la page).
-- Commande de mise en production : migrations de base puis données initiales, **sans** les comptes de test.
-- Création du compte administrateur de production : mot de passe provisoire affiché une seule fois.
-- **Sauvegarde quotidienne** automatique de la base (GitHub Actions, gratuit pour un dépôt privé), conservée
-  30 jours, et procédure de restauration testée.
-- **Tâche quotidienne** des alertes « saisie incomplète » (22h), qui ne fera rien tant que la date de mise en
-  service des alertes n'est pas fixée.
+| Élément | Fichier | Vérifié |
+|---|---|---|
+| Configuration Netlify | `netlify.toml` | — (au premier déploiement) |
+| En-têtes de sécurité (HTTPS strict, page non intégrable, etc.) | `next.config.ts` | Build de production local |
+| Connexion Neon (adresse poolée, peu de connexions par instance) | `src/db/client.ts` | — |
+| Initialisation / mise à jour de la base : migrations, référentiels, compte `admin` (mot de passe provisoire), **jamais de comptes de test** | `npm run db:setup` | Base vide locale : refus sans mot de passe, création unique |
+| Sauvegarde chiffrée (AES-256) et restauration | `scripts/backup.sh`, `scripts/restore.sh` | Sauvegarde → restauration → contenu identique ; mauvaise phrase secrète refusée sans toucher la base |
+| Tests à chaque envoi sur GitHub | `.github/workflows/tests.yml` | — |
+| Sauvegarde quotidienne (2h UTC), conservée 30 jours | `.github/workflows/sauvegarde.yml` | — |
+| Alertes quotidiennes (21h30 UTC) | `.github/workflows/alertes.yml` | — |
+| Initialiser / mettre à jour la base (à la main, sauvegarde préalable) | `.github/workflows/base-de-donnees.yml` | — |
 
-## Ce que vous devez faire (création de comptes : je ne peux pas le faire à votre place)
+## Pas-à-pas de mise en ligne (à faire par l'administratrice)
 
-1. Pousser le projet sur GitHub (GitHub Desktop → Push origin) : Netlify déploie depuis GitHub.
-2. Créer un compte **Neon** (ou utiliser celui du développeur), un projet en région Europe, et me donner…
-   rien en clair dans la conversation : l'adresse de connexion se colle directement dans les réglages Netlify.
-3. Créer ou utiliser l'équipe **Netlify** de l'entreprise et y relier le dépôt GitHub.
+> Les adresses de connexion, phrases secrètes et mots de passe se saisissent **uniquement** dans les réglages
+> de GitHub, Neon et Netlify. Ne jamais les coller dans une conversation, un e-mail ou un fichier du projet.
+
+**1. GitHub** — Pousser le projet (GitHub Desktop → *Push origin*).
+
+**2. Neon** — Créer un compte (ou utiliser celui du développeur de l'entreprise), puis un projet :
+- nom : `pertes` ; région : **AWS Europe Central (Frankfurt)** ;
+- dans *Connect*, relever deux adresses : l'adresse **poolée** (`…-pooler…`) et l'adresse **directe**
+  (option *Connection pooling* désactivée).
+
+**3. GitHub → dépôt → Settings → Secrets and variables → Actions**
+- onglet *Secrets* → *New repository secret* :
+  - `DATABASE_URL_DIRECT` : l'adresse **directe** de Neon ;
+  - `BACKUP_PASSPHRASE` : une longue phrase secrète, **à conserver dans un gestionnaire de mots de passe**
+    (sans elle, les sauvegardes sont illisibles) ;
+  - `ADMIN_INITIAL_PASSWORD` : mot de passe provisoire du compte `admin` (10 caractères minimum) ;
+- onglet *Variables* → `ALERTES_DEBUT` : laisser **vide** jusqu'à la fin des essais.
+
+**4. GitHub → onglet Actions** → *Base de données (initialiser / mettre à jour)* → *Run workflow*.
+Attendre la coche verte (2 à 3 minutes).
+
+**5. Netlify** → *Add new site* → *Import an existing project* → GitHub → dépôt `Gestion_pertes_alimentaires`.
+- Les réglages de construction sont lus dans `netlify.toml`.
+- *Environment variables*, portée **Production uniquement** :
+  - `DATABASE_URL` : l'adresse **poolée** de Neon ;
+  - `DB_POOL_MAX` : `3`.
+- Désactiver les *Deploy previews* (sinon des versions de test utiliseraient la base de production).
+- *Deploy*.
+
+**6. Première connexion** — Ouvrir l'adresse Netlify, se connecter avec `admin` et le mot de passe provisoire,
+le changer, puis créer les comptes des équipes et des responsables dans *Administration → Comptes*.
+Supprimer ensuite le secret `ADMIN_INITIAL_PASSWORD` sur GitHub.
+
+**7. Vérifier la sauvegarde** — GitHub → Actions → *Sauvegarde quotidienne* → *Run workflow* : le fichier
+chiffré apparaît dans *Artifacts*.
+
+**8. Mises à jour suivantes** — Chaque envoi sur GitHub redéploie l'application. Quand une mise à jour contient
+une migration de base, lancer d'abord l'action *Base de données (initialiser / mettre à jour)*.
+
+## Restaurer une sauvegarde (en cas de problème)
+
+1. GitHub → Actions → exécution de *Sauvegarde quotidienne* choisie → *Artifacts* → télécharger et dézipper.
+2. Sur un poste avec PostgreSQL : `TARGET_URL=<adresse directe> BACKUP_PASSPHRASE=<phrase> RESTORE_CONFIRM=oui
+   scripts/restore.sh pertes-AAAAMMJJ-HHMM.dump.enc`.
+3. La restauration remplace tout le contenu de la base cible : à faire de préférence d'abord dans une base de test.

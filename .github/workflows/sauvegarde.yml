@@ -1,0 +1,29 @@
+# Sauvegarde quotidienne chiffrée de la base de production (docs/HEBERGEMENT.md).
+# Secrets : DATABASE_URL_DIRECT (adresse Neon NON poolée), BACKUP_PASSPHRASE.
+name: Sauvegarde quotidienne
+on:
+  schedule:
+    - cron: "0 2 * * *" # 2h UTC (3h ou 4h à Paris)
+  workflow_dispatch:
+jobs:
+  sauvegarde:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Client PostgreSQL 18
+        run: |
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-18
+      - name: Sauvegarde chiffrée
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: PATH="/usr/lib/postgresql/18/bin:$PATH" scripts/backup.sh backups
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sauvegarde-${{ github.run_id }}
+          path: backups/*.dump.enc
+          retention-days: 30
+          if-no-files-found: error
