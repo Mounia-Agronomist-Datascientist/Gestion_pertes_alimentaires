@@ -126,12 +126,16 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
   (DLC trop courte pour le lundi) et **après le mercredi** (le lendemain commence une nouvelle semaine).
 - Chaque semaine de production a donc deux **plages** : jeudi → vendredi (un samedi travaillé y est rattaché)
   et lundi → mercredi. Les jours de production viennent de la table `production_days` (pré-remplie jeudi,
-  vendredi, lundi, mardi, mercredi ; à aligner sur le calendrier du portail : fériés, samedis).
-- Le lendemain du dernier jour d'une plage, chaque équipe active **sans aucune déclaration** sur la plage
-  reçoit une **perte estimée de 150 kg** (valeur conservée dans l'alerte). Une semaine sans rien : 2 × 150 kg.
+  vendredi, lundi, mardi, mercredi, notés A à E comme sur le calendrier du portail). Les jours fériés sont
+  traités au cas par cas par l'entreprise : pour l'instant, toutes les semaines sont considérées normales.
+- Le lendemain du dernier jour d'une plage, chaque équipe active dont **au moins un jour de production de la
+  plage n'a aucune déclaration** reçoit une **perte estimée de 150 kg** pour la plage (une seule fois, quel que
+  soit le nombre de jours manquants ; confirmé le 09/11/2026). Une semaine sans rien : 2 × 150 kg = 300 kg.
+  Les jours manquants sont affichés à l'équipe.
 - Comptent : les pertes attribuées à l'équipe et celles saisies par son compte (même hors cuisine), non annulées.
-- Une perte déclarée ensuite dans le délai de 7 jours **régularise** l'alerte (l'estimation n'est plus comptée,
-  l'alerte reste dans l'historique). L'administration ou la production peut **lever** une alerte avec motif.
+- Quand **tous** les jours manquants ont été renseignés dans le délai de 7 jours, l'alerte est **régularisée**
+  (l'estimation n'est plus comptée, l'alerte reste dans l'historique) ; un rattrapage partiel met seulement
+  à jour la liste des jours manquants. L'administration ou la production peut **lever** une alerte avec motif.
 - L'estimation est toujours comptée **à part** des pertes déclarées dans les statistiques.
 - Visible par l'administratrice et le responsable de production (toutes les équipes) et par chaque équipe (les siennes).
 - Mise en service : variable `ALERTES_DEBUT` (aucune plage antérieure n'est contrôlée). Évaluation à chaque

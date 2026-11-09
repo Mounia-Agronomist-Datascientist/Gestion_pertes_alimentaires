@@ -88,26 +88,42 @@ describe("alerte « rien de noté »", () => {
     expect((await alertsOf("C")).map((a) => a.window)).toEqual(["jeudi_vendredi"]);
   });
 
-  it("une seule déclaration sur la plage suffit ; une semaine vide coûte 2 × 150 kg", async () => {
-    await declare(teamC, "2026-11-10", THURSDAY_S47); // mardi : plage lundi-mercredi couverte
+  it("chaque jour de la plage doit être renseigné : un seul jour manquant déclenche les 150 kg", async () => {
+    await declare(teamC, "2026-11-09", THURSDAY_S47);
+    await declare(teamC, "2026-11-10", THURSDAY_S47); // mercredi 11/11 non renseigné
     await evaluateMissingDeclarations(t.db, { startDate: START, now: THURSDAY_S47 });
-    expect((await alertsOf("C")).map((a) => a.window)).toEqual(["jeudi_vendredi"]);
-    expect((await alertsOf("A")).map((a) => a.window).sort()).toEqual(["jeudi_vendredi", "lundi_mercredi"]);
+    const [mondayWednesday] = (await alertsOf("C")).filter((a) => a.window === "lundi_mercredi");
+    expect(mondayWednesday).toMatchObject({ missingDays: ["2026-11-11"], estimatedKg: 150, status: "active" });
   });
 
-  it("une perte saisie hors cuisine par le compte de l'équipe compte aussi", async () => {
+  it("une semaine sans aucune saisie coûte 2 × 150 kg", async () => {
+    await evaluateMissingDeclarations(t.db, { startDate: START, now: THURSDAY_S47 });
+    const alerts = await alertsOf("E");
+    expect(alerts.map((a) => a.window).sort()).toEqual(["jeudi_vendredi", "lundi_mercredi"]);
+    expect(alerts.reduce((sum, a) => sum + a.estimatedKg, 0)).toBe(300);
+    expect(alerts.find((a) => a.window === "lundi_mercredi")?.missingDays).toEqual(["2026-11-09", "2026-11-10", "2026-11-11"]);
+  });
+
+  it("une perte saisie hors cuisine par le compte de l'équipe compte pour son jour", async () => {
+    await declare(teamA, "2026-11-05", THURSDAY_S47, condBarquettes, condCause);
     await declare(teamA, "2026-11-06", THURSDAY_S47, condBarquettes, condCause);
     await evaluateMissingDeclarations(t.db, { startDate: START, now: THURSDAY_S47 });
     expect((await alertsOf("A")).map((a) => a.window)).not.toContain("jeudi_vendredi");
   });
 
-  it("une déclaration tardive (dans le délai) régularise l'alerte, qui reste dans l'historique", async () => {
+  it("les jours rattrapés dans le délai mettent à jour puis régularisent l'alerte, conservée dans l'historique", async () => {
     await evaluateMissingDeclarations(t.db, { startDate: START, now: SATURDAY });
-    await declare(teamC, "2026-11-05", new Date("2026-11-09T09:00:00Z"));
-    const r = await evaluateMissingDeclarations(t.db, { startDate: START, now: new Date("2026-11-09T10:00:00Z") });
+    expect((await alertsOf("D"))[0]?.missingDays).toEqual(["2026-11-05", "2026-11-06"]);
+
+    const teamD = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-d", displayName: "equipe-d", roleCode: "equipe", teamId: team.D, password: "mot-de-passe-test" }));
+    await declare(teamD, "2026-11-05", new Date("2026-11-09T09:00:00Z"));
+    await evaluateMissingDeclarations(t.db, { startDate: START, now: new Date("2026-11-09T10:00:00Z") });
+    expect((await alertsOf("D"))[0]).toMatchObject({ status: "active", missingDays: ["2026-11-06"] });
+
+    await declare(teamD, "2026-11-06", new Date("2026-11-09T11:00:00Z"));
+    const r = await evaluateMissingDeclarations(t.db, { startDate: START, now: new Date("2026-11-09T12:00:00Z") });
     expect(r.regularized).toBeGreaterThanOrEqual(1);
-    const [alert] = (await alertsOf("C")).filter((a) => a.window === "jeudi_vendredi");
-    expect(alert?.status).toBe("regularisee");
+    expect((await alertsOf("D"))[0]).toMatchObject({ status: "regularisee", missingDays: [] });
   });
 
   it("ignore une équipe désactivée pour la semaine et les plages avant la mise en service", async () => {
@@ -145,6 +161,7 @@ describe("alerte « rien de noté »", () => {
     await expect(cancelAlert(t.db, teamC, mine[0]!.id, "Absente")).rejects.toThrow(ForbiddenError);
     await expect(cancelAlert(t.db, admin, mine[0]!.id, " ")).rejects.toThrow(/motif/);
     await cancelAlert(t.db, admin, mine[0]!.id, "Équipe en formation ce jour-là");
-    expect(await listAlerts(t.db, teamC, { onlyActive: true })).toHaveLength(0);
+    const activeBefore = mine.filter((a) => a.status === "active").length;
+    expect(await listAlerts(t.db, teamC, { onlyActive: true })).toHaveLength(activeBefore - 1);
   });
 });

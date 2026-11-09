@@ -36,3 +36,12 @@ describe("plages de réutilisation des surplus", () => {
     expect(isWindowClosed(window, "2026-11-07")).toBe(true);
   });
 });
+
+describe("jours sans saisie", () => {
+  it("liste les jours de la plage sans déclaration", async () => {
+    const { missingDays } = await import("@/domain/plages-reutilisation");
+    const window = { days: ["2026-11-09", "2026-11-10", "2026-11-11"] };
+    expect(missingDays(window, ["2026-11-10"])).toEqual(["2026-11-09", "2026-11-11"]);
+    expect(missingDays(window, window.days)).toEqual([]);
+  });
+});

@@ -43,6 +43,13 @@
       "when": 1793979793805,
       "tag": "0005_alertes_rien_de_note",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794215307340,
+      "tag": "0006_alertes_jours_manquants",
+      "breakpoints": true
     }
   ]
 }

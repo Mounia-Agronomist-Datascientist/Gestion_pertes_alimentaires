@@ -5,7 +5,7 @@
 import { and, asc, desc, eq, gte, inArray, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { ESTIMATED_LOSS_KG_PER_WINDOW, isWindowClosed, reuseWindows } from "@/domain/plages-reutilisation";
+import { ESTIMATED_LOSS_KG_PER_WINDOW, isWindowClosed, missingDays, reuseWindows } from "@/domain/plages-reutilisation";
 import { addDays, type LocalDate, toProductionLocalDate } from "@/domain/semaine-production";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, can, requirePermission } from "@/modules/auth/permissions";
@@ -68,21 +68,24 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
 
         // Comptent les pertes attribuées à l'équipe et celles saisies par son compte (même hors cuisine).
         const accountIds = teamAccounts.filter((u) => u.teamId === team.id).map((u) => u.id);
-        const declared = await db.$count(
-          s.lossDeclarations,
-          and(
-            inArray(s.lossDeclarations.status, ["validee", "corrigee"]),
-            gte(s.lossDeclarations.occurredOn, window.firstDay),
-            lte(s.lossDeclarations.occurredOn, window.lastDay),
-            or(
-              eq(s.lossDeclarations.teamId, team.id),
-              accountIds.length ? inArray(s.lossDeclarations.createdBy, accountIds) : undefined,
+        const declaredRows = await db
+          .selectDistinct({ day: s.lossDeclarations.occurredOn })
+          .from(s.lossDeclarations)
+          .where(
+            and(
+              inArray(s.lossDeclarations.status, ["validee", "corrigee"]),
+              gte(s.lossDeclarations.occurredOn, window.firstDay),
+              lte(s.lossDeclarations.occurredOn, window.lastDay),
+              or(
+                eq(s.lossDeclarations.teamId, team.id),
+                accountIds.length ? inArray(s.lossDeclarations.createdBy, accountIds) : undefined,
+              ),
             ),
-          ),
-        );
+          );
+        const missing = missingDays(window, declaredRows.map((r) => r.day));
         const alert = existing.find((a) => a.teamId === team.id && a.productionWeekId === week.id && a.window === window.key);
 
-        if (declared === 0 && !alert) {
+        if (missing.length > 0 && !alert) {
           const [created] = await db
             .insert(s.missingDeclarationAlerts)
             .values({
@@ -91,6 +94,7 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
               window: window.key,
               firstDay: window.firstDay,
               lastDay: window.lastDay,
+              missingDays: missing,
               estimatedKg: ESTIMATED_LOSS_KG_PER_WINDOW,
               detectedAt: now,
             })
@@ -100,13 +104,16 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
             result.created++;
             await writeAudit(db, { action: "alert_created", entity: "missing_declaration_alert", entityId: created.id, after: created, occurredAt: now });
           }
-        } else if (declared > 0 && alert?.status === "active") {
+        } else if (alert?.status === "active" && missing.length === 0) {
           await db
             .update(s.missingDeclarationAlerts)
-            .set({ status: "regularisee", resolvedAt: now, resolutionNote: "Déclaration saisie après la détection" })
+            .set({ status: "regularisee", missingDays: [], resolvedAt: now, resolutionNote: "Tous les jours ont été renseignés après la détection" })
             .where(eq(s.missingDeclarationAlerts.id, alert.id));
           result.regularized++;
           await writeAudit(db, { action: "alert_regularized", entity: "missing_declaration_alert", entityId: alert.id, occurredAt: now });
+        } else if (alert?.status === "active" && missing.join() !== alert.missingDays.join()) {
+          // Régularisation partielle : l'alerte reste active, la liste des jours manquants est mise à jour.
+          await db.update(s.missingDeclarationAlerts).set({ missingDays: missing }).where(eq(s.missingDeclarationAlerts.id, alert.id));
         }
       }
     }
@@ -128,6 +135,7 @@ export async function listAlerts(db: Db, user: AuthUser, options: { onlyActive?:
       window: s.missingDeclarationAlerts.window,
       firstDay: s.missingDeclarationAlerts.firstDay,
       lastDay: s.missingDeclarationAlerts.lastDay,
+      missingDays: s.missingDeclarationAlerts.missingDays,
       estimatedKg: s.missingDeclarationAlerts.estimatedKg,
       status: s.missingDeclarationAlerts.status,
       detectedAt: s.missingDeclarationAlerts.detectedAt,

@@ -1,0 +1,1 @@
+ALTER TABLE "missing_declaration_alerts" ADD COLUMN "missing_days" date[] DEFAULT '{}'::date[] NOT NULL;

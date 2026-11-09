@@ -22,13 +22,13 @@ export const productionDays = pgTable("production_days", {
 export const reuseWindowEnum = pgEnum("reuse_window", ["jeudi_vendredi", "lundi_mercredi"]);
 
 /**
- * - `active` : aucune déclaration sur la plage, la perte estimée est comptée ;
- * - `regularisee` : une déclaration a été saisie depuis (dans le délai), l'estimation n'est plus comptée ;
+ * - `active` : au moins un jour de la plage sans déclaration, la perte estimée est comptée ;
+ * - `regularisee` : tous les jours ont été renseignés depuis (dans le délai), l'estimation n'est plus comptée ;
  * - `annulee` : levée par un responsable, avec motif.
  */
 export const alertStatusEnum = pgEnum("missing_declaration_status", ["active", "regularisee", "annulee"]);
 
-/** Alerte « rien de noté » : une équipe sans aucune déclaration sur une plage de réutilisation. */
+/** Alerte « rien de noté » : au moins un jour d'une plage de réutilisation sans déclaration de l'équipe. */
 export const missingDeclarationAlerts = pgTable(
   "missing_declaration_alerts",
   {
@@ -42,6 +42,8 @@ export const missingDeclarationAlerts = pgTable(
     window: reuseWindowEnum("window").notNull(),
     firstDay: date("first_day", { mode: "string" }).notNull(),
     lastDay: date("last_day", { mode: "string" }).notNull(),
+    /** Jours de production de la plage sans déclaration (mis à jour jusqu'à régularisation). */
+    missingDays: date("missing_days", { mode: "string" }).array().notNull().default(sql`'{}'::date[]`),
     /** Perte estimée (instantané de la valeur forfaitaire au moment de la détection). */
     estimatedKg: numeric("estimated_kg", { precision: 10, scale: 3, mode: "number" }).notNull(),
     status: alertStatusEnum("status").notNull().default("active"),

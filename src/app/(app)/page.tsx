@@ -5,7 +5,7 @@ import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
 import { countPendingProposals } from "@/modules/admin/causes";
 import { alertsStartDateFromEnv, evaluateMissingDeclarations, listAlerts } from "@/modules/alertes/service";
-import { alertTitle, fmtLongDay, regularizationDeadline } from "./alertes/format";
+import { alertTitle, fmtLongDay, missingDaysLabel, regularizationDeadline } from "./alertes/format";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
@@ -38,17 +38,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <div key={a.id} role="alert" className="flex flex-col gap-1 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-red-900">
               <p className="font-semibold">{alertTitle(a)}</p>
               <p>{a.estimatedKg} kg de pertes estimées sont attribués à votre équipe.</p>
-              {regularizationDeadline(a.lastDay) >= toProductionLocalDate(new Date()) && (
+              {a.missingDays.length > 0 && <p className="font-medium">{missingDaysLabel(a.missingDays)}</p>}
+              {regularizationDeadline(a) >= toProductionLocalDate(new Date()) && (
                 <p className="text-sm">
-                  Si des pertes ont eu lieu sur cette période, déclarez-les (7 jours maximum après chaque perte, au plus tard
-                  le {fmtLongDay(regularizationDeadline(a.lastDay))}) : l&apos;estimation sera alors retirée.
+                  Renseignez {a.missingDays.length > 1 ? "ces jours" : "ce jour"} au plus tard le{" "}
+                  {fmtLongDay(regularizationDeadline(a))} : l&apos;estimation sera alors retirée.
                 </p>
               )}
             </div>
           ))
         ) : (
           <Link href="/alertes" role="alert" className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 font-semibold text-red-900">
-            {activeAlerts.length} alerte{activeAlerts.length > 1 ? "s" : ""} « rien de noté » — {alertKg} kg estimés →
+            {activeAlerts.length} alerte{activeAlerts.length > 1 ? "s" : ""} « saisie incomplète » — {alertKg} kg estimés →
           </Link>
         ))}
 
@@ -83,7 +84,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         Pertes déclarées et corrections
       </Link>
       <Link href="/alertes" className="text-center text-slate-700 underline">
-        Alertes « rien de noté »
+        Alertes « saisie incomplète »
       </Link>
 
       {(can(user, "user.manage") || can(user, "referentiel.manage")) && (

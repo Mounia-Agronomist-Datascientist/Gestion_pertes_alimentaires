@@ -5,7 +5,7 @@ import { listAlerts } from "@/modules/alertes/service";
 import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
 import { CancelAlertForm } from "./cancel-alert-form";
-import { alertTitle, fmtLongDay } from "./format";
+import { alertTitle, fmtLongDay, missingDaysLabel } from "./format";
 
 export const metadata = { title: "Alertes — Pertes" };
 
@@ -27,10 +27,11 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
       <Link href="/" className="self-start rounded-xl px-2 py-2 font-medium text-slate-700">
         ← Accueil
       </Link>
-      <h1 className="text-2xl font-bold">Alertes « rien de noté »</h1>
+      <h1 className="text-2xl font-bold">Alertes « saisie incomplète »</h1>
       <p className="text-slate-600">
-        Une équipe qui ne déclare aucune perte sur une plage (jeudi-vendredi ou lundi-mercredi) reçoit une perte estimée
-        de {ESTIMATED_LOSS_KG_PER_WINDOW} kg, toujours comptée à part des pertes déclarées.
+        Chaque jour de production doit avoir au moins une déclaration. Si un jour d&apos;une plage (jeudi-vendredi ou
+        lundi-mercredi) n&apos;est pas renseigné, l&apos;équipe reçoit une perte estimée de {ESTIMATED_LOSS_KG_PER_WINDOW} kg
+        pour cette plage, toujours comptée à part des pertes déclarées.
       </p>
       <nav className="flex gap-2">
         <Link href="/alertes" className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-teal-700 text-white"}`}>
@@ -64,6 +65,9 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
               <span className="text-sm text-slate-600">
                 Du {fmtLongDay(a.firstDay)} au {fmtLongDay(a.lastDay)} — {a.estimatedKg} kg estimés
               </span>
+              {a.status === "active" && a.missingDays.length > 0 && (
+                <span className="text-sm font-medium text-red-800">{missingDaysLabel(a.missingDays)}</span>
+              )}
               {a.resolutionNote && <span className="text-sm text-slate-500">{a.resolutionNote}</span>}
               {canResolve && a.status === "active" && <CancelAlertForm alertId={a.id} />}
             </li>

@@ -9,12 +9,13 @@
  * - « jeudi-vendredi » : jours de production du jeudi au dimanche (un samedi travaillé y est rattaché) ;
  * - « lundi-mercredi » : jours de production du lundi au mercredi.
  *
- * Une équipe active qui ne déclare aucune perte sur l'ensemble d'une plage reçoit une perte estimée
- * forfaitaire, attribuée au dernier jour de la plage.
+ * Chaque jour de production d'une plage doit avoir au moins une déclaration de l'équipe (règle confirmée
+ * le 09/11/2026). Si au moins un jour n'est pas renseigné, l'équipe reçoit une perte estimée forfaitaire
+ * pour la plage (une seule fois par plage, quel que soit le nombre de jours manquants).
  */
 import { addDays, type LocalDate } from "./semaine-production";
 
-/** Perte estimée attribuée par plage sans aucune déclaration (valeur fixée par l'entreprise le 06/11/2026). */
+/** Perte estimée attribuée par plage incomplète (valeur fixée par l'entreprise le 06/11/2026). */
 export const ESTIMATED_LOSS_KG_PER_WINDOW = 150;
 
 export type ReuseWindowKey = "jeudi_vendredi" | "lundi_mercredi";
@@ -52,6 +53,12 @@ export function reuseWindows(weekStart: LocalDate, productionDays: readonly Loca
   return groups
     .filter(([, list]) => list.length > 0)
     .map(([key, list]) => ({ key, firstDay: list[0]!, lastDay: list.at(-1)!, days: list }));
+}
+
+/** Jours de production de la plage sans aucune déclaration, dans l'ordre. */
+export function missingDays(window: Pick<ReuseWindow, "days">, declaredDays: Iterable<LocalDate>): LocalDate[] {
+  const declared = new Set(declaredDays);
+  return window.days.filter((d) => !declared.has(d));
 }
 
 /** Une plage peut être contrôlée le lendemain de son dernier jour (toutes les équipes ont terminé). */

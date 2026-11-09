@@ -7,7 +7,7 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | # | Point | Proposition | Statut |
 |---|---|---|---|
 | T1 | Pile technique | Next.js + TypeScript + PostgreSQL + Drizzle (ARCHITECTURE.md §2) | ✅ Validé 06/11/2026 |
-| H1 🟠 | Hébergement de production | Plateforme managée UE (app + PostgreSQL managé) | À décider avant la mise en production |
+| H1 🟠 | Hébergement de production | Décision : hébergeur géré, sécurisé et gratuit pour démarrer, puis migration vers la plateforme du développeur de l'entreprise. Offre précise à choisir | Mise en ligne |
 | G1 | Dépôt GitHub | github.com/Mounia-Agronomist-Datascientist/Gestion_pertes_alimentaires | ✅ |
 | D1 | Base de développement | PostgreSQL 18 (Postgres.app) sur le poste local | ✅ |
 
@@ -24,9 +24,9 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | C4 ✅ | Causes du stockage | Ajoutées : péremption, rupture de la chaîne du froid, mauvaise rotation, mauvais stockage, stock excédentaire | — |
 | 1 🟠 | Comptes partagés | Mot de passe par équipe géré par l'admin ; rotation à chaque départ ; révocation des sessions. Durée de session proposée : 30 jours glissants pour les comptes équipe et responsables de zone, 12 h pour les autres | Phase 1 |
 | C1 ✅ | Délai des équipes | Déclaration le jour même attendue ; 7 jours maximum pour déclarer, corriger ou annuler ; au-delà, un responsable | — |
-| A1 🟠 | Alerte « rien de noté » | Appliqué : 150 kg par plage (jeudi-vendredi, lundi-mercredi) sans déclaration, soit 300 kg pour une semaine vide (et non 600 kg comme indiqué au départ) ; une déclaration tardive dans le délai **régularise** l'alerte. À confirmer : ces deux points | Validation |
-| P3 🟠 | Jours de production | Source retenue : calendrier du portail. Il demande une connexion : fournir un export (ou un accès) pour charger fériés et samedis travaillés ; en attendant, jeudi, vendredi, lundi, mardi, mercredi par défaut | Alertes |
-| P4 🟠 | Date de mise en service des alertes | À fixer (`ALERTES_DEBUT`) le jour où les équipes commencent à utiliser l'application | Mise en service |
+| A1 ✅ | Alerte « saisie incomplète » | 150 kg par plage dès qu'un jour de production de la plage n'a aucune déclaration (300 kg max. par semaine) ; régularisée quand tous les jours sont rattrapés dans le délai | — |
+| P3 ✅ | Jours de production | Calendrier du portail : jeudi (A), vendredi (B), lundi (C), mardi (D), mercredi (E). Fériés au cas par cas : semaines normales pour l'instant ; écran d'ajustement à prévoir | — |
+| P4 🟠 | Date de mise en service des alertes | Après les essais des équipes et la vérification du bon fonctionnement | Mise en service |
 | C2 ✅ | Causes initiales | Listes reçues pour toutes les zones et chargées (26 causes, voir src/db/seed/data.ts) | — |
 | P1 🔴 | Référentiel produits Phase 1 | Le référentiel est vide : les saisies se font en « hors liste ». Il faut une liste de départ (export Melba même partiel : identifiant, nom, catégorie, unité, poids unitaire si connu) | Mise en service |
 | P2 🟠 | Estimation par contenant | Pour convertir « 2 gastros pleins » en kg, il faudrait un poids moyen par produit et par type de gastro. À défaut, la quantité reste en nombre de gastros (non convertie) | Phase 1–2 |
