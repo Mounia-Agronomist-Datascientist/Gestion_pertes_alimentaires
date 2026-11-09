@@ -18,6 +18,7 @@ causes, destinations, impact environnemental).
 | [docs/REGLES_METIER.md](docs/REGLES_METIER.md) | Règles de calcul centralisées (semaines, unités, tares, destinations) |
 | [docs/POINTS_A_VALIDER.md](docs/POINTS_A_VALIDER.md) | Points bloquants et questions ouvertes |
 | [docs/INTEGRATION_OUTIL_SOUS_RECETTES.md](docs/INTEGRATION_OUTIL_SOUS_RECETTES.md) | Analyse de l'outil « Pertes Production » et plan d'intégration |
+| [docs/HEBERGEMENT.md](docs/HEBERGEMENT.md) | Choix de l'hébergement, sauvegardes, étapes de mise en ligne |
 | [docs/SUIVI.md](docs/SUIVI.md) | Fonctionnalités terminées, anomalies connues, journal des phases |
 
 ## Phasage
