@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/db/client";
-import { toProductionLocalDate } from "@/domain/semaine-production";
+import { computeProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { INPUT_METHODS, type InputMethod } from "@/modules/declarations/input";
 import { getDeclarationOptions } from "@/modules/declarations/options";
@@ -24,13 +24,33 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     : "comptage";
   const support = detail.containers.find((c) => c.kind === "support");
 
+  // Produit choisi dans l'import de la semaine : il reste valable tant que la date de la perte ne change pas de semaine.
+  const weekItem = d.weekRecipeId
+    ? { kind: "plat" as const, id: d.weekRecipeId }
+    : d.weekSubRecipeId
+      ? { kind: "sous_recette" as const, id: d.weekSubRecipeId }
+      : d.weekLineId
+        ? { kind: "ingredient" as const, id: d.weekLineId }
+        : null;
+  const lossWeek = computeProductionWeek(d.occurredOn);
+
   const initial: WizardInitial = {
     zoneId: d.zoneId,
     subzoneId: d.subzoneId,
     teamId: d.teamId,
-    product: d.productId
-      ? { kind: "listed", id: d.productId, name: d.productName, category: d.productCategory }
-      : { kind: "free", name: d.productName, category: d.productCategory },
+    product: weekItem
+      ? {
+          kind: "week",
+          itemKind: weekItem.kind,
+          id: weekItem.id,
+          name: d.productName,
+          category: d.productCategory,
+          unitWeightKg: d.conversionFactorUsed,
+          week: { year: lossWeek.year, number: lossWeek.number },
+        }
+      : d.productId
+        ? { kind: "listed", id: d.productId, name: d.productName, category: d.productCategory }
+        : { kind: "free", name: d.productName, category: d.productCategory },
     method,
     quantity: useTare ? "" : String(d.quantity),
     unitCode: useTare ? null : d.unitCode,

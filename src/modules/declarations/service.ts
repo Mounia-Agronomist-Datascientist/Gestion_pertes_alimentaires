@@ -12,6 +12,8 @@ import { computeNetWeight, type GastroLine, type SupportTare, TareError } from "
 import { convertToKg, type KgStatus, QuantityError, type UnitKind } from "@/domain/unites";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules/auth/permissions";
+import { findWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
+import { currentWeekImport } from "@/modules/imports/service";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { canModifyDeclaration, canReadDeclaration, isBoundByTeamDelay, isWithinTeamDelay, TEAM_DELAY_DAYS } from "./access";
 import { declarationInputSchema } from "./input";
@@ -102,8 +104,35 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
     variant: string | null;
     unitWeightKg: number | null;
     densityKgPerL: number | null;
+    refs?: { weekRecipeId: string | null; weekSubRecipeId: string | null; weekLineId: string | null };
   };
-  if ("productId" in input.product) {
+  if ("weekItem" in input.product) {
+    // Produit de l'import de la semaine (docs/PHASE2.md, étape 2.5).
+    const item = await findWeekItem(db, input.product.weekItem.kind, input.product.weekItem.id);
+    const current = await currentWeekImport(db, lossWeek.id);
+    if (!item) throw new DeclarationError("Produit de la semaine introuvable");
+    if (!current || item.importId !== current.id) {
+      throw new DeclarationError("Ce produit ne fait pas partie de la semaine de la perte : choisissez-le à nouveau");
+    }
+    if (item.snack && !SNACK_ZONE_CODES.includes(place.zone.code)) {
+      throw new DeclarationError("Les encas se déclarent en conditionnement, réception ou stockage");
+    }
+    if (input.product.weekItem.kind === "plat" && !item.snack && place.subzone.teamMode === "equipe" && item.teamId !== teamId) {
+      throw new DeclarationError("Ce plat n'est pas produit par cette équipe cette semaine");
+    }
+    product = {
+      id: null,
+      unlisted: false,
+      category: item.category,
+      name: item.name,
+      externalId: null,
+      code: item.code,
+      variant: null,
+      unitWeightKg: item.unitWeightKg,
+      densityKgPerL: null,
+      refs: item.refs,
+    };
+  } else if ("productId" in input.product) {
     const [row] = await db.select().from(s.products).where(eq(s.products.id, input.product.productId));
     if (!row || !row.active) throw new DeclarationError("Produit inconnu ou désactivé");
     product = {
@@ -266,6 +295,9 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       productExternalId: product.externalId,
       productCode: product.code,
       productVariant: product.variant,
+      weekRecipeId: product.refs?.weekRecipeId ?? null,
+      weekSubRecipeId: product.refs?.weekSubRecipeId ?? null,
+      weekLineId: product.refs?.weekLineId ?? null,
       measurementMethod,
       quantity: measurement.quantity,
       unitCode: measurement.unitCode,

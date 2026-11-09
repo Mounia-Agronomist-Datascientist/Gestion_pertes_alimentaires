@@ -62,6 +62,7 @@ export const declarationInputSchema = z
     teamId: uuid.nullable().optional(),
     product: z.union([
       z.object({ productId: uuid }),
+      z.object({ weekItem: z.object({ kind: z.enum(["plat", "sous_recette", "ingredient"]), id: uuid }) }),
       z.object({
         freeLabel: z.string().trim().min(2, "Indiquez le nom du produit").max(200),
         category: z.enum(PRODUCT_CATEGORIES),

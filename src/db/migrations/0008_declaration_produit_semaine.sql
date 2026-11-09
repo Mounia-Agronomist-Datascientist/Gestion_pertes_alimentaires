@@ -1,0 +1,9 @@
+ALTER TABLE "loss_declarations" DROP CONSTRAINT "loss_declarations_product_reference";--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD COLUMN "week_recipe_id" uuid;--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD COLUMN "week_sub_recipe_id" uuid;--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD COLUMN "week_line_id" uuid;--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD CONSTRAINT "loss_declarations_week_recipe_id_week_recipes_id_fk" FOREIGN KEY ("week_recipe_id") REFERENCES "public"."week_recipes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD CONSTRAINT "loss_declarations_week_sub_recipe_id_week_sub_recipes_id_fk" FOREIGN KEY ("week_sub_recipe_id") REFERENCES "public"."week_sub_recipes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD CONSTRAINT "loss_declarations_week_line_id_week_recipe_lines_id_fk" FOREIGN KEY ("week_line_id") REFERENCES "public"."week_recipe_lines"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD CONSTRAINT "loss_declarations_one_week_item" CHECK (num_nonnulls("loss_declarations"."week_recipe_id", "loss_declarations"."week_sub_recipe_id", "loss_declarations"."week_line_id") <= 1);--> statement-breakpoint
+ALTER TABLE "loss_declarations" ADD CONSTRAINT "loss_declarations_product_reference" CHECK (("loss_declarations"."product_id" is not null) or "loss_declarations"."product_unlisted" or ("loss_declarations"."week_recipe_id" is not null) or ("loss_declarations"."week_sub_recipe_id" is not null) or ("loss_declarations"."week_line_id" is not null));

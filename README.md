@@ -28,7 +28,7 @@ causes, destinations, impact environnemental).
 |---|---|---|
 | 0 | Cadrage technique | ✅ |
 | 1 | Déclarations de pertes (application utilisable) | ✅ Développée — déclarations, historique, corrections, alertes, administration complète, journal d'audit ; reste l'essai pilote avec les équipes |
-| 2 | Référentiels et imports (Melba, CSV/Excel) | 🟡 En cours — import hebdomadaire (tome + plan) fait ; reste la saisie à partir des plats de la semaine |
+| 2 | Référentiels et imports (Melba, CSV/Excel) | 🟡 En cours — import hebdomadaire et saisie à partir des plats de la semaine faits ; reste le coût de la semaine |
 | 3 | Calcul des coûts | ⏳ |
 | 4 | Tableaux de bord et statistiques | ⏳ |
 | 5 | Valorisation et environnement | ⏳ |

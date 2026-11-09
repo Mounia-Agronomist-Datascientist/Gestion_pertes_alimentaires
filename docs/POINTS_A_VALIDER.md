@@ -39,3 +39,11 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | 13 ✅ | Coûts matières | Les coûts Melba du tome sont la référence ; extraction hebdomadaire avec le prix de chaque recette et sous-recette, conservés par semaine (les plats changent chaque semaine) | Phase 3 |
 | 8 🟠 | Volumes de production | Sources identifiées : « Décompte barquettes » (barquettes par code, équipe et jour, surplus, NC) et « Déboitage » (kg par barquette). Reste : mode d'accès automatique (lecture du Google Sheet par l'application ou export) | Phase 4 |
 | 10 ⚪ | Facteurs carbone | Sources (ADEME / Base Empreinte) et niveau de précision | Phase 5 |
+
+## Phase 2 — saisie à partir des plats de la semaine (09/11/2026)
+
+| # | Sujet | Hypothèse appliquée | À confirmer |
+|---|---|---|---|
+| P2-1 ⚠️ | Poids d'une barquette | Une barquette (ou un encas) = **une portion** du tome : des barquettes perdues sont converties en kg avec le poids de la portion (« 1 recette(s) (315.1 g) »), ou à défaut la « Recette totale » | Oui / non, et poids de la barquette vide (emballage) à exclure ? |
+| P2-2 ⚠️ | Type de produit | Plat de la semaine → « Produit fini » ; encas → « Produit externe » ; sous-recette → « Sous-recette » ; ingrédient → « Matière première » (y compris les emballages listés comme ingrédients dans le tome) | Faut-il distinguer les emballages ? |
+| P2-3 ⚠️ | Plats hors cuisine | Seuls les postes de cuisine voient les plats de l'équipe ; Conditionnement, Réception et Stockage voient les encas (R9) et peuvent rechercher sous-recettes et ingrédients ; la Plonge ne voit pas de liste | Le conditionnement doit-il voir tous les plats (barquettes ratées) ? |

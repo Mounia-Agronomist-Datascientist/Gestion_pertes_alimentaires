@@ -8,6 +8,12 @@ import type { TomeParseResult, TomeRecipe, TomeSubRecipe } from "./tome/parse-to
 /** Encas (règle R9) : codes « EN… », hors plan de production, proposés en conditionnement, réception et stockage. */
 export const isSnackCode = (code: string) => /^EN\d/.test(code);
 
+/** Grammes → kg, sans erreur d'arrondi binaire (315,1 g → 0,3151 kg). */
+export const gramsToKg = (g: number | null) => (g == null ? null : Math.round(g * 1000) / 1e6);
+
+/** Zones où les encas sont proposés (règle R9). */
+export const SNACK_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT", "RECEPTION", "STOCKAGE"];
+
 export interface WeekImportRecipe extends TomeRecipe {
   team: string | null;
   planGroup: string | null;

@@ -6,6 +6,7 @@ import { and, asc, eq, gte, isNull, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import type { LocalDate } from "@/domain/semaine-production";
+import { weekCatalogs } from "@/modules/imports/catalog";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
@@ -33,7 +34,7 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
           ),
         )
         .orderBy(asc(s.containerTypes.displayOrder)),
-      // Phase 1 : référentiel simple et court. En Phase 2, recherche côté serveur filtrée par semaine.
+      // Référentiel saisi à la main ; les produits de la semaine viennent de `weekCatalogs`.
       db.select().from(s.products).where(eq(s.products.active, true)).orderBy(asc(s.products.name)),
     ]);
 
@@ -41,6 +42,7 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
     .filter((z) => !limitedToOwnZones || user.zoneIds.includes(z.id))
     .map((z) => ({
       id: z.id,
+      code: z.code,
       name: z.name,
       subzones: subzoneRows
         .filter((sz) => sz.zoneId === z.id)
@@ -69,6 +71,8 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
 
   return {
     today,
+    /** Plats, sous-recettes et ingrédients de la semaine en cours et de la précédente (imports en vigueur). */
+    weekCatalogs: await weekCatalogs(db, user, today),
     zones,
     teams,
     causes: causeRows

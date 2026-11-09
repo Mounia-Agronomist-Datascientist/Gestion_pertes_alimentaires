@@ -19,6 +19,7 @@ import {
 import { users } from "./auth";
 import { subzones, teams, zones } from "./organisation";
 import { productionWeeks } from "./production-weeks";
+import { weekRecipeLines, weekRecipes, weekSubRecipes } from "./imports";
 import { causes, containerTares, destinations, productCategoryEnum, products, units } from "./referentiels";
 
 export const declarationStatusEnum = pgEnum("declaration_status", ["brouillon", "validee", "corrigee", "annulee"]);
@@ -86,6 +87,14 @@ export const lossDeclarations = pgTable(
     productExternalId: text("product_external_id"),
     productCode: text("product_code"),
     productVariant: text("product_variant"),
+    /**
+     * Produit choisi dans l'import de la semaine (docs/PHASE2.md, étape 2.5) : un plat, une sous-recette ou un
+     * ingrédient (ligne de composition). Au plus une des trois références ; le nom et le type restent copiés
+     * ci-dessus comme pour tout produit.
+     */
+    weekRecipeId: uuid("week_recipe_id").references(() => weekRecipes.id),
+    weekSubRecipeId: uuid("week_sub_recipe_id").references(() => weekSubRecipes.id),
+    weekLineId: uuid("week_line_id").references(() => weekRecipeLines.id),
 
     measurementMethod: measurementMethodEnum("measurement_method").notNull(),
     quantity: numeric("quantity", { precision: 12, scale: 4, mode: "number" }).notNull(),
@@ -123,7 +132,11 @@ export const lossDeclarations = pgTable(
     ),
     check(
       "loss_declarations_product_reference",
-      sql`(${t.productId} is not null) or ${t.productUnlisted}`,
+      sql`(${t.productId} is not null) or ${t.productUnlisted} or (${t.weekRecipeId} is not null) or (${t.weekSubRecipeId} is not null) or (${t.weekLineId} is not null)`,
+    ),
+    check(
+      "loss_declarations_one_week_item",
+      sql`num_nonnulls(${t.weekRecipeId}, ${t.weekSubRecipeId}, ${t.weekLineId}) <= 1`,
     ),
   ],
 );

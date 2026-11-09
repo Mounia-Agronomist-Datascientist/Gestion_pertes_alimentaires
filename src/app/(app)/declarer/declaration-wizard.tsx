@@ -15,12 +15,25 @@ import {
   PRODUCT_CATEGORY_LABELS,
 } from "@/modules/declarations/input";
 import type { DeclarationOptions } from "@/modules/declarations/options";
+import type { WeekCatalog, WeekItemKind } from "@/modules/imports/catalog";
+import { gramsToKg, SNACK_ZONE_CODES } from "@/modules/imports/merge";
 import { proposeCauseAction, submitCorrection, submitDeclaration, type SubmitResult } from "./actions";
 
 type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "cause" | "destination" | "recap" | "done";
 export type ProductChoice =
   | { kind: "listed"; id: string; name: string; category: string }
-  | { kind: "free"; name: string; category: (typeof PRODUCT_CATEGORIES)[number] };
+  | { kind: "free"; name: string; category: (typeof PRODUCT_CATEGORIES)[number] }
+  | {
+      /** Produit de l'import de la semaine (plat, sous-recette ou ingrédient). */
+      kind: "week";
+      itemKind: WeekItemKind;
+      id: string;
+      name: string;
+      category: string;
+      unitWeightKg: number | null;
+      /** Semaine de production de l'import (le produit n'est valable que pour une perte de cette semaine). */
+      week: { year: number; number: number };
+    };
 
 /** État de départ d'une correction, construit à partir de la déclaration existante. */
 export interface WizardInitial {
@@ -189,10 +202,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     const conversion = convertToKg(
       q,
       { code: unit.code, kind: unit.kind as UnitKind, toBaseFactor: unit.toBaseFactor },
-      { isConsumable, unitWeightKg: listedProduct?.unitWeightKg, densityKgPerL: listedProduct?.densityKgPerL },
+      {
+        isConsumable,
+        unitWeightKg: product?.kind === "week" ? product.unitWeightKg : listedProduct?.unitWeightKg,
+        densityKgPerL: listedProduct?.densityKgPerL,
+      },
     );
     return { quantity: q, unitCode: unit.code, kg: conversion.netKg, note: conversion.reason };
-  }, [useTare, tarePreview, quantity, unit, isConsumable, listedProduct]);
+  }, [useTare, tarePreview, quantity, unit, isConsumable, listedProduct, product]);
 
   const unitLabel = (code: string) => options.units.find((u) => u.code === code)?.label ?? code;
   const netLabel = net ? `${fmt(net.quantity)} ${unitLabel(net.unitCode)}` : "";
@@ -220,6 +237,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     occurredOn && occurredOn <= options.today
       ? computeProductionWeek(occurredOn).startDate < computeProductionWeek(options.today).startDate
       : false;
+
+  // Un produit de la semaine n'est valable que pour une perte de cette semaine de production.
+  const occurredWeek = occurredOn ? computeProductionWeek(occurredOn) : null;
+  const productWeekMismatch =
+    product?.kind === "week" && occurredWeek != null && (product.week.year !== occurredWeek.year || product.week.number !== occurredWeek.number);
+  const catalogForDate = options.weekCatalogs.find((c) => occurredWeek && c.year === occurredWeek.year && c.number === occurredWeek.number) ?? null;
 
   // ─── Actions ────────────────────────────────────────────────────────────────
   function chooseZone(id: string) {
@@ -291,7 +314,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       occurredTime: occurredTime || null,
       subzoneId: subzone.id,
       teamId: needsTeam ? teamId : null,
-      product: product.kind === "listed" ? { productId: product.id } : { freeLabel: product.name, category: product.category },
+      product:
+        product.kind === "listed"
+          ? { productId: product.id }
+          : product.kind === "week"
+            ? { weekItem: { kind: product.itemKind, id: product.id } }
+            : { freeLabel: product.name, category: product.category },
       method,
       quantity: useTare ? null : net.quantity,
       unitCode: useTare ? null : unitCode,
@@ -484,6 +512,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       {step === "product" && (
         <ProductStep
           products={options.products}
+          catalogs={options.weekCatalogs}
+          initialCatalog={catalogForDate}
+          showDishes={subzone?.teamMode === "equipe"}
+          showSnacks={!!zone && SNACK_ZONE_CODES.includes(zone.code)}
+          teamId={teamId}
           onChoose={(p) => {
             setProduct(p);
             setMethod(null);
@@ -726,6 +759,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             <dd>
               {product?.name}
               {product?.kind === "free" && <span className="text-sm text-amber-700"> (hors liste)</span>}
+              {product?.kind === "week" && <span className="text-sm text-slate-500"> (S{product.week.number})</span>}
             </dd>
             <EditLink onClick={() => setStep("product")} />
             <dt className="text-slate-500">Quantité</dt>
@@ -768,6 +802,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               <input type="time" className="field" value={occurredTime} onChange={(e) => setOccurredTime(e.target.value)} />
             </label>
           </div>
+          {productWeekMismatch && (
+            <p role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">
+              Le produit choisi est un produit de S{product.week.number} : indiquez une date de cette semaine, ou changez de produit.{" "}
+              <button type="button" className="font-medium underline" onClick={() => setStep("product")}>
+                Changer le produit
+              </button>
+            </p>
+          )}
           {isLate && (
             <p className="rounded-xl bg-amber-50 p-3 text-amber-900">
               Déclaration tardive : la perte sera comptée en {formatProductionWeek(computeProductionWeek(occurredOn))}.
@@ -792,7 +834,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           <button
             type="button"
             className="btn-primary"
-            disabled={pending || !occurredOn || (!!correction && reason.trim().length < 3)}
+            disabled={pending || !occurredOn || productWeekMismatch || (!!correction && reason.trim().length < 3)}
             onClick={submit}
           >
             {pending
@@ -963,31 +1005,68 @@ function Stepper({
   );
 }
 
+/** Produits proposés : ceux de la semaine (plats → sous-recettes → ingrédients), puis le référentiel. */
 function ProductStep({
   products,
+  catalogs,
+  initialCatalog,
+  showDishes,
+  showSnacks,
+  teamId,
   onChoose,
 }: {
   products: DeclarationOptions["products"];
+  /** Semaines importées proposées (en cours et précédente). */
+  catalogs: WeekCatalog[];
+  /** Semaine de la date de la perte, si elle est importée. */
+  initialCatalog: WeekCatalog | null;
+  /** Poste de cuisine : plats de l'équipe. */
+  showDishes: boolean;
+  /** Conditionnement, réception, stockage : encas (règle R9). */
+  showSnacks: boolean;
+  /** Équipe choisie par un responsable ; pour un compte équipe, le catalogue ne contient déjà que ses plats. */
+  teamId: string | null;
   onChoose: (p: ProductChoice) => void;
 }) {
   const [search, setSearch] = useState("");
-  const [freeMode, setFreeMode] = useState(products.length === 0);
+  const [freeMode, setFreeMode] = useState(false);
   const [freeName, setFreeName] = useState("");
   const [freeCategory, setFreeCategory] = useState<(typeof PRODUCT_CATEGORIES)[number] | null>(null);
+  /** Chemin parcouru : un plat, puis des sous-recettes. */
+  const [path, setPath] = useState<{ kind: "plat" | "sous_recette"; id: string }[]>([]);
+  const [catalogId, setCatalogId] = useState(initialCatalog?.weekId ?? catalogs[0]?.weekId ?? null);
+  const catalog = catalogs.find((c) => c.weekId === catalogId) ?? null;
 
-  const term = search.trim().toLowerCase();
-  const matches = term
-    ? products.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term)))
-    : products;
+  const week = catalog ? { year: catalog.year, number: catalog.number } : null;
+  const dishes = (catalog?.dishes ?? []).filter((d) => (d.snack ? showSnacks : showDishes && (!teamId || d.teamId === teamId)));
+  const hasWeek = dishes.length > 0;
+
+  const chooseDish = (d: WeekCatalog["dishes"][number]) =>
+    onChoose({
+      kind: "week",
+      itemKind: "plat",
+      id: d.id,
+      name: d.name,
+      category: d.snack ? "produit_externe" : "produit_fini",
+      unitWeightKg: gramsToKg(d.portionWeightG),
+      week: week!,
+    });
+  const chooseSubRecipe = (id: string) =>
+    onChoose({ kind: "week", itemKind: "sous_recette", id, name: catalog!.subRecipes[id]!.name, category: "sous_recette", unitWeightKg: null, week: week! });
+  const chooseIngredient = (l: WeekCatalog["dishes"][number]["lines"][number]) =>
+    onChoose({
+      kind: "week",
+      itemKind: "ingredient",
+      id: l.id,
+      name: l.label,
+      category: "matiere_premiere",
+      unitWeightKg: gramsToKg(l.unitWeightG),
+      week: week!,
+    });
 
   if (freeMode) {
     return (
       <Section title="Quel produit ?">
-        {products.length === 0 && (
-          <p className="rounded-xl bg-amber-50 p-3 text-amber-900">
-            Le référentiel des produits est encore vide : saisissez le nom du produit.
-          </p>
-        )}
         <label className="flex flex-col gap-1">
           <span className="font-medium">Nom du produit</span>
           <input className="field" value={freeName} onChange={(e) => setFreeName(e.target.value)} autoFocus />
@@ -1010,41 +1089,183 @@ function ProductStep({
         >
           Continuer
         </button>
-        {products.length > 0 && (
-          <button type="button" className="text-slate-600 underline" onClick={() => setFreeMode(false)}>
-            Revenir à la liste
-          </button>
-        )}
+        <button type="button" className="text-slate-600 underline" onClick={() => setFreeMode(false)}>
+          Revenir à la liste
+        </button>
       </Section>
     );
   }
+
+  // ─── Parcours plat → sous-recette → ingrédient ──────────────────────────
+  const current = path.at(-1);
+  if (catalog && current) {
+    const dish = current.kind === "plat" ? dishes.find((d) => d.id === current.id) : undefined;
+    const sub = current.kind === "sous_recette" ? catalog.subRecipes[current.id] : undefined;
+    const lines = dish?.lines ?? sub?.lines ?? [];
+    return (
+      <Section title={dish ? `${dish.code} — ${dish.name}` : (sub?.name ?? "")}>
+        <button type="button" className="self-start text-slate-700 underline" onClick={() => setPath(path.slice(0, -1))}>
+          {path.length > 1 ? "← Revenir au niveau précédent" : "← Tous les plats"}
+        </button>
+        <Tile onClick={() => (dish ? chooseDish(dish) : chooseSubRecipe(current.id))}>
+          {dish ? (dish.snack ? "L'encas entier" : "Le plat entier (barquettes)") : "La sous-recette entière"}
+          <small className="font-normal opacity-80">{dish ? "Produit fini" : "Sous-recette"}</small>
+        </Tile>
+        {lines.length > 0 && <p className="font-medium text-slate-700">Ou seulement un composant :</p>}
+        <div className="flex flex-col gap-2">
+          {lines.map((l) =>
+            l.subRecipeId && catalog.subRecipes[l.subRecipeId] ? (
+              <Tile key={l.id} compact onClick={() => setPath([...path, { kind: "sous_recette", id: l.subRecipeId! }])}>
+                {l.label} →<small className="font-normal opacity-70">Sous-recette : voir ses ingrédients</small>
+              </Tile>
+            ) : (
+              <Tile key={l.id} compact onClick={() => chooseIngredient(l)}>
+                {l.label}
+                <small className="font-normal opacity-70">Ingrédient</small>
+              </Tile>
+            ),
+          )}
+        </div>
+      </Section>
+    );
+  }
+
+  // ─── Accueil de l'étape : produits de la semaine, recherche, hors liste ───
+  const term = search.trim().toLowerCase();
+  const listedMatches = term ? products.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term))) : [];
+  const weekMatches = term.length >= 2 && catalog ? searchWeek(catalog, dishes, term) : [];
 
   return (
     <Section title="Quel produit ?">
       <input
         className="field"
         type="search"
-        placeholder="Rechercher par nom, code ou référence Melba"
+        placeholder={hasWeek ? "Rechercher un plat, une sous-recette, un ingrédient" : "Rechercher par nom ou code"}
         aria-label="Rechercher un produit"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <div className="flex flex-col gap-2">
-        {matches.slice(0, 30).map((p) => (
-          <Tile key={p.id} compact onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}>
-            {p.name}
-            {p.variant && ` – ${p.variant}`}
-            <small className="font-normal opacity-70">
-              {PRODUCT_CATEGORY_LABELS[p.category]}
-              {p.code && ` · ${p.code}`}
-            </small>
-          </Tile>
-        ))}
-        {matches.length === 0 && <p className="text-slate-500">Aucun produit trouvé.</p>}
-      </div>
+      {term ? (
+        <div className="flex flex-col gap-2">
+          {weekMatches.map((m) => (
+            <Tile
+              key={`${m.kind}:${m.id}`}
+              compact
+              onClick={() =>
+                m.kind === "plat" ? chooseDish(m.dish!) : m.kind === "sous_recette" ? chooseSubRecipe(m.id) : chooseIngredient(m.line!)
+              }
+            >
+              {m.label}
+              <small className="font-normal opacity-70">
+                {m.kind === "plat" ? "Plat de la semaine" : m.kind === "sous_recette" ? "Sous-recette de la semaine" : "Ingrédient de la semaine"}
+              </small>
+            </Tile>
+          ))}
+          {listedMatches.slice(0, 20).map((p) => (
+            <Tile key={p.id} compact onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}>
+              {p.name}
+              {p.variant && ` – ${p.variant}`}
+              <small className="font-normal opacity-70">
+                {PRODUCT_CATEGORY_LABELS[p.category]}
+                {p.code && ` · ${p.code}`}
+              </small>
+            </Tile>
+          ))}
+          {weekMatches.length === 0 && listedMatches.length === 0 && <p className="text-slate-500">Aucun produit trouvé.</p>}
+        </div>
+      ) : hasWeek ? (
+        <>
+          {(catalogs.length > 1 || catalog !== initialCatalog) && (
+            <nav aria-label="Semaine" className="flex flex-wrap gap-2">
+              {catalogs.map((c) => (
+                <button
+                  key={c.weekId}
+                  type="button"
+                  onClick={() => setCatalogId(c.weekId)}
+                  className={`rounded-full px-4 py-2 text-sm font-medium ${c.weekId === catalogId ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+                >
+                  S{c.number}
+                  {c === initialCatalog ? " (cette semaine)" : ""}
+                </button>
+              ))}
+            </nav>
+          )}
+          {catalog !== initialCatalog && (
+            <p className="rounded-xl bg-amber-50 p-3 text-amber-900">
+              Produits de S{catalog!.number} : la date de la perte devra être dans cette semaine.
+            </p>
+          )}
+          <p className="font-medium text-slate-700">
+            {showSnacks && !showDishes ? "Encas" : "Plats"} de la semaine S{catalog!.number}
+          </p>
+          <div className="flex flex-col gap-2">
+            {dishes.map((d) => (
+              <Tile key={d.id} compact onClick={() => setPath([{ kind: "plat", id: d.id }])}>
+                <span>
+                  <span className="font-mono">{d.code}</span> {d.name}
+                </span>
+                <small className="font-normal opacity-70">{d.lines.length} composant{d.lines.length > 1 ? "s" : ""} →</small>
+              </Tile>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {products.slice(0, 30).map((p) => (
+            <Tile key={p.id} compact onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}>
+              {p.name}
+              {p.variant && ` – ${p.variant}`}
+              <small className="font-normal opacity-70">
+                {PRODUCT_CATEGORY_LABELS[p.category]}
+                {p.code && ` · ${p.code}`}
+              </small>
+            </Tile>
+          ))}
+          {products.length === 0 && (
+            <p className="text-slate-500">
+              {showDishes && !catalog ? "Les plats de la semaine ne sont pas encore importés : " : ""}recherchez le produit ou saisissez son nom.
+            </p>
+          )}
+        </div>
+      )}
       <button type="button" className="btn-secondary" onClick={() => setFreeMode(true)}>
         Produit absent de la liste
       </button>
     </Section>
   );
+}
+
+interface WeekMatch {
+  kind: WeekItemKind;
+  id: string;
+  label: string;
+  dish?: WeekCatalog["dishes"][number];
+  line?: WeekCatalog["dishes"][number]["lines"][number];
+}
+
+/** Recherche dans les produits de la semaine proposés au poste (un ingrédient présent plusieurs fois n'apparaît qu'une fois). */
+function searchWeek(catalog: WeekCatalog, dishes: WeekCatalog["dishes"], term: string): WeekMatch[] {
+  const fold = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  const wanted = fold(term);
+  const matches: WeekMatch[] = [];
+  for (const d of dishes) if (fold(`${d.code} ${d.name}`).includes(wanted)) matches.push({ kind: "plat", id: d.id, label: `${d.code} — ${d.name}`, dish: d });
+  // Sous-recettes et ingrédients accessibles depuis les plats proposés.
+  const seenSubs = new Set<string>();
+  const seenIngredients = new Set<string>();
+  const visit = (lines: WeekCatalog["dishes"][number]["lines"]) => {
+    for (const l of lines) {
+      if (l.subRecipeId) {
+        const sub = catalog.subRecipes[l.subRecipeId];
+        if (!sub || seenSubs.has(sub.id)) continue;
+        seenSubs.add(sub.id);
+        if (fold(sub.name).includes(wanted)) matches.push({ kind: "sous_recette", id: sub.id, label: sub.name });
+        visit(sub.lines);
+      } else if (!seenIngredients.has(fold(l.label)) && fold(l.label).includes(wanted)) {
+        seenIngredients.add(fold(l.label));
+        matches.push({ kind: "ingredient", id: l.id, label: l.label, line: l });
+      }
+    }
+  };
+  for (const d of dishes) visit(d.lines);
+  return matches.slice(0, 30);
 }
