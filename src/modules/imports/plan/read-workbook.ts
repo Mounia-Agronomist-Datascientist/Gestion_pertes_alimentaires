@@ -21,11 +21,24 @@ export async function readWorkbookSheet(data: Uint8Array, sheetName: string): Pr
   sheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
     const values: string[] = [];
     row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-      values[colNumber - 1] = cell.text ?? "";
+      values[colNumber - 1] = displayedText(cell);
     });
     grid[rowNumber - 1] = Array.from(values, (v) => v ?? "");
   });
   return Array.from(grid, (row) => row ?? []);
+}
+
+/**
+ * Texte de la cellule tel qu'affiché dans Google Sheets : le classeur garde la valeur exacte (676,5) et le
+ * format d'affichage (« 0 » → 677) ; on applique les formats numériques simples (« 0 », « 0.0 », « #,##0 »).
+ */
+export function displayedText(cell: Pick<ExcelJS.Cell, "value" | "numFmt" | "text">): string {
+  const value = cell.value;
+  const number =
+    typeof value === "number" ? value : value && typeof value === "object" && "result" in value && typeof value.result === "number" ? value.result : null;
+  const format = cell.numFmt?.match(/^[#,]*0(?:\.(0+))?$/);
+  if (number == null || !format) return cell.text ?? "";
+  return Number(number.toFixed(format[1]?.length ?? 0)).toString();
 }
 
 async function load(data: Uint8Array) {

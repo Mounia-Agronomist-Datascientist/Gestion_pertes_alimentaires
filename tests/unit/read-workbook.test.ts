@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { describe, expect, it } from "vitest";
 import { parsePlan } from "@/modules/imports/plan/parse-plan";
-import { listWorkbookSheets, readWorkbookSheet } from "@/modules/imports/plan/read-workbook";
+import { displayedText, listWorkbookSheets, readWorkbookSheet } from "@/modules/imports/plan/read-workbook";
 
 /** Classeur semblable à un téléchargement Google Sheets : plusieurs onglets, nombres et formules. */
 async function workbook(): Promise<Uint8Array> {
@@ -38,6 +38,13 @@ describe("lecture du classeur Excel du plan de production", () => {
     ]);
     expect(plan.volumes.map((v) => v.code)).toEqual(["VI01", "QD01", "VG02"]);
     expect(plan.anomalies).toEqual([]);
+  });
+
+  it("applique le format d'affichage des nombres, comme Google Sheets", () => {
+    expect(displayedText({ value: { formula: "A1*0.5", result: 676.5 } as never, numFmt: "0", text: "676.5" })).toBe("677");
+    expect(displayedText({ value: 2.386363636, numFmt: "0.0", text: "2.386363636" })).toBe("2.4");
+    expect(displayedText({ value: 50.6, numFmt: undefined as never, text: "50.6" })).toBe("50.6");
+    expect(displayedText({ value: "A", numFmt: "0", text: "A" })).toBe("A");
   });
 
   it("renvoie null pour un onglet absent", async () => {

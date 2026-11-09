@@ -20,7 +20,7 @@ Analyse détaillée des sources : [INTEGRATION_OUTIL_SOUS_RECETTES.md](INTEGRATI
 | Étape | Contenu | État |
 |---|---|---|
 | 2.1 | Lecture du tome PDF : recettes, sous-recettes, ingrédients, quantités, poids unitaires, coûts, rendement (brut / net) ; rapport d'anomalies | ✅ Lecture faite (`src/modules/imports/tome/`) ; enregistrement en 2.3 |
-| 2.2 | Lecture du plan de production (Excel de l'onglet) : groupes de codes → équipe, barquettes par code | ✅ Lecture faite (`src/modules/imports/plan/`) ; à confirmer sur un vrai téléchargement Excel |
+| 2.2 | Lecture du plan de production (Excel de l'onglet) : groupes de codes → équipe, barquettes par code | ✅ Lecture faite (`src/modules/imports/plan/`), vérifiée sur le vrai classeur |
 | 2.3 | Modèle de données par semaine (instantanés figés) et migration | ⏳ |
 | 2.4 | Écran d'import : dépôt des deux fichiers, aperçu, anomalies, validation ; un nouvel import d'une semaine validée crée une nouvelle version tracée | ⏳ |
 | 2.5 | Saisie : produits proposés selon l'équipe et la semaine (plat → sous-recette → ingrédient) | ⏳ |
@@ -69,6 +69,14 @@ Anomalies signalées : onglet qui n'est pas une semaine, équipe non renseignée
 deux groupes, code avec des barquettes mais sans groupe.
 
 Vérifié sur l'extrait S45 : 18 groupes de plats, 12 de petits-déjeuners, 60 codes, 8 équipes, aucune anomalie.
+
+Vérifié sur le vrai classeur téléchargé le 09/11/2026 (57 onglets) :
+- le classeur garde les valeurs exactes (676,5) et leur format d'affichage (« 0 ») : le format est appliqué pour
+  retrouver les valeurs affichées dans Google Sheets (677) ; l'onglet S45 est alors identique à l'extrait ;
+- S03 à S47 : lues sans anomalie (30 à 36 groupes, 45 à 66 codes selon les semaines) ;
+- S48 à S50 : certains groupes sans équipe (planning pas encore fait) → signalé ;
+- S01, S02, S2551, S2552 : ancienne mise en page sans bloc « Référence PLATS » → signalé ; ces semaines passées
+  ne sont pas à importer.
 
 ## Essais en local
 
