@@ -10,13 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Base configurée ?
+        id: config
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: |
+          if [ -n "$DATABASE_URL" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "Secret DATABASE_URL_DIRECT absent : tâche ignorée."; fi
       - uses: actions/checkout@v4
+        if: steps.config.outputs.ok == 'true'
       - uses: actions/setup-node@v4
+        if: steps.config.outputs.ok == 'true'
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+        if: steps.config.outputs.ok == 'true'
       - run: npm run alertes:evaluer
+        if: steps.config.outputs.ok == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
           ALERTES_DEBUT: ${{ vars.ALERTES_DEBUT }}
