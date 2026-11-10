@@ -37,7 +37,7 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | 3 ⚪ | Main-d'œuvre | Méthode d'imputation — désactivée tant que non définie | Phase 3 |
 | 9 ⚪ | Récupération financière | Ventes à déduire du coût net | Phase 3 |
 | 13 ✅ | Coûts matières | Les coûts Melba du tome sont la référence ; extraction hebdomadaire avec le prix de chaque recette et sous-recette, conservés par semaine (les plats changent chaque semaine) | Phase 3 |
-| 8 🟠 | Volumes de production | Sources identifiées : « Décompte barquettes » (barquettes par code, équipe et jour, surplus, NC) et « Déboitage » (kg par barquette). Reste : mode d'accès automatique (lecture du Google Sheet par l'application ou export) | Phase 4 |
+| 8 🟠 | Volumes de production | Validé le 10/11/2026 : ratios sur le **prévu** (plan importé) et le **réel** (« Décompte barquettes ») côte à côte ; kg produits = barquettes × poids d'une portion Melba. Reste : mode d'accès au « Décompte barquettes » | Phase 4 (étape 4.6) |
 | 10 ⚪ | Facteurs carbone | Sources (ADEME / Base Empreinte) et niveau de précision | Phase 5 |
 
 ## Phase 2 — saisie à partir des plats de la semaine (09/11/2026)
