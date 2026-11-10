@@ -15,6 +15,7 @@ export const AUDIT_ENTITY_LABELS: Record<string, string> = {
   weekly_import: "Import de la semaine",
   packaging_item: "Emballage",
   packaging_item_cost: "Coût d'emballage",
+  labour_rate: "Coût horaire de main-d'œuvre",
 };
 
 export const AUDIT_ACTION_LABELS: Record<string, string> = {

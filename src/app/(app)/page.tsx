@@ -98,6 +98,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </Link>
       )}
 
+      {can(user, "indicators.read") && (
+        <Link href="/couts" className="btn-secondary flex items-center justify-center">
+          Coûts des pertes
+        </Link>
+      )}
       {can(user, "audit.read") && (
         <Link href="/journal" className="text-center text-slate-700 underline">
           Journal d&apos;audit

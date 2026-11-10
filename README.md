@@ -30,7 +30,7 @@ causes, destinations, impact environnemental).
 | 0 | Cadrage technique | ✅ |
 | 1 | Déclarations de pertes (application utilisable) | ✅ Développée — déclarations, historique, corrections, alertes, administration complète, journal d'audit ; reste l'essai pilote avec les équipes |
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ✅ Développée — import hebdomadaire (tome + plan), saisie à partir des plats de la semaine, coût matière figé |
-| 3 | Calcul des coûts | 🟡 En cours — emballages, coût brut et coût net par perte faits ([docs/PHASE3.md](docs/PHASE3.md)) |
+| 3 | Calcul des coûts | ✅ Développée — emballages, coût brut et net par perte, main-d'œuvre (non imputée), écran « Coûts des pertes » ([docs/PHASE3.md](docs/PHASE3.md)) |
 | 4 | Tableaux de bord et statistiques | ⏳ |
 | 5 | Valorisation et environnement | ⏳ |
 | 6 | Optimisation et automatisation | ⏳ |

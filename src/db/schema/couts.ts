@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, date, numeric, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
+import { zones } from "./organisation";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -71,5 +72,32 @@ export const packagingPerPortion = pgTable(
   (t) => [
     unique("packaging_per_portion_kind_item_key").on(t.portionKind, t.itemId),
     check("packaging_per_portion_positive", sql`${t.quantity} > 0`),
+  ],
+);
+
+/**
+ * Coût horaire moyen de main-d'œuvre par zone (cahier des charges §18.2), daté comme les autres coûts.
+ * Saisi et historisé, mais **non imputé aux pertes** tant que la méthode d'affectation n'est pas définie.
+ */
+export const labourRates = pgTable(
+  "labour_rates",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    zoneId: uuid("zone_id")
+      .notNull()
+      .references(() => zones.id),
+    hourlyCostEur: numeric("hourly_cost_eur", { precision: 10, scale: 2, mode: "number" }).notNull(),
+    /** Unité de référence du coût (par défaut : heure travaillée chargée). */
+    unit: text("unit").notNull().default("heure"),
+    validFrom: date("valid_from", { mode: "string" }).notNull(),
+    validTo: date("valid_to", { mode: "string" }),
+    source: text("source"),
+    createdBy: uuid("created_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("labour_rates_zone_valid_from_key").on(t.zoneId, t.validFrom),
+    check("labour_rates_positive", sql`${t.hourlyCostEur} >= 0`),
+    check("labour_rates_period", sql`${t.validTo} is null or ${t.validTo} >= ${t.validFrom}`),
   ],
 );

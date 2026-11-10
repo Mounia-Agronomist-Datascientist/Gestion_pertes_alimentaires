@@ -52,6 +52,7 @@
 | 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
 | 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
+| 2026-11-10 | Phase 3 terminée — coûts horaires de main-d'œuvre par zone (non imputés) et écran « Coûts des pertes » (brut, recettes, net, répartition, par équipe et par zone) | 2 + 2 tests d'intégration, 3 tests unitaires ; écran vérifié dans le navigateur (mobile) |
 | 2026-11-10 | Lecture du tome : tome imprimé pour toute la semaine ramené à une portion, colonnes lues dans l'en-tête de chaque tableau, détection des moules affinée | Tome S46 réel : 0 anomalie ; import S46 local et plats de la semaine vérifiés dans la saisie ; 2 tests unitaires |
 | 2026-11-10 | Phase 3 — recettes encaissées sur les lignes de vente (à la déclaration ou plus tard) et coût net | 3 tests d'intégration ; parcours vérifié dans le navigateur (mobile) |
 | 2026-11-10 | Correctif en ligne : connexion et déconnexion par formulaire classique (cookie posé sur une redirection 303), contrôle d'origine ; sur Netlify, chaque page redemandait la connexion | Test automatique dans Chrome (développement et build de production) : connexion, cookie, navigation ; 2 tests unitaires |
@@ -108,6 +109,7 @@
 | `0011_emballages` | Tables `packaging_items`, `packaging_item_costs` (coûts datés), `packaging_per_portion` | Nouvelles tables vides |
 | `0012_cout_brut` | Colonnes du coût brut figé (emballages, main-d'œuvre, indirect, brut, méthode, date, détail) | Déclarations existantes sans coût brut (colonnes vides) |
 | `0013_cout_net` | Colonnes `recovered_eur`, `net_cost_eur` sur les déclarations | Recettes vides, coût net vide pour les déclarations existantes |
+| `0014_main_oeuvre` | Table `labour_rates` (coût horaire daté par zone) | Nouvelle table vide |
 | `0005_alertes_rien_de_note` | Tables `production_days` et `missing_declaration_alerts` | Aucune modification des tables existantes |
 | `0003_declarations` | Création des 5 tables de déclarations, tares utilisées, destinations, versions et lots | Aucune modification des tables existantes |
 | `0002_causes_par_sous_zone` | Création de `cause_subzones` | Aucune modification des tables existantes ; base de dév. recréée (aucune donnée réelle) |

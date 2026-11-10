@@ -6,6 +6,7 @@ import { toProductionLocalDate } from "@/domain/semaine-production";
 import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
 import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
 import { setContainerActive, setContainerMaxCount, setContainerTare } from "@/modules/admin/containers";
+import { setLabourRate } from "@/modules/admin/labour";
 import {
   createPackagingItem,
   setPackagingCost,
@@ -393,4 +394,24 @@ export async function packagingAction(_prev: PlaceActionState, formData: FormDat
   }
   revalidatePath("/admin/emballages");
   return { message };
+}
+
+// ─── Main-d'œuvre ────────────────────────────────────────────────────────────
+
+export async function labourAction(_prev: PlaceActionState, formData: FormData): Promise<PlaceActionState> {
+  const admin = await requireUser();
+  try {
+    const rate = await setLabourRate(
+      db,
+      admin,
+      String(formData.get("zoneId") ?? ""),
+      { hourlyCostEur: String(formData.get("hourlyCostEur") ?? ""), validFrom: String(formData.get("validFrom") ?? ""), note: String(formData.get("note") ?? "") },
+      toProductionLocalDate(new Date()),
+    );
+    revalidatePath("/admin/main-oeuvre");
+    return { message: `${rate.hourlyCostEur.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € de l'heure à partir du ${rate.validFrom.split("-").reverse().join("/")}.` };
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
 }

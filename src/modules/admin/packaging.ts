@@ -8,6 +8,7 @@ import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
+import { datedChange } from "@/domain/versions-datees";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import { AdminError } from "./accounts";
@@ -121,12 +122,9 @@ export async function setPackagingCost(db: Db, admin: AuthUser, itemId: string, 
       .where(eq(s.packagingItemCosts.itemId, itemId))
       .orderBy(desc(s.packagingItemCosts.validFrom))
       .limit(1);
-    const fr = (d: string) => d.split("-").reverse().join("/");
-    if (latest && input.validFrom < latest.validFrom) {
-      throw new AdminError(`Un coût plus récent existe déjà (à partir du ${fr(latest.validFrom)}) : choisissez une date ultérieure`);
-    }
-    if (latest && input.validFrom === latest.validFrom) {
-      if (latest.validFrom < today) throw new AdminError("Ce coût est déjà appliqué : choisissez une date de début ultérieure");
+    const change = datedChange(latest, input.validFrom, today);
+    if (change.kind === "refus") throw new AdminError(change.message);
+    if (latest && change.kind === "correction") {
       const [after] = await tx
         .update(s.packagingItemCosts)
         .set({ unitCostEur: input.unitCostEur, source: input.note || null, createdBy: admin.id })

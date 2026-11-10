@@ -24,8 +24,8 @@ par composante et un coût net après recettes récupérées, figés sur la déc
 | 3.3 | Coût Melba d'un plat séparé en **matières** et **moules / plats à gratin** (déjà inclus dans Melba : jamais comptés deux fois) | ✅ |
 | 3.4 | Instantané complet par déclaration : matières, emballages, main-d'œuvre (non active), indirect (vide), méthode, versions, date de calcul ; coût brut | ✅ Migration `0012` |
 | 3.5 | Recettes récupérées : montant encaissé par ligne de vente ; coût net | ✅ Migration `0013` |
-| 3.6 | Référentiel main-d'œuvre par zone (taux horaires datés), sans imputation | ⏳ |
-| 3.7 | Écran « Coûts » : brut, récupéré, net par semaine ; répartition matières / main-d'œuvre / emballages / indirect en montants et pourcentages | ⏳ |
+| 3.6 | Référentiel main-d'œuvre par zone (taux horaires datés), sans imputation | ✅ Administration → Main-d'œuvre (migration `0014`) |
+| 3.7 | Écran « Coûts » : brut, récupéré, net par semaine ; répartition matières / main-d'œuvre / emballages / indirect en montants et pourcentages | ✅ Page « Coûts des pertes » |
 
 ## Règles appliquées
 
@@ -94,3 +94,27 @@ détail du coût.
 
 Vérifié : 3 tests d'intégration ; dans le navigateur, 10 barquettes de VI01 (6 Too Good To Go, 4 compost) avec
 4,50 € encaissés au récapitulatif, puis montant porté à 5,00 € depuis le détail (coût net 8,30 €).
+
+## Main-d'œuvre (3.6)
+
+Administration → **Main-d'œuvre** : coût horaire moyen par zone, daté (même règle que les emballages : nouvelle
+valeur à partir d'une date, correction possible avant son entrée en vigueur, jamais de réécriture d'une valeur
+appliquée ; règle commune `src/domain/versions-datees.ts`). **Rien n'est imputé aux pertes** : la composante
+main-d'œuvre reste vide tant que la méthode d'affectation n'est pas définie (§18.2).
+
+## Écran « Coûts des pertes » (3.7)
+
+Accessible depuis l'accueil aux rôles ayant les indicateurs économiques (administration, responsable production,
+direction) :
+- semaine par semaine : **coût brut**, **recettes encaissées**, **coût net** ;
+- nombre de pertes, kg, pertes valorisées ; pertes **sans coût connu** comptées à part (jamais estimées) ;
+  emballages incomplets signalés ;
+- **répartition du coût brut** : barre empilée (matières, main-d'œuvre, emballages, charges indirectes, couleurs
+  fixes validées pour le daltonisme) et tableau des montants et pourcentages ;
+- tableaux **par équipe** et **par zone** (brut, recettes, net).
+
+Le net de la synthèse est toujours « brut − recettes » ; une perte saisie avant le coût brut (Phase 2) compte pour
+son coût matière.
+
+**Phase 3 terminée** (10/11/2026). Restent à définir avec l'entreprise : la méthode d'imputation de la
+main-d'œuvre et les charges indirectes (§18.2, §18.4).
