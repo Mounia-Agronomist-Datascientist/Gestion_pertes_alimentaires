@@ -78,10 +78,10 @@ chiffré apparaît dans *Artifacts*.
 
 **8. Mises à jour suivantes** — Chaque envoi sur GitHub redéploie l'application. Quand une mise à jour contient
 une migration de base (nouveau fichier dans `src/db/migrations`), l'ordre compte :
-1. **Pousser** sur GitHub, puis **désactiver la mise en ligne automatique le temps de l'opération** n'est pas
-   nécessaire si l'on suit l'ordre suivant : lancer l'action *Base de données* **dès** le push ;
-2. ou, plus sûr : dans Netlify, **Deploys → Stop auto publishing** avant le push, lancer l'action, attendre la
-   coche verte, puis **Start auto publishing** (la dernière version est alors publiée).
+1. dans Netlify, **Deploys → Stop auto publishing** (la version en ligne ne change plus) ;
+2. **pousser** sur GitHub ;
+3. lancer l'action *Base de données (initialiser / mettre à jour)* et attendre la coche verte ;
+4. dans Netlify, **Start auto publishing** : la nouvelle version est publiée sur une base déjà à jour.
 Les migrations ne font qu'ajouter (tables, colonnes, valeurs) : l'ancienne version de l'application fonctionne
 avec une base déjà mise à jour, l'inverse non (« column … does not exist »).
 
