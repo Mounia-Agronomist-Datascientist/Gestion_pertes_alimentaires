@@ -12,7 +12,8 @@ import { buildWeekImport } from "@/modules/imports/merge";
 import { parsePlan } from "@/modules/imports/plan/parse-plan";
 import { saveWeekImport } from "@/modules/imports/service";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
-import { loadFacts, previousOf } from "@/modules/statistiques/facts";
+import { generalDashboard } from "@/modules/statistiques/dashboard";
+import { adjacentOf, loadFacts } from "@/modules/statistiques/facts";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
 
@@ -100,8 +101,18 @@ describe("lecture des pertes pour les statistiques", () => {
     expect(await loadFacts(t.db, direction, { kind: "semaine", year: 2031, number: 45 })).toEqual([]);
   });
 
-  it("trouve la semaine précédente dans le calendrier", async () => {
-    expect(await previousOf(t.db, S45)).toEqual({ kind: "semaine", year: 2026, number: 44 });
+  it("trouve les semaines voisines dans le calendrier", async () => {
+    expect(await adjacentOf(t.db, S45, -1)).toEqual({ kind: "semaine", year: 2026, number: 44 });
+    expect(await adjacentOf(t.db, S45, 1)).toEqual({ kind: "semaine", year: 2026, number: 46 });
+    expect(await adjacentOf(t.db, { kind: "semaine", year: 2031, number: 45 }, -1)).toBeNull();
+  });
+
+  it("tableau de bord général : période, période précédente et euros selon le profil", async () => {
+    const forDirection = await generalDashboard(t.db, direction, S45, {});
+    expect(forDirection).toMatchObject({ withCosts: true, previousPeriod: { number: 44 }, nextPeriod: { number: 46 }, previous: { events: 0 } });
+    expect(forDirection.current.cost?.recoveredEur).toBe(6);
+    const forTeam = await generalDashboard(t.db, teamC, S45, {});
+    expect(forTeam).toMatchObject({ withCosts: false, current: { events: 1, foodKg: 1.5, cost: null, kgByDestinationKind: { compost: 1.5 } } });
   });
 
   it("refusé sans droit de statistiques", async () => {

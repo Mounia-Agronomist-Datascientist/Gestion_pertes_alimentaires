@@ -31,7 +31,7 @@ semaines ; ratios de pertes ; graphiques économiques.
 | Étape | Contenu | État |
 |---|---|---|
 | 4.1 | Moteur de statistiques : agrégats sur une période (semaine, mois, année, dates libres) avec filtres (zone, sous-zone, équipe, catégorie de produit, cause, destination), selon les droits | ✅ Règle R14 |
-| 4.2 | **Tableau de bord général** (§19.1) : kg, coût, quantités détruite / compostée / donnée / vendue / réutilisée, évolution par rapport à la période précédente, barre de filtres | ⏳ |
+| 4.2 | **Tableau de bord général** (§19.1) : kg, coût, quantités détruite / compostée / donnée / vendue / réutilisée, évolution par rapport à la période précédente, barre de filtres | ✅ Page « Statistiques » |
 | 4.3 | **Analyses par zone, sous-zone et équipe** (§19.2, §19.3) : quantités, coûts, causes principales, produits, destinations, évolution ; comparaison des équipes pour les profils autorisés | ⏳ |
 | 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ⏳ |
 | 4.5 | **Comparaison des semaines** (§19.6) : courbe semaine par semaine, moyenne des dernières semaines, mois, année, même semaine l'année précédente si elle existe | ⏳ |
@@ -57,3 +57,24 @@ chaque semaine, comme le plan, ou lecture du Google Sheet. En attendant, le rati
 Vérifié : 8 tests unitaires + 5 tests d'intégration (dernière version et ses destinations, annulées exclues,
 périmètre d'une équipe sans euros, direction sur toute l'entreprise, mois / année / période / filtres, semaine
 précédente).
+
+## Tableau de bord général (4.2)
+
+Page **Statistiques**, accessible depuis l'accueil à tous les profils qui ont les statistiques (équipes,
+responsables de zone, production, direction, administration) :
+- période : semaine (par défaut la semaine en cours), mois, année ou dates libres ; boutons période précédente et
+  suivante ;
+- filtres : zone, équipe (profils qui comparent les équipes seulement), type de produit ; ils restent dans
+  l'adresse de la page (partageable, retour arrière du navigateur) ;
+- indicateurs : kg de pertes alimentaires, coût brut et coût net (profils « indicateurs économiques »),
+  barquettes perdues, nombre de déclarations ; chacun avec son **évolution** par rapport à la période précédente
+  (flèche, écart et pourcentage écrits) ;
+- **devenir des pertes** : kg détruits, compostés, donnés, vendus, réutilisés (puis repas du personnel, retour
+  fournisseur, autre s'il y en a), en barres d'une seule couleur avec valeur et part écrites ;
+- notes : pertes sans poids en kg, emballages et moules comptés à part (par unité), pertes sans coût connu ;
+- une équipe voit « vos pertes uniquement », un responsable de zone ses zones.
+
+Le pourcentage de pertes par rapport à la production arrivera avec les ratios (étape 4.6).
+
+Vérifié : 1 test d'intégration (période précédente, euros selon le profil, périmètre d'une équipe) ; page
+vérifiée dans le navigateur (mobile) : semaine S46, navigation, filtre mois + équipe.

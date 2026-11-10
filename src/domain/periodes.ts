@@ -29,23 +29,29 @@ export function monthBounds(year: number, month: number): { from: LocalDate; to:
 }
 
 /**
- * Période précédente. Pour une semaine, `previousWeek` donne la semaine d'avant dans le calendrier stocké (le
- * numéro 1 n'a pas forcément de semaine 0) ; null si le calendrier ne la connaît pas.
+ * Période voisine : la précédente (`step` = −1) ou la suivante (+1). Pour une semaine, `adjacentWeek` donne la
+ * semaine voisine dans le calendrier stocké (la semaine 1 n'a pas forcément de semaine 0) ; null s'il ne la
+ * connaît pas.
  */
-export function previousPeriod(period: Period, previousWeek?: { year: number; number: number } | null): Period | null {
+export function adjacentPeriod(period: Period, step: -1 | 1, adjacentWeek?: { year: number; number: number } | null): Period | null {
   switch (period.kind) {
     case "semaine":
-      return previousWeek ? { kind: "semaine", ...previousWeek } : null;
-    case "mois":
-      return period.month === 1 ? { kind: "mois", year: period.year - 1, month: 12 } : { kind: "mois", year: period.year, month: period.month - 1 };
+      return adjacentWeek ? { kind: "semaine", ...adjacentWeek } : null;
+    case "mois": {
+      const index = period.year * 12 + (period.month - 1) + step;
+      return { kind: "mois", year: Math.floor(index / 12), month: (index % 12) + 1 };
+    }
     case "annee":
-      return { kind: "annee", year: period.year - 1 };
+      return { kind: "annee", year: period.year + step };
     case "periode": {
-      const days = daysBetween(period.from, period.to) + 1;
-      return { kind: "periode", from: addDays(period.from, -days), to: addDays(period.from, -1) };
+      const days = (daysBetween(period.from, period.to) + 1) * step;
+      return { kind: "periode", from: addDays(period.from, days), to: addDays(period.to, days) };
     }
   }
 }
+
+/** Période précédente (évolution affichée au tableau de bord). */
+export const previousPeriod = (period: Period, previousWeek?: { year: number; number: number } | null) => adjacentPeriod(period, -1, previousWeek);
 
 const frDate = (d: LocalDate) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}`;
 

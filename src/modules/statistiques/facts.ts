@@ -7,10 +7,10 @@
  * une perte corrigée compte pour sa dernière version (destinations de cette version). Les euros ne sont transmis
  * qu'aux profils `indicators.read`.
  */
-import { and, asc, desc, eq, gte, inArray, lt, lte, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, lt, lte, type SQL } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { monthBounds, type Period, previousPeriod } from "@/domain/periodes";
+import { adjacentPeriod, monthBounds, type Period } from "@/domain/periodes";
 import type { LossFact } from "@/domain/statistiques";
 import { type AuthUser, can, ForbiddenError } from "@/modules/auth/permissions";
 import { isNonFoodCategory } from "@/modules/declarations/input";
@@ -53,21 +53,21 @@ async function periodCondition(db: Db, period: Period): Promise<SQL | null> {
   }
 }
 
-/** Période précédente, avec la semaine d'avant tirée du calendrier stocké. */
-export async function previousOf(db: Db, period: Period): Promise<Period | null> {
-  if (period.kind !== "semaine") return previousPeriod(period);
+/** Période voisine (−1 précédente, +1 suivante), avec la semaine voisine tirée du calendrier stocké. */
+export async function adjacentOf(db: Db, period: Period, step: -1 | 1): Promise<Period | null> {
+  if (period.kind !== "semaine") return adjacentPeriod(period, step);
   const [week] = await db
     .select({ startDate: s.productionWeeks.startDate })
     .from(s.productionWeeks)
     .where(and(eq(s.productionWeeks.year, period.year), eq(s.productionWeeks.number, period.number)));
   if (!week) return null;
-  const [before] = await db
+  const [next] = await db
     .select({ year: s.productionWeeks.year, number: s.productionWeeks.number })
     .from(s.productionWeeks)
-    .where(lt(s.productionWeeks.startDate, week.startDate))
-    .orderBy(desc(s.productionWeeks.startDate))
+    .where(step < 0 ? lt(s.productionWeeks.startDate, week.startDate) : gt(s.productionWeeks.startDate, week.startDate))
+    .orderBy(step < 0 ? desc(s.productionWeeks.startDate) : asc(s.productionWeeks.startDate))
     .limit(1);
-  return previousPeriod(period, before ?? null);
+  return adjacentPeriod(period, step, next ?? null);
 }
 
 export async function loadFacts(db: Db, user: AuthUser, period: Period, filters: StatsFilters = {}): Promise<LossFact[]> {
