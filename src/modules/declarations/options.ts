@@ -6,6 +6,7 @@ import { and, asc, eq, gte, isNull, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import type { LocalDate } from "@/domain/semaine-production";
+import { portionPackagingCost } from "@/modules/admin/packaging";
 import { weekCatalogs } from "@/modules/imports/catalog";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
@@ -73,6 +74,11 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
     today,
     /** Plats, sous-recettes et ingrédients de la semaine en cours et de la précédente (imports en vigueur). */
     weekCatalogs: await weekCatalogs(db, user, today),
+    /** Coût des emballages du référentiel par portion aujourd'hui (aperçu ; le serveur prend la date de la perte). */
+    packagingPerPortion: {
+      plat: (await portionPackagingCost(db, "plat", today)).totalEur,
+      petit_dejeuner: (await portionPackagingCost(db, "petit_dejeuner", today)).totalEur,
+    },
     zones,
     teams,
     causes: causeRows

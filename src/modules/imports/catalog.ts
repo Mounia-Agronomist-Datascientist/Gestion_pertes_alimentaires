@@ -7,7 +7,8 @@
 import { and, eq } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { dishUnitCost, ingredientUnitCost, subRecipeUnitCost, type UnitCost } from "@/domain/couts";
+import { dishUnitCost, ingredientUnitCost, mouldCostOf, subRecipeUnitCost, type UnitCost } from "@/domain/couts";
+import type { PortionKind } from "@/modules/admin/packaging-labels";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
@@ -35,7 +36,21 @@ export interface WeekCatalog {
   number: number;
   startDate: LocalDate;
   endDate: LocalDate;
-  dishes: { id: string; code: string; name: string; teamId: string | null; snack: boolean; portionWeightG: number | null; cost: UnitCost; lines: CatalogLine[] }[];
+  dishes: {
+    id: string;
+    code: string;
+    name: string;
+    teamId: string | null;
+    snack: boolean;
+    portionWeightG: number | null;
+    /** Coût matières d'une portion, hors moules et plats à gratin. */
+    cost: UnitCost;
+    /** Moules et plats à gratin inclus dans le coût Melba d'une portion (comptés en emballages). */
+    mouldPerPortionEur: number;
+    /** Emballages du référentiel ajoutés par portion. */
+    portionKind: PortionKind | null;
+    lines: CatalogLine[];
+  }[];
   subRecipes: Record<string, { id: string; name: string; mould: boolean; cost: UnitCost; lines: CatalogLine[] }>;
 }
 
@@ -76,6 +91,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
         .sort((a, b) => a.position - b.position)
         .map(toLine);
 
+    const structure = importStructure(lines, subRecipes);
     const visible = recipes.filter((r) => (user.teamId ? r.teamId === user.teamId : true));
     const dishes = visible
       .map((r) => ({
@@ -85,7 +101,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
         teamId: r.teamId,
         snack: isSnackCode(r.code),
         portionWeightG: portionWeightG(r),
-        cost: dishUnitCost(r.totalCostEur, portionWeightG(r)),
+        ...dishCosts(r, structure),
         lines: linesOf({ recipeId: r.id }),
       }))
       .sort((a, b) => a.code.localeCompare(b.code));
@@ -106,6 +122,32 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
   return catalogs;
 }
 
+type LineRow = typeof s.weekRecipeLines.$inferSelect;
+type SubRecipeRow = typeof s.weekSubRecipes.$inferSelect;
+
+/** Compositions d'un import, pour retrouver les moules inclus dans le coût d'un plat. */
+function importStructure(lines: readonly LineRow[], subRecipes: readonly SubRecipeRow[]) {
+  const asLine = (l: LineRow) => ({ label: l.label, costEur: l.costEur, subRecipeId: l.componentSubRecipeId });
+  return {
+    linesOfRecipe: (recipeId: string) => lines.filter((l) => l.recipeId === recipeId).map(asLine),
+    subRecipes: new Map(subRecipes.map((sr) => [sr.id, { totalCostEur: sr.totalCostEur, lines: lines.filter((l) => l.subRecipeId === sr.id).map(asLine) }])),
+  };
+}
+
+/**
+ * Coûts d'un plat : matières (coût Melba moins les moules et plats à gratin qu'il inclut) et emballages
+ * (ces moules + emballages du référentiel par portion). Encas : produit acheté, sans emballage ajouté.
+ */
+function dishCosts(r: typeof s.weekRecipes.$inferSelect, structure: ReturnType<typeof importStructure>) {
+  const snack = isSnackCode(r.code);
+  const mould = snack ? 0 : mouldCostOf(structure.linesOfRecipe(r.id), structure.subRecipes, isMouldLabel);
+  return {
+    cost: dishUnitCost(r.totalCostEur != null ? Math.round((r.totalCostEur - mould) * 10_000) / 10_000 : null, portionWeightG(r)),
+    mouldPerPortionEur: mould,
+    portionKind: snack ? null : r.code.startsWith("PJ") ? ("petit_dejeuner" as const) : ("plat" as const),
+  };
+}
+
 /** Coût d'une sous-recette rapporté à son poids net (à défaut, à sa quantité de référence en g ou kg). */
 const subRecipeCost = (sr: { totalCostEur: number | null; netQuantity: number | null; netUnit: string | null; referenceQuantity: number | null; referenceUnit: string | null }) =>
   subRecipeUnitCost(
@@ -116,6 +158,15 @@ const subRecipeCost = (sr: { totalCostEur: number | null; netQuantity: number | 
         ? { quantity: sr.referenceQuantity, unit: sr.referenceUnit }
         : null,
   );
+
+/** Coûts d'une sous-recette ou d'un ingrédient : matières, ou emballage s'il s'agit d'un moule. */
+const itemCost = (cost: UnitCost, mould: boolean): ResolvedWeekItem["cost"] => ({
+  food: mould ? { perKgEur: null, perUnitEur: null } : cost,
+  mouldPerPortionEur: null,
+  portionKind: null,
+  portionWeightKg: null,
+  packagingItself: mould ? cost : null,
+});
 
 /** Poids d'une portion : celui du rendement (« (315.1 g) »), sinon la « Recette totale » d'une recette. */
 const portionWeightG = (r: { portionWeightG: number | null; totalWeightG: number | null }) => r.portionWeightG ?? r.totalWeightG;
@@ -130,7 +181,17 @@ export interface ResolvedWeekItem {
   teamId: string | null;
   snack: boolean;
   /** Coûts du tome de la semaine (figés sur la déclaration). */
-  cost: UnitCost;
+  cost: {
+    /** Coût matières (hors moules et plats à gratin). */
+    food: UnitCost;
+    /** Moules inclus dans le coût Melba d'une portion de plat. */
+    mouldPerPortionEur: number | null;
+    /** Emballages du référentiel à ajouter par portion (plat, petit-déjeuner) ; null pour les autres produits. */
+    portionKind: PortionKind | null;
+    portionWeightKg: number | null;
+    /** Le produit est lui-même un moule ou un plat à gratin : son coût va dans les emballages. */
+    packagingItself: UnitCost | null;
+  };
 }
 
 /** Retrouve un produit de la semaine choisi à la saisie, ou null s'il n'existe pas. */
@@ -140,6 +201,11 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
     const [r] = await db.select().from(s.weekRecipes).where(eq(s.weekRecipes.id, id));
     if (!r) return null;
     const snack = isSnackCode(r.code);
+    const [lines, subRecipes] = await Promise.all([
+      db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.importId, r.importId)),
+      db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.importId, r.importId)),
+    ]);
+    const costs = dishCosts(r, importStructure(lines, subRecipes));
     return {
       // Un encas est un produit acheté ; un plat de la semaine, un produit fini (barquette).
       category: snack ? "produit_externe" : "produit_fini",
@@ -152,13 +218,19 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
       importId: r.importId,
       teamId: r.teamId,
       snack,
-      cost: dishUnitCost(r.totalCostEur, portionWeightG(r)),
+      cost: {
+        food: costs.cost,
+        mouldPerPortionEur: costs.mouldPerPortionEur,
+        portionKind: costs.portionKind,
+        portionWeightKg: gramsToKg(portionWeightG(r)),
+        packagingItself: null,
+      },
     };
   }
   if (kind === "sous_recette") {
     const [sr] = await db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.id, id));
     if (!sr) return null;
-    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false, cost: subRecipeCost(sr) };
+    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false, cost: itemCost(subRecipeCost(sr), isMouldLabel(sr.name)) };
   }
   const [l] = await db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.id, id));
   if (!l || l.isSubRecipe) return null;
@@ -171,6 +243,6 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
     importId: l.importId,
     teamId: null,
     snack: false,
-    cost: ingredientUnitCost(l),
+    cost: itemCost(ingredientUnitCost(l), isMouldLabel(l.label)),
   };
 }

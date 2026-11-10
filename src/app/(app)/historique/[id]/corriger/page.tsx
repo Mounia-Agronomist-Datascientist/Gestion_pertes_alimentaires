@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/db/client";
+import type { UnitCost } from "@/domain/couts";
 import { computeProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { INPUT_METHODS, type InputMethod } from "@/modules/declarations/input";
@@ -47,7 +48,12 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
           category: d.productCategory,
           unitWeightKg: d.conversionFactorUsed,
           week: { year: lossWeek.year, number: lossWeek.number },
-          cost: { perKgEur: d.costPerKgEur, perUnitEur: d.costPerUnitEur },
+          cost: {
+            food: { perKgEur: d.costPerKgEur, perUnitEur: d.costPerUnitEur },
+            packagingPerPortionEur: (d.costDetails as { packagingPerPortionEur?: number | null } | null)?.packagingPerPortionEur ?? null,
+            portionWeightKg: d.conversionFactorUsed,
+            packagingItself: (d.costDetails as { packagingItself?: UnitCost | null } | null)?.packagingItself ?? undefined,
+          },
         }
       : d.productId
         ? { kind: "listed", id: d.productId, name: d.productName, category: d.productCategory }

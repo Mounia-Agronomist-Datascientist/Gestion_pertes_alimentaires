@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as s from "@/db/schema";
 import { seed } from "@/db/seed/seed";
+import { createPackagingItem, setPackagingCost, setPackagingPerPortion } from "@/modules/admin/packaging";
 import { createAccount } from "@/modules/auth/accounts";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
@@ -142,7 +143,40 @@ describe("saisie à partir des produits de la semaine", () => {
       .find((l) => l.mould && !l.subRecipeId)!;
     const r = await declare(admin, { weekItem: { kind: "ingredient", id: mould.id } }, { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" });
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
-    expect(row).toMatchObject({ productCategory: "moule_plat_gratin", kgStatus: "sans_objet", netKg: null });
+    expect(row).toMatchObject({ productCategory: "moule_plat_gratin", kgStatus: "sans_objet", netKg: null, materialCostEur: null });
+    expect(row?.packagingCostEur).toBeGreaterThan(0);
+    expect(row?.grossCostEur).toBe(row?.packagingCostEur);
+  });
+
+  it("coût brut d'un plat : matières hors plat à gratin + emballages (plat à gratin Melba + référentiel à la date de la perte)", async () => {
+    const barquette = await createPackagingItem(t.db, admin, { code: "BARQ", name: "Barquette", kind: "barquette", unit: "pièce" });
+    const film = await createPackagingItem(t.db, admin, { code: "FILM", name: "Film", kind: "film", unit: "pièce" });
+    await setPackagingCost(t.db, admin, barquette.id, { unitCostEur: "0,12", validFrom: "2026-10-01" }, "2026-10-01");
+    await setPackagingCost(t.db, admin, film.id, { unitCostEur: "0,03", validFrom: "2026-10-01" }, "2026-10-01");
+    await setPackagingPerPortion(t.db, admin, { portionKind: "plat", itemId: barquette.id, quantity: "1" });
+    await setPackagingPerPortion(t.db, admin, { portionKind: "plat", itemId: film.id, quantity: "1" });
+
+    const adminCatalog = await weekCatalogs(t.db, admin, DAY);
+    const vi03 = adminCatalog[0]!.dishes.find((d) => d.code === "VI03")!; // Choutiflette : 1,46 € dont 0,07 € de plat à gratin
+    expect(vi03).toMatchObject({ mouldPerPortionEur: 0.07, portionKind: "plat", cost: { perUnitEur: 1.39 } });
+    const teamH = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "H")))[0]!.id;
+    const r = await declare(admin, { weekItem: { kind: "plat", id: vi03.id } }, { quantity: 4, teamId: teamH, destinations: [{ destinationId: ref.compost, quantity: 4 }] });
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
+    expect(row).toMatchObject({
+      materialCostEur: 5.56,
+      packagingCostEur: 0.88, // 4 × (0,07 + 0,12 + 0,03)
+      grossCostEur: 6.44,
+      labourCostEur: null,
+      indirectCostEur: null,
+      costMethod: "melba-semaine+emballages-v1",
+    });
+    expect(row?.costDetails).toMatchObject({ portions: 4, packagingComplete: true, packagingDate: DAY });
+
+    // Un sous-produit (sous-recette) n'a pas d'emballage ajouté.
+    const sub = await declare(admin, { weekItem: { kind: "sous_recette", id: vi03.lines[1]!.subRecipeId! } }, { teamId: teamH, method: "pesee", quantity: 1, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 1 }] });
+    const [subRow] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, sub.id));
+    expect(subRow?.packagingCostEur).toBeNull();
+    expect(subRow?.grossCostEur).toBe(subRow?.materialCostEur);
   });
 
   it("refuse un produit d'une autre semaine que celle de la perte", async () => {

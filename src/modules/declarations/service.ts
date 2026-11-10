@@ -5,7 +5,7 @@
 import { and, eq, gte, inArray, isNull, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { estimateLossCost, type UnitCost } from "@/domain/couts";
+import { COST_METHOD, lossCostBreakdown } from "@/domain/couts";
 import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
@@ -13,7 +13,8 @@ import { computeNetWeight, type GastroLine, type SupportTare, TareError } from "
 import { convertToKg, type KgStatus, QuantityError, type UnitKind } from "@/domain/unites";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules/auth/permissions";
-import { findWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
+import { portionPackagingCost } from "@/modules/admin/packaging";
+import { findWeekItem, type ResolvedWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
 import { currentWeekImport } from "@/modules/imports/service";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { canModifyDeclaration, canReadDeclaration, isBoundByTeamDelay, isWithinTeamDelay, TEAM_DELAY_DAYS } from "./access";
@@ -107,7 +108,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
     densityKgPerL: number | null;
     refs?: { weekRecipeId: string | null; weekSubRecipeId: string | null; weekLineId: string | null };
     /** Coûts du tome de la semaine et import d'origine (produits de la semaine uniquement). */
-    cost?: { unit: UnitCost; importId: string };
+    cost?: { item: ResolvedWeekItem["cost"]; importId: string };
   };
   if ("weekItem" in input.product) {
     // Produit de l'import de la semaine (docs/PHASE2.md, étape 2.5).
@@ -134,7 +135,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       unitWeightKg: item.unitWeightKg,
       densityKgPerL: null,
       refs: item.refs,
-      cost: { unit: item.cost, importId: item.importId },
+      cost: { item: item.cost, importId: item.importId },
     };
   } else if ("productId" in input.product) {
     const [row] = await db.select().from(s.products).where(eq(s.products.id, input.product.productId));
@@ -280,6 +281,57 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
   );
   const kgPerUnit = measurement.netKg != null ? measurement.netKg / measurement.netQuantity : null;
 
+  // ─── Coût brut figé (docs/PHASE3.md, étapes 3.3 et 3.4) ────────────────────
+  // Coûts du tome de la semaine et emballages en vigueur à la date de la perte ; rien pour un produit sans coût.
+  // Toutes les colonnes sont écrites (null par défaut) : une correction vers un produit sans coût efface l'ancien coût.
+  let costSnapshot: Partial<typeof s.lossDeclarations.$inferInsert> = {
+    costPerKgEur: null,
+    costPerUnitEur: null,
+    materialCostEur: null,
+    packagingCostEur: null,
+    labourCostEur: null,
+    indirectCostEur: null,
+    grossCostEur: null,
+    costImportId: null,
+    costMethod: null,
+    costComputedAt: null,
+    costDetails: null,
+  };
+  if (product.cost) {
+    const c = product.cost.item;
+    const packaging = c.portionKind ? await portionPackagingCost(db, c.portionKind, input.occurredOn) : null;
+    const packagingPerPortionEur = c.portionKind ? Math.round(((c.mouldPerPortionEur ?? 0) + packaging!.totalEur) * 100_000) / 100_000 : null;
+    const loss = { netKg: measurement.netKg, quantity: measurement.netQuantity, unitCode: measurement.netUnitCode };
+    const breakdown = lossCostBreakdown(loss, {
+      food: c.food,
+      packagingPerPortionEur,
+      portionWeightKg: c.portionWeightKg,
+      packagingItself: c.packagingItself ?? undefined,
+    });
+    costSnapshot = {
+      costPerKgEur: c.food.perKgEur,
+      costPerUnitEur: c.food.perUnitEur,
+      materialCostEur: breakdown.foodEur,
+      packagingCostEur: breakdown.packagingEur,
+      labourCostEur: breakdown.labourEur,
+      indirectCostEur: breakdown.indirectEur,
+      grossCostEur: breakdown.grossEur,
+      costImportId: product.cost.importId,
+      costMethod: COST_METHOD,
+      costComputedAt: now,
+      costDetails: {
+        portions: breakdown.portions,
+        mouldPerPortionEur: c.mouldPerPortionEur,
+        packagingPerPortionEur,
+        packagingDate: c.portionKind ? input.occurredOn : null,
+        packagingComplete: packaging?.complete ?? null,
+        packagingLines: packaging?.lines ?? [],
+        packagingItself: c.packagingItself,
+        labour: "non imputée : méthode d'affectation à définir (cahier des charges §18.2)",
+      },
+    };
+  }
+
   return {
     values: {
       occurredOn: input.occurredOn,
@@ -302,12 +354,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       weekRecipeId: product.refs?.weekRecipeId ?? null,
       weekSubRecipeId: product.refs?.weekSubRecipeId ?? null,
       weekLineId: product.refs?.weekLineId ?? null,
-      costPerKgEur: product.cost?.unit.perKgEur ?? null,
-      costPerUnitEur: product.cost?.unit.perUnitEur ?? null,
-      materialCostEur: product.cost
-        ? estimateLossCost({ netKg: measurement.netKg, quantity: measurement.netQuantity, unitCode: measurement.netUnitCode }, product.cost.unit)
-        : null,
-      costImportId: product.cost?.importId ?? null,
+      ...costSnapshot,
       measurementMethod,
       quantity: measurement.quantity,
       unitCode: measurement.unitCode,

@@ -173,3 +173,11 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
   ingrédient : coût de sa ligne rapporté à sa quantité.
 - Coût estimé = poids net × coût au kg, sinon nombre × coût unitaire ; aucun coût n'est inventé pour un produit
   du référentiel ou hors liste. Les règles de valorisation complètes (ventes, destinations) relèvent de la Phase 3.
+
+## R12 — Coût brut d'une perte (Phase 3, 10/11/2026)
+
+- Coût brut = matières + emballages (+ main-d'œuvre et charges indirectes quand elles seront définies).
+- Les moules et plats à gratin inclus dans le coût Melba d'un plat sont comptés en **emballages**, jamais deux fois.
+- Les emballages du référentiel s'ajoutent à **tout plat perdu** (par portion), aux prix en vigueur à la date de
+  la perte ; aucun emballage n'est ajouté aux encas, sous-recettes et ingrédients.
+- Le coût est figé sur la déclaration avec sa méthode et sa date de calcul.

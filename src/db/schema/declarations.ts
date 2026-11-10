@@ -116,10 +116,19 @@ export const lossDeclarations = pgTable(
      */
     costPerKgEur: numeric("cost_per_kg_eur", { precision: 12, scale: 4, mode: "number" }),
     costPerUnitEur: numeric("cost_per_unit_eur", { precision: 12, scale: 4, mode: "number" }),
-    /** Coût matière estimé de la perte (poids net × coût au kg, ou nombre × coût unitaire). */
+    /** Coût matières estimé de la perte, hors moules et plats à gratin (poids net × coût au kg, ou nombre × coût unitaire). */
     materialCostEur: numeric("material_cost_eur", { precision: 12, scale: 4, mode: "number" }),
     /** Import (tome) d'où viennent les coûts. */
     costImportId: uuid("cost_import_id").references(() => weeklyImports.id),
+    /** Instantané du coût brut par composante (cahier des charges §18.5, docs/PHASE3.md étape 3.4). */
+    packagingCostEur: numeric("packaging_cost_eur", { precision: 12, scale: 4, mode: "number" }),
+    labourCostEur: numeric("labour_cost_eur", { precision: 12, scale: 4, mode: "number" }),
+    indirectCostEur: numeric("indirect_cost_eur", { precision: 12, scale: 4, mode: "number" }),
+    grossCostEur: numeric("gross_cost_eur", { precision: 12, scale: 4, mode: "number" }),
+    costMethod: text("cost_method"),
+    costComputedAt: timestamp("cost_computed_at", { withTimezone: true }),
+    /** Détail utilisé : version de l'import, emballages et coûts unitaires appliqués, portions. */
+    costDetails: jsonb("cost_details"),
 
     causeId: uuid("cause_id")
       .notNull()

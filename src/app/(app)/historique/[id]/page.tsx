@@ -96,13 +96,24 @@ export default async function DeclarationDetailPage({
         </dd>
         {d.costImportId && (
           <>
-            <dt className="text-slate-500">Coût matière</dt>
+            <dt className="text-slate-500">Coût brut</dt>
             <dd>
-              {d.materialCostEur != null ? `≈ ${fmtEuro(d.materialCostEur)}` : "non calculable"}
+              {d.grossCostEur != null ? `≈ ${fmtEuro(d.grossCostEur)}` : d.materialCostEur != null ? `≈ ${fmtEuro(d.materialCostEur)}` : "non calculable"}
               <span className="block text-sm text-slate-500">
-                Coût du tome Melba de la semaine
-                {d.costPerUnitEur != null && ` · ${fmtEuro(d.costPerUnitEur)} l'unité`}
-                {d.costPerKgEur != null && ` · ${fmtEuro(d.costPerKgEur)} le kg`}
+                Matières : {d.materialCostEur != null ? fmtEuro(d.materialCostEur) : "—"}
+                {d.costPerUnitEur != null && ` (${fmtEuro(d.costPerUnitEur)} l'unité)`}
+                {d.costPerKgEur != null && ` (${fmtEuro(d.costPerKgEur)} le kg)`}
+              </span>
+              <span className="block text-sm text-slate-500">Emballages : {d.packagingCostEur != null ? fmtEuro(d.packagingCostEur) : "—"}</span>
+              {(d.costDetails as { packagingComplete?: boolean | null } | null)?.packagingComplete === false && (
+                <span className="block text-sm text-amber-700">
+                  Un emballage n&apos;avait pas de coût à la date de la perte : montant des emballages incomplet.
+                </span>
+              )}
+              <span className="block text-sm text-slate-500">Main-d&apos;œuvre : non imputée (méthode à définir)</span>
+              <span className="block text-sm text-slate-500">
+                Coûts du tome Melba de la semaine
+                {d.costComputedAt && `, calculés le ${fmtDateTime(d.costComputedAt)}`}
               </span>
             </dd>
           </>
