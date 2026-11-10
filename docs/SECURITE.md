@@ -38,6 +38,11 @@ Stockée en base (`roles`, `permissions`, `role_permissions`), initialisée par 
 - Sessions : jeton aléatoire 256 bits, seul son hachage est stocké ; cookie `httpOnly`, `Secure`,
   `SameSite=Lax` ; expiration glissante (durée à valider : proposition 30 jours sur appareil d'équipe,
   12 h pour les comptes admin).
+- Connexion et déconnexion par **formulaire classique** (`POST /connexion/session`, `POST /deconnexion`) : le
+  cookie est posé ou effacé sur une redirection 303 ordinaire, et l'en-tête `Origin` doit être celui de
+  l'application (protection CSRF). Les actions serveur ne posent plus de cookie : sur Netlify, ce cookie n'était
+  pas enregistré par le navigateur (chaque page redemandait la connexion, 10/11/2026). Les redirections vers la
+  connexion portent `Cache-Control: no-store`.
 - Limitation des tentatives de connexion : 5 échecs en 15 min **par identifiant** bloquent cet identifiant
   15 min ; tout est journalisé. Pas de blocage par adresse IP : tous les appareils de l'usine sortent
   probablement par la même adresse, un blocage par IP bloquerait toutes les équipes à la fois.

@@ -1,18 +1,25 @@
 "use client";
 
-import { useActionState } from "react";
-import { loginAction, type LoginState } from "./actions";
+import { useState } from "react";
 
-export function LoginForm() {
-  const [state, action, pending] = useActionState<LoginState, FormData>(loginAction, {});
+const ERRORS: Record<string, string> = {
+  vide: "Saisissez votre identifiant et votre mot de passe.",
+  incorrect: "Identifiant ou mot de passe incorrect.",
+  bloque: "Trop d'essais : ce compte est bloqué pendant 15 minutes.",
+};
+
+/** Formulaire classique envoyé à /connexion/session (le cookie de session est posé sur la redirection). */
+export function LoginForm({ error, login }: { error?: string; login?: string }) {
+  const [pending, setPending] = useState(false);
+  const message = error ? (ERRORS[error] ?? ERRORS.incorrect) : null;
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form method="post" action="/connexion/session" onSubmit={() => setPending(true)} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1">
         <span className="font-medium">Identifiant</span>
         <input
           name="login"
-          defaultValue={state.login}
+          defaultValue={login}
           autoComplete="username"
           autoCapitalize="none"
           autoCorrect="off"
@@ -23,11 +30,11 @@ export function LoginForm() {
       </label>
       <label className="flex flex-col gap-1">
         <span className="font-medium">Mot de passe</span>
-        <input name="password" type="password" autoComplete="current-password" required className="field" />
+        <input name="password" type="password" autoComplete="current-password" required autoFocus={!!login} className="field" />
       </label>
-      {state.error && (
+      {message && (
         <p role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">
-          {state.error}
+          {message}
         </p>
       )}
       <button type="submit" disabled={pending} className="btn-primary">

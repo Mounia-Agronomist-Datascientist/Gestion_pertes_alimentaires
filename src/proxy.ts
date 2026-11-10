@@ -11,7 +11,10 @@ export function proxy(request: NextRequest) {
   const isPublic = request.nextUrl.pathname.startsWith("/connexion");
 
   if (!token && !isPublic) {
-    return NextResponse.redirect(new URL("/connexion", request.url));
+    const redirect = NextResponse.redirect(new URL("/connexion", request.url));
+    // Jamais mis en cache (navigateur ou hébergeur) : la réponse dépend de la session.
+    redirect.headers.set("Cache-Control", "no-store");
+    return redirect;
   }
 
   const response = NextResponse.next();

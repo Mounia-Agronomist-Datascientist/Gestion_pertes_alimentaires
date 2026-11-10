@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions";
 import { requireUser } from "@/modules/auth/next-session";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             )}
             <span className="text-lg font-semibold leading-tight">{user.displayName}</span>
           </Link>
-          <form action={logoutAction}>
+          <form method="post" action="/deconnexion">
             <button type="submit" className="rounded-xl bg-white/20 px-3 py-2 text-sm font-medium hover:bg-white/30">
               Déconnexion
             </button>
