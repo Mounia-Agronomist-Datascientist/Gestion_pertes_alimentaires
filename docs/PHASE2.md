@@ -161,3 +161,17 @@ Vérifié : 4 tests unitaires, 2 tests d'intégration ; dans le navigateur, 4 ba
 
 **Phase 2 terminée** (09–10/11/2026). La valorisation complète (recettes des ventes, destinations, impact
 environnemental) relève de la Phase 3.
+
+## Tome imprimé pour toute la semaine (10/11/2026, tome S46)
+
+Le tome peut être imprimé **pour une portion** (S45 : « 1 recette(s) (315.1 g) ») ou **pour toute la production de
+la semaine** (S46 : « 2792 recette(s) (312.2 g) », VG02 = 871,66 kg et 2 911,43 €). La lecture ramène toujours une
+recette à **une portion** (quantités et coûts divisés par le nombre de recettes), pour que les coûts restent justes
+quelle que soit l'impression. Les sous-recettes n'en ont pas besoin (coût au kg net, indépendant de la quantité).
+
+Les grands nombres décalent les colonnes : leur position est lue dans l'en-tête de chaque tableau (« Quantité
+pour », « Unité ») au lieu d'une position fixe, et le coût est reconnu à son « € ». « Bombe de graisse pour moule »
+n'est plus pris pour un moule (seuls les libellés qui commencent par « Moule » ou contiennent « plat à gratin »).
+
+Tome S46 réel : 59 recettes, 110 sous-recettes, 675 lignes, aucune anomalie ; avec l'onglet S46 du plan :
+8 équipes, 2 points à vérifier (PJ05 prévu au plan mais absent du tome ; QD09 à 380,3 g).

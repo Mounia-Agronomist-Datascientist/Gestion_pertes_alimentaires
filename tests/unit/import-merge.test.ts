@@ -43,6 +43,8 @@ describe("rapprochement du tome et du plan S45", () => {
     expect(isMouldLabel("Légume sauteuse: Appareil à gratin de poireau, oignons et lardons")).toBe(false);
     expect(isMouldLabel("Gratiné de polenta à la raclette")).toBe(false);
     expect(isMouldLabel("muscade moulue")).toBe(false);
+    expect(isMouldLabel("Bombe de graisse pour moule et plaque")).toBe(false);
+    expect(isMouldLabel("Plat à gratin (grand format)")).toBe(true);
   });
 
   it("bloque un tome et un onglet de semaines différentes, ou un tome vide", () => {

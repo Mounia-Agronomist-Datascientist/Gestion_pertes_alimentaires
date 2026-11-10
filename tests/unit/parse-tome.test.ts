@@ -105,6 +105,49 @@ describe("lecture du tome : anomalies et formats", () => {
     expect(result.subRecipes[0]).toMatchObject({ name: "Sauce", reference: { quantity: 100, unit: "g" } });
   });
 
+  it("ramène à une portion un tome imprimé pour toute la semaine (« 2792 recette(s) »)", () => {
+    const result = parseTome([
+      item(1, 28, 800, 16.5, "2026 S46_VG02-Tortilla"),
+      item(1, 40, 770, 12, "2792 recette(s) (312.2 g)"),
+      item(1, 250, 745, 9, "Quantité pour 2792"),
+      item(1, 40, 740, 9, "Ingrédients"),
+      item(1, 355, 740, 9, "Unité"),
+      item(1, 534, 740, 9, "Coût"),
+      item(1, 40, 720, 9, "Plat à gratin (grand format)"),
+      item(1, 304, 720, 9, "349.00"),
+      item(1, 355, 720, 9, "recette(s) (1 portion(s))"),
+      item(1, 522, 720, 9, "91.79 €"),
+      item(1, 40, 700, 9, "Base oeufs (sous recette)"),
+      item(1, 301, 700, 9, "195440"),
+      item(1, 355, 700, 9, "g"),
+      item(1, 517, 700, 9, "910.75 €"),
+      item(1, 40, 680, 9, "Recette totale"),
+      item(1, 304, 680, 9, "871.66"),
+      item(1, 355, 680, 9, "kg"),
+      item(1, 510, 680, 9, "1,002.54 €"),
+      item(1, 28, 600, 16.5, "Base oeufs (sous recette)"),
+      item(1, 40, 570, 12, "195440 g"),
+      item(1, 40, 540, 9, "Ingrédients"),
+      item(1, 372, 540, 9, "Unité"),
+      item(1, 534, 540, 9, "Coût"),
+      item(1, 40, 520, 9, "Oeuf"),
+      item(1, 301, 520, 9, "195440"),
+      item(1, 372, 520, 9, "g"),
+      item(1, 517, 520, 9, "910.75 €"),
+      item(1, 40, 500, 9, "Recette totale"),
+      item(1, 301, 500, 9, "195440"),
+      item(1, 372, 500, 9, "g"),
+      item(1, 517, 500, 9, "910.75 €"),
+    ]);
+    expect(result.anomalies).toEqual([]);
+    const [r] = result.recipes;
+    expect(r).toMatchObject({ code: "VG02", recipeCount: 2792, portionWeightG: 312.2, total: { quantity: 0.3122, unit: "kg", cost: 0.3591 } });
+    expect(r!.lines.map((l) => [l.quantity, l.cost])).toEqual([
+      [0.125, 0.0329],
+      [70, 0.3262],
+    ]);
+  });
+
   it("convertit les poids unitaires en grammes", () => {
     expect(unitWeightInGrams("Pot (125 g)")).toBe(125);
     expect(unitWeightInGrams("seau (1.5 kg)")).toBe(1500);

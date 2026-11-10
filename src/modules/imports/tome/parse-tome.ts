@@ -37,6 +37,8 @@ export interface TomeRecipe {
   name: string;
   /** Poids d'une portion en grammes, quand le rendement l'indique. */
   portionWeightG: number | null;
+  /** Nombre de recettes pour lequel le tome est imprimé (1 = une portion) ; quantités et coûts ramenés à une portion. */
+  recipeCount: number;
   lines: TomeLine[];
   total: TomeQuantity | null;
   page: number;
@@ -68,9 +70,14 @@ export interface TomeParseResult {
 
 // ─── Mise en page ────────────────────────────────────────────────────────────
 
+/** Fin de la colonne des noms ; plus à gauche quand l'en-tête « Quantité pour » l'est (unités très longues). */
 const NAME_COLUMN_MAX_X = 295;
-const UNIT_COLUMN_MIN_X = 365;
-const COST_COLUMN_MIN_X = 515;
+/**
+ * Position de la colonne « Unité », lue dans l'en-tête de chaque tableau : elle varie selon la largeur des
+ * nombres (tome pour une portion : 372 ; tome pour toute la semaine, avec des quantités comme 307120 g : 348 à
+ * 371). Valeur par défaut avant le premier en-tête.
+ */
+const DEFAULT_UNIT_X = 365;
 
 type LineKind = "title" | "yield" | "heading" | "text" | "table" | "page_furniture";
 
@@ -133,6 +140,15 @@ const NUMBER = /^-?\d[\d,]*(?:\.\d+)?$/;
 const parseNumber = (text: string) => Number(text.replace(/,/g, ""));
 const SUB_RECIPE_MARK = /\(\s*sous[\s-]*recettes?\s*\)/i;
 
+const round4 = (n: number) => Math.round(n * 10_000) / 10_000;
+
+/** « 2792 recette(s) (312.2 g) » ou « 459.5 portion(s) » → 2792 / 459,5 ; 1 par défaut. */
+export function recipeCount(yieldText: string | null | undefined): number {
+  const match = yieldText?.match(/^(\d[\d,]*(?:\.\d+)?)\s*(?:recette|portion)/i);
+  const n = match ? Number(match[1]!.replace(/,/g, "")) : 1;
+  return n > 0 ? n : 1;
+}
+
 /** Clé de rapprochement : sans la mention « (sous-recette) », sans accents, ponctuation ni majuscules. */
 export function tomeKey(label: string): string {
   return label
@@ -161,12 +177,14 @@ interface ValueRow {
   fragments: { y: number; text: string }[];
 }
 
-function readValues(items: readonly PdfItem[]): Omit<ValueRow, "page" | "y" | "fragments"> | null {
-  const values = items.filter((i) => i.x >= NAME_COLUMN_MAX_X);
+function readValues(items: readonly PdfItem[], nameMaxX: number, unitX: number): Omit<ValueRow, "page" | "y" | "fragments"> | null {
+  const values = items.filter((i) => i.x >= nameMaxX);
   if (values.length === 0) return null;
-  const quantityText = joinItems(values.filter((i) => i.x < UNIT_COLUMN_MIN_X));
-  const unit = joinItems(values.filter((i) => i.x >= UNIT_COLUMN_MIN_X && i.x < COST_COLUMN_MIN_X));
-  const costText = joinItems(values.filter((i) => i.x >= COST_COLUMN_MIN_X));
+  // Le coût est aligné à droite et peut déborder vers la gauche (« 2,911.43 € ») : on le reconnaît à son « € ».
+  const isCost = (i: PdfItem) => /€\s*$/.test(i.text);
+  const quantityText = joinItems(values.filter((i) => !isCost(i) && i.x < unitX - 2));
+  const unit = joinItems(values.filter((i) => !isCost(i) && i.x >= unitX - 2));
+  const costText = joinItems(values.filter(isCost));
   if (!NUMBER.test(quantityText)) return null; // en-tête de colonne (« Quantité pour 1 », « recette(s) », « g »)
   const cost = costText.match(/^(-?\d[\d,]*(?:\.\d+)?)\s*€$/);
   return { quantity: parseNumber(quantityText), unit, cost: cost ? parseNumber(cost[1]!) : null };
@@ -188,6 +206,9 @@ export function parseTome(items: readonly PdfItem[]): TomeParseResult {
   const sections: Section[] = [];
   let section: Section | null = null;
   let inTable = false;
+  let unitX = DEFAULT_UNIT_X;
+  let nameMaxX = NAME_COLUMN_MAX_X;
+  let quantityHeaderX: number | null = null;
   let titleOpen = false;
   /** Lignes de la portion de tableau en cours (une page) : valeurs et morceaux de nom. */
   let pending: { values: ValueRow[]; names: { y: number; text: string }[] } = { values: [], names: [] };
@@ -235,25 +256,31 @@ export function parseTome(items: readonly PdfItem[]): TomeParseResult {
       case "table": {
         if (!section) break;
         const text = joinItems(line.items);
-        if (/^Ingrédients\b/.test(joinItems(line.items.filter((i) => i.x < NAME_COLUMN_MAX_X)))) {
-          // En-tête de tableau, répété en haut de chaque page.
+        // « Quantité pour 722 » (au-dessus de l'en-tête) : début de la colonne des quantités.
+        if (/^Quantité pour\b/.test(joinItems(line.items.filter((i) => i.x > 150)))) {
+          quantityHeaderX = line.items.find((i) => /^Quantité pour/.test(i.text.trim()))?.x ?? null;
+        }
+        if (/^Ingrédients\b/.test(joinItems(line.items.filter((i) => i.x < 150)))) {
+          // En-tête de tableau, répété en haut de chaque page : il donne la position de la colonne « Unité ».
           if (pending.values.length && pending.values[0]!.page !== line.page) flushTable();
           inTable = true;
+          unitX = line.items.find((i) => /^Unité$/.test(i.text.trim()))?.x ?? DEFAULT_UNIT_X;
+          nameMaxX = quantityHeaderX != null ? Math.min(NAME_COLUMN_MAX_X, quantityHeaderX + 10) : NAME_COLUMN_MAX_X;
           break;
         }
         if (!inTable) break; // allergènes
         // En-tête de colonne répété en haut de page (« Quantité pour 1 », « recette(s) », « g »).
-        if (line.items.every((i) => i.x >= 260 && i.x < UNIT_COLUMN_MIN_X) || /^Quantité pour\b/.test(text)) break;
+        if (line.items.every((i) => i.x >= 240 && i.x < unitX - 2) || /^Quantité pour\b/.test(text)) break;
         // Consigne glissée dans la liste des ingrédients (« saupoudrer de parmesan | - | 0.00 € ») : pas une quantité.
-        if (joinItems(line.items.filter((i) => i.x >= NAME_COLUMN_MAX_X && i.x < UNIT_COLUMN_MIN_X)) === "-") break;
+        if (joinItems(line.items.filter((i) => i.x >= nameMaxX && i.x < unitX - 2)) === "-") break;
         if (pending.values.length && pending.values[0]!.page !== line.page) flushTable();
-        const values = readValues(line.items);
-        const nameText = joinItems(line.items.filter((i) => i.x < NAME_COLUMN_MAX_X));
+        const values = readValues(line.items, nameMaxX, unitX);
+        const nameText = joinItems(line.items.filter((i) => i.x < nameMaxX));
         if (values) {
           const row: ValueRow = { page: line.page, y: line.y, ...values, fragments: nameText ? [{ y: line.y, text: nameText }] : [] };
           pending.values.push(row);
           section.rows.push(row);
-        } else if (nameText && line.items.every((i) => i.x < NAME_COLUMN_MAX_X)) {
+        } else if (nameText && line.items.every((i) => i.x < nameMaxX)) {
           pending.names.push({ y: line.y, text: nameText });
         } else if (!/^(Quantité pour|recette\(s\)|g|kg|portion)/i.test(text)) {
           anomalies.push({ page: line.page, message: `Ligne non reconnue : ${text}` });
@@ -311,14 +338,20 @@ function assemble(sections: Section[], anomalies: TomeAnomaly[]): TomeParseResul
 
     const recipe = section.title.match(RECIPE_TITLE);
     if (recipe) {
+      // Le tome peut être imprimé pour une portion (« 1 recette(s) (315.1 g) ») ou pour toute la production de la
+      // semaine (« 2792 recette(s) (312.2 g) ») : quantités et coûts sont toujours ramenés à une portion.
+      const count = recipeCount(section.yieldText);
+      const perPortion = <T extends { quantity: number; cost: number | null }>(q: T): T =>
+        count === 1 ? q : { ...q, quantity: round4(q.quantity / count), cost: q.cost != null ? round4(q.cost / count) : null };
       recipes.push({
         year: Number(recipe[1]),
         week: Number(recipe[2]),
         code: recipe[3]!,
         name: clean(recipe[4]!),
         portionWeightG: section.yieldText?.match(/\((\d+(?:\.\d+)?)\s*g\)/)?.[1] ? Number(section.yieldText.match(/\((\d+(?:\.\d+)?)\s*g\)/)![1]) : null,
-        lines,
-        total,
+        recipeCount: count,
+        lines: lines.map(perPortion),
+        total: total ? perPortion(total) : null,
         page: section.page,
       });
       continue;

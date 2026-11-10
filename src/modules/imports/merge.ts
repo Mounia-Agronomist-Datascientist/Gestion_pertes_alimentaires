@@ -14,9 +14,9 @@ export const gramsToKg = (g: number | null) => (g == null ? null : Math.round(g 
 /**
  * Moules et plats à gratin listés comme ingrédients ou sous-recettes dans le tome (« MOULE ROND INDIVIDUEL
  * BIODEG 180mL », « Petit plat à gratin format individuel ») : catégorie « Moules et plats à gratin ».
- * « Appareil à gratin » ou « Gratiné de polenta » restent des denrées.
+ * « Appareil à gratin », « Gratiné de polenta » ou « Bombe de graisse pour moule » ne sont pas des moules.
  */
-export const isMouldLabel = (label: string) => /\bmoules?\b/i.test(label) || /\bplats? à gratin\b/i.test(label);
+export const isMouldLabel = (label: string) => /^\s*moules?\b/i.test(label) || /\bplats? à gratin\b/i.test(label);
 
 /** Zones où les encas sont proposés (règle R9). */
 export const SNACK_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT", "RECEPTION", "STOCKAGE"];

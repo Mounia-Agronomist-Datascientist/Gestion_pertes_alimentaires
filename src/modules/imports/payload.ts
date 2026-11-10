@@ -22,6 +22,7 @@ const tomeSchema = z.object({
         code: z.string().regex(/^[A-Z]{2,3}\d{2,3}(?:_[A-Z]{2,3})?$/),
         name: z.string().min(1).max(300),
         portionWeightG: finite.nullable(),
+        recipeCount: finite.positive(),
         lines: z.array(line).max(200),
         total: quantity.nullable(),
         page: z.number().int(),
