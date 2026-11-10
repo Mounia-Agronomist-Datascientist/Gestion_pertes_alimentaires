@@ -30,7 +30,7 @@ semaines ; ratios de pertes ; graphiques économiques.
 
 | Étape | Contenu | État |
 |---|---|---|
-| 4.1 | Moteur de statistiques : agrégats sur une période (semaine, mois, année, dates libres) avec filtres (zone, sous-zone, équipe, catégorie de produit, cause, destination), selon les droits | ⏳ |
+| 4.1 | Moteur de statistiques : agrégats sur une période (semaine, mois, année, dates libres) avec filtres (zone, sous-zone, équipe, catégorie de produit, cause, destination), selon les droits | ✅ Règle R14 |
 | 4.2 | **Tableau de bord général** (§19.1) : kg, coût, quantités détruite / compostée / donnée / vendue / réutilisée, évolution par rapport à la période précédente, barre de filtres | ⏳ |
 | 4.3 | **Analyses par zone, sous-zone et équipe** (§19.2, §19.3) : quantités, coûts, causes principales, produits, destinations, évolution ; comparaison des équipes pour les profils autorisés | ⏳ |
 | 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ⏳ |
@@ -44,3 +44,16 @@ semaines ; ratios de pertes ; graphiques économiques.
 Le **mode d'accès au « Décompte barquettes »** (barquettes réellement produites) : import d'un fichier exporté
 chaque semaine, comme le plan, ou lecture du Google Sheet. En attendant, le ratio « réel » s'affiche
 « non disponible » et seul le ratio « prévu » est calculé.
+
+## Moteur de statistiques (4.1)
+
+- `src/domain/periodes.ts` : semaine, mois, année, période libre ; lecture dans l'adresse ; période précédente.
+- `src/modules/statistiques/facts.ts` : lecture des pertes d'une période avec les filtres, dans le périmètre du
+  compte (règle R14) ; euros transmis seulement aux profils « indicateurs économiques ».
+- `src/domain/statistiques.ts` : agrégats (kg alimentaires, pertes non converties, barquettes, emballages par
+  unité, kg par type de destination, coûts brut / recettes / net), regroupements et classements (kg, coût,
+  nombre d'événements), évolution.
+
+Vérifié : 8 tests unitaires + 5 tests d'intégration (dernière version et ses destinations, annulées exclues,
+périmètre d'une équipe sans euros, direction sur toute l'entreprise, mois / année / période / filtres, semaine
+précédente).

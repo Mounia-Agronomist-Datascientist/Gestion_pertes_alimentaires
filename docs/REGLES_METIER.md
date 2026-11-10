@@ -187,3 +187,16 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 - Seules les destinations de **vente** (Too Good To Go, vente flash) portent une recette : le **montant réellement
   encaissé**, saisi à la déclaration ou complété plus tard (nouvelle version tracée).
 - Coût net = coût brut − recettes encaissées ; brut et net restent consultables séparément.
+
+## R14 — Périodes et périmètre des statistiques (Phase 4, 10/11/2026)
+
+- **Semaine** et **année** : calendrier de production stocké (une année = ses semaines S01 à S52/S53).
+  **Mois** et **période libre** (un an au plus) : date réelle de la perte. Une semaine à cheval sur deux mois est
+  donc répartie entre ces mois selon la date de chaque perte.
+- Période précédente (évolution) : la semaine d'avant dans le calendrier, le mois ou l'année d'avant, ou la même
+  durée juste avant une période libre.
+- Comptées : déclarations validées ou corrigées (dernière version et ses destinations) ; jamais les annulées.
+- Kg alimentaires et unités d'emballage (consommables, moules) ne sont jamais additionnés ; une perte alimentaire
+  non convertie en kg est comptée à part.
+- Périmètre : une équipe ses pertes, un responsable de zone ses zones ; production, direction et administration
+  toute l'entreprise. Les euros (coûts figés sur chaque perte) seulement pour les profils « indicateurs économiques ».

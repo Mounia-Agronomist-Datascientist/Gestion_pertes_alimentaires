@@ -9,7 +9,7 @@ import { type AuthUser, declarationReadScope } from "@/modules/auth/permissions"
 import { canModifyDeclaration, canReadDeclaration } from "./access";
 
 /** Condition SQL du périmètre de lecture ; `null` si l'utilisateur ne peut rien lire. */
-function scopeCondition(user: AuthUser): SQL | undefined | null {
+export function scopeCondition(user: AuthUser): SQL | undefined | null {
   const scope = declarationReadScope(user);
   switch (scope.kind) {
     case "all":
