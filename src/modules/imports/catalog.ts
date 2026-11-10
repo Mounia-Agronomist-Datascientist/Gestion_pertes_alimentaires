@@ -10,7 +10,7 @@ import type { Db } from "@/db/types";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
-import { gramsToKg, isSnackCode } from "./merge";
+import { gramsToKg, isMouldLabel, isSnackCode } from "./merge";
 
 export { SNACK_ZONE_CODES } from "./merge";
 
@@ -22,6 +22,8 @@ export interface CatalogLine {
   label: string;
   subRecipeId: string | null;
   unitWeightG: number | null;
+  /** Moule ou plat à gratin (catégorie « Moules et plats à gratin »). */
+  mould: boolean;
 }
 
 export interface WeekCatalog {
@@ -31,7 +33,7 @@ export interface WeekCatalog {
   startDate: LocalDate;
   endDate: LocalDate;
   dishes: { id: string; code: string; name: string; teamId: string | null; snack: boolean; portionWeightG: number | null; lines: CatalogLine[] }[];
-  subRecipes: Record<string, { id: string; name: string; lines: CatalogLine[] }>;
+  subRecipes: Record<string, { id: string; name: string; mould: boolean; lines: CatalogLine[] }>;
 }
 
 /** Retire la mention « (sous-recette) » d'un libellé de composition. */
@@ -62,6 +64,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
       label: displayLabel(l.label),
       subRecipeId: l.componentSubRecipeId,
       unitWeightG: l.unitWeightG,
+      mould: isMouldLabel(l.label),
     });
     const linesOf = (owner: { recipeId?: string; subRecipeId?: string }) =>
       lines
@@ -90,7 +93,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
       const id = queue.pop()!;
       const sr = byId.get(id);
       if (!sr || reachable[id]) continue;
-      reachable[id] = { id, name: sr.name, lines: linesOf({ subRecipeId: id }) };
+      reachable[id] = { id, name: sr.name, mould: isMouldLabel(sr.name), lines: linesOf({ subRecipeId: id }) };
       for (const l of reachable[id].lines) if (l.subRecipeId) queue.push(l.subRecipeId);
     }
     catalogs.push({ weekId: week.id, year: week.year, number: week.number, startDate: week.startDate, endDate: week.endDate, dishes, subRecipes: reachable });
@@ -136,12 +139,12 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
   if (kind === "sous_recette") {
     const [sr] = await db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.id, id));
     if (!sr) return null;
-    return { category: "sous_recette", name: sr.name, code: null, unitWeightKg: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false };
+    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false };
   }
   const [l] = await db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.id, id));
   if (!l || l.isSubRecipe) return null;
   return {
-    category: "matiere_premiere",
+    category: isMouldLabel(l.label) ? "moule_plat_gratin" : "matiere_premiere",
     name: displayLabel(l.label),
     code: null,
     unitWeightKg: gramsToKg(l.unitWeightG),

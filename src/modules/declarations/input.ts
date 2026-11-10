@@ -11,6 +11,7 @@ export const PRODUCT_CATEGORIES = [
   "produit_fini",
   "produit_externe",
   "consommable",
+  "moule_plat_gratin",
 ] as const;
 
 export const PRODUCT_CATEGORY_LABELS: Record<(typeof PRODUCT_CATEGORIES)[number], string> = {
@@ -20,7 +21,12 @@ export const PRODUCT_CATEGORY_LABELS: Record<(typeof PRODUCT_CATEGORIES)[number]
   produit_fini: "Produit fini",
   produit_externe: "Produit externe",
   consommable: "Consommable / emballage",
+  moule_plat_gratin: "Moules et plats à gratin",
 };
+
+/** Types de produit qui ne sont pas des denrées : jamais convertis en kg alimentaires, pas de pesée en gastros. */
+export const NON_FOOD_CATEGORIES: readonly string[] = ["consommable", "moule_plat_gratin"];
+export const isNonFoodCategory = (category: string) => NON_FOOD_CATEGORIES.includes(category);
 
 /** Méthodes proposées à l'utilisateur ; « conversion_reference » est déduite automatiquement. */
 export const INPUT_METHODS = ["pesee", "comptage", "estimation_contenant", "estimation_manuelle"] as const;

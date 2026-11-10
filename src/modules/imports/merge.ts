@@ -11,8 +11,19 @@ export const isSnackCode = (code: string) => /^EN\d/.test(code);
 /** Grammes → kg, sans erreur d'arrondi binaire (315,1 g → 0,3151 kg). */
 export const gramsToKg = (g: number | null) => (g == null ? null : Math.round(g * 1000) / 1e6);
 
+/**
+ * Moules et plats à gratin listés comme ingrédients ou sous-recettes dans le tome (« MOULE ROND INDIVIDUEL
+ * BIODEG 180mL », « Petit plat à gratin format individuel ») : catégorie « Moules et plats à gratin ».
+ * « Appareil à gratin » ou « Gratiné de polenta » restent des denrées.
+ */
+export const isMouldLabel = (label: string) => /\bmoules?\b/i.test(label) || /\bplats? à gratin\b/i.test(label);
+
 /** Zones où les encas sont proposés (règle R9). */
 export const SNACK_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT", "RECEPTION", "STOCKAGE"];
+
+/** Poids habituel d'une portion de plat (hors petits-déjeuners et encas). */
+export const PORTION_MIN_G = 300;
+export const PORTION_MAX_G = 380;
 
 export interface WeekImportRecipe extends TomeRecipe {
   team: string | null;
@@ -71,6 +82,17 @@ export function buildWeekImport(tome: TomeParseResult, plan: PlanParseResult): W
   const withoutTeam = recipes.filter((r) => !r.team && !isSnackCode(r.code)).map((r) => r.code);
   if (withoutTeam.length) {
     warnings.push(`Recettes du tome sans équipe dans le plan (non proposées aux équipes) : ${withoutTeam.join(", ")}`);
+  }
+
+  // Une portion de plat pèse toujours entre 300 et 380 g (ingrédients après cuisson, sans la barquette ;
+  // validé le 10/11/2026). Les petits-déjeuners (PJ) et les encas (EN) peuvent peser moins.
+  for (const r of recipes) {
+    if (/^(PJ|EN)/.test(r.code)) continue;
+    const grams = r.portionWeightG ?? (r.total && /^g$/i.test(r.total.unit.trim()) ? r.total.quantity : null);
+    if (grams == null) warnings.push(`${r.code} : poids de la portion absent du tome`);
+    else if (grams < PORTION_MIN_G || grams > PORTION_MAX_G) {
+      warnings.push(`${r.code} : portion de ${grams} g, en dehors de ${PORTION_MIN_G}–${PORTION_MAX_G} g habituels pour un plat`);
+    }
   }
 
   return { year, week, recipes, subRecipes: tome.subRecipes, errors, warnings };

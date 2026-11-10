@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWeekImport, isSnackCode } from "@/modules/imports/merge";
+import { buildWeekImport, isMouldLabel, isSnackCode } from "@/modules/imports/merge";
 import { parsePlan } from "@/modules/imports/plan/parse-plan";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
@@ -26,6 +26,23 @@ describe("rapprochement du tome et du plan S45", () => {
     expect(preview.warnings).toEqual([]);
     const grid = s45PlanGrid().map((row) => (row[0] === "VG02" ? row.map((v, i) => (i === 15 ? "" : v)) : row));
     expect(buildWeekImport(tome, parsePlan("S45", grid)).warnings).toContain("Recettes du tome sans équipe dans le plan (non proposées aux équipes) : VG02");
+  });
+
+  it("signale une portion de plat en dehors de 300–380 g, pas celle d'un petit-déjeuner", () => {
+    const light = structuredClone(tome);
+    light.recipes.find((r) => r.code === "VI01")!.portionWeightG = 250;
+    light.recipes.find((r) => r.code === "PJ01")!.portionWeightG = 60;
+    expect(buildWeekImport(light, parsePlan("S45", s45PlanGrid())).warnings).toEqual([
+      "VI01 : portion de 250 g, en dehors de 300–380 g habituels pour un plat",
+    ]);
+  });
+
+  it("repère les moules et plats à gratin, sans confondre les préparations « à gratin »", () => {
+    expect(isMouldLabel("MOULE ROND INDIVIDUEL BIODEG 180mL")).toBe(true);
+    expect(isMouldLabel("Petit plat à gratin format individuel ( sous-recette)")).toBe(true);
+    expect(isMouldLabel("Légume sauteuse: Appareil à gratin de poireau, oignons et lardons")).toBe(false);
+    expect(isMouldLabel("Gratiné de polenta à la raclette")).toBe(false);
+    expect(isMouldLabel("muscade moulue")).toBe(false);
   });
 
   it("bloque un tome et un onglet de semaines différentes, ou un tome vide", () => {

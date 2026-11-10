@@ -23,7 +23,7 @@ Analyse détaillée des sources : [INTEGRATION_OUTIL_SOUS_RECETTES.md](INTEGRATI
 | 2.2 | Lecture du plan de production (Excel de l'onglet) : groupes de codes → équipe, barquettes par code | ✅ Lecture faite (`src/modules/imports/plan/`), vérifiée sur le vrai classeur |
 | 2.3 | Modèle de données par semaine (instantanés figés) et migration | ✅ Migration `0007`, rapprochement (`merge.ts`) et enregistrement (`service.ts`) |
 | 2.4 | Écran d'import : dépôt des deux fichiers, aperçu, anomalies, validation ; un nouvel import d'une semaine validée crée une nouvelle version tracée | ✅ Administration → Import de la semaine |
-| 2.5 | Saisie : produits proposés selon l'équipe et la semaine (plat → sous-recette → ingrédient) | ✅ Étape « Quel produit ? » de la déclaration ; hypothèses P2-1 à P2-3 à valider |
+| 2.5 | Saisie : produits proposés selon l'équipe et la semaine (plat → sous-recette → ingrédient) | ✅ Étape « Quel produit ? » de la déclaration ; règles validées le 10/11/2026 (R10) |
 | 2.6 | Coût de la semaine conservé avec chaque perte (préparation de la Phase 3) | ⏳ |
 
 ## Lecture du tome (2.1)
@@ -120,7 +120,8 @@ secondes, onglet S45 choisi seul, 60 plats sur 8 équipes, 22 encas, 105 sous-re
 - **poste de cuisine** : les plats de l'équipe pour la semaine (plan de production) ; un plat s'ouvre sur « Le plat
   entier (barquettes) » et ses composants ; une sous-recette s'ouvre sur « La sous-recette entière » et ses
   ingrédients (sous-recettes imbriquées comprises) ;
-- **conditionnement, réception, stockage** : les encas (règle R9) ;
+- **conditionnement** : tous les plats de la semaine et les encas ; **réception, stockage** : les encas (R9, R10) ;
+- moules et plats à gratin du tome : catégorie « Moules et plats à gratin », sans conversion en kg ;
 - **recherche** : plats, sous-recettes et ingrédients de la semaine proposés au poste, puis le référentiel saisi
   à la main ; « Produit absent de la liste » reste possible ;
 - semaine en cours et semaine précédente (déclarations tardives) : un sélecteur permet de passer de l'une à
@@ -128,7 +129,7 @@ secondes, onglet S45 choisi seul, 60 plats sur 8 équipes, 22 encas, 105 sous-re
 
 La déclaration garde le nom et le type du produit comme avant, plus un lien vers le plat, la sous-recette ou
 l'ingrédient de l'import (migration `0008`). Conversion en kg : poids d'une portion pour un plat ou un encas
-(hypothèse P2-1), poids unitaire du tome pour un ingrédient (« Pot (125 g) »).
+(règle R10), poids unitaire du tome pour un ingrédient (« Pot (125 g) »).
 
 Côté serveur : le produit doit appartenir à l'import en vigueur de la semaine de la perte ; un plat de cuisine
 doit être celui de l'équipe ; un encas ne se déclare qu'en conditionnement, réception ou stockage.

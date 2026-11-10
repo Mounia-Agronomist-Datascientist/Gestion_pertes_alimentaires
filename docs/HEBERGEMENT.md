@@ -77,7 +77,18 @@ Supprimer ensuite le secret `ADMIN_INITIAL_PASSWORD` sur GitHub.
 chiffré apparaît dans *Artifacts*.
 
 **8. Mises à jour suivantes** — Chaque envoi sur GitHub redéploie l'application. Quand une mise à jour contient
-une migration de base, lancer d'abord l'action *Base de données (initialiser / mettre à jour)*.
+une migration de base (nouveau fichier dans `src/db/migrations`), l'ordre compte :
+1. **Pousser** sur GitHub, puis **désactiver la mise en ligne automatique le temps de l'opération** n'est pas
+   nécessaire si l'on suit l'ordre suivant : lancer l'action *Base de données* **dès** le push ;
+2. ou, plus sûr : dans Netlify, **Deploys → Stop auto publishing** avant le push, lancer l'action, attendre la
+   coche verte, puis **Start auto publishing** (la dernière version est alors publiée).
+Les migrations ne font qu'ajouter (tables, colonnes, valeurs) : l'ancienne version de l'application fonctionne
+avec une base déjà mise à jour, l'inverse non (« column … does not exist »).
+
+**Si l'action reste en attente (point orange) au-delà de quelques minutes** : ouvrir l'exécution. « Waiting for a
+runner to pick up this job » = file d'attente de GitHub (incident sur githubstatus.com ou quota de minutes du
+compte, Settings → Billing) : annuler (*Cancel workflow*) puis relancer. Une étape qui tourne indique au contraire
+l'étape bloquée (l'action s'arrête d'elle-même après 20 minutes).
 
 ## Restaurer une sauvegarde (en cas de problème)
 

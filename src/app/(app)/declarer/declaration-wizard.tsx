@@ -9,6 +9,7 @@ import { convertToKg, type UnitKind } from "@/domain/unites";
 import {
   INPUT_METHODS,
   type InputMethod,
+  isNonFoodCategory,
   METHOD_LABELS,
   METHOD_UNITS,
   PRODUCT_CATEGORIES,
@@ -139,7 +140,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const subzone = zone?.subzones.find((sz) => sz.id === subzoneId) ?? null;
   const needsTeam = subzone?.teamMode === "equipe" && !userTeam;
   const team = options.teams.find((t) => t.id === teamId) ?? null;
-  const isConsumable = product?.category === "consommable";
+  const isConsumable = !!product && isNonFoodCategory(product.category);
 
   const steps: Step[] = [
     "zone",
@@ -514,7 +515,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           products={options.products}
           catalogs={options.weekCatalogs}
           initialCatalog={catalogForDate}
-          showDishes={subzone?.teamMode === "equipe"}
+          dishScope={subzone?.teamMode === "equipe" ? "equipe" : zone?.code === "CONDITIONNEMENT" ? "toutes" : null}
           showSnacks={!!zone && SNACK_ZONE_CODES.includes(zone.code)}
           teamId={teamId}
           onChoose={(p) => {
@@ -1010,7 +1011,7 @@ function ProductStep({
   products,
   catalogs,
   initialCatalog,
-  showDishes,
+  dishScope,
   showSnacks,
   teamId,
   onChoose,
@@ -1020,8 +1021,8 @@ function ProductStep({
   catalogs: WeekCatalog[];
   /** Semaine de la date de la perte, si elle est importée. */
   initialCatalog: WeekCatalog | null;
-  /** Poste de cuisine : plats de l'équipe. */
-  showDishes: boolean;
+  /** Plats proposés : ceux de l'équipe (poste de cuisine), tous (conditionnement, décision du 10/11/2026) ou aucun. */
+  dishScope: "equipe" | "toutes" | null;
   /** Conditionnement, réception, stockage : encas (règle R9). */
   showSnacks: boolean;
   /** Équipe choisie par un responsable ; pour un compte équipe, le catalogue ne contient déjà que ses plats. */
@@ -1038,7 +1039,9 @@ function ProductStep({
   const catalog = catalogs.find((c) => c.weekId === catalogId) ?? null;
 
   const week = catalog ? { year: catalog.year, number: catalog.number } : null;
-  const dishes = (catalog?.dishes ?? []).filter((d) => (d.snack ? showSnacks : showDishes && (!teamId || d.teamId === teamId)));
+  const dishes = (catalog?.dishes ?? []).filter((d) =>
+    d.snack ? showSnacks : dishScope === "toutes" || (dishScope === "equipe" && (!teamId || d.teamId === teamId)),
+  );
   const hasWeek = dishes.length > 0;
 
   const chooseDish = (d: WeekCatalog["dishes"][number]) =>
@@ -1052,14 +1055,22 @@ function ProductStep({
       week: week!,
     });
   const chooseSubRecipe = (id: string) =>
-    onChoose({ kind: "week", itemKind: "sous_recette", id, name: catalog!.subRecipes[id]!.name, category: "sous_recette", unitWeightKg: null, week: week! });
+    onChoose({
+      kind: "week",
+      itemKind: "sous_recette",
+      id,
+      name: catalog!.subRecipes[id]!.name,
+      category: catalog!.subRecipes[id]!.mould ? "moule_plat_gratin" : "sous_recette",
+      unitWeightKg: null,
+      week: week!,
+    });
   const chooseIngredient = (l: WeekCatalog["dishes"][number]["lines"][number]) =>
     onChoose({
       kind: "week",
       itemKind: "ingredient",
       id: l.id,
       name: l.label,
-      category: "matiere_premiere",
+      category: l.mould ? "moule_plat_gratin" : "matiere_premiere",
       unitWeightKg: gramsToKg(l.unitWeightG),
       week: week!,
     });
@@ -1121,7 +1132,7 @@ function ProductStep({
             ) : (
               <Tile key={l.id} compact onClick={() => chooseIngredient(l)}>
                 {l.label}
-                <small className="font-normal opacity-70">Ingrédient</small>
+                <small className="font-normal opacity-70">{l.mould ? "Moule ou plat à gratin" : "Ingrédient"}</small>
               </Tile>
             ),
           )}
@@ -1196,7 +1207,7 @@ function ProductStep({
             </p>
           )}
           <p className="font-medium text-slate-700">
-            {showSnacks && !showDishes ? "Encas" : "Plats"} de la semaine S{catalog!.number}
+            {showSnacks && !dishScope ? "Encas" : showSnacks ? "Plats et encas" : "Plats"} de la semaine S{catalog!.number}
           </p>
           <div className="flex flex-col gap-2">
             {dishes.map((d) => (
@@ -1223,7 +1234,7 @@ function ProductStep({
           ))}
           {products.length === 0 && (
             <p className="text-slate-500">
-              {showDishes && !catalog ? "Les plats de la semaine ne sont pas encore importés : " : ""}recherchez le produit ou saisissez son nom.
+              {dishScope && !catalog ? "Les plats de la semaine ne sont pas encore importés : " : ""}recherchez le produit ou saisissez son nom.
             </p>
           )}
         </div>

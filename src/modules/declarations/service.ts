@@ -16,7 +16,7 @@ import { findWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
 import { currentWeekImport } from "@/modules/imports/service";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { canModifyDeclaration, canReadDeclaration, isBoundByTeamDelay, isWithinTeamDelay, TEAM_DELAY_DAYS } from "./access";
-import { declarationInputSchema } from "./input";
+import { declarationInputSchema, isNonFoodCategory } from "./input";
 
 /** Erreur de saisie, affichable telle quelle à l'utilisateur. */
 export class DeclarationError extends Error {}
@@ -159,7 +159,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       densityKgPerL: null,
     };
   }
-  const isConsumable = product.category === "consommable";
+  const isConsumable = isNonFoodCategory(product.category);
 
   // ─── Quantité ───────────────────────────────────────────────────────────
   let measurement: {
@@ -175,7 +175,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
   };
 
   if (input.tare) {
-    if (isConsumable) throw new DeclarationError("La pesée en gastros concerne les denrées, pas les consommables");
+    if (isConsumable) throw new DeclarationError("La pesée en gastros concerne les denrées, pas les consommables ni les moules");
     const typeIds = [
       ...input.tare.gastros.map((g) => g.containerTypeId),
       ...(input.tare.supportTypeId ? [input.tare.supportTypeId] : []),
@@ -618,7 +618,7 @@ export async function linkDeclarationsToProduct(
       if (existing.tareTotalKg == null) {
         const [unit] = await tx.select().from(s.units).where(eq(s.units.code, existing.unitCode));
         const conversion = convertToKg(existing.quantity, { code: unit!.code, kind: unit!.kind as UnitKind, toBaseFactor: unit!.toBaseFactor }, {
-          isConsumable: product.category === "consommable",
+          isConsumable: isNonFoodCategory(product.category),
           unitWeightKg: product.unitWeightKg,
           densityKgPerL: product.densityKgPerL,
         });
@@ -629,7 +629,7 @@ export async function linkDeclarationsToProduct(
           conversionFactorUsed: conversion.factorUsed,
           measurementMethod: counted ? (conversion.kgStatus === "converti" ? "conversion_reference" : "comptage") : existing.measurementMethod,
         };
-      } else if (product.category === "consommable") {
+      } else if (isNonFoodCategory(product.category)) {
         throw new DeclarationError("Une pesée en gastros ne peut pas être rattachée à un consommable");
       }
 

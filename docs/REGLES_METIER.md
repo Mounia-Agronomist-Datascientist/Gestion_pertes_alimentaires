@@ -154,3 +154,14 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 - Ils sont proposés **uniquement** dans les zones **Conditionnement**, **Réception** et **Stockage** ; jamais
   aux équipes de cuisine.
 - À l'import, leur absence du plan est normale : elle n'est pas signalée comme une anomalie.
+
+## R10 — Produits de la semaine (validé le 10/11/2026)
+
+- Le poids d'une recette dans Melba est celui de tous ses ingrédients après cuisson pour **une portion**, sans la
+  barquette : une barquette perdue = une portion. Une portion de plat pèse toujours entre **300 et 380 g** (un
+  écart est signalé à l'import) ; un petit-déjeuner (`PJ`) peut peser moins.
+- Les **moules et plats à gratin** listés dans le tome (« Moule rond biodeg », « Petit plat à gratin format
+  individuel »…) forment la catégorie **« Moules et plats à gratin »** : ils ne sont jamais convertis en kg
+  alimentaires et ne se pèsent pas en gastros.
+- Plats proposés à la saisie : les postes de cuisine voient les plats de **leur équipe** ; le **Conditionnement
+  voit tous les plats** de la semaine et les encas ; Réception et Stockage voient les encas (R9).

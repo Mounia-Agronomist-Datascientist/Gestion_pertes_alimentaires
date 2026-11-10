@@ -64,6 +64,13 @@
       "when": 1794240566857,
       "tag": "0008_declaration_produit_semaine",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794299633992,
+      "tag": "0009_categorie_moules",
+      "breakpoints": true
     }
   ]
 }

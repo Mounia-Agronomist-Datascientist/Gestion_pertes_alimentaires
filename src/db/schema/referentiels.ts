@@ -52,6 +52,8 @@ export const productCategoryEnum = pgEnum("product_category", [
   "produit_fini",
   "produit_externe",
   "consommable",
+  // Moules et plats à gratin listés comme ingrédients dans le tome Melba (décision du 10/11/2026).
+  "moule_plat_gratin",
 ]);
 
 export const products = pgTable(

@@ -121,6 +121,16 @@ describe("saisie à partir des produits de la semaine", () => {
     expect(row).toMatchObject({ productCategory: "produit_externe", productCode: "EN02_EQ", teamId: null, netKg: 2.5 });
   });
 
+  it("un moule du tome est déclaré dans la catégorie « Moules et plats à gratin », sans conversion en kg", async () => {
+    const all = await weekCatalogs(t.db, admin, DAY);
+    const mould = Object.values(all[0]!.subRecipes)
+      .flatMap((sr) => sr.lines)
+      .find((l) => l.mould && !l.subRecipeId)!;
+    const r = await declare(admin, { weekItem: { kind: "ingredient", id: mould.id } }, { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" });
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
+    expect(row).toMatchObject({ productCategory: "moule_plat_gratin", kgStatus: "sans_objet", netKg: null });
+  });
+
   it("refuse un produit d'une autre semaine que celle de la perte", async () => {
     await expect(
       declare(teamD, { weekItem: { kind: "plat", id: dish("VI01").id } }, { occurredOn: "2026-10-28" }),

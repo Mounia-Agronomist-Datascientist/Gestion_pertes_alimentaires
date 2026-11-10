@@ -44,6 +44,6 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 
 | # | Sujet | Hypothèse appliquée | À confirmer |
 |---|---|---|---|
-| P2-1 ⚠️ | Poids d'une barquette | Une barquette (ou un encas) = **une portion** du tome : des barquettes perdues sont converties en kg avec le poids de la portion (« 1 recette(s) (315.1 g) »), ou à défaut la « Recette totale » | Oui / non, et poids de la barquette vide (emballage) à exclure ? |
-| P2-2 ⚠️ | Type de produit | Plat de la semaine → « Produit fini » ; encas → « Produit externe » ; sous-recette → « Sous-recette » ; ingrédient → « Matière première » (y compris les emballages listés comme ingrédients dans le tome) | Faut-il distinguer les emballages ? |
-| P2-3 ⚠️ | Plats hors cuisine | Seuls les postes de cuisine voient les plats de l'équipe ; Conditionnement, Réception et Stockage voient les encas (R9) et peuvent rechercher sous-recettes et ingrédients ; la Plonge ne voit pas de liste | Le conditionnement doit-il voir tous les plats (barquettes ratées) ? |
+| P2-1 ✅ | Poids d'une barquette | Validé le 10/11/2026 : le poids de la recette dans Melba est celui de tous les ingrédients après cuisson pour **une portion**, sans la barquette. Une barquette = une portion. Un plat pèse toujours entre 300 et 380 g (contrôle à l'import) ; un petit-déjeuner peut peser moins | — |
+| P2-2 ✅ | Type de produit | Plat de la semaine → « Produit fini » ; encas → « Produit externe » ; sous-recette → « Sous-recette » ; ingrédient → « Matière première ». Validé le 10/11/2026 : les **moules et plats à gratin** du tome ont leur propre catégorie « Moules et plats à gratin » (jamais convertis en kg alimentaires) | — |
+| P2-3 ✅ | Plats hors cuisine | Postes de cuisine : plats de l'équipe. Validé le 10/11/2026 : le **Conditionnement voit tous les plats** de la semaine en plus des encas ; Réception et Stockage voient les encas (R9) ; la Plonge ne voit pas de liste | — |
