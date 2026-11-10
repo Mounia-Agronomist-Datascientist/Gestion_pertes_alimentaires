@@ -165,3 +165,11 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
   alimentaires et ne se pèsent pas en gastros.
 - Plats proposés à la saisie : les postes de cuisine voient les plats de **leur équipe** ; le **Conditionnement
   voit tous les plats** de la semaine et les encas ; Réception et Stockage voient les encas (R9).
+
+## R11 — Coût matière d'une perte (Phase 2, 10/11/2026)
+
+- Référence : les coûts du **tome Melba de la semaine de la perte**, figés sur la déclaration à la saisie.
+- Plat ou encas : coût de la portion ; sous-recette : coût des ingrédients rapporté au poids net après cuisson ;
+  ingrédient : coût de sa ligne rapporté à sa quantité.
+- Coût estimé = poids net × coût au kg, sinon nombre × coût unitaire ; aucun coût n'est inventé pour un produit
+  du référentiel ou hors liste. Les règles de valorisation complètes (ventes, destinations) relèvent de la Phase 3.

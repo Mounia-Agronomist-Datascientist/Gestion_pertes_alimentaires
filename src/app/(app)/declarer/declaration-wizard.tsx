@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { estimateLossCost, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
 import { computeProductionWeek, formatProductionWeek } from "@/domain/semaine-production";
 import { computeNetWeight } from "@/domain/tares";
@@ -34,6 +35,8 @@ export type ProductChoice =
       unitWeightKg: number | null;
       /** Semaine de production de l'import (le produit n'est valable que pour une perte de cette semaine). */
       week: { year: number; number: number };
+      /** Coûts du tome de la semaine. */
+      cost: UnitCost;
     };
 
 /** État de départ d'une correction, construit à partir de la déclaration existante. */
@@ -80,6 +83,9 @@ interface Props {
 }
 
 const LAST_SUBZONE_KEY = "pertes:derniere-sous-zone";
+
+const euroFormat = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+const fmtEuro = (n: number) => euroFormat.format(n);
 
 /** Lit un nombre saisi au clavier français (virgule acceptée). */
 function parseNumber(value: string): number | null {
@@ -238,6 +244,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     occurredOn && occurredOn <= options.today
       ? computeProductionWeek(occurredOn).startDate < computeProductionWeek(options.today).startDate
       : false;
+
+  // Coût matière estimé d'après le tome de la semaine (le serveur refait le calcul et le fige).
+  const estimatedCost =
+    product?.kind === "week" && net ? estimateLossCost({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost) : null;
 
   // Un produit de la semaine n'est valable que pour une perte de cette semaine de production.
   const occurredWeek = occurredOn ? computeProductionWeek(occurredOn) : null;
@@ -770,6 +780,16 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               {!useTare && net.kg != null && net.unitCode !== "kg" && ` = ${fmt(net.kg)} kg`}
             </dd>
             <EditLink onClick={() => setStep("quantity")} />
+            {product?.kind === "week" && (
+              <>
+                <dt className="text-slate-500">Coût matière</dt>
+                <dd>
+                  {estimatedCost != null ? `≈ ${fmtEuro(estimatedCost)}` : "non calculable"}
+                  <span className="block text-sm text-slate-500">tome Melba S{product.week.number}</span>
+                </dd>
+                <span />
+              </>
+            )}
             <dt className="text-slate-500">Cause</dt>
             <dd>{options.causes.find((c) => c.id === causeId)?.name}</dd>
             <EditLink onClick={() => setStep("cause")} />
@@ -1053,6 +1073,7 @@ function ProductStep({
       category: d.snack ? "produit_externe" : "produit_fini",
       unitWeightKg: gramsToKg(d.portionWeightG),
       week: week!,
+      cost: d.cost,
     });
   const chooseSubRecipe = (id: string) =>
     onChoose({
@@ -1063,6 +1084,7 @@ function ProductStep({
       category: catalog!.subRecipes[id]!.mould ? "moule_plat_gratin" : "sous_recette",
       unitWeightKg: null,
       week: week!,
+      cost: catalog!.subRecipes[id]!.cost,
     });
   const chooseIngredient = (l: WeekCatalog["dishes"][number]["lines"][number]) =>
     onChoose({
@@ -1073,6 +1095,7 @@ function ProductStep({
       category: l.mould ? "moule_plat_gratin" : "matiere_premiere",
       unitWeightKg: gramsToKg(l.unitWeightG),
       week: week!,
+      cost: l.cost,
     });
 
   if (freeMode) {

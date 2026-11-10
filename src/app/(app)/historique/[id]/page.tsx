@@ -8,6 +8,9 @@ import { getDeclarationDetail } from "@/modules/declarations/queries";
 import { fmtDateTime, fmtDay, fmtNumber, fmtQuantity, STATUS_LABELS, STATUS_STYLES, UNIT_LABELS } from "../format";
 import { CancelForm } from "./cancel-form";
 
+const euroFormat = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+const fmtEuro = (n: number) => euroFormat.format(n);
+
 export const metadata = { title: "Détail d'une perte — Pertes" };
 
 /** Champs comparés d'une version à l'autre pour indiquer ce qui a changé. */
@@ -91,6 +94,19 @@ export default async function DeclarationDetailPage({
           {d.productName} <span className="text-sm text-slate-500">({PRODUCT_CATEGORY_LABELS[d.productCategory]})</span>
           {d.productUnlisted && <span className="block text-sm text-amber-700">Hors liste : à rattacher au référentiel</span>}
         </dd>
+        {d.costImportId && (
+          <>
+            <dt className="text-slate-500">Coût matière</dt>
+            <dd>
+              {d.materialCostEur != null ? `≈ ${fmtEuro(d.materialCostEur)}` : "non calculable"}
+              <span className="block text-sm text-slate-500">
+                Coût du tome Melba de la semaine
+                {d.costPerUnitEur != null && ` · ${fmtEuro(d.costPerUnitEur)} l'unité`}
+                {d.costPerKgEur != null && ` · ${fmtEuro(d.costPerKgEur)} le kg`}
+              </span>
+            </dd>
+          </>
+        )}
         <dt className="text-slate-500">Cause</dt>
         <dd>{d.causeName}</dd>
         <dt className="text-slate-500">Destination</dt>

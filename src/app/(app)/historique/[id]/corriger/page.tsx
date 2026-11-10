@@ -47,6 +47,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
           category: d.productCategory,
           unitWeightKg: d.conversionFactorUsed,
           week: { year: lossWeek.year, number: lossWeek.number },
+          cost: { perKgEur: d.costPerKgEur, perUnitEur: d.costPerUnitEur },
         }
       : d.productId
         ? { kind: "listed", id: d.productId, name: d.productName, category: d.productCategory }

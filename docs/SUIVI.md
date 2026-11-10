@@ -52,6 +52,7 @@
 | 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
 | 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
+| 2026-11-10 | Phase 2 — coût de la semaine figé sur chaque perte (plat, sous-recette au kg net, ingrédient) et coût matière estimé affiché | 4 tests unitaires + 2 d'intégration ; VI01 × 4 = 5,32 € vérifié dans le navigateur |
 | 2026-11-10 | Règles R10 validées : portion = barquette (contrôle 300–380 g à l'import), catégorie « Moules et plats à gratin », tous les plats au conditionnement | 3 tests ajoutés |
 | 2026-11-09 | Phase 2 — saisie à partir des produits de la semaine : plats de l'équipe → sous-recettes → ingrédients, encas en conditionnement/réception/stockage, recherche, semaine précédente, conversion par portion ou poids unitaire | 6 tests d'intégration ; déclaration VI01 faite dans le navigateur (mobile) |
 | 2026-11-09 | Phase 2 — écran d'import (Administration → Import de la semaine) : fichiers lus dans le navigateur, aperçu par équipe, anomalies, validation, liste des versions ; règle R9 des encas | Import S45 réel fait dans le navigateur (mobile) ; construction Netlify locale |
@@ -98,6 +99,7 @@
 | `0007_import_hebdomadaire` | Tables `weekly_imports`, `week_recipes`, `week_sub_recipes`, `week_recipe_lines` | Nouvelles tables vides ; aucune donnée existante modifiée |
 | `0008_declaration_produit_semaine` | Colonnes `week_recipe_id`, `week_sub_recipe_id`, `week_line_id` sur les déclarations ; contrainte de référence produit élargie | Déclarations existantes inchangées (colonnes vides) |
 | `0009_categorie_moules` | Valeur `moule_plat_gratin` ajoutée au type de produit | Aucune donnée modifiée |
+| `0010_cout_matiere` | Colonnes `cost_per_kg_eur`, `cost_per_unit_eur`, `material_cost_eur`, `cost_import_id` sur les déclarations | Déclarations existantes sans coût (colonnes vides) |
 | `0005_alertes_rien_de_note` | Tables `production_days` et `missing_declaration_alerts` | Aucune modification des tables existantes |
 | `0003_declarations` | Création des 5 tables de déclarations, tares utilisées, destinations, versions et lots | Aucune modification des tables existantes |
 | `0002_causes_par_sous_zone` | Création de `cause_subzones` | Aucune modification des tables existantes ; base de dév. recréée (aucune donnée réelle) |

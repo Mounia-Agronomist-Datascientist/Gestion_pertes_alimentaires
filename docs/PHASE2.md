@@ -24,7 +24,7 @@ Analyse détaillée des sources : [INTEGRATION_OUTIL_SOUS_RECETTES.md](INTEGRATI
 | 2.3 | Modèle de données par semaine (instantanés figés) et migration | ✅ Migration `0007`, rapprochement (`merge.ts`) et enregistrement (`service.ts`) |
 | 2.4 | Écran d'import : dépôt des deux fichiers, aperçu, anomalies, validation ; un nouvel import d'une semaine validée crée une nouvelle version tracée | ✅ Administration → Import de la semaine |
 | 2.5 | Saisie : produits proposés selon l'équipe et la semaine (plat → sous-recette → ingrédient) | ✅ Étape « Quel produit ? » de la déclaration ; règles validées le 10/11/2026 (R10) |
-| 2.6 | Coût de la semaine conservé avec chaque perte (préparation de la Phase 3) | ⏳ |
+| 2.6 | Coût de la semaine conservé avec chaque perte (préparation de la Phase 3) | ✅ Coût unitaire et coût estimé figés sur la déclaration (migration `0010`) |
 
 ## Lecture du tome (2.1)
 
@@ -136,3 +136,28 @@ doit être celui de l'équipe ; un encas ne se déclare qu'en conditionnement, r
 
 Vérifié : 6 tests d'intégration sur l'import S45 réel ; dans le navigateur (mobile), 4 barquettes de VI01
 déclarées pour l'équipe D le 03/11 → 1,26 kg, comptées en S45 ; encas affichés en conditionnement.
+
+## Coût de la semaine (2.6)
+
+Pour un produit de la semaine, la déclaration garde **les coûts du tome Melba de sa semaine**, figés à la saisie
+(un nouveau tome ne change pas une perte passée) :
+
+| Produit | Coût unitaire | Exemple S45 |
+|---|---|---|
+| Plat / encas | coût de la portion (« Recette totale ») et coût au kg = coût ÷ poids de la portion | VI01 : 1,33 € la portion, 4,22 € le kg |
+| Sous-recette | coût des ingrédients ÷ **poids net** (après cuisson), à défaut ÷ quantité de référence | Tagliatelles : 0,37 € pour 140 g nets → 2,64 €/kg |
+| Ingrédient | coût de la ligne ÷ sa quantité (en g, ou à la pièce s'il se compte) | Yaourt : 0,74 € pour 2 pots de 125 g → 0,37 € le pot |
+
+**Coût matière estimé** de la perte = poids net × coût au kg, sinon nombre × coût unitaire (barquettes, pièces) ;
+rien si le coût ou la conversion manque (jamais deviné). Affiché au récapitulatif de la saisie et dans le détail
+de la perte. Produits du référentiel et hors liste : pas de coût.
+
+Limite connue : le tome arrondit les coûts au centime ; pour un ingrédient en petite quantité dans une ligne
+(30 g à 0,07 €), le coût au kg est approché (± quelques %). Les plats et sous-recettes, calculés sur leur total,
+sont précis.
+
+Vérifié : 4 tests unitaires, 2 tests d'intégration ; dans le navigateur, 4 barquettes de VI01 → ≈ 5,32 €
+(4 × 1,33 €), enregistré et affiché dans le détail.
+
+**Phase 2 terminée** (09–10/11/2026). La valorisation complète (recettes des ventes, destinations, impact
+environnemental) relève de la Phase 3.

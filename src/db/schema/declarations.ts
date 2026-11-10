@@ -19,7 +19,7 @@ import {
 import { users } from "./auth";
 import { subzones, teams, zones } from "./organisation";
 import { productionWeeks } from "./production-weeks";
-import { weekRecipeLines, weekRecipes, weekSubRecipes } from "./imports";
+import { weeklyImports, weekRecipeLines, weekRecipes, weekSubRecipes } from "./imports";
 import { causes, containerTares, destinations, productCategoryEnum, products, units } from "./referentiels";
 
 export const declarationStatusEnum = pgEnum("declaration_status", ["brouillon", "validee", "corrigee", "annulee"]);
@@ -109,6 +109,17 @@ export const lossDeclarations = pgTable(
     netKg: numeric("net_kg", { precision: 12, scale: 4, mode: "number" }),
     kgStatus: kgStatusEnum("kg_status").notNull(),
     conversionFactorUsed: numeric("conversion_factor_used", { precision: 12, scale: 4, mode: "number" }),
+
+    /**
+     * Coût matière figé à la saisie (docs/PHASE2.md, étape 2.6) : coûts du tome Melba de la semaine pour un
+     * produit de la semaine ; vides pour un produit du référentiel ou hors liste (pas de coût connu).
+     */
+    costPerKgEur: numeric("cost_per_kg_eur", { precision: 12, scale: 4, mode: "number" }),
+    costPerUnitEur: numeric("cost_per_unit_eur", { precision: 12, scale: 4, mode: "number" }),
+    /** Coût matière estimé de la perte (poids net × coût au kg, ou nombre × coût unitaire). */
+    materialCostEur: numeric("material_cost_eur", { precision: 12, scale: 4, mode: "number" }),
+    /** Import (tome) d'où viennent les coûts. */
+    costImportId: uuid("cost_import_id").references(() => weeklyImports.id),
 
     causeId: uuid("cause_id")
       .notNull()

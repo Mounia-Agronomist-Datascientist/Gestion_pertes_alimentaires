@@ -5,6 +5,7 @@
 import { and, eq, gte, inArray, isNull, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import { estimateLossCost, type UnitCost } from "@/domain/couts";
 import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
@@ -105,6 +106,8 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
     unitWeightKg: number | null;
     densityKgPerL: number | null;
     refs?: { weekRecipeId: string | null; weekSubRecipeId: string | null; weekLineId: string | null };
+    /** Coûts du tome de la semaine et import d'origine (produits de la semaine uniquement). */
+    cost?: { unit: UnitCost; importId: string };
   };
   if ("weekItem" in input.product) {
     // Produit de l'import de la semaine (docs/PHASE2.md, étape 2.5).
@@ -131,6 +134,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       unitWeightKg: item.unitWeightKg,
       densityKgPerL: null,
       refs: item.refs,
+      cost: { unit: item.cost, importId: item.importId },
     };
   } else if ("productId" in input.product) {
     const [row] = await db.select().from(s.products).where(eq(s.products.id, input.product.productId));
@@ -298,6 +302,12 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       weekRecipeId: product.refs?.weekRecipeId ?? null,
       weekSubRecipeId: product.refs?.weekSubRecipeId ?? null,
       weekLineId: product.refs?.weekLineId ?? null,
+      costPerKgEur: product.cost?.unit.perKgEur ?? null,
+      costPerUnitEur: product.cost?.unit.perUnitEur ?? null,
+      materialCostEur: product.cost
+        ? estimateLossCost({ netKg: measurement.netKg, quantity: measurement.netQuantity, unitCode: measurement.netUnitCode }, product.cost.unit)
+        : null,
+      costImportId: product.cost?.importId ?? null,
       measurementMethod,
       quantity: measurement.quantity,
       unitCode: measurement.unitCode,

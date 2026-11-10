@@ -71,6 +71,13 @@
       "when": 1794299633992,
       "tag": "0009_categorie_moules",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794301646870,
+      "tag": "0010_cout_matiere",
+      "breakpoints": true
     }
   ]
 }

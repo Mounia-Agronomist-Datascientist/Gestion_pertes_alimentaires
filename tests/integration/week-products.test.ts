@@ -91,7 +91,18 @@ describe("saisie à partir des produits de la semaine", () => {
       weekRecipeId: dish("VI01").id,
       netKg: 3.151,
       kgStatus: "converti",
+      // Coût du tome S45 figé : 1,33 € la portion, soit 10 × 1,33 €.
+      costPerUnitEur: 1.33,
+      costPerKgEur: 4.2209,
+      costImportId: expect.any(String),
     });
+    expect(row?.materialCostEur).toBeCloseTo(13.3, 2);
+  });
+
+  it("un produit hors liste n'a pas de coût (jamais deviné)", async () => {
+    const r = await declare(teamD, { freeLabel: "Produit sans coût", category: "sous_recette" }, { method: "pesee", unitCode: "kg" });
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
+    expect(row).toMatchObject({ costPerKgEur: null, costPerUnitEur: null, materialCostEur: null, costImportId: null });
   });
 
   it("une sous-recette pesée et un ingrédient compté (poids unitaire du tome)", async () => {
@@ -99,6 +110,9 @@ describe("saisie à partir des produits de la semaine", () => {
     const sub = await declare(teamD, { weekItem: { kind: "sous_recette", id: chicken.subRecipeId! } }, { method: "pesee", quantity: 2.5, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 2.5 }] });
     const [subRow] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, sub.id));
     expect(subRow).toMatchObject({ productCategory: "sous_recette", weekSubRecipeId: chicken.subRecipeId, netKg: 2.5 });
+    const subCost = catalog[0]!.subRecipes[chicken.subRecipeId!]!.cost.perKgEur!;
+    expect(subRow?.costPerKgEur).toBe(subCost);
+    expect(subRow?.materialCostEur).toBeCloseTo(2.5 * subCost, 3);
 
     const ingredient = Object.values(catalog[0]!.subRecipes)
       .flatMap((sr) => sr.lines)

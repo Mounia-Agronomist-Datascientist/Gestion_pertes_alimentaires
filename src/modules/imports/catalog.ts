@@ -7,6 +7,7 @@
 import { and, eq } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import { dishUnitCost, ingredientUnitCost, subRecipeUnitCost, type UnitCost } from "@/domain/couts";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
@@ -24,6 +25,8 @@ export interface CatalogLine {
   unitWeightG: number | null;
   /** Moule ou plat à gratin (catégorie « Moules et plats à gratin »). */
   mould: boolean;
+  /** Coût de l'ingrédient d'après le tome (pour une sous-recette, voir la sous-recette). */
+  cost: UnitCost;
 }
 
 export interface WeekCatalog {
@@ -32,8 +35,8 @@ export interface WeekCatalog {
   number: number;
   startDate: LocalDate;
   endDate: LocalDate;
-  dishes: { id: string; code: string; name: string; teamId: string | null; snack: boolean; portionWeightG: number | null; lines: CatalogLine[] }[];
-  subRecipes: Record<string, { id: string; name: string; mould: boolean; lines: CatalogLine[] }>;
+  dishes: { id: string; code: string; name: string; teamId: string | null; snack: boolean; portionWeightG: number | null; cost: UnitCost; lines: CatalogLine[] }[];
+  subRecipes: Record<string, { id: string; name: string; mould: boolean; cost: UnitCost; lines: CatalogLine[] }>;
 }
 
 /** Retire la mention « (sous-recette) » d'un libellé de composition. */
@@ -65,6 +68,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
       subRecipeId: l.componentSubRecipeId,
       unitWeightG: l.unitWeightG,
       mould: isMouldLabel(l.label),
+      cost: ingredientUnitCost(l),
     });
     const linesOf = (owner: { recipeId?: string; subRecipeId?: string }) =>
       lines
@@ -81,6 +85,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
         teamId: r.teamId,
         snack: isSnackCode(r.code),
         portionWeightG: portionWeightG(r),
+        cost: dishUnitCost(r.totalCostEur, portionWeightG(r)),
         lines: linesOf({ recipeId: r.id }),
       }))
       .sort((a, b) => a.code.localeCompare(b.code));
@@ -93,13 +98,24 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
       const id = queue.pop()!;
       const sr = byId.get(id);
       if (!sr || reachable[id]) continue;
-      reachable[id] = { id, name: sr.name, mould: isMouldLabel(sr.name), lines: linesOf({ subRecipeId: id }) };
+      reachable[id] = { id, name: sr.name, mould: isMouldLabel(sr.name), cost: subRecipeCost(sr), lines: linesOf({ subRecipeId: id }) };
       for (const l of reachable[id].lines) if (l.subRecipeId) queue.push(l.subRecipeId);
     }
     catalogs.push({ weekId: week.id, year: week.year, number: week.number, startDate: week.startDate, endDate: week.endDate, dishes, subRecipes: reachable });
   }
   return catalogs;
 }
+
+/** Coût d'une sous-recette rapporté à son poids net (à défaut, à sa quantité de référence en g ou kg). */
+const subRecipeCost = (sr: { totalCostEur: number | null; netQuantity: number | null; netUnit: string | null; referenceQuantity: number | null; referenceUnit: string | null }) =>
+  subRecipeUnitCost(
+    sr.totalCostEur,
+    sr.netQuantity != null && sr.netUnit
+      ? { quantity: sr.netQuantity, unit: sr.netUnit }
+      : sr.referenceQuantity != null && sr.referenceUnit
+        ? { quantity: sr.referenceQuantity, unit: sr.referenceUnit }
+        : null,
+  );
 
 /** Poids d'une portion : celui du rendement (« (315.1 g) »), sinon la « Recette totale » d'une recette. */
 const portionWeightG = (r: { portionWeightG: number | null; totalWeightG: number | null }) => r.portionWeightG ?? r.totalWeightG;
@@ -113,6 +129,8 @@ export interface ResolvedWeekItem {
   importId: string;
   teamId: string | null;
   snack: boolean;
+  /** Coûts du tome de la semaine (figés sur la déclaration). */
+  cost: UnitCost;
 }
 
 /** Retrouve un produit de la semaine choisi à la saisie, ou null s'il n'existe pas. */
@@ -134,12 +152,13 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
       importId: r.importId,
       teamId: r.teamId,
       snack,
+      cost: dishUnitCost(r.totalCostEur, portionWeightG(r)),
     };
   }
   if (kind === "sous_recette") {
     const [sr] = await db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.id, id));
     if (!sr) return null;
-    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false };
+    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false, cost: subRecipeCost(sr) };
   }
   const [l] = await db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.id, id));
   if (!l || l.isSubRecipe) return null;
@@ -152,5 +171,6 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
     importId: l.importId,
     teamId: null,
     snack: false,
+    cost: ingredientUnitCost(l),
   };
 }
