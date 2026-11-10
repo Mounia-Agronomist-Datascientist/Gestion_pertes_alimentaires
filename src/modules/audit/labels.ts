@@ -47,6 +47,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   cost_new_version: "Nouveau coût",
   cost_corrected: "Correction de coût",
   packaging_per_portion: "Emballages par portion",
+  recovered_amount: "Recette encaissée",
 };
 
 export const auditEntityLabel = (entity: string) => AUDIT_ENTITY_LABELS[entity] ?? entity;

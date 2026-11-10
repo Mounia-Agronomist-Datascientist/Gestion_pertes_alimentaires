@@ -273,6 +273,9 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
   for (const d of input.destinations) {
     const row = destinationRows.find((r) => r.id === d.destinationId);
     if (!row || !row.active) throw new DeclarationError("Destination inconnue ou désactivée");
+    if (d.recoveredAmountEur != null && !row.financialRecovery) {
+      throw new DeclarationError(`« ${row.name} » ne rapporte pas de recette : seules les ventes ont un montant encaissé`);
+    }
   }
   const { justification } = validateDestinationSplit(
     measurement.netQuantity,
@@ -355,6 +358,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       weekSubRecipeId: product.refs?.weekSubRecipeId ?? null,
       weekLineId: product.refs?.weekLineId ?? null,
       ...costSnapshot,
+      ...netCost(costSnapshot.grossCostEur, input.destinations.map((d) => ({ recoveredAmount: d.recoveredAmountEur }))),
       measurementMethod,
       quantity: measurement.quantity,
       unitCode: measurement.unitCode,
@@ -375,7 +379,18 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       destinationId: d.destinationId,
       quantity: roundQuantity(d.quantity),
       netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
+      recoveredAmount: d.recoveredAmountEur ?? null,
     })),
+  };
+}
+
+/** Recettes encaissées et coût net d'une déclaration, à partir de ses lignes de destination (§10.4, §18.6). */
+function netCost(grossCostEur: number | null | undefined, lines: readonly { recoveredAmount?: number | null }[]) {
+  const amounts = lines.map((l) => l.recoveredAmount).filter((a): a is number => a != null);
+  const recoveredEur = amounts.length ? Math.round(amounts.reduce((a, b) => a + b, 0) * 100) / 100 : null;
+  return {
+    recoveredEur,
+    netCostEur: grossCostEur != null ? roundQuantity(grossCostEur - (recoveredEur ?? 0)) : null,
   };
 }
 
@@ -625,7 +640,7 @@ export async function cancelDeclaration(
     // Les lignes de tares et destinations sont reconduites telles quelles dans la nouvelle version.
     const after = await writeVersionLines(tx, declaration, {
       containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
-      destinations: before.destinations.map((d) => ({ destinationId: d.destinationId, quantity: d.quantity, netKg: d.netKg })),
+      destinations: before.destinations.map((d) => ({ destinationId: d.destinationId, quantity: d.quantity, netKg: d.netKg, recoveredAmount: d.recoveredAmount })),
     });
     await tx.insert(s.declarationRevisions).values({
       declarationId: id,
@@ -717,11 +732,60 @@ export async function linkDeclarationsToProduct(
           destinationId: d.destinationId,
           quantity: d.quantity,
           netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
+          recoveredAmount: d.recoveredAmount,
         })),
       });
       await tx.insert(s.declarationRevisions).values({ declarationId: existing.id, revision, status: "corrigee", data: after, changedBy: user.id, changedAt: now, reason });
       await writeAudit(tx, { userId: user.id, action: "link_product", entity: "loss_declaration", entityId: existing.id, before, after, reason, occurredAt: now });
     }
     return rows.length;
+  });
+}
+
+/**
+ * Saisit ou complète les montants encaissés des lignes de vente d'une déclaration (docs/PHASE3.md, étape 3.5) :
+ * nouvelle version, recettes et coût net recalculés, coût brut inchangé. Mêmes droits qu'une correction.
+ */
+export async function setRecoveredAmounts(
+  db: Db,
+  user: AuthUser,
+  id: string,
+  input: { expectedRevision: number; amounts: Record<string, number | null> },
+  now: Date = new Date(),
+): Promise<void> {
+  const { existing } = await loadForChange(db, user, id, { reason: "Recette encaissée", expectedRevision: input.expectedRevision }, now);
+  const before = await currentSnapshot(db, existing);
+  const destinationRows = await db
+    .select()
+    .from(s.destinations)
+    .where(inArray(s.destinations.id, before.destinations.map((d) => d.destinationId)));
+  for (const [destinationId, amount] of Object.entries(input.amounts)) {
+    const row = destinationRows.find((r) => r.id === destinationId);
+    if (!row || !before.destinations.some((d) => d.destinationId === destinationId)) throw new DeclarationError("Ligne de destination introuvable");
+    if (!row.financialRecovery) throw new DeclarationError(`« ${row.name} » ne rapporte pas de recette`);
+    if (amount != null && (!Number.isFinite(amount) || amount < 0 || amount > 100_000)) throw new DeclarationError("Montant invalide");
+  }
+  const lines = before.destinations.map((d) => ({
+    destinationId: d.destinationId,
+    quantity: d.quantity,
+    netKg: d.netKg,
+    recoveredAmount: d.destinationId in input.amounts ? (input.amounts[d.destinationId] ?? null) : d.recoveredAmount,
+  }));
+
+  await db.transaction(async (tx) => {
+    const revision = existing.revision + 1;
+    const [declaration] = await tx
+      .update(s.lossDeclarations)
+      .set({ ...netCost(existing.grossCostEur, lines), status: "corrigee", revision, updatedAt: now })
+      .where(and(eq(s.lossDeclarations.id, id), eq(s.lossDeclarations.revision, existing.revision)))
+      .returning();
+    if (!declaration) throw new DeclarationConflictError();
+    const after = await writeVersionLines(tx, declaration, {
+      containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
+      destinations: lines,
+    });
+    const reason = "Recette encaissée";
+    await tx.insert(s.declarationRevisions).values({ declarationId: id, revision, status: "corrigee", data: after, changedBy: user.id, changedAt: now, reason });
+    await writeAudit(tx, { userId: user.id, action: "recovered_amount", entity: "loss_declaration", entityId: id, before, after, reason, occurredAt: now });
   });
 }

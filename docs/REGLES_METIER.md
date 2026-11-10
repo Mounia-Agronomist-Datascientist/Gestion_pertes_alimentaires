@@ -181,3 +181,9 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 - Les emballages du référentiel s'ajoutent à **tout plat perdu** (par portion), aux prix en vigueur à la date de
   la perte ; aucun emballage n'est ajouté aux encas, sous-recettes et ingrédients.
 - Le coût est figé sur la déclaration avec sa méthode et sa date de calcul.
+
+## R13 — Recettes encaissées et coût net (Phase 3, 10/11/2026)
+
+- Seules les destinations de **vente** (Too Good To Go, vente flash) portent une recette : le **montant réellement
+  encaissé**, saisi à la déclaration ou complété plus tard (nouvelle version tracée).
+- Coût net = coût brut − recettes encaissées ; brut et net restent consultables séparément.

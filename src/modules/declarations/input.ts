@@ -80,7 +80,14 @@ export const declarationInputSchema = z
     tare: tareInput.nullable().optional(),
     causeId: uuid,
     destinations: z
-      .array(z.object({ destinationId: uuid, quantity: positive }))
+      .array(
+        z.object({
+          destinationId: uuid,
+          quantity: positive,
+          /** Montant encaissé pour une vente (Too Good To Go, vente flash) ; facultatif, complété plus tard sinon. */
+          recoveredAmountEur: z.number({ message: "Montant invalide" }).finite().min(0, "Le montant ne peut pas être négatif").max(100_000).nullable().optional(),
+        }),
+      )
       .min(1, "Choisissez au moins une destination"),
     destinationGapJustification: z.string().trim().max(500).nullable().optional(),
     comment: z.string().trim().max(1000).nullable().optional(),

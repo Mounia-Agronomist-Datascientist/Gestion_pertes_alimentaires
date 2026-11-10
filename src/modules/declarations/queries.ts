@@ -111,6 +111,8 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
         name: s.destinations.name,
         quantity: s.declarationDestinations.quantity,
         netKg: s.declarationDestinations.netKg,
+        recoveredAmount: s.declarationDestinations.recoveredAmount,
+        financialRecovery: s.destinations.financialRecovery,
       })
       .from(s.declarationDestinations)
       .innerJoin(s.destinations, eq(s.declarationDestinations.destinationId, s.destinations.id))

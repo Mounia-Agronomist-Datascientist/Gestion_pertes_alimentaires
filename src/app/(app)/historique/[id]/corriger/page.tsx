@@ -67,6 +67,9 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     supportId: support?.containerTypeId ?? null,
     causeId: d.causeId,
     destinationLines: detail.destinations.map((x) => ({ destinationId: x.destinationId, quantity: String(x.quantity) })),
+    recoveredAmounts: Object.fromEntries(
+      detail.destinations.filter((x) => x.recoveredAmount != null).map((x) => [x.destinationId, String(x.recoveredAmount).replace(".", ",")]),
+    ),
     justification: d.destinationGapJustification ?? "",
     occurredOn: d.occurredOn,
     occurredTime: d.occurredTime?.slice(0, 5) ?? "",

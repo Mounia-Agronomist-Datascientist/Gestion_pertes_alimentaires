@@ -7,6 +7,7 @@ import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { getDeclarationDetail } from "@/modules/declarations/queries";
 import { fmtDateTime, fmtDay, fmtNumber, fmtQuantity, STATUS_LABELS, STATUS_STYLES, UNIT_LABELS } from "../format";
 import { CancelForm } from "./cancel-form";
+import { RecoveredForm } from "./recovered-form";
 
 const euroFormat = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 const fmtEuro = (n: number) => euroFormat.format(n);
@@ -43,11 +44,11 @@ export default async function DeclarationDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ annulee?: string }>;
+  searchParams: Promise<{ annulee?: string; recette?: string }>;
 }) {
   const user = await requireUser();
   const { id } = await params;
-  const { annulee } = await searchParams;
+  const { annulee, recette } = await searchParams;
   const detail = await getDeclarationDetail(db, user, id).catch(() => null);
   if (!detail) notFound();
   const d = detail.declaration;
@@ -57,6 +58,11 @@ export default async function DeclarationDetailPage({
       <Link href="/historique" className="self-start rounded-xl px-2 py-2 font-medium text-slate-700">
         ← Historique
       </Link>
+      {recette && (
+        <p role="status" className="rounded-xl bg-emerald-50 p-3 text-emerald-800">
+          Recette encaissée enregistrée : le coût net est recalculé, l&apos;ancienne version reste dans l&apos;historique.
+        </p>
+      )}
       {annulee && (
         <p role="status" className="rounded-xl bg-emerald-50 p-3 text-emerald-800">
           Déclaration annulée. Elle reste visible ici avec son historique.
@@ -111,6 +117,11 @@ export default async function DeclarationDetailPage({
                 </span>
               )}
               <span className="block text-sm text-slate-500">Main-d&apos;œuvre : non imputée (méthode à définir)</span>
+              {d.recoveredEur != null && (
+                <span className="block font-medium">
+                  Recettes encaissées : − {fmtEuro(d.recoveredEur)} · coût net {d.netCostEur != null ? `≈ ${fmtEuro(d.netCostEur)}` : "—"}
+                </span>
+              )}
               <span className="block text-sm text-slate-500">
                 Coûts du tome Melba de la semaine
                 {d.costComputedAt && `, calculés le ${fmtDateTime(d.costComputedAt)}`}
@@ -126,6 +137,12 @@ export default async function DeclarationDetailPage({
             {detail.destinations.map((x) => (
               <li key={x.destinationId}>
                 {x.name} : {fmtNumber(x.quantity)} {UNIT_LABELS[d.netUnitCode] ?? d.netUnitCode}
+                {x.financialRecovery && (
+                  <span className="text-sm text-slate-500">
+                    {" "}
+                    · {x.recoveredAmount != null ? `${fmtEuro(x.recoveredAmount)} encaissés` : "recette à saisir"}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
@@ -167,6 +184,15 @@ export default async function DeclarationDetailPage({
           <Link href={`/historique/${d.id}/corriger`} className="btn-primary flex items-center justify-center">
             Corriger
           </Link>
+          {detail.destinations.some((x) => x.financialRecovery) && (
+            <RecoveredForm
+              id={d.id}
+              revision={d.revision}
+              lines={detail.destinations
+                .filter((x) => x.financialRecovery)
+                .map((x) => ({ destinationId: x.destinationId, name: x.name, recoveredAmount: x.recoveredAmount }))}
+            />
+          )}
           <CancelForm id={d.id} revision={d.revision} />
         </div>
       )}

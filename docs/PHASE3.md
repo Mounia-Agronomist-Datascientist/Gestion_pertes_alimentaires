@@ -23,7 +23,7 @@ par composante et un coût net après recettes récupérées, figés sur la déc
 | 3.2 | Emballages consommés par portion : plats et petits-déjeuners (ex. 1 barquette + 1 film + 1 étiquette) | ✅ Quantité par plat / par petit-déjeuner ; coût d'une portion à une date (`portionPackagingCost`) |
 | 3.3 | Coût Melba d'un plat séparé en **matières** et **moules / plats à gratin** (déjà inclus dans Melba : jamais comptés deux fois) | ✅ |
 | 3.4 | Instantané complet par déclaration : matières, emballages, main-d'œuvre (non active), indirect (vide), méthode, versions, date de calcul ; coût brut | ✅ Migration `0012` |
-| 3.5 | Recettes récupérées : montant encaissé par ligne de vente ; coût net | ⏳ |
+| 3.5 | Recettes récupérées : montant encaissé par ligne de vente ; coût net | ✅ Migration `0013` |
 | 3.6 | Référentiel main-d'œuvre par zone (taux horaires datés), sans imputation | ⏳ |
 | 3.7 | Écran « Coûts » : brut, récupéré, net par semaine ; répartition matières / main-d'œuvre / emballages / indirect en montants et pourcentages | ⏳ |
 
@@ -80,3 +80,17 @@ matières 4 × 1,39 = 5,56 € ; emballages 4 × (0,07 + 0,15) = 0,88 € ; coû
 
 Vérifié : 4 tests unitaires + 1 test d'intégration ; dans le navigateur, déclaration VI03 avec récapitulatif et
 détail du coût.
+
+## Recettes récupérées et coût net (3.5)
+
+- Sur une ligne de destination **de vente** (destinations « peut rapporter une recette » : Too Good To Go, vente
+  flash), on indique le **montant réellement encaissé** : au récapitulatif de la déclaration, ou plus tard depuis le
+  détail de la perte (« Saisir la recette encaissée »), avec les mêmes droits qu'une correction.
+- Un montant sur une autre destination (compost, don, personnel…) est refusé : le don et le repas du personnel ne
+  sont jamais des recettes (§10.4).
+- La déclaration garde **recettes encaissées** (somme des lignes) et **coût net = coût brut − recettes** ; le coût
+  brut ne change pas. Compléter une recette crée une nouvelle version (motif « Recette encaissée »), l'ancienne
+  reste dans l'historique.
+
+Vérifié : 3 tests d'intégration ; dans le navigateur, 10 barquettes de VI01 (6 Too Good To Go, 4 compost) avec
+4,50 € encaissés au récapitulatif, puis montant porté à 5,00 € depuis le détail (coût net 8,30 €).

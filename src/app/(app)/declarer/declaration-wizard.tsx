@@ -54,6 +54,8 @@ export interface WizardInitial {
   supportId: string | null;
   causeId: string;
   destinationLines: { destinationId: string; quantity: string }[];
+  /** Montants encaissés saisis pour les lignes de vente (en texte, clavier français). */
+  recoveredAmounts?: Record<string, string>;
   justification: string;
   occurredOn: string;
   occurredTime: string;
@@ -132,6 +134,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     init?.destinationLines ?? [],
   );
   const [justification, setJustification] = useState(init?.justification ?? "");
+  const [recoveredAmounts, setRecoveredAmounts] = useState<Record<string, string>>(init?.recoveredAmounts ?? {});
   const [occurredOn, setOccurredOn] = useState(init?.occurredOn ?? options.today);
   const [occurredTime, setOccurredTime] = useState(init?.occurredTime ?? "");
   const [comment, setComment] = useState(init?.comment ?? "");
@@ -249,6 +252,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const costPreview =
     product?.kind === "week" && net ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost) : null;
 
+  const isSale = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.financialRecovery ?? false;
+  const saleLines = destinationLines.filter((l) => isSale(l.destinationId));
+  const recoveredTotal = saleLines.reduce((sum, l) => sum + (parseNumber(recoveredAmounts[l.destinationId] ?? "") ?? 0), 0);
+
   // Un produit de la semaine n'est valable que pour une perte de cette semaine de production.
   const occurredWeek = occurredOn ? computeProductionWeek(occurredOn) : null;
   const productWeekMismatch =
@@ -345,7 +352,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
         : null,
       causeId,
       destinations: destinationLines
-        .map((l) => ({ destinationId: l.destinationId, quantity: parseNumber(l.quantity) ?? 0 }))
+        .map((l) => ({
+          destinationId: l.destinationId,
+          quantity: parseNumber(l.quantity) ?? 0,
+          recoveredAmountEur: isSale(l.destinationId) ? parseNumber(recoveredAmounts[l.destinationId] ?? "") : null,
+        }))
         .filter((l) => l.quantity > 0),
       destinationGapJustification: justification || null,
       comment: comment || null,
@@ -367,6 +378,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           supportId,
           causeId,
           destinationLines,
+          recoveredAmounts,
           justification,
           occurredOn,
           occurredTime,
@@ -795,6 +807,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                       .join(" · ")}
                     {` (tome Melba S${product.week.number})`}
                   </span>
+                  {costPreview?.grossEur != null && recoveredTotal > 0 && (
+                    <span className="block text-sm font-medium">
+                      Recettes − {fmtEuro(recoveredTotal)} · coût net ≈ {fmtEuro(costPreview.grossEur - recoveredTotal)}
+                    </span>
+                  )}
                   {costPreview?.packagingEur != null && occurredOn !== options.today && (
                     <span className="block text-sm text-slate-500">
                       Emballages estimés aux prix d&apos;aujourd&apos;hui : l&apos;enregistrement prend ceux de la date de la perte.
@@ -819,6 +836,22 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 .join(" ; ")}
             </dd>
             <EditLink onClick={() => setStep("destination")} />
+            {saleLines.map((l) => (
+              <div key={l.destinationId} className="col-span-3">
+                <label className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-50 p-3">
+                  <span className="text-sm font-medium">
+                    Montant encaissé – {options.destinations.find((d) => d.id === l.destinationId)?.name} (€, facultatif)
+                  </span>
+                  <input
+                    className="field w-32 text-right"
+                    inputMode="decimal"
+                    value={recoveredAmounts[l.destinationId] ?? ""}
+                    onChange={(e) => setRecoveredAmounts((prev) => ({ ...prev, [l.destinationId]: e.target.value }))}
+                    aria-label="Montant encaissé"
+                  />
+                </label>
+              </div>
+            ))}
           </dl>
 
           <div className="grid grid-cols-2 gap-3">

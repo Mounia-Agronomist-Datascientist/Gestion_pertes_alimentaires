@@ -125,6 +125,10 @@ export const lossDeclarations = pgTable(
     labourCostEur: numeric("labour_cost_eur", { precision: 12, scale: 4, mode: "number" }),
     indirectCostEur: numeric("indirect_cost_eur", { precision: 12, scale: 4, mode: "number" }),
     grossCostEur: numeric("gross_cost_eur", { precision: 12, scale: 4, mode: "number" }),
+    /** Recettes encaissées (ventes Too Good To Go, vente flash…), somme des lignes de destination (§10.4). */
+    recoveredEur: numeric("recovered_eur", { precision: 12, scale: 2, mode: "number" }),
+    /** Coût net = coût brut − recettes encaissées ; brut et net restent consultables séparément (§18.6). */
+    netCostEur: numeric("net_cost_eur", { precision: 12, scale: 4, mode: "number" }),
     costMethod: text("cost_method"),
     costComputedAt: timestamp("cost_computed_at", { withTimezone: true }),
     /** Détail utilisé : version de l'import, emballages et coûts unitaires appliqués, portions. */
@@ -191,6 +195,7 @@ export const declarationDestinations = pgTable("declaration_destinations", {
     .references(() => destinations.id),
   quantity: numeric("quantity", { precision: 12, scale: 4, mode: "number" }).notNull(),
   netKg: numeric("net_kg", { precision: 12, scale: 4, mode: "number" }),
+  /** Montant réellement encaissé pour cette ligne (destinations « vente » uniquement), saisi ou complété plus tard. */
   recoveredAmount: numeric("recovered_amount", { precision: 12, scale: 2, mode: "number" }),
 });
 
