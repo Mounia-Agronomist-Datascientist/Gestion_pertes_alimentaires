@@ -2,9 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
+import { toProductionLocalDate } from "@/domain/semaine-production";
 import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
 import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
 import { setContainerActive, setContainerMaxCount, setContainerTare } from "@/modules/admin/containers";
+import {
+  createPackagingItem,
+  setPackagingCost,
+  setPackagingItemActive,
+  setPackagingPerPortion,
+  updatePackagingItem,
+} from "@/modules/admin/packaging";
 import {
   createDestination,
   createSubzone,
@@ -326,5 +334,63 @@ export async function zoneAction(_prev: PlaceActionState, formData: FormData): P
     throw e;
   }
   revalidatePath("/admin/zones");
+  return { message };
+}
+
+// ─── Emballages et consommables ──────────────────────────────────────────────
+
+export async function packagingAction(_prev: PlaceActionState, formData: FormData): Promise<PlaceActionState> {
+  const admin = await requireUser();
+  const intent = String(formData.get("intent"));
+  const id = String(formData.get("id") ?? "");
+  const field = (name: string) => String(formData.get(name) ?? "");
+  let message: string;
+  try {
+    switch (intent) {
+      case "create": {
+        const item = await createPackagingItem(db, admin, {
+          code: field("code"),
+          name: field("name"),
+          kind: field("kind") as never,
+          unit: field("unit"),
+          supplier: field("supplier"),
+        });
+        message = `« ${item.name} » créé. Indiquez maintenant son coût unitaire.`;
+        break;
+      }
+      case "update":
+        await updatePackagingItem(db, admin, id, { name: field("name"), kind: field("kind") as never, unit: field("unit"), supplier: field("supplier") });
+        message = "Emballage modifié.";
+        break;
+      case "cost": {
+        const cost = await setPackagingCost(
+          db,
+          admin,
+          id,
+          { unitCostEur: field("unitCostEur"), validFrom: field("validFrom"), note: field("note") },
+          toProductionLocalDate(new Date()),
+        );
+        message = `Coût de ${cost.unitCostEur.toLocaleString("fr-FR", { maximumFractionDigits: 5 })} € à partir du ${cost.validFrom.split("-").reverse().join("/")}.`;
+        break;
+      }
+      case "portion":
+        for (const kind of ["plat", "petit_dejeuner"] as const) {
+          await setPackagingPerPortion(db, admin, { portionKind: kind, itemId: id, quantity: formData.get(`portion_${kind}`) });
+        }
+        message = "Quantités par portion enregistrées.";
+        break;
+      case "activate":
+      case "deactivate":
+        await setPackagingItemActive(db, admin, id, intent === "activate");
+        message = intent === "activate" ? "Emballage réactivé." : "Emballage désactivé : il n'est plus compté.";
+        break;
+      default:
+        return { error: "Action inconnue" };
+    }
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/admin/emballages");
   return { message };
 }

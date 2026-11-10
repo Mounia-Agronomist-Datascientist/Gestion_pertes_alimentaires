@@ -14,6 +14,7 @@ causes, destinations, impact environnemental).
 | [docs/SCHEMA_BDD.md](docs/SCHEMA_BDD.md) | Schéma initial de la base de données |
 | [docs/ECRANS_PHASE1.md](docs/ECRANS_PHASE1.md) | Écrans et parcours de la Phase 1 |
 | [docs/PHASE2.md](docs/PHASE2.md) | Phase 2 : import du plan de production et du tome Melba (décisions, étapes) |
+| [docs/PHASE3.md](docs/PHASE3.md) | Phase 3 : calcul des coûts (décisions, étapes) |
 | [docs/SECURITE.md](docs/SECURITE.md) | Rôles, matrice d'autorisation, règles de sécurité |
 | [docs/PLAN_TESTS.md](docs/PLAN_TESTS.md) | Stratégie et plan de tests |
 | [docs/REGLES_METIER.md](docs/REGLES_METIER.md) | Règles de calcul centralisées (semaines, unités, tares, destinations) |
@@ -29,7 +30,7 @@ causes, destinations, impact environnemental).
 | 0 | Cadrage technique | ✅ |
 | 1 | Déclarations de pertes (application utilisable) | ✅ Développée — déclarations, historique, corrections, alertes, administration complète, journal d'audit ; reste l'essai pilote avec les équipes |
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ✅ Développée — import hebdomadaire (tome + plan), saisie à partir des plats de la semaine, coût matière figé |
-| 3 | Calcul des coûts | ⏳ |
+| 3 | Calcul des coûts | 🟡 En cours — référentiel des emballages fait ([docs/PHASE3.md](docs/PHASE3.md)) |
 | 4 | Tableaux de bord et statistiques | ⏳ |
 | 5 | Valorisation et environnement | ⏳ |
 | 6 | Optimisation et automatisation | ⏳ |

@@ -13,6 +13,8 @@ export const AUDIT_ENTITY_LABELS: Record<string, string> = {
   production_day: "Jour de production",
   missing_declaration_alert: "Alerte « saisie incomplète »",
   weekly_import: "Import de la semaine",
+  packaging_item: "Emballage",
+  packaging_item_cost: "Coût d'emballage",
 };
 
 export const AUDIT_ACTION_LABELS: Record<string, string> = {
@@ -42,6 +44,9 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   alert_regularized: "Alerte régularisée",
   alert_cancelled: "Alerte levée",
   import_week: "Import plan + tome",
+  cost_new_version: "Nouveau coût",
+  cost_corrected: "Correction de coût",
+  packaging_per_portion: "Emballages par portion",
 };
 
 export const auditEntityLabel = (entity: string) => AUDIT_ENTITY_LABELS[entity] ?? entity;
