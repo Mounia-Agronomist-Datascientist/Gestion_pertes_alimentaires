@@ -129,6 +129,7 @@ export async function loadFacts(db: Db, user: AuthUser, period: Period, filters:
       food: !isNonFoodCategory(r.productCategory),
       productKey: `${r.productCategory}:${r.productCode ?? r.productName.trim().toLowerCase()}`,
       productName: r.productName,
+      productCode: r.productCode,
       causeId: r.causeId,
       causeName: r.causeName,
       netKg: r.netKg,

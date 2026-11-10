@@ -12,6 +12,7 @@ import { buildWeekImport } from "@/modules/imports/merge";
 import { parsePlan } from "@/modules/imports/plan/parse-plan";
 import { saveWeekImport } from "@/modules/imports/service";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
+import { axisDetail, compareAxis, recentWeeks } from "@/modules/statistiques/analysis";
 import { generalDashboard } from "@/modules/statistiques/dashboard";
 import { adjacentOf, loadFacts } from "@/modules/statistiques/facts";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
@@ -113,6 +114,41 @@ describe("lecture des pertes pour les statistiques", () => {
     expect(forDirection.current.cost?.recoveredEur).toBe(6);
     const forTeam = await generalDashboard(t.db, teamC, S45, {});
     expect(forTeam).toMatchObject({ withCosts: false, current: { events: 1, foodKg: 1.5, cost: null, kgByDestinationKind: { compost: 1.5 } } });
+  });
+
+  it("compare les équipes (responsables seulement) et détaille une zone", async () => {
+    const teams = await compareAxis(t.db, direction, "equipe", S45, {});
+    expect(teams.rows.map((r) => [r.label, r.summary.events, r.previous?.events])).toEqual([
+      ["Équipe C – Rose", 1, 0],
+      ["Équipe D – Jaune", 2, 0],
+    ]);
+    await expect(compareAxis(t.db, teamC, "equipe", S45, {})).rejects.toThrow(ForbiddenError);
+
+    const zones = await compareAxis(t.db, direction, "zone", S45, {});
+    expect(zones.rows).toHaveLength(1);
+    const cuisine = await axisDetail(t.db, direction, "zone", zones.rows[0]!.id, S45, {});
+    expect(cuisine.label).toBe("Cuisine / Production");
+    expect(cuisine.causes).toHaveLength(1);
+    expect(cuisine.products.map((p) => [p.label, p.summary.events])).toEqual(
+      expect.arrayContaining([["Carottes", 1], [expect.stringMatching(/^VI01 – /) as unknown as string, 2]]),
+    );
+    expect(cuisine.teams.map((x) => x.label).sort()).toEqual(["Équipe C – Rose", "Équipe D – Jaune"]);
+  });
+
+  it("une équipe voit le détail de son équipe seulement, sans comparaison", async () => {
+    const own = await axisDetail(t.db, teamD, "equipe", teamDId, S45, {});
+    expect(own).toMatchObject({ withCosts: false, label: "Équipe D – Jaune", teams: [] });
+    expect(own.summary.events).toBe(2);
+    await expect(axisDetail(t.db, teamC, "equipe", teamDId, S45, {})).rejects.toThrow(ForbiddenError);
+  });
+
+  it("kg des dernières semaines de production", async () => {
+    const weeks = await recentWeeks(t.db, direction, S45, {}, 3);
+    expect(weeks.map((w) => [w.number, w.summary.events])).toEqual([
+      [43, 0],
+      [44, 0],
+      [45, 3],
+    ]);
   });
 
   it("refusé sans droit de statistiques", async () => {

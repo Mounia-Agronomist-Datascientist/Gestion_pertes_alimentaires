@@ -32,7 +32,7 @@ semaines ; ratios de pertes ; graphiques économiques.
 |---|---|---|
 | 4.1 | Moteur de statistiques : agrégats sur une période (semaine, mois, année, dates libres) avec filtres (zone, sous-zone, équipe, catégorie de produit, cause, destination), selon les droits | ✅ Règle R14 |
 | 4.2 | **Tableau de bord général** (§19.1) : kg, coût, quantités détruite / compostée / donnée / vendue / réutilisée, évolution par rapport à la période précédente, barre de filtres | ✅ Page « Statistiques » |
-| 4.3 | **Analyses par zone, sous-zone et équipe** (§19.2, §19.3) : quantités, coûts, causes principales, produits, destinations, évolution ; comparaison des équipes pour les profils autorisés | ⏳ |
+| 4.3 | **Analyses par zone, sous-zone et équipe** (§19.2, §19.3) : quantités, coûts, causes principales, produits, destinations, évolution ; comparaison des équipes pour les profils autorisés | ✅ Onglets « Par zone » et « Par équipe » |
 | 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ⏳ |
 | 4.5 | **Comparaison des semaines** (§19.6) : courbe semaine par semaine, moyenne des dernières semaines, mois, année, même semaine l'année précédente si elle existe | ⏳ |
 | 4.6 | **Ratios de pertes** (§19.7) : barquettes perdues / barquettes produites, kg perdus / kg produits, prévu et réel côte à côte, avec dénominateur affiché | ⏳ |
@@ -78,3 +78,21 @@ Le pourcentage de pertes par rapport à la production arrivera avec les ratios (
 
 Vérifié : 1 test d'intégration (période précédente, euros selon le profil, périmètre d'une équipe) ; page
 vérifiée dans le navigateur (mobile) : semaine S46, navigation, filtre mois + équipe.
+
+## Analyses par zone, sous-zone et équipe (4.3)
+
+Onglets **Vue générale / Par zone / Par équipe** en haut des statistiques (même période et mêmes filtres) :
+- **Par zone** : kg de pertes alimentaires et coût brut de chaque zone, avec le nombre de pertes, le coût net et
+  l'évolution par rapport à la période précédente ; un clic ouvre le détail de la zone ;
+- **Par équipe** (production, direction, administration) : la même comparaison entre équipes ; les pertes sans
+  équipe (attribuées à une zone) sont signalées à part. Un compte équipe voit l'onglet **Mon équipe** : le détail
+  de sa seule équipe, jamais celui des autres (§19.3) ;
+- **Détail** d'une zone ou d'une équipe : indicateurs avec évolution, **causes principales**, **produits
+  concernés** (code Melba et nom), **par sous-zone**, **par équipe** (détail d'une zone, profils qui comparent),
+  **devenir des pertes**, et **semaine après semaine** (kg des 8 dernières semaines de production jusqu'à la fin de
+  la période).
+
+Barres d'une seule couleur avec valeur, part et détail écrits ; sur téléphone la barre passe sous le libellé.
+
+Vérifié : 3 tests d'intégration (comparaison réservée, détail d'une zone, équipe limitée à son détail,
+dernières semaines) ; pages vérifiées dans le navigateur (mobile) : par équipe S46, par zone S45, détail Cuisine.

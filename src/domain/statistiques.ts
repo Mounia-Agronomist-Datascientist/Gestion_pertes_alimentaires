@@ -31,6 +31,8 @@ export interface LossFact {
   /** Clé du produit pour les classements : code Melba (même formule d'une semaine à l'autre) ou nom. */
   productKey: string;
   productName: string;
+  /** Code Melba (plat de la semaine), s'il existe. */
+  productCode: string | null;
   causeId: string;
   causeName: string;
   netKg: number | null;
