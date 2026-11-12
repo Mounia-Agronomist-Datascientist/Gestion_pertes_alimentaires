@@ -218,9 +218,12 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 
 ## R17 — N° de poubelle des Alchimistes (12/11/2026)
 
-- Les destinations marquées « n° de poubelle demandé » (Administration → Destinations ; Les Alchimistes au
-  départ) exigent, sur chaque perte, le **n° de la poubelle** où elle est jetée (20 caractères au plus).
+- Chaque destination a un réglage « N° de poubelle à chaque perte » (Administration → Destinations) :
+  **non demandé**, **facultatif** ou **obligatoire**. Quand il est demandé, la saisie propose le **n° de la
+  poubelle** où la perte est jetée (20 caractères au plus).
+- **Les Alchimistes : facultatif** depuis le 12/11/2026, en attendant que leur fichier donne les n° des bacs
+  collectés. Il repassera en obligatoire dans l'administration, sans changement de code.
 - La case est **préremplie** avec le dernier n° noté dans la même zone (pertes non annulées) : on ne la change
-  qu'au changement de poubelle. La perte ne peut pas être validée sans n°.
+  qu'au changement de poubelle. En mode obligatoire, la perte ne peut pas être validée sans n°.
 - Le n° est gardé à chaque nouvelle version (correction, annulation, recette, rattachement) ; il servira au
   rapprochement avec les pesées des Alchimistes (Phase 5).

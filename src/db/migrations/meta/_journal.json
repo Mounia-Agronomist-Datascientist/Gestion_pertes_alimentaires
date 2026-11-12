@@ -120,6 +120,13 @@
       "when": 1794481841515,
       "tag": "0016_numero_poubelle",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794495633536,
+      "tag": "0017_numero_poubelle_facultatif",
+      "breakpoints": true
     }
   ]
 }

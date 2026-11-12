@@ -1,7 +1,14 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { DESTINATION_KIND_LABELS, DESTINATION_KINDS, type DestinationKind } from "@/modules/admin/destination-kinds";
+import {
+  BIN_NUMBER_MODE_LABELS,
+  BIN_NUMBER_MODES,
+  type BinNumberMode,
+  DESTINATION_KIND_LABELS,
+  DESTINATION_KINDS,
+  type DestinationKind,
+} from "@/modules/admin/destination-kinds";
 import { type PlaceActionState, destinationAction } from "../actions";
 import { Feedback } from "../feedback";
 
@@ -10,7 +17,7 @@ interface Destination {
   name: string;
   kind: DestinationKind;
   financialRecovery: boolean;
-  binNumberRequired: boolean;
+  binNumberMode: BinNumberMode;
   active: boolean;
   used: boolean;
 }
@@ -70,7 +77,7 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
                 <span className="text-sm text-slate-600">
                   {DESTINATION_KIND_LABELS[d.kind]}
                   {d.financialRecovery && " · peut rapporter une recette"}
-                  {d.binNumberRequired && " · n° de poubelle demandé"}
+                  {d.binNumberMode !== "aucun" && ` · n° de poubelle ${d.binNumberMode}`}
                 </span>
                 <form action={action} className="flex flex-wrap items-center gap-4">
                   <input type="hidden" name="id" value={d.id} />
@@ -137,9 +144,15 @@ function DestinationFields({ destination }: { destination?: Destination }) {
         <input type="checkbox" name="financialRecovery" defaultChecked={destination?.financialRecovery} disabled={locked} className="size-5" />
         Peut rapporter une recette (ventes uniquement)
       </label>
-      <label className="flex items-center gap-2">
-        <input type="checkbox" name="binNumberRequired" defaultChecked={destination?.binNumberRequired} className="size-5" />
-        N° de poubelle demandé à chaque perte (obligatoire)
+      <label className="flex flex-col gap-1">
+        <span className="font-medium">N° de poubelle à chaque perte</span>
+        <select name="binNumberMode" className="field" defaultValue={destination?.binNumberMode ?? "aucun"}>
+          {BIN_NUMBER_MODES.map((m) => (
+            <option key={m} value={m}>
+              {BIN_NUMBER_MODE_LABELS[m]}
+            </option>
+          ))}
+        </select>
       </label>
     </>
   );

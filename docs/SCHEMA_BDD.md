@@ -191,4 +191,5 @@ l'utilisateur applicatif).
 | 3 | `cost_versions` (coût par référence et période), `labour_rates` (par groupe de zones, dates d'effet), `packaging_items`, `packaging_costs`, `declaration_cost_snapshots` |
 | 4 | **Réalisé (0015)** : `production_counts` (décompte des barquettes produites d'une semaine, une version par lecture, une seule en vigueur), `production_count_lines` (code → barquettes produites, colonne « Ma production »). Le volume prévu vient de `week_recipes` (barquettes du plan). |
 | 2026-11-12 | **Réalisé (0016)** : `destinations.bin_number_required`, `declaration_destinations.bin_number` (n° de poubelle des Alchimistes, règle R17). |
+| 2026-11-12 | **Réalisé (0017)** : `destinations.bin_number_mode` (aucun / facultatif / obligatoire) remplace `bin_number_required`. |
 | 5 | `emission_factors` (valeur, unité, source, version, hypothèses), `alchimistes_collections` (poids externes, rapprochement — jamais additionnés aux pertes) |

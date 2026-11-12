@@ -257,11 +257,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     product?.kind === "week" && net ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost) : null;
 
   const isSale = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.financialRecovery ?? false;
-  // N° de poubelle (Les Alchimistes) : obligatoire, prérempli avec le dernier n° noté dans la zone.
-  const needsBin = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.binNumberRequired ?? false;
+  // N° de poubelle (Les Alchimistes) : facultatif ou obligatoire selon la destination, prérempli avec le dernier n° noté dans la zone.
+  const binMode = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.binNumberMode ?? "aucun";
+  const needsBin = (destinationId: string) => binMode(destinationId) !== "aucun";
   const binOf = (destinationId: string) => binNumbers[destinationId] ?? (zone ? options.lastBinNumbers[zone.id]?.[destinationId] : undefined) ?? "";
   const binLines = destinationLines.filter((l) => needsBin(l.destinationId) && (parseNumber(l.quantity) ?? 0) > 0);
-  const missingBin = binLines.some((l) => !binOf(l.destinationId).trim());
+  const missingBin = binLines.some((l) => binMode(l.destinationId) === "obligatoire" && !binOf(l.destinationId).trim());
   const saleLines = destinationLines.filter((l) => isSale(l.destinationId));
   const recoveredTotal = saleLines.reduce((sum, l) => sum + (parseNumber(recoveredAmounts[l.destinationId] ?? "") ?? 0), 0);
 
@@ -868,6 +869,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 <label className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-sky-50 p-3">
                   <span className="text-sm font-medium">
                     N° de poubelle – {options.destinations.find((d) => d.id === l.destinationId)?.name}
+                    {binMode(l.destinationId) === "facultatif" && " (facultatif)"}
                     <span className="block text-xs font-normal text-slate-600">À changer seulement si la poubelle a changé.</span>
                   </span>
                   <input
@@ -876,10 +878,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                     onChange={(e) => setBinNumbers((prev) => ({ ...prev, [l.destinationId]: e.target.value }))}
                     aria-label="N° de poubelle"
                     maxLength={20}
-                    required
+                    required={binMode(l.destinationId) === "obligatoire"}
                   />
                 </label>
-                {!binOf(l.destinationId).trim() && <p className="mt-1 text-sm text-amber-800">Indiquez le n° de la poubelle.</p>}
+                {binMode(l.destinationId) === "obligatoire" && !binOf(l.destinationId).trim() && <p className="mt-1 text-sm text-amber-800">Indiquez le n° de la poubelle.</p>}
               </div>
             ))}
           </dl>

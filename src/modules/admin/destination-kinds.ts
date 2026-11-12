@@ -12,3 +12,13 @@ export const DESTINATION_KIND_LABELS: Record<DestinationKind, string> = {
   retour_fournisseur: "Retour fournisseur",
   autre: "Autre",
 };
+
+/** N° de poubelle demandé à chaque perte (énumération `bin_number_mode`). */
+export const BIN_NUMBER_MODES = ["aucun", "facultatif", "obligatoire"] as const;
+export type BinNumberMode = (typeof BIN_NUMBER_MODES)[number];
+
+export const BIN_NUMBER_MODE_LABELS: Record<BinNumberMode, string> = {
+  aucun: "Non demandé",
+  facultatif: "Demandé, facultatif",
+  obligatoire: "Demandé, obligatoire",
+};

@@ -187,7 +187,7 @@ export const CAUSES: readonly CauseSeed[] = [
 ];
 
 export const DESTINATIONS = [
-  { code: "ALCHIMISTES", name: "Les Alchimistes – compost", kind: "compost", financialRecovery: false, binNumberRequired: true },
+  { code: "ALCHIMISTES", name: "Les Alchimistes – compost", kind: "compost", financialRecovery: false, binNumberMode: "facultatif" },
   { code: "ORDURES", name: "Ordures ménagères", kind: "destruction", financialRecovery: false },
   { code: "PERSONNEL", name: "Personnel", kind: "personnel", financialRecovery: false },
   { code: "DON", name: "Association / don", kind: "don", financialRecovery: false },

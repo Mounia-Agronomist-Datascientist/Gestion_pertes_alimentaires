@@ -116,7 +116,7 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
         subzoneIds: causeSubzoneRows.filter((cs) => cs.causeId === c.id).map((cs) => cs.subzoneId),
       }))
       .sort((a, b) => Number(a.isOther) - Number(b.isOther)),
-    destinations: destinationRows.map((d) => ({ id: d.id, name: d.name, kind: d.kind, financialRecovery: d.financialRecovery, binNumberRequired: d.binNumberRequired })),
+    destinations: destinationRows.map((d) => ({ id: d.id, name: d.name, kind: d.kind, financialRecovery: d.financialRecovery, binNumberMode: d.binNumberMode })),
     /** Dernier n° de poubelle noté par zone et par destination, pour préremplir la case (on ne le change qu'au changement de poubelle). */
     lastBinNumbers: await lastBinNumbers(db, zones.map((z) => z.id)),
     units: unitRows.map((u) => ({ code: u.code, label: u.label, kind: u.kind, toBaseFactor: u.toBaseFactor })),

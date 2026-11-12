@@ -276,9 +276,9 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
     if (d.recoveredAmountEur != null && !row.financialRecovery) {
       throw new DeclarationError(`« ${row.name} » ne rapporte pas de recette : seules les ventes ont un montant encaissé`);
     }
-    if (row.binNumberRequired && !d.binNumber) throw new DeclarationError(`Indiquez le n° de la poubelle pour « ${row.name} »`);
+    if (row.binNumberMode === "obligatoire" && !d.binNumber) throw new DeclarationError(`Indiquez le n° de la poubelle pour « ${row.name} »`);
   }
-  const binRequired = new Set(destinationRows.filter((r) => r.binNumberRequired).map((r) => r.id));
+  const binAsked = new Set(destinationRows.filter((r) => r.binNumberMode !== "aucun").map((r) => r.id));
   const { justification } = validateDestinationSplit(
     measurement.netQuantity,
     input.destinations,
@@ -382,7 +382,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       quantity: roundQuantity(d.quantity),
       netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
       recoveredAmount: d.recoveredAmountEur ?? null,
-      binNumber: binRequired.has(d.destinationId) ? (d.binNumber ?? null) : null,
+      binNumber: binAsked.has(d.destinationId) ? d.binNumber || null : null,
     })),
   };
 }

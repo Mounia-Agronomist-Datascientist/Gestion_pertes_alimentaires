@@ -17,7 +17,7 @@ Cela couvre :
 | 12/11/2026 | Retours fournisseurs et avoirs | **Classés à part**, ni avec recette ni sans recette. La réutilisation reste à classer. |
 | 12/11/2026 | Versions des facteurs CO2e | **Les anciennes versions sont conservées.** Un calcul fait avec une version de facteur n'est pas réécrit quand le facteur change (même principe que les coûts, §22). |
 | 12/11/2026 | Semaine d'une collecte | **Calculée automatiquement à partir de la date de collecte**, avec le calendrier de production de l'application. La colonne « Correspondance aux semaines de prod » du fichier n'est plus à remplir à la main ; si elle est remplie et diffère, l'aperçu le signale. |
-| 12/11/2026 | N° de poubelle | **Reste obligatoire à la saisie** si l'on obtient les n° des bacs collectés de façon automatique (voir « À confirmer »). Les n° sont visibles dans l'agenda en ligne des Alchimistes, jour par jour, mais pas dans leur fichier CSV. |
+| 12/11/2026 | N° de poubelle | **Facultatif à la saisie en attendant**, obligatoire à nouveau dès que l'on obtient les n° des bacs collectés. Les n° sont visibles dans l'agenda en ligne des Alchimistes, jour par jour, mais pas dans leur fichier CSV ; demande envoyée aux Alchimistes pour les ajouter. Réglage dans Administration → Destinations (migration 0017). |
 | 12/11/2026 | Rapports PDF (§23) | Quatre rapports : hebdomadaire ; mensuel et annuel ; valorisation ; environnemental avec le rapprochement des Alchimistes. |
 
 ## Principes
@@ -56,11 +56,8 @@ Cela couvre :
 
 - **Réutilisation** dans une autre préparation : avec recette, sans recette, ou à part avec les retours
   fournisseurs ?
-- **Source des n° de bacs collectés**, par ordre de préférence :
-  1. Les Alchimistes ajoutent une colonne « Identifiant du contenant » à leur export CSV (demande à leur faire) ;
-  2. en attendant, lecture de leur agenda en ligne, à condition qu'il charge ses données d'une façon lisible
-     automatiquement (à examiner avec vous, connectée à votre compte ; aucun mot de passe enregistré) ;
-  3. sinon, le n° devient facultatif et le rapprochement se fait par semaine seulement.
+- **N° des bacs collectés** : réponse des Alchimistes attendue (colonne « Identifiant du contenant » dans leur
+  export). D'ici là, le rapprochement se fait par semaine seulement.
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 

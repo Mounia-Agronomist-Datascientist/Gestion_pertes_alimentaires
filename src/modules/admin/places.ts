@@ -12,7 +12,7 @@ import type { Db } from "@/db/types";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import { AdminError } from "./accounts";
-import { DESTINATION_KINDS } from "./destination-kinds";
+import { BIN_NUMBER_MODES, DESTINATION_KINDS } from "./destination-kinds";
 import { normalizeCauseName as normalizeLabel } from "./causes";
 
 const name = z.string().trim().min(2, "Le nom est trop court").max(120);
@@ -48,7 +48,7 @@ const destinationSchema = z
     name,
     kind: z.enum(DESTINATION_KINDS, { message: "Choisissez le type de destination" }),
     financialRecovery: z.boolean().default(false),
-    binNumberRequired: z.boolean().default(false),
+    binNumberMode: z.enum(BIN_NUMBER_MODES).default("aucun"),
   })
   .refine((d) => !d.financialRecovery || d.kind === "vente", { message: "Seule une vente peut rapporter une recette" });
 

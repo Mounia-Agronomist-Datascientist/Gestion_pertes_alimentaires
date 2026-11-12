@@ -51,11 +51,19 @@ describe("n° de poubelle des Alchimistes", () => {
     await t.close();
   });
 
-  it("est obligatoire pour Les Alchimistes seulement", async () => {
+  it("est facultatif pour Les Alchimistes en attendant les n° des bacs collectés", async () => {
     const [row] = await t.db.select().from(s.destinations).where(eq(s.destinations.id, alchimistes));
-    expect(row!.binNumberRequired).toBe(true);
+    expect(row!.binNumberMode).toBe("facultatif");
+    const without = await createDeclaration(t.db, team, input([{ destinationId: alchimistes, quantity: 2, binNumber: "  " }]), NOW);
+    expect((await getDeclarationDetail(t.db, team, without.id, NOW))!.destinations[0]!.binNumber).toBeNull();
+    await cancelDeclaration(t.db, admin, without.id, { reason: "Essai", expectedRevision: 1 }, NOW);
+  });
+
+  it("peut redevenir obligatoire, et n'est demandé que pour Les Alchimistes", async () => {
+    await t.db.update(s.destinations).set({ binNumberMode: "obligatoire" }).where(eq(s.destinations.id, alchimistes));
     await expect(createDeclaration(t.db, team, input([{ destinationId: alchimistes, quantity: 2 }]), NOW)).rejects.toThrow(/n° de la poubelle/);
     await expect(createDeclaration(t.db, team, input([{ destinationId: alchimistes, quantity: 2, binNumber: "  " }]), NOW)).rejects.toThrow(/n° de la poubelle/);
+    await t.db.update(s.destinations).set({ binNumberMode: "facultatif" }).where(eq(s.destinations.id, alchimistes));
     const other = await createDeclaration(t.db, team, input([{ destinationId: ordures, quantity: 2, binNumber: "7" }]), NOW);
     const detail = await getDeclarationDetail(t.db, team, other.id, NOW);
     expect(detail!.destinations[0]!.binNumber).toBeNull();
