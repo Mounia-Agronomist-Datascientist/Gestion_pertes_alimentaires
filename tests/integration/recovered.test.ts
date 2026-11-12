@@ -67,13 +67,13 @@ describe("recettes récupérées et coût net", () => {
   it("montant encaissé saisi à la déclaration : coût net = brut − recettes", async () => {
     const r = await declare([
       { destinationId: ref.tgtg, quantity: 6, recoveredAmountEur: 4.5 },
-      { destinationId: ref.compost, quantity: 4 },
+      { destinationId: ref.compost, quantity: 4, binNumber: "1" },
     ]);
     expect(await load(r.id)).toMatchObject({ grossCostEur: 13.3, recoveredEur: 4.5, netCostEur: 8.8 });
   });
 
   it("refuse un montant sur une destination qui n'est pas une vente", async () => {
-    await expect(declare([{ destinationId: ref.compost, quantity: 10, recoveredAmountEur: 2 }])).rejects.toThrow(/ne rapporte pas de recette/);
+    await expect(declare([{ destinationId: ref.compost, quantity: 10, binNumber: "1", recoveredAmountEur: 2 }])).rejects.toThrow(/ne rapporte pas de recette/);
   });
 
   it("recette complétée plus tard : nouvelle version, coût brut inchangé", async () => {

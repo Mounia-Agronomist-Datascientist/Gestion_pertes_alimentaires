@@ -48,6 +48,7 @@ const destinationSchema = z
     name,
     kind: z.enum(DESTINATION_KINDS, { message: "Choisissez le type de destination" }),
     financialRecovery: z.boolean().default(false),
+    binNumberRequired: z.boolean().default(false),
   })
   .refine((d) => !d.financialRecovery || d.kind === "vente", { message: "Seule une vente peut rapporter une recette" });
 

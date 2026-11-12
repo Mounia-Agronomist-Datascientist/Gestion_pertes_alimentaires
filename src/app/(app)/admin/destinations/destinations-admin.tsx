@@ -10,6 +10,7 @@ interface Destination {
   name: string;
   kind: DestinationKind;
   financialRecovery: boolean;
+  binNumberRequired: boolean;
   active: boolean;
   used: boolean;
 }
@@ -69,6 +70,7 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
                 <span className="text-sm text-slate-600">
                   {DESTINATION_KIND_LABELS[d.kind]}
                   {d.financialRecovery && " · peut rapporter une recette"}
+                  {d.binNumberRequired && " · n° de poubelle demandé"}
                 </span>
                 <form action={action} className="flex flex-wrap items-center gap-4">
                   <input type="hidden" name="id" value={d.id} />
@@ -134,6 +136,10 @@ function DestinationFields({ destination }: { destination?: Destination }) {
         {locked && destination!.financialRecovery && <input type="hidden" name="financialRecovery" value="on" />}
         <input type="checkbox" name="financialRecovery" defaultChecked={destination?.financialRecovery} disabled={locked} className="size-5" />
         Peut rapporter une recette (ventes uniquement)
+      </label>
+      <label className="flex items-center gap-2">
+        <input type="checkbox" name="binNumberRequired" defaultChecked={destination?.binNumberRequired} className="size-5" />
+        N° de poubelle demandé à chaque perte (obligatoire)
       </label>
     </>
   );

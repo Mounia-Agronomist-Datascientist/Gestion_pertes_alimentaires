@@ -2,7 +2,7 @@
  * Listes proposées dans le formulaire de déclaration, filtrées selon le compte connecté.
  * Les mêmes contrôles sont refaits à l'enregistrement (service.ts).
  */
-import { and, asc, eq, gte, isNull, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lte, ne, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import type { LocalDate } from "@/domain/semaine-production";
@@ -10,6 +10,31 @@ import { portionPackagingCost } from "@/modules/admin/packaging";
 import { weekCatalogs } from "@/modules/imports/catalog";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
+
+/** Dernier n° de poubelle noté dans chaque zone, par destination (déclarations non annulées, plus récente d'abord). */
+export async function lastBinNumbers(db: Db, zoneIds: readonly string[]): Promise<Record<string, Record<string, string>>> {
+  if (!zoneIds.length) return {};
+  const rows = await db
+    .select({ zoneId: s.lossDeclarations.zoneId, destinationId: s.declarationDestinations.destinationId, binNumber: s.declarationDestinations.binNumber })
+    .from(s.declarationDestinations)
+    .innerJoin(s.lossDeclarations, eq(s.lossDeclarations.id, s.declarationDestinations.declarationId))
+    .where(
+      and(
+        isNotNull(s.declarationDestinations.binNumber),
+        eq(s.declarationDestinations.revision, s.lossDeclarations.revision),
+        ne(s.lossDeclarations.status, "annulee"),
+        inArray(s.lossDeclarations.zoneId, [...zoneIds]),
+      ),
+    )
+    .orderBy(desc(s.lossDeclarations.declaredAt))
+    .limit(500);
+  const last: Record<string, Record<string, string>> = {};
+  for (const r of rows) {
+    const zone = (last[r.zoneId] ??= {});
+    zone[r.destinationId] ??= r.binNumber!;
+  }
+  return last;
+}
 
 export async function getDeclarationOptions(db: Db, user: AuthUser, today: LocalDate) {
   const limitedToOwnZones = can(user, "declaration.read.zone") && !can(user, "declaration.read.all");
@@ -91,7 +116,9 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
         subzoneIds: causeSubzoneRows.filter((cs) => cs.causeId === c.id).map((cs) => cs.subzoneId),
       }))
       .sort((a, b) => Number(a.isOther) - Number(b.isOther)),
-    destinations: destinationRows.map((d) => ({ id: d.id, name: d.name, kind: d.kind, financialRecovery: d.financialRecovery })),
+    destinations: destinationRows.map((d) => ({ id: d.id, name: d.name, kind: d.kind, financialRecovery: d.financialRecovery, binNumberRequired: d.binNumberRequired })),
+    /** Dernier n° de poubelle noté par zone et par destination, pour préremplir la case (on ne le change qu'au changement de poubelle). */
+    lastBinNumbers: await lastBinNumbers(db, zones.map((z) => z.id)),
     units: unitRows.map((u) => ({ code: u.code, label: u.label, kind: u.kind, toBaseFactor: u.toBaseFactor })),
     containers: containerRows.map((r) => ({
       id: r.type.id,

@@ -57,6 +57,8 @@ export interface WizardInitial {
   destinationLines: { destinationId: string; quantity: string }[];
   /** Montants encaissés saisis pour les lignes de vente (en texte, clavier français). */
   recoveredAmounts?: Record<string, string>;
+  /** N° de poubelle saisis (destinations qui le demandent). */
+  binNumbers?: Record<string, string>;
   justification: string;
   occurredOn: string;
   occurredTime: string;
@@ -136,6 +138,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   );
   const [justification, setJustification] = useState(init?.justification ?? "");
   const [recoveredAmounts, setRecoveredAmounts] = useState<Record<string, string>>(init?.recoveredAmounts ?? {});
+  const [binNumbers, setBinNumbers] = useState<Record<string, string>>(init?.binNumbers ?? {});
   const [occurredOn, setOccurredOn] = useState(init?.occurredOn ?? options.today);
   const [occurredTime, setOccurredTime] = useState(init?.occurredTime ?? "");
   const [comment, setComment] = useState(init?.comment ?? "");
@@ -254,6 +257,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     product?.kind === "week" && net ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost) : null;
 
   const isSale = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.financialRecovery ?? false;
+  // N° de poubelle (Les Alchimistes) : obligatoire, prérempli avec le dernier n° noté dans la zone.
+  const needsBin = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.binNumberRequired ?? false;
+  const binOf = (destinationId: string) => binNumbers[destinationId] ?? (zone ? options.lastBinNumbers[zone.id]?.[destinationId] : undefined) ?? "";
+  const binLines = destinationLines.filter((l) => needsBin(l.destinationId) && (parseNumber(l.quantity) ?? 0) > 0);
+  const missingBin = binLines.some((l) => !binOf(l.destinationId).trim());
   const saleLines = destinationLines.filter((l) => isSale(l.destinationId));
   const recoveredTotal = saleLines.reduce((sum, l) => sum + (parseNumber(recoveredAmounts[l.destinationId] ?? "") ?? 0), 0);
 
@@ -357,6 +365,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           destinationId: l.destinationId,
           quantity: parseNumber(l.quantity) ?? 0,
           recoveredAmountEur: isSale(l.destinationId) ? parseNumber(recoveredAmounts[l.destinationId] ?? "") : null,
+          binNumber: needsBin(l.destinationId) ? binOf(l.destinationId).trim() || null : null,
         }))
         .filter((l) => l.quantity > 0),
       destinationGapJustification: justification || null,
@@ -380,6 +389,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           causeId,
           destinationLines,
           recoveredAmounts,
+          binNumbers: Object.fromEntries(binLines.map((l) => [l.destinationId, binOf(l.destinationId).trim()])),
           justification,
           occurredOn,
           occurredTime,
@@ -853,6 +863,25 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 </label>
               </div>
             ))}
+            {binLines.map((l) => (
+              <div key={`bin-${l.destinationId}`} className="col-span-3">
+                <label className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-sky-50 p-3">
+                  <span className="text-sm font-medium">
+                    N° de poubelle – {options.destinations.find((d) => d.id === l.destinationId)?.name}
+                    <span className="block text-xs font-normal text-slate-600">À changer seulement si la poubelle a changé.</span>
+                  </span>
+                  <input
+                    className="field w-32 text-right"
+                    value={binOf(l.destinationId)}
+                    onChange={(e) => setBinNumbers((prev) => ({ ...prev, [l.destinationId]: e.target.value }))}
+                    aria-label="N° de poubelle"
+                    maxLength={20}
+                    required
+                  />
+                </label>
+                {!binOf(l.destinationId).trim() && <p className="mt-1 text-sm text-amber-800">Indiquez le n° de la poubelle.</p>}
+              </div>
+            ))}
           </dl>
 
           <div className="grid grid-cols-2 gap-3">
@@ -903,7 +932,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           <button
             type="button"
             className="btn-primary"
-            disabled={pending || !occurredOn || productWeekMismatch || (!!correction && reason.trim().length < 3)}
+            disabled={pending || !occurredOn || productWeekMismatch || missingBin || (!!correction && reason.trim().length < 3)}
             onClick={submit}
           >
             {pending

@@ -86,6 +86,8 @@ export const declarationInputSchema = z
           quantity: positive,
           /** Montant encaissé pour une vente (Too Good To Go, vente flash) ; facultatif, complété plus tard sinon. */
           recoveredAmountEur: z.number({ message: "Montant invalide" }).finite().min(0, "Le montant ne peut pas être négatif").max(100_000).nullable().optional(),
+          /** N° de poubelle (obligatoire pour les destinations qui le demandent : Les Alchimistes). */
+          binNumber: z.string().trim().max(20, "N° de poubelle trop long (20 caractères au plus)").nullable().optional(),
         }),
       )
       .min(1, "Choisissez au moins une destination"),

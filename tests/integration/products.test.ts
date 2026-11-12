@@ -53,7 +53,7 @@ describe("référentiel des produits", () => {
         quantity,
         unitCode,
         causeId: cause,
-        destinations: [{ destinationId: compost, quantity }],
+        destinations: [{ destinationId: compost, quantity, binNumber: "1" }],
       },
       NOW,
     );
@@ -111,7 +111,7 @@ describe("référentiel des produits", () => {
         method: "pesee",
         tare: { grossKg: 12.2, gastros: [{ containerTypeId: gastro1, count: 2 }] },
         causeId: cause,
-        destinations: [{ destinationId: compost, quantity: 10 }],
+        destinations: [{ destinationId: compost, quantity: 10, binNumber: "1" }],
       },
       NOW,
     );

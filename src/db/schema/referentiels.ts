@@ -159,6 +159,8 @@ export const destinations = pgTable(
     kind: destinationKindEnum("kind").notNull(),
     /** Seules ces destinations peuvent porter une recette récupérée (§10.4). */
     financialRecovery: boolean("financial_recovery").notNull().default(false),
+    /** N° de poubelle à noter à chaque perte (Les Alchimistes, décision du 12/11/2026), pour le rapprochement des collectes. */
+    binNumberRequired: boolean("bin_number_required").notNull().default(false),
     displayOrder: smallint("display_order").notNull().default(0),
     active: boolean("active").notNull().default(true),
     ...timestamps,

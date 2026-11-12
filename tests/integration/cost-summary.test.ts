@@ -44,9 +44,9 @@ describe("synthèse des coûts d'une semaine", () => {
     const declare = (product: object, quantity: number, destinations: object[]) =>
       createDeclaration(t.db, teamD, { occurredOn: "2026-11-02", subzoneId: cuisine, product, method: "comptage", quantity, unitCode: "barquette", causeId: cause, destinations }, NOW);
     await declare({ weekItem: { kind: "plat", id: vi01 } }, 10, [{ destinationId: tgtg, quantity: 10, recoveredAmountEur: 6 }]); // 13,30 € brut
-    await declare({ weekItem: { kind: "plat", id: vi01 } }, 2, [{ destinationId: compost, quantity: 2 }]); // 2,66 €
-    await declare({ freeLabel: "Produit sans coût", category: "produit_fini" }, 3, [{ destinationId: compost, quantity: 3 }]);
-    const cancelled = await declare({ weekItem: { kind: "plat", id: vi01 } }, 50, [{ destinationId: compost, quantity: 50 }]);
+    await declare({ weekItem: { kind: "plat", id: vi01 } }, 2, [{ destinationId: compost, quantity: 2, binNumber: "1" }]); // 2,66 €
+    await declare({ freeLabel: "Produit sans coût", category: "produit_fini" }, 3, [{ destinationId: compost, quantity: 3, binNumber: "1" }]);
+    const cancelled = await declare({ weekItem: { kind: "plat", id: vi01 } }, 50, [{ destinationId: compost, quantity: 50, binNumber: "1" }]);
     await cancelDeclaration(t.db, admin, cancelled.id, { reason: "Doublon", expectedRevision: 1 }, NOW);
   });
 

@@ -62,7 +62,7 @@ describe("alerte « rien de noté »", () => {
         quantity: 1,
         unitCode: "kg",
         causeId,
-        destinations: [{ destinationId: compost, quantity: 1 }],
+        destinations: [{ destinationId: compost, quantity: 1, binNumber: "1" }],
       },
       now,
     );

@@ -49,7 +49,7 @@ describe("gastros et tares datées", () => {
         method: "pesee",
         tare: { grossKg: 12, gastros: [{ containerTypeId: gastro1, count: 2 }] },
         causeId: cause,
-        destinations: [{ destinationId: compost, quantity: 1 }],
+        destinations: [{ destinationId: compost, quantity: 1, binNumber: "1" }],
         destinationGapJustification: "Test",
       },
       now,

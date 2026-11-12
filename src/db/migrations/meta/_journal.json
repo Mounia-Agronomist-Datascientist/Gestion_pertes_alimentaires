@@ -113,6 +113,13 @@
       "when": 1794478068465,
       "tag": "0015_decompte_barquettes",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794481841515,
+      "tag": "0016_numero_poubelle",
+      "breakpoints": true
     }
   ]
 }

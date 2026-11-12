@@ -197,6 +197,8 @@ export const declarationDestinations = pgTable("declaration_destinations", {
   netKg: numeric("net_kg", { precision: 12, scale: 4, mode: "number" }),
   /** Montant réellement encaissé pour cette ligne (destinations « vente » uniquement), saisi ou complété plus tard. */
   recoveredAmount: numeric("recovered_amount", { precision: 12, scale: 2, mode: "number" }),
+  /** N° de la poubelle où la perte est jetée (destinations qui le demandent : Les Alchimistes). */
+  binNumber: text("bin_number"),
 });
 
 /**

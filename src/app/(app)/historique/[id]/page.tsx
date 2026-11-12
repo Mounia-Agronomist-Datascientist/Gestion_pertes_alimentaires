@@ -138,6 +138,7 @@ export default async function DeclarationDetailPage({
             {detail.destinations.map((x) => (
               <li key={x.destinationId}>
                 {x.name} : {fmtNumber(x.quantity)} {UNIT_LABELS[d.netUnitCode] ?? d.netUnitCode}
+                {x.binNumber && <span className="text-sm text-slate-500"> · poubelle n° {x.binNumber}</span>}
                 {x.financialRecovery && (
                   <span className="text-sm text-slate-500">
                     {" "}

@@ -87,7 +87,7 @@ describe("déclaration de perte", () => {
       quantity: 4.2,
       unitCode: "kg",
       causeId: ref("cause:ERREUR_PREPARATION"),
-      destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 4.2 }],
+      destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 4.2, binNumber: "1" }],
       ...overrides,
     };
   }
@@ -181,7 +181,7 @@ describe("déclaration de perte", () => {
             gastros: [{ containerTypeId: ref("ct:GASTRO_1"), count: 10 }],
             supportTypeId: ref("ct:ECHELLE_CLASSIQUE"),
           },
-          destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 28 }],
+          destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 28, binNumber: "1" }],
         }),
         NOW,
       );
@@ -202,7 +202,7 @@ describe("déclaration de perte", () => {
           quantity: null,
           unitCode: null,
           tare: { grossKg: 10, gastros: [{ containerTypeId: ref("ct:GASTRO_4"), count: 2 }] },
-          destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 5.5 }],
+          destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 5.5, binNumber: "1" }],
         }),
         NOW,
       );
@@ -256,14 +256,14 @@ describe("déclaration de perte", () => {
       const withDensity = await createDeclaration(
         t.db,
         teamC,
-        cuisine({ product: { productId: ref("product:T-SAUCE") }, method: "estimation_manuelle", quantity: 2, unitCode: "l", destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2 }] }),
+        cuisine({ product: { productId: ref("product:T-SAUCE") }, method: "estimation_manuelle", quantity: 2, unitCode: "l", destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }] }),
         NOW,
       );
       expect((await load(withDensity.id)).netKg).toBe(2.1);
       const freeLabel = await createDeclaration(
         t.db,
         teamC,
-        cuisine({ product: { freeLabel: "Jus inconnu", category: "matiere_premiere" }, method: "estimation_manuelle", quantity: 2, unitCode: "l", destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2 }] }),
+        cuisine({ product: { freeLabel: "Jus inconnu", category: "matiere_premiere" }, method: "estimation_manuelle", quantity: 2, unitCode: "l", destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }] }),
         NOW,
       );
       expect(await load(freeLabel.id)).toMatchObject({ netKg: null, kgStatus: "non_converti", productUnlisted: true, productName: "Jus inconnu" });
@@ -325,7 +325,7 @@ describe("déclaration de perte", () => {
             { destinationId: ref("dest:DON"), quantity: 5 },
             { destinationId: ref("dest:VENTE_FLASH"), quantity: 8 },
             { destinationId: ref("dest:REUTILISATION"), quantity: 4 },
-            { destinationId: ref("dest:ALCHIMISTES"), quantity: 3 },
+            { destinationId: ref("dest:ALCHIMISTES"), quantity: 3, binNumber: "1" },
           ],
         }),
         NOW,
@@ -394,7 +394,7 @@ describe("déclaration de perte", () => {
         t.db,
         teamC,
         created.id,
-        cuisine({ quantity: 3.8, destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 3.8 }] }),
+        cuisine({ quantity: 3.8, destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 3.8, binNumber: "1" }] }),
         { reason: "Erreur de pesée", expectedRevision: 1 },
         later,
       );
@@ -533,7 +533,7 @@ describe("déclaration groupée", () => {
     quantity,
     unitCode: "kg",
     causeId: ref[`cause:${causeCode}`],
-    destinations: [{ destinationId: ref["dest:ALCHIMISTES"], quantity }],
+    destinations: [{ destinationId: ref["dest:ALCHIMISTES"], quantity, binNumber: "1" }],
   });
 
   it("enregistre toutes les lignes dans un même lot", async () => {

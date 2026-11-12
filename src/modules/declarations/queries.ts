@@ -113,6 +113,7 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
         quantity: s.declarationDestinations.quantity,
         netKg: s.declarationDestinations.netKg,
         recoveredAmount: s.declarationDestinations.recoveredAmount,
+        binNumber: s.declarationDestinations.binNumber,
         financialRecovery: s.destinations.financialRecovery,
       })
       .from(s.declarationDestinations)

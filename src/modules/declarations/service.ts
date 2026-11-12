@@ -276,7 +276,9 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
     if (d.recoveredAmountEur != null && !row.financialRecovery) {
       throw new DeclarationError(`« ${row.name} » ne rapporte pas de recette : seules les ventes ont un montant encaissé`);
     }
+    if (row.binNumberRequired && !d.binNumber) throw new DeclarationError(`Indiquez le n° de la poubelle pour « ${row.name} »`);
   }
+  const binRequired = new Set(destinationRows.filter((r) => r.binNumberRequired).map((r) => r.id));
   const { justification } = validateDestinationSplit(
     measurement.netQuantity,
     input.destinations,
@@ -380,6 +382,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       quantity: roundQuantity(d.quantity),
       netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
       recoveredAmount: d.recoveredAmountEur ?? null,
+      binNumber: binRequired.has(d.destinationId) ? (d.binNumber ?? null) : null,
     })),
   };
 }
@@ -640,7 +643,7 @@ export async function cancelDeclaration(
     // Les lignes de tares et destinations sont reconduites telles quelles dans la nouvelle version.
     const after = await writeVersionLines(tx, declaration, {
       containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
-      destinations: before.destinations.map((d) => ({ destinationId: d.destinationId, quantity: d.quantity, netKg: d.netKg, recoveredAmount: d.recoveredAmount })),
+      destinations: before.destinations.map((d) => ({ destinationId: d.destinationId, quantity: d.quantity, netKg: d.netKg, recoveredAmount: d.recoveredAmount, binNumber: d.binNumber })),
     });
     await tx.insert(s.declarationRevisions).values({
       declarationId: id,
@@ -733,6 +736,7 @@ export async function linkDeclarationsToProduct(
           quantity: d.quantity,
           netKg: kgPerUnit != null ? roundQuantity(d.quantity * kgPerUnit) : null,
           recoveredAmount: d.recoveredAmount,
+          binNumber: d.binNumber,
         })),
       });
       await tx.insert(s.declarationRevisions).values({ declarationId: existing.id, revision, status: "corrigee", data: after, changedBy: user.id, changedAt: now, reason });
@@ -770,6 +774,7 @@ export async function setRecoveredAmounts(
     quantity: d.quantity,
     netKg: d.netKg,
     recoveredAmount: d.destinationId in input.amounts ? (input.amounts[d.destinationId] ?? null) : d.recoveredAmount,
+    binNumber: d.binNumber,
   }));
 
   await db.transaction(async (tx) => {

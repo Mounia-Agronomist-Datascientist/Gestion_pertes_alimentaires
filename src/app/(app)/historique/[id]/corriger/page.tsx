@@ -71,6 +71,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     recoveredAmounts: Object.fromEntries(
       detail.destinations.filter((x) => x.recoveredAmount != null).map((x) => [x.destinationId, String(x.recoveredAmount).replace(".", ",")]),
     ),
+    binNumbers: Object.fromEntries(detail.destinations.filter((x) => x.binNumber).map((x) => [x.destinationId, x.binNumber!])),
     justification: d.destinationGapJustification ?? "",
     occurredOn: d.occurredOn,
     occurredTime: d.occurredTime?.slice(0, 5) ?? "",

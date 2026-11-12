@@ -52,6 +52,7 @@
 | 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
 | 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
+| 2026-11-12 | N° de poubelle obligatoire et prérempli pour Les Alchimistes (récapitulatif de la saisie, correction, détail, réglage par destination) — règle R17 | 2 tests d'intégration ; saisie vérifiée dans le navigateur (mobile) |
 | 2026-11-12 | Plats affichés partout en « CODE_Nom » (saisie, historique, détail, statistiques, import) — règle R16 | 1 test unitaire ; historique vérifié dans le navigateur |
 | 2026-11-12 | Phase 4 — ratios de pertes (barquettes, kg, coût matières) sur la production prévue et réelle côte à côte, semaine et année, histogrammes ; production réelle dans « Évolution » | 2 tests unitaires + 1 test d'intégration ; S45 réelle vérifiée dans le navigateur (mobile) |
 | 2026-11-12 | Phase 4 — dépôt du « Décompte barquettes » (Administration → Import) : onglet « Semaine NN », colonne « Ma production », lecture ciblée d'un onglet (fichier de 50 Mo), versions tracées ; barquettes réelles par semaine et par équipe | 5 tests unitaires + 3 tests d'intégration ; vrai fichier lu (48 semaines, S45 = 64 462 barquettes) et S45 enregistrée en local |
@@ -118,6 +119,7 @@
 | `0012_cout_brut` | Colonnes du coût brut figé (emballages, main-d'œuvre, indirect, brut, méthode, date, détail) | Déclarations existantes sans coût brut (colonnes vides) |
 | `0013_cout_net` | Colonnes `recovered_eur`, `net_cost_eur` sur les déclarations | Recettes vides, coût net vide pour les déclarations existantes |
 | `0014_main_oeuvre` | Table `labour_rates` (coût horaire daté par zone) | Nouvelle table vide |
+| `0016_numero_poubelle` | `destinations.bin_number_required` (activé pour Les Alchimistes), `declaration_destinations.bin_number` | Colonnes ajoutées, Les Alchimistes mis à jour |
 | `0015_decompte_barquettes` | Tables `production_counts` et `production_count_lines` (barquettes réellement produites par semaine) | Nouvelles tables vides |
 | `0005_alertes_rien_de_note` | Tables `production_days` et `missing_declaration_alerts` | Aucune modification des tables existantes |
 | `0003_declarations` | Création des 5 tables de déclarations, tares utilisées, destinations, versions et lots | Aucune modification des tables existantes |

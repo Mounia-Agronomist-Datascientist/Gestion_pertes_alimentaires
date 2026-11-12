@@ -67,9 +67,9 @@ describe("lecture des pertes pour les statistiques", () => {
     });
     const dish = { weekItem: { kind: "plat", id: vi01 } };
     await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 10, "barquette", [{ destinationId: tgtg, quantity: 10, recoveredAmountEur: 6 }]), NOW);
-    const corrected = await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 2, "barquette", [{ destinationId: compost, quantity: 2 }]), NOW);
+    const corrected = await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 2, "barquette", [{ destinationId: compost, quantity: 2, binNumber: "1" }]), NOW);
     await correctDeclaration(t.db, teamD, corrected.id, input("2026-11-02", dish, "comptage", 3, "barquette", [{ destinationId: don, quantity: 3 }]), { reason: "Recompté", expectedRevision: 1 }, NOW);
-    const cancelled = await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 50, "barquette", [{ destinationId: compost, quantity: 50 }]), NOW);
+    const cancelled = await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 50, "barquette", [{ destinationId: compost, quantity: 50, binNumber: "1" }]), NOW);
     await cancelDeclaration(t.db, admin, cancelled.id, { reason: "Doublon", expectedRevision: 1 }, NOW);
     // Sous-recette qui sert à plusieurs plats de la semaine.
     const used = await t.db
@@ -81,9 +81,9 @@ describe("lecture des pertes pour les statistiques", () => {
       .orderBy(desc(count()));
     const mostUsed = used.find((u) => !isMouldLabel(u.name));
     shared = { id: mostUsed!.id!, recipes: mostUsed!.recipes };
-    await createDeclaration(t.db, teamD, input("2026-11-02", { weekItem: { kind: "sous_recette", id: shared.id } }, "pesee", 2, "kg", [{ destinationId: compost, quantity: 2 }]), NOW);
+    await createDeclaration(t.db, teamD, input("2026-11-02", { weekItem: { kind: "sous_recette", id: shared.id } }, "pesee", 2, "kg", [{ destinationId: compost, quantity: 2, binNumber: "1" }]), NOW);
     // Équipe C, en octobre mais dans la même semaine de production S45 (jeudi 29/10 → mercredi 04/11).
-    await createDeclaration(t.db, teamC, input("2026-10-30", { freeLabel: "Carottes", category: "matiere_premiere" }, "pesee", 1.5, "kg", [{ destinationId: compost, quantity: 1.5 }]), NOW);
+    await createDeclaration(t.db, teamC, input("2026-10-30", { freeLabel: "Carottes", category: "matiere_premiere" }, "pesee", 1.5, "kg", [{ destinationId: compost, quantity: 1.5, binNumber: "1" }]), NOW);
   });
 
   afterAll(async () => {

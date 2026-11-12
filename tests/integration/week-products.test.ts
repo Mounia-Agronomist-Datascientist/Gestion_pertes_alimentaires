@@ -65,7 +65,7 @@ describe("saisie à partir des produits de la semaine", () => {
         quantity: 10,
         unitCode: "barquette",
         causeId: ref.cause,
-        destinations: [{ destinationId: ref.compost, quantity: 10 }],
+        destinations: [{ destinationId: ref.compost, quantity: 10, binNumber: "1" }],
         ...extra,
       },
       NOW,
@@ -108,7 +108,7 @@ describe("saisie à partir des produits de la semaine", () => {
 
   it("une sous-recette pesée et un ingrédient compté (poids unitaire du tome)", async () => {
     const chicken = dish("VI01").lines.find((l) => l.label.startsWith("Viande"))!;
-    const sub = await declare(teamD, { weekItem: { kind: "sous_recette", id: chicken.subRecipeId! } }, { method: "pesee", quantity: 2.5, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 2.5 }] });
+    const sub = await declare(teamD, { weekItem: { kind: "sous_recette", id: chicken.subRecipeId! } }, { method: "pesee", quantity: 2.5, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 2.5, binNumber: "1" }] });
     const [subRow] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, sub.id));
     expect(subRow).toMatchObject({ productCategory: "sous_recette", weekSubRecipeId: chicken.subRecipeId, netKg: 2.5 });
     const subCost = catalog[0]!.subRecipes[chicken.subRecipeId!]!.cost.perKgEur!;
@@ -160,7 +160,7 @@ describe("saisie à partir des produits de la semaine", () => {
     const vi03 = adminCatalog[0]!.dishes.find((d) => d.code === "VI03")!; // Choutiflette : 1,46 € dont 0,07 € de plat à gratin
     expect(vi03).toMatchObject({ mouldPerPortionEur: 0.07, portionKind: "plat", cost: { perUnitEur: 1.39 } });
     const teamH = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "H")))[0]!.id;
-    const r = await declare(admin, { weekItem: { kind: "plat", id: vi03.id } }, { quantity: 4, teamId: teamH, destinations: [{ destinationId: ref.compost, quantity: 4 }] });
+    const r = await declare(admin, { weekItem: { kind: "plat", id: vi03.id } }, { quantity: 4, teamId: teamH, destinations: [{ destinationId: ref.compost, quantity: 4, binNumber: "1" }] });
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
     expect(row).toMatchObject({
       materialCostEur: 5.56,
@@ -173,7 +173,7 @@ describe("saisie à partir des produits de la semaine", () => {
     expect(row?.costDetails).toMatchObject({ portions: 4, packagingComplete: true, packagingDate: DAY });
 
     // Un sous-produit (sous-recette) n'a pas d'emballage ajouté.
-    const sub = await declare(admin, { weekItem: { kind: "sous_recette", id: vi03.lines[1]!.subRecipeId! } }, { teamId: teamH, method: "pesee", quantity: 1, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 1 }] });
+    const sub = await declare(admin, { weekItem: { kind: "sous_recette", id: vi03.lines[1]!.subRecipeId! } }, { teamId: teamH, method: "pesee", quantity: 1, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 1, binNumber: "1" }] });
     const [subRow] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, sub.id));
     expect(subRow?.packagingCostEur).toBeNull();
     expect(subRow?.grossCostEur).toBe(subRow?.materialCostEur);
