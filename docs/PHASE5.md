@@ -16,6 +16,8 @@ Cela couvre :
 | 12/11/2026 | Précision du CO2e (§20.2, §29 point 10) | **Calcul à partir de la recette Melba.** Chaque ingrédient du tome est rattaché à une famille alimentaire. Le facteur de chaque famille vient d'Agribalyse (ADEME) et doit être validé avant usage. L'impact d'un plat est la somme de ses ingrédients. Une perte hors liste reçoit une estimation par famille, signalée comme telle. |
 | 12/11/2026 | Retours fournisseurs et avoirs | **Classés à part**, ni avec recette ni sans recette. La réutilisation reste à classer. |
 | 12/11/2026 | Versions des facteurs CO2e | **Les anciennes versions sont conservées.** Un calcul fait avec une version de facteur n'est pas réécrit quand le facteur change (même principe que les coûts, §22). |
+| 12/11/2026 | Semaine d'une collecte | **Calculée automatiquement à partir de la date de collecte**, avec le calendrier de production de l'application. La colonne « Correspondance aux semaines de prod » du fichier n'est plus à remplir à la main ; si elle est remplie et diffère, l'aperçu le signale. |
+| 12/11/2026 | N° de poubelle | **Reste obligatoire à la saisie** si l'on obtient les n° des bacs collectés de façon automatique (voir « À confirmer »). Les n° sont visibles dans l'agenda en ligne des Alchimistes, jour par jour, mais pas dans leur fichier CSV. |
 | 12/11/2026 | Rapports PDF (§23) | Quatre rapports : hebdomadaire ; mensuel et annuel ; valorisation ; environnemental avec le rapprochement des Alchimistes. |
 
 ## Principes
@@ -52,15 +54,13 @@ Cela couvre :
 
 ## À confirmer
 
-- **Réutilisation** dans une autre préparation et **retour fournisseur** : ils ne rapportent pas d'argent
-  directement, mais ils évitent un achat ou peuvent donner lieu à un avoir. Faut-il les classer avec ou sans
-  recette ? Ou à part ?
 - **Réutilisation** dans une autre préparation : avec recette, sans recette, ou à part avec les retours
   fournisseurs ?
-- **Semaine d'une collecte** : utiliser la colonne « Correspondance aux semaines de prod » quand elle est
-  remplie, ou calculer la semaine à partir de la date de collecte ?
-- **N° de poubelle** : le fichier des Alchimistes ne donne aucun n° de bac. Faut-il garder le n° obligatoire à
-  la saisie pour un suivi interne, ou le rendre facultatif ?
+- **Source des n° de bacs collectés**, par ordre de préférence :
+  1. Les Alchimistes ajoutent une colonne « Identifiant du contenant » à leur export CSV (demande à leur faire) ;
+  2. en attendant, lecture de leur agenda en ligne, à condition qu'il charge ses données d'une façon lisible
+     automatiquement (à examiner avec vous, connectée à votre compte ; aucun mot de passe enregistré) ;
+  3. sinon, le n° devient facultatif et le rapprochement se fait par semaine seulement.
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 
@@ -76,7 +76,11 @@ Une ligne par bac collecté. Colonnes :
 - Qualite ;
 - Incident de collecte ;
 - Type de matière ;
-- Correspondance aux semaines de prod (« S19 »).
+- Correspondance aux semaines de prod (« S19 ») : remplie à la main jusqu'ici ; l'application calcule la semaine
+  elle-même.
+
+Pas de n° de bac dans le fichier. L'agenda en ligne les montre pour chaque jour : bacs collectés (n°, matière,
+qualité, poids) et bacs vides déposés (n°).
 
 Lecture prévue :
 - seules les lignes « collect » sont gardées ; les livraisons sont ignorées et comptées dans l'aperçu ;
