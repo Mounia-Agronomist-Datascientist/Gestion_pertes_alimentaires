@@ -14,6 +14,8 @@ Cela couvre :
 | 12/11/2026 | Valorisation (§10.4, §20.1) | **Ce qui rapporte de l'argent est séparé de ce qui n'en rapporte pas.** Avec recette : ventes flash, Too Good To Go. Sans recette : personnel, association / don, ordures ménagères, Les Alchimistes. |
 | 12/11/2026 | Poids des Alchimistes (§21) | **Fichier Excel ou CSV** fourni par Les Alchimistes, déposé dans l'application, avec un aperçu avant validation. |
 | 12/11/2026 | Précision du CO2e (§20.2, §29 point 10) | **Calcul à partir de la recette Melba.** Chaque ingrédient du tome est rattaché à une famille alimentaire. Le facteur de chaque famille vient d'Agribalyse (ADEME) et doit être validé avant usage. L'impact d'un plat est la somme de ses ingrédients. Une perte hors liste reçoit une estimation par famille, signalée comme telle. |
+| 12/11/2026 | Retours fournisseurs et avoirs | **Classés à part**, ni avec recette ni sans recette. La réutilisation reste à classer. |
+| 12/11/2026 | Versions des facteurs CO2e | **Les anciennes versions sont conservées.** Un calcul fait avec une version de facteur n'est pas réécrit quand le facteur change (même principe que les coûts, §22). |
 | 12/11/2026 | Rapports PDF (§23) | Quatre rapports : hebdomadaire ; mensuel et annuel ; valorisation ; environnemental avec le rapprochement des Alchimistes. |
 
 ## Principes
@@ -41,8 +43,8 @@ Cela couvre :
 | Étape | Contenu | État |
 |---|---|---|
 | 5.1 | **Valorisation** : nouvel onglet des statistiques. Il présente deux blocs. **Avec recette** (ventes) : kg, nombre de ventes, recettes, recette par kg, coût brut des produits vendus et part récupérée. **Sans recette** (don, personnel, compost, ordures) : kg et coût des produits. Suivi des dons, des ventes et des réutilisations sur 12 semaines. Exports Excel et CSV. | À faire |
-| 5.2 | **Import des poids des Alchimistes** : dépôt du fichier, aperçu, enregistrement des versions et de la source. Chaque collecte garde sa date, son poids, et son n° de collecte ou de bac s'il existe. | En attente d'un fichier exemple |
-| 5.3 | **Rapprochement** : par semaine ou par mois, kg déclarés vers Les Alchimistes comparés aux kg qu'ils ont mesurés. Écart en kg et en %, périodes non rapprochées, détail par n° de poubelle si le fichier le donne. | Après 5.2 |
+| 5.2 | **Import des poids des Alchimistes** : dépôt du fichier, aperçu, enregistrement des versions et de la source. Chaque bac collecté garde sa date, son poids, son type de bac, sa qualité et l'incident éventuel. | Extrait reçu |
+| 5.3 | **Rapprochement** : par semaine de production ou par mois, kg déclarés vers Les Alchimistes comparés aux kg qu'ils ont mesurés. Écart en kg et en %, périodes non rapprochées. | Après 5.2 |
 | 5.4 | **Facteurs d'émission** : écran des familles alimentaires et de leurs facteurs. Je préparerai une proposition tirée d'Agribalyse, que vous validerez. | À faire |
 | 5.5 | **Rattachement des ingrédients Melba aux familles** : suggestions automatiques par mot-clé, validées par vous. On commence par les ingrédients les plus fréquents. | Après 5.4 |
 | 5.6 | **Tableau de bord environnemental** : kg par catégorie et par devenir, CO2e mesuré, estimé ou non couvert, évolution. | Après 5.5 |
@@ -53,7 +55,32 @@ Cela couvre :
 - **Réutilisation** dans une autre préparation et **retour fournisseur** : ils ne rapportent pas d'argent
   directement, mais ils évitent un achat ou peuvent donner lieu à un avoir. Faut-il les classer avec ou sans
   recette ? Ou à part ?
-- **Fichier des Alchimistes** : il faut un exemple, même ancien, pour connaître ses colonnes : date, poids, n° de
-  collecte, n° de bac.
-- **CO2e figé ou recalculé** : quand un facteur change de version, faut-il garder le calcul fait avec l'ancienne
-  version (comme pour les coûts, §22) ? Ou tout recalculer en indiquant la version utilisée ?
+- **Réutilisation** dans une autre préparation : avec recette, sans recette, ou à part avec les retours
+  fournisseurs ?
+- **Semaine d'une collecte** : utiliser la colonne « Correspondance aux semaines de prod » quand elle est
+  remplie, ou calculer la semaine à partir de la date de collecte ?
+- **N° de poubelle** : le fichier des Alchimistes ne donne aucun n° de bac. Faut-il garder le n° obligatoire à
+  la saisie pour un suivi interne, ou le rendre facultatif ?
+
+## Fichier des Alchimistes (extrait reçu le 12/11/2026)
+
+Une ligne par bac collecté. Colonnes :
+- Date ;
+- Type de rdv : « collect », ou « delivery » pour une livraison de bacs vides, toujours à 0 kg ;
+- Région ;
+- Nom du client ;
+- Nom de l'établissement ;
+- Nombre de contenant ;
+- Type de contenant (« 120L biofiltre ») ;
+- Poids net (contenu déchets), en kg avec une virgule décimale ;
+- Qualite ;
+- Incident de collecte ;
+- Type de matière ;
+- Correspondance aux semaines de prod (« S19 »).
+
+Lecture prévue :
+- seules les lignes « collect » sont gardées ; les livraisons sont ignorées et comptées dans l'aperçu ;
+- le nom du client et de l'établissement ne sont pas enregistrés : c'est toujours La Brigade de Véro ;
+- une ligne déjà importée n'est jamais comptée deux fois quand un fichier couvre une période déjà déposée.
+  Une même date peut avoir plusieurs bacs de même poids : le fichier le plus récent remplace donc toutes les
+  collectes de sa période.
