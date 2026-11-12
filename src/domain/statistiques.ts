@@ -33,6 +33,8 @@ export interface LossFact {
   productName: string;
   /** Code Melba (plat de la semaine), s'il existe. */
   productCode: string | null;
+  /** Sous-recette de la semaine (import du tome), pour retrouver les plats qui l'utilisent. */
+  weekSubRecipeId: string | null;
   causeId: string;
   causeName: string;
   netKg: number | null;
@@ -137,6 +139,19 @@ export function rankGroups<K extends string>(facts: readonly LossFact[], keyOf: 
   return [...groupFacts(facts, keyOf)]
     .map(([key, list]) => ({ key, summary: summarize(list, withCosts) }))
     .sort((a, b) => value(b.summary) - value(a.summary) || b.summary.events - a.summary.events);
+}
+
+/** Totaux par destination (lignes de destination de chaque perte) : kg alimentaires et nombre de pertes. */
+export function destinationTotals(facts: readonly LossFact[]): Map<string, { kind: string; foodKg: number; events: number }> {
+  const totals = new Map<string, { kind: string; foodKg: number; events: number }>();
+  for (const f of facts) {
+    for (const d of f.destinations) {
+      const t = totals.get(d.destinationId) ?? totals.set(d.destinationId, { kind: d.kind, foodKg: 0, events: 0 }).get(d.destinationId)!;
+      t.events++;
+      if (f.food && d.netKg != null) t.foodKg = roundQuantity(t.foodKg + d.netKg);
+    }
+  }
+  return totals;
 }
 
 /** Évolution d'une valeur par rapport à la période précédente ; null sans base de comparaison. */

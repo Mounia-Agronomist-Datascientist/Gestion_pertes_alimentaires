@@ -15,6 +15,7 @@ import type { LossFact } from "@/domain/statistiques";
 import { type AuthUser, can, ForbiddenError } from "@/modules/auth/permissions";
 import { isNonFoodCategory } from "@/modules/declarations/input";
 import { scopeCondition } from "@/modules/declarations/queries";
+import { tomeKey } from "@/modules/imports/tome/parse-tome";
 
 export interface StatsFilters {
   zoneId?: string;
@@ -127,9 +128,11 @@ export async function loadFacts(db: Db, user: AuthUser, period: Period, filters:
       teamId: r.teamId,
       category: r.productCategory,
       food: !isNonFoodCategory(r.productCategory),
-      productKey: `${r.productCategory}:${r.productCode ?? r.productName.trim().toLowerCase()}`,
+      // Une formule de plat (VI01) se suit par son code ; une sous-recette, sans code Melba, par son nom normalisé.
+      productKey: `${r.productCategory}:${r.productCode ?? tomeKey(r.productName)}`,
       productName: r.productName,
       productCode: r.productCode,
+      weekSubRecipeId: r.weekSubRecipeId,
       causeId: r.causeId,
       causeName: r.causeName,
       netKg: r.netKg,

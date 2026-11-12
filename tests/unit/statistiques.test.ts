@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evolution, type LossFact, rankGroups, summarize } from "@/domain/statistiques";
+import { destinationTotals, evolution, type LossFact, rankGroups, summarize } from "@/domain/statistiques";
 
 const fact = (over: Partial<LossFact>): LossFact => ({
   id: "x",
@@ -13,6 +13,7 @@ const fact = (over: Partial<LossFact>): LossFact => ({
   productKey: "recette:VI01",
   productName: "Plat",
   productCode: "VI01",
+  weekSubRecipeId: null,
   causeId: "c1",
   causeName: "Erreur",
   netKg: 1,
@@ -47,6 +48,15 @@ describe("agrégats des statistiques", () => {
     expect(rankGroups(facts, (f) => f.teamId, true, "kg").map((g) => [g.key, g.summary.foodKg])).toEqual([["D", 3.3], ["C", 1.5]]);
     expect(rankGroups(facts, (f) => f.teamId, true, "evenements").map((g) => g.key)).toEqual(["D", "C"]);
     expect(rankGroups(facts, (f) => (f.teamId === "C" ? null : f.causeId), true, "cout").map((g) => [g.key, g.summary.events])).toEqual([["c1", 3]]);
+  });
+
+  it("totalise les destinations, sans les kg des emballages", () => {
+    const totals = destinationTotals([...facts, fact({ food: false, netKg: null, destinations: [{ destinationId: "a", kind: "compost", quantity: 5, netKg: 9 }] })]);
+    expect(Object.fromEntries(totals)).toEqual({
+      tgtg: { kind: "vente", foodKg: 3.3, events: 1 },
+      a: { kind: "compost", foodKg: 1, events: 2 },
+      d: { kind: "don", foodKg: 0.5, events: 1 },
+    });
   });
 
   it("calcule l'évolution", () => {

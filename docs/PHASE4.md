@@ -33,7 +33,7 @@ semaines ; ratios de pertes ; graphiques économiques.
 | 4.1 | Moteur de statistiques : agrégats sur une période (semaine, mois, année, dates libres) avec filtres (zone, sous-zone, équipe, catégorie de produit, cause, destination), selon les droits | ✅ Règle R14 |
 | 4.2 | **Tableau de bord général** (§19.1) : kg, coût, quantités détruite / compostée / donnée / vendue / réutilisée, évolution par rapport à la période précédente, barre de filtres | ✅ Page « Statistiques » |
 | 4.3 | **Analyses par zone, sous-zone et équipe** (§19.2, §19.3) : quantités, coûts, causes principales, produits, destinations, évolution ; comparaison des équipes pour les profils autorisés | ✅ Onglets « Par zone » et « Par équipe » |
-| 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ⏳ |
+| 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ✅ Onglets « Produits » et « Causes et destinations » |
 | 4.5 | **Comparaison des semaines** (§19.6) : courbe semaine par semaine, moyenne des dernières semaines, mois, année, même semaine l'année précédente si elle existe | ⏳ |
 | 4.6 | **Ratios de pertes** (§19.7) : barquettes perdues / barquettes produites, kg perdus / kg produits, prévu et réel côte à côte, avec dénominateur affiché | ⏳ |
 | 4.7 | **Graphiques économiques** : évolution du coût brut et net, répartition par composante dans le temps (complète « Coûts des pertes ») | ⏳ |
@@ -96,3 +96,24 @@ Barres d'une seule couleur avec valeur, part et détail écrits ; sur téléphon
 
 Vérifié : 3 tests d'intégration (comparaison réservée, détail d'une zone, équipe limitée à son détail,
 dernières semaines) ; pages vérifiées dans le navigateur (mobile) : par équipe S46, par zone S45, détail Cuisine.
+
+## Produits, causes et destinations (4.4)
+
+Onglet **Produits** (§19.4) :
+- familles : plats, sous-recettes, matières premières, encas / emballages / moules, tous ;
+- classement **en kg**, **en coût** (profils qui voient les euros) ou **en nombre de pertes** ; 20 premiers ;
+- pour chaque produit : pertes, kg, barquettes, coût, **cause principale** (et sa part) ;
+- un plat est suivi par sa **formule** (code Melba) : sur plusieurs semaines, les plats différents d'une même
+  formule sont regroupés et leurs noms listés ;
+- une sous-recette, sans code Melba, est suivie par son **nom normalisé** (identification au mieux d'une semaine
+  à l'autre), comptée **une seule fois** et accompagnée des **plats qui l'utilisent** dans leur composition.
+
+Onglet **Causes et destinations** (§19.5) :
+- causes classées en kg, en coût ou en nombre de pertes, avec la zone où elles pèsent le plus ;
+- kg et nombre de pertes **par destination** (Les Alchimistes, Too Good To Go, don…) ; une perte répartie entre
+  plusieurs destinations compte dans chacune.
+
+Les pertes par quantité produite (§19.4) arriveront avec les ratios (étape 4.6).
+
+Vérifié : 1 test unitaire + 2 tests d'intégration (formule, sous-recette partagée et ses plats, compte équipe
+sans euros, causes et destinations) ; pages vérifiées dans le navigateur (mobile) avec un compte équipe.

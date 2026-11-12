@@ -62,7 +62,7 @@ const chip = (active: boolean) =>
   `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
 
 /** Onglets des statistiques (vue générale, par zone, par équipe). */
-export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsContext; active: "general" | "zones" | "equipes" }) {
+export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsContext; active: "general" | "zones" | "equipes" | "produits" | "causes" }) {
   return (
     <nav className="flex flex-wrap gap-2" aria-label="Analyses">
       <Link className={chip(active === "general")} href={statsHref("/statistiques", ctx)}>
@@ -82,6 +82,26 @@ export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsCon
           </Link>
         )
       )}
+      <Link className={chip(active === "produits")} href={statsHref("/statistiques/produits", ctx)}>
+        Produits
+      </Link>
+      <Link className={chip(active === "causes")} href={statsHref("/statistiques/causes", ctx)}>
+        Causes et destinations
+      </Link>
+    </nav>
+  );
+}
+
+/** Choix d'une option dans l'adresse (pastilles), en gardant période et filtres. */
+export function OptionChips<T extends string>({ label, path, ctx, name, value, options, keep = {} }: { label: string; path: string; ctx: StatsContext; name: string; value: T; options: { value: T; label: string }[]; keep?: Record<string, string> }) {
+  return (
+    <nav className="flex flex-wrap items-center gap-2" aria-label={label}>
+      <span className="text-sm text-slate-600">{label} :</span>
+      {options.map((o) => (
+        <Link key={o.value} className={chip(o.value === value)} aria-current={o.value === value ? "true" : undefined} href={statsHref(path, ctx, ctx.period, { ...keep, [name]: o.value })}>
+          {o.label}
+        </Link>
+      ))}
     </nav>
   );
 }
