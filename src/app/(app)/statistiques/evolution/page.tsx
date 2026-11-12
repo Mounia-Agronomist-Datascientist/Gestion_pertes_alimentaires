@@ -14,7 +14,7 @@ export const metadata = { title: "Évolution — Statistiques — Pertes" };
 
 const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 
-type Measure = "kg" | "volume";
+type Measure = "kg" | "volume" | "reel";
 
 export default async function EvolutionPage({ searchParams }: { searchParams: Promise<Params> }) {
   const user = await requireUser();
@@ -29,7 +29,7 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
   }
   if (!anchor) return <p className="rounded-xl bg-red-50 p-3 text-red-800">Semaine absente du calendrier.</p>;
   const ctx = { ...base, period: anchor as Period };
-  const measure: Measure = params.mesure === "volume" ? "volume" : "kg";
+  const measure: Measure = params.mesure === "volume" || params.mesure === "reel" ? params.mesure : "kg";
   const keep = { mesure: measure };
   const path = "/statistiques/evolution";
 
@@ -48,16 +48,19 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
   const firstMonth = months.findIndex((m) => m.summary.events > 0);
   const shownMonths = firstMonth < 0 ? months.slice(-1) : months.slice(firstMonth);
   const note = scopeNote(user, ctx.compareTeams);
-  const volumeLabel = comparison.volumeTeam ? "barquettes prévues pour l'équipe" : "barquettes prévues (toutes équipes)";
+  const scopeLabel = comparison.volumeTeam ? "de l'équipe" : "(toutes équipes)";
 
-  const rows: { label: string; point: Pick<WeekPoint, "perThousand"> & { foodKg: number | null; barquettes: number | null; events: number | null; grossEur: number | null; planned: number | null } }[] = [
+  const rows: {
+    label: string;
+    point: Pick<WeekPoint, "perThousand" | "perThousandActual"> & { foodKg: number | null; barquettes: number | null; events: number | null; grossEur: number | null; planned: number | null; actual: number | null };
+  }[] = [
     { label: `${formatProductionWeek(current)} (choisie)`, point: flat(current) },
     ...(comparison.previous ? [{ label: `${formatProductionWeek(comparison.previous)} (précédente)`, point: flat(comparison.previous) }] : []),
     ...(comparison.average
       ? [
           {
             label: `Moyenne des ${comparison.average.weeks} semaines d'avant`,
-            point: { ...comparison.average, planned: null },
+            point: { ...comparison.average, planned: null, actual: null },
           },
         ]
       : []),
@@ -78,16 +81,18 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
 
       <Card title="Comparaison de la semaine">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[30rem] text-sm">
+          <table className="w-full min-w-[40rem] text-sm">
             <thead>
               <tr className="text-left text-slate-500">
                 <th className="py-1 font-medium" />
                 <th className="py-1 pl-3 text-right font-medium">Kg</th>
-                <th className="py-1 pl-3 text-right font-medium">Kg / 1 000 barq.</th>
+                <th className="py-1 pl-3 text-right font-medium">Kg / 1 000 barq. prévues</th>
+                <th className="py-1 pl-3 text-right font-medium">Kg / 1 000 barq. produites</th>
                 <th className="py-1 pl-3 text-right font-medium">Barq. perdues</th>
                 <th className="py-1 pl-3 text-right font-medium">Pertes</th>
                 {withCosts && <th className="py-1 pl-3 text-right font-medium">Coût brut</th>}
                 <th className="py-1 pl-3 text-right font-medium">Barq. prévues</th>
+                <th className="py-1 pl-3 text-right font-medium">Barq. produites</th>
               </tr>
             </thead>
             <tbody>
@@ -96,19 +101,21 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
                   <td className="py-2">{r.label}</td>
                   <td className={cell}>{r.point.foodKg != null ? num.format(r.point.foodKg) : "—"}</td>
                   <td className={cell}>{r.point.perThousand != null ? num.format(r.point.perThousand) : "—"}</td>
+                  <td className={cell}>{r.point.perThousandActual != null ? num.format(r.point.perThousandActual) : "—"}</td>
                   <td className={cell}>{r.point.barquettes != null ? num.format(r.point.barquettes) : "—"}</td>
                   <td className={cell}>{r.point.events != null ? num.format(r.point.events) : "—"}</td>
                   {withCosts && <td className={cell}>{r.point.grossEur != null ? euro.format(r.point.grossEur) : "—"}</td>}
                   <td className={`${cell} text-slate-600`}>{r.point.planned != null ? num.format(r.point.planned) : "—"}</td>
+                  <td className={`${cell} text-slate-600`}>{r.point.actual != null ? num.format(r.point.actual) : "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <p className="text-xs text-slate-500">
-          « Kg / 1 000 barq. » : kg de pertes alimentaires pour 1 000 {volumeLabel} au plan de production importé. Il permet de comparer des semaines
-          de volumes différents ; sans plan importé, il n&apos;est pas calculé. Les barquettes réellement produites seront ajoutées avec les ratios
-          (étape 4.6). La moyenne à volume égal ne compte que les semaines qui ont un plan importé.
+          « Kg / 1 000 barq. » : kg de pertes alimentaires pour 1 000 barquettes {scopeLabel} prévues au plan de production importé, ou
+          produites d&apos;après le « Décompte barquettes » déposé. Il permet de comparer des semaines de volumes différents ; sans plan ou sans
+          décompte, il n&apos;est pas calculé. Les moyennes ne comptent que les semaines qui ont ce volume.
           {!comparison.lastYear && " Pas de pertes enregistrées la même semaine l'année précédente."}
         </p>
       </Card>
@@ -123,24 +130,33 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
           keep={keep}
           options={[
             { value: "kg", label: "En kg" },
-            { value: "volume", label: "À volume égal" },
+            { value: "volume", label: "Pour 1 000 prévues" },
+            { value: "reel", label: "Pour 1 000 produites" },
           ]}
         />
         <ColumnChart
-          caption={measure === "kg" ? "Kg de pertes alimentaires par semaine" : "Kg de pertes pour 1 000 barquettes prévues, par semaine"}
+          caption={
+            measure === "kg"
+              ? "Kg de pertes alimentaires par semaine"
+              : `Kg de pertes pour 1 000 barquettes ${measure === "volume" ? "prévues" : "produites"}, par semaine`
+          }
           columns={comparison.series.map((p) => {
-            const value = measure === "kg" ? p.summary.foodKg : p.perThousand;
+            const value = measure === "kg" ? p.summary.foodKg : measure === "volume" ? p.perThousand : p.perThousandActual;
             return {
               key: p.id,
               label: `S${String(p.number).padStart(2, "0")}`,
               value,
-              text: value == null ? "—" : measure === "kg" ? `${num.format(value)} kg` : `${num.format(value)} kg`,
+              text: value == null ? "—" : `${num.format(value)} kg`,
               highlight: p.id === current.id,
             };
           })}
         />
         <p className="text-xs text-slate-500">
-          {measure === "kg" ? "Kg de pertes alimentaires de chaque semaine de production." : `Kg de pertes pour 1 000 ${volumeLabel} ; un tiret : pas de plan importé.`}
+          {measure === "kg"
+            ? "Kg de pertes alimentaires de chaque semaine de production."
+            : measure === "volume"
+              ? `Kg de pertes pour 1 000 barquettes ${scopeLabel} prévues ; un tiret : pas de plan importé.`
+              : "Kg de pertes pour 1 000 barquettes produites (« Décompte barquettes ») ; un tiret : pas de décompte déposé."}
         </p>
       </Card>
 
@@ -184,6 +200,8 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
 
 function flat(p: WeekPoint) {
   return {
+    perThousandActual: p.perThousandActual,
+    actual: p.actual?.barquettes ?? null,
     foodKg: p.summary.foodKg,
     barquettes: p.summary.barquettes,
     events: p.summary.events,

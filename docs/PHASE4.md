@@ -35,7 +35,7 @@ semaines ; ratios de pertes ; graphiques économiques.
 | 4.3 | **Analyses par zone, sous-zone et équipe** (§19.2, §19.3) : quantités, coûts, causes principales, produits, destinations, évolution ; comparaison des équipes pour les profils autorisés | ✅ Onglets « Par zone » et « Par équipe » |
 | 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ✅ Onglets « Produits » et « Causes et destinations » |
 | 4.5 | **Comparaison des semaines** (§19.6) : courbe semaine par semaine, moyenne des dernières semaines, mois, année, même semaine l'année précédente si elle existe | ✅ Onglet « Évolution » |
-| 4.6 | **Ratios de pertes** (§19.7) : barquettes perdues / barquettes produites, kg perdus / kg produits, prévu et réel côte à côte, avec dénominateur affiché | ⏳ |
+| 4.6 | **Ratios de pertes** (§19.7) : barquettes perdues / barquettes produites, kg perdus / kg produits, prévu et réel côte à côte, avec dénominateur affiché | ✅ Dépôt du « Décompte barquettes » + onglet « Ratios » |
 | 4.7 | **Graphiques économiques** : évolution du coût brut et net, répartition par composante dans le temps (complète « Coûts des pertes ») | ⏳ |
 | 4.8 | **Exports Excel et CSV** de chaque tableau de bord, avec ses filtres | ⏳ |
 
@@ -151,3 +151,29 @@ Administration → **Import de la semaine** → « Barquettes réellement produi
 Vérifié : 5 tests unitaires (lecture de l'onglet, année par les onglets des jours, lecture ciblée du classeur) et
 3 tests d'intégration (versions, journal, volumes réels par équipe, refus) ; vrai fichier du 06/11 lu en 0,1 s
 (48 semaines ; S45 : 60 codes, 64 462 barquettes, VI01 = 2 938) et S45 enregistrée dans la base locale.
+
+## Ratios de pertes (4.6)
+
+Onglet **Ratios** (§19.7), à partir d'une semaine (celle choisie, sinon la semaine en cours). Trois ratios
+distincts, chacun **sur la production prévue et sur la production réelle**, côte à côte, avec numérateur et
+dénominateur écrits :
+
+| Ratio | Numérateur | Dénominateur |
+|---|---|---|
+| Barquettes | pertes saisies en barquettes | barquettes prévues (plan) / produites (« Ma production ») |
+| Kg | kg nets de toutes les pertes alimentaires (jamais d'emballages) | barquettes × poids d'une portion du tome Melba |
+| Coût matières (profils qui voient les euros) | coût matières figé sur les pertes | barquettes × coût Melba d'une portion |
+
+- pour la semaine et pour l'**année de production jusqu'à cette semaine** ; sur plusieurs semaines, seules celles
+  qui ont le dénominateur comptent (« sur N semaines ») ;
+- **non disponible** sans plan importé ou sans décompte déposé : rien n'est estimé ; « dénominateur incomplet »
+  si des codes produits n'ont pas de poids ou de coût Melba ;
+- par équipe (filtre, ou compte équipe) : codes attribués à l'équipe par le plan de la semaine ;
+- histogrammes des 12 dernières semaines, prévu et réel.
+
+L'onglet **Évolution** affiche aussi les barquettes produites et les kg pour 1 000 barquettes produites.
+
+Vérifié : 2 tests unitaires + 1 test d'intégration ; dans le navigateur (mobile), S45 avec le vrai décompte :
+22 / 64 462 barquettes (0,03 %), 6,9 / 17 918 kg (0,04 %), 24,18 € / 81 006,91 € de coût matières.
+
+**Phase 4, étape 4.6 terminée.** Restent 4.7 (graphiques économiques) et 4.8 (exports Excel et CSV).

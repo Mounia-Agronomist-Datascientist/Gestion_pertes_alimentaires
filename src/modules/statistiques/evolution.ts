@@ -12,7 +12,8 @@ import { monthBounds } from "@/domain/periodes";
 import { type LossFact, type StatsSummary, summarize } from "@/domain/statistiques";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { loadFacts, type StatsFilters } from "./facts";
-import { type PlannedVolume, plannedVolumes } from "./production";
+import { actualVolumes, type PlannedVolume, plannedVolumes } from "./production";
+import { volumeTeam } from "./ratios";
 
 /** Kg perdus pour 1 000 barquettes prévues ; null sans volume prévu. */
 export function kgPerThousand(foodKg: number, planned: PlannedVolume | null | undefined): number | null {
@@ -27,6 +28,9 @@ export interface WeekPoint {
   summary: StatsSummary;
   planned: PlannedVolume | null;
   perThousand: number | null;
+  /** Volume réellement produit (« Décompte barquettes »), s'il est déposé. */
+  actual: PlannedVolume | null;
+  perThousandActual: number | null;
 }
 
 /** Moyenne de valeurs connues ; null s'il n'y en a aucune. */
@@ -35,26 +39,32 @@ function average(values: readonly (number | null)[]): number | null {
   return known.length ? Math.round((known.reduce((a, b) => a + b, 0) / known.length) * 100) / 100 : null;
 }
 
-/** Équipe dont on compare le volume prévu : celle du filtre, ou celle du compte s'il ne voit que son équipe. */
-function volumeTeam(user: AuthUser, filters: StatsFilters): string | null {
-  if (filters.teamId) return filters.teamId;
-  return can(user, "stats.compare_teams") ? null : user.teamId;
-}
-
 async function weekPoints(db: Db, user: AuthUser, weeks: readonly { id: string; year: number; number: number; startDate: string; endDate: string }[], filters: StatsFilters) {
   if (!weeks.length) return [];
   const withCosts = can(user, "indicators.read");
   const sorted = [...weeks].sort((a, b) => a.startDate.localeCompare(b.startDate));
-  const [facts, planned] = await Promise.all([
+  const team = volumeTeam(user, filters);
+  const [facts, planned, actual] = await Promise.all([
     loadFacts(db, user, { kind: "periode", from: sorted[0]!.startDate, to: sorted.at(-1)!.endDate }, filters),
-    plannedVolumes(db, weeks.map((w) => w.id), volumeTeam(user, filters)),
+    plannedVolumes(db, weeks.map((w) => w.id), team),
+    actualVolumes(db, weeks.map((w) => w.id), team),
   ]);
   const byWeek = new Map<string, LossFact[]>();
   for (const f of facts) (byWeek.get(f.productionWeekId) ?? byWeek.set(f.productionWeekId, []).get(f.productionWeekId)!).push(f);
   return weeks.map((w): WeekPoint => {
     const summary = summarize(byWeek.get(w.id) ?? [], withCosts);
     const volume = planned.get(w.id) ?? null;
-    return { id: w.id, year: w.year, number: w.number, summary, planned: volume, perThousand: kgPerThousand(summary.foodKg, volume) };
+    const real = actual.get(w.id) ?? null;
+    return {
+      id: w.id,
+      year: w.year,
+      number: w.number,
+      summary,
+      planned: volume,
+      perThousand: kgPerThousand(summary.foodKg, volume),
+      actual: real,
+      perThousandActual: kgPerThousand(summary.foodKg, real),
+    };
   });
 }
 
@@ -97,6 +107,7 @@ export async function weekComparison(db: Db, user: AuthUser, anchor: { year: num
           events: average(lastFour.map((p) => p.summary.events)),
           grossEur: average(lastFour.map((p) => p.summary.cost?.grossEur ?? null)),
           perThousand: average(lastFour.map((p) => p.perThousand)),
+          perThousandActual: average(lastFour.map((p) => p.perThousandActual)),
         }
       : null,
     /** Même semaine l'année précédente, seulement si des pertes y sont enregistrées. */

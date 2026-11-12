@@ -11,6 +11,7 @@ import { parsePlan } from "@/modules/imports/plan/parse-plan";
 import { saveWeekImport } from "@/modules/imports/service";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
 import { actualVolumes, plannedVolumes } from "@/modules/statistiques/production";
+import { weekRatios } from "@/modules/statistiques/ratios";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
 
@@ -61,6 +62,20 @@ describe("décompte des barquettes produites", () => {
     const team = (await actualVolumes(t.db, [weekId], teamOfVi01)).get(weekId)!;
     expect(team.barquettes).toBe(2938);
     expect((await plannedVolumes(t.db, [weekId])).get(weekId)!.barquettes).toBeGreaterThan(team.barquettes);
+  });
+
+  it("ratios de la semaine sur le prévu et le réel, année jusqu'à la semaine", async () => {
+    const r = (await weekRatios(t.db, production, { year: 2026, number: 45 }, {}, 3))!;
+    expect(r.week.prevu?.producedBarquettes).toBeGreaterThan(0);
+    expect(r.week.reel).toMatchObject({ weeks: 1, producedBarquettes: 2948, lostBarquettes: 0, barquetteRate: 0 });
+    expect(r.week.reel?.productionCostEur).toBeGreaterThan(0);
+    expect(r.year).toMatchObject({ year: 2026, reel: { weeks: 1 } });
+    expect(r.series.map((w) => [w.number, w.reel?.weeks ?? null])).toEqual([
+      [43, null],
+      [44, null],
+      [45, 1],
+    ]);
+    expect(await weekRatios(t.db, production, { year: 2031, number: 1 }, {})).toBeNull();
   });
 
   it("refuse les doublons, une semaine hors calendrier et les profils sans droit", async () => {

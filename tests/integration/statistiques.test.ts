@@ -201,7 +201,7 @@ describe("lecture des pertes pour les statistiques", () => {
     expect(teamOnly.barquettes).toBeGreaterThan(0);
     expect(all.kg).toBeGreaterThan(all.barquettes * 0.25);
     expect((await plannedVolumes(t.db, [week!.id])).size).toBe(1);
-    expect(kgPerThousand(10, { barquettes: 20000, kg: null, dishesWithoutWeight: 0 })).toBe(0.5);
+    expect(kgPerThousand(10, { barquettes: 20000, kg: null, dishesWithoutWeight: 0, costEur: null, dishesWithoutCost: 0 })).toBe(0.5);
     expect(kgPerThousand(10, null)).toBeNull();
   });
 

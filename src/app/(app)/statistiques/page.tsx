@@ -40,7 +40,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
       </Card>
 
       <p className="text-sm text-slate-500">
-        Le pourcentage de pertes par rapport à la production (prévue et réelle) sera ajouté avec les ratios (étape 4.6).
+        Pourcentages de pertes par rapport à la production prévue et réelle : onglet « Ratios ».
       </p>
     </div>
   );

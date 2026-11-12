@@ -62,7 +62,7 @@ const chip = (active: boolean) =>
   `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
 
 /** Onglets des statistiques (vue générale, par zone, par équipe). */
-export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsContext; active: "general" | "zones" | "equipes" | "produits" | "causes" | "evolution" }) {
+export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsContext; active: "general" | "zones" | "equipes" | "produits" | "causes" | "evolution" | "ratios" }) {
   return (
     <nav className="flex flex-wrap gap-2" aria-label="Analyses">
       <Link className={chip(active === "general")} href={statsHref("/statistiques", ctx)}>
@@ -84,6 +84,9 @@ export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsCon
       )}
       <Link className={chip(active === "evolution")} href={statsHref("/statistiques/evolution", ctx)}>
         Évolution
+      </Link>
+      <Link className={chip(active === "ratios")} href={statsHref("/statistiques/ratios", ctx)}>
+        Ratios
       </Link>
       <Link className={chip(active === "produits")} href={statsHref("/statistiques/produits", ctx)}>
         Produits
