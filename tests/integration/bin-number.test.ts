@@ -58,12 +58,12 @@ describe("n° de poubelle des Alchimistes", () => {
     await expect(createDeclaration(t.db, team, input([{ destinationId: alchimistes, quantity: 2, binNumber: "  " }]), NOW)).rejects.toThrow(/n° de la poubelle/);
     const other = await createDeclaration(t.db, team, input([{ destinationId: ordures, quantity: 2, binNumber: "7" }]), NOW);
     const detail = await getDeclarationDetail(t.db, team, other.id, NOW);
-    expect(detail.destinations[0]!.binNumber).toBeNull();
+    expect(detail!.destinations[0]!.binNumber).toBeNull();
   });
 
   it("est enregistré, gardé à la correction et à l'annulation, et proposé pour la perte suivante de la zone", async () => {
     const first = await createDeclaration(t.db, team, input([{ destinationId: alchimistes, quantity: 2, binNumber: "12" }]), NOW);
-    expect((await getDeclarationDetail(t.db, team, first.id, NOW)).destinations[0]!.binNumber).toBe("12");
+    expect((await getDeclarationDetail(t.db, team, first.id, NOW))!.destinations[0]!.binNumber).toBe("12");
     expect((await lastBinNumbers(t.db, [zoneId]))[zoneId]?.[alchimistes]).toBe("12");
 
     const later = new Date("2026-11-02T15:00:00Z");
@@ -71,9 +71,9 @@ describe("n° de poubelle des Alchimistes", () => {
     expect((await lastBinNumbers(t.db, [zoneId]))[zoneId]?.[alchimistes]).toBe("13");
 
     await correctDeclaration(t.db, team, first.id, input([{ destinationId: alchimistes, quantity: 2, binNumber: "12" }]), { reason: "Repesé", expectedRevision: 1 }, later);
-    expect((await getDeclarationDetail(t.db, team, first.id, later)).destinations[0]!.binNumber).toBe("12");
+    expect((await getDeclarationDetail(t.db, team, first.id, later))!.destinations[0]!.binNumber).toBe("12");
     await cancelDeclaration(t.db, admin, second.id, { reason: "Doublon", expectedRevision: 1 }, later);
-    expect((await getDeclarationDetail(t.db, admin, second.id, later)).destinations[0]!.binNumber).toBe("13");
+    expect((await getDeclarationDetail(t.db, admin, second.id, later))!.destinations[0]!.binNumber).toBe("13");
     // Une perte annulée ne sert plus de référence : on revient à la poubelle 12.
     expect((await lastBinNumbers(t.db, [zoneId]))[zoneId]?.[alchimistes]).toBe("12");
   });

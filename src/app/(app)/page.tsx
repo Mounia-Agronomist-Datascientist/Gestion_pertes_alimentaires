@@ -99,9 +99,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       )}
 
       {(can(user, "stats.global") || can(user, "indicators.read")) && (
-        <Link href="/statistiques" className="btn-secondary flex items-center justify-center">
-          Statistiques
-        </Link>
+        <>
+          <Link href="/statistiques/synthese" className="btn-secondary flex items-center justify-center">
+            Synthèse de la semaine
+          </Link>
+          <Link href="/statistiques" className="btn-secondary flex items-center justify-center">
+            Statistiques
+          </Link>
+        </>
       )}
       {can(user, "indicators.read") && (
         <Link href="/couts" className="btn-secondary flex items-center justify-center">

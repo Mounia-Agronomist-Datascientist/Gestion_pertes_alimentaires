@@ -17,6 +17,7 @@ import { generalDashboard } from "@/modules/statistiques/dashboard";
 import { annualEvolution, kgPerThousand, monthlyEvolution, weekComparison } from "@/modules/statistiques/evolution";
 import { plannedVolumes } from "@/modules/statistiques/production";
 import { causeAndDestinationRanking, productRanking } from "@/modules/statistiques/rankings";
+import { weeklySummary } from "@/modules/statistiques/weekly";
 import { adjacentOf, loadFacts } from "@/modules/statistiques/facts";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
@@ -228,6 +229,19 @@ describe("lecture des pertes pour les statistiques", () => {
       [11, 3],
     ]);
     expect((await annualEvolution(t.db, direction, 2026, {})).map((y) => [y.year, y.summary.events])).toEqual([[2026, 4]]);
+  });
+
+  it("synthèse de la semaine : zones, causes et produits classés en euros (ou en kg pour une équipe)", async () => {
+    const w = (await weeklySummary(t.db, direction, { year: 2026, number: 45 }, {}))!;
+    expect(w).toMatchObject({ withCosts: true, by: "cout", summary: { events: 4 } });
+    expect(w.byZone.map((r) => [r.label, Math.round(r.share * 100)])).toEqual([["Cuisine / Production", 100]]);
+    expect(w.byProduct.some((r) => r.label.startsWith("VI01_"))).toBe(true);
+    expect(w.byCause).toHaveLength(1);
+    // Pas de pertes en S44 : pas de « points d'attention ».
+    expect(w.rises).toEqual([]);
+    const team = (await weeklySummary(t.db, teamC, { year: 2026, number: 45 }, {}))!;
+    expect(team).toMatchObject({ withCosts: false, by: "kg", summary: { events: 1, foodKg: 1.5 } });
+    expect(team.byProduct.map((r) => [r.label, r.value])).toEqual([["Carottes", 1.5]]);
   });
 
   it("refusé sans droit de statistiques", async () => {
