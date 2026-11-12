@@ -76,15 +76,21 @@ const WEEK_COLUMNS = {
   endDate: s.productionWeeks.endDate,
 };
 
-export async function weekComparison(db: Db, user: AuthUser, anchor: { year: number; number: number }, filters: StatsFilters, count = 12) {
+/** Les `count` semaines du calendrier jusqu'à la semaine donnée comprise, de la plus ancienne à la plus récente ; null si elle n'existe pas. */
+export async function recentWeeks(db: Db, anchor: { year: number; number: number }, count: number) {
   const [week] = await db
     .select(WEEK_COLUMNS)
     .from(s.productionWeeks)
     .where(and(eq(s.productionWeeks.year, anchor.year), eq(s.productionWeeks.number, anchor.number)));
   if (!week) return null;
-  const recent = (
+  return (
     await db.select(WEEK_COLUMNS).from(s.productionWeeks).where(lte(s.productionWeeks.startDate, week.startDate)).orderBy(desc(s.productionWeeks.startDate)).limit(count)
   ).reverse();
+}
+
+export async function weekComparison(db: Db, user: AuthUser, anchor: { year: number; number: number }, filters: StatsFilters, count = 12) {
+  const recent = await recentWeeks(db, anchor, count);
+  if (!recent) return null;
   const [lastYear] = await db
     .select(WEEK_COLUMNS)
     .from(s.productionWeeks)

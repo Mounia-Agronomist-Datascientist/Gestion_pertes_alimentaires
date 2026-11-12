@@ -7,6 +7,7 @@ import type { CsvTable, CsvValue } from "@/domain/csv";
 import { periodLabel } from "@/domain/periodes";
 import { formatProductionWeek } from "@/domain/semaine-production";
 import type { RankBy, StatsSummary } from "@/domain/statistiques";
+import { RECOVERY_GROUPS, type RecoveryTotals, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { COST_COMPONENTS } from "@/modules/couts/summary";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
@@ -17,9 +18,10 @@ import { DESTINATION_KIND_STATS, generalDashboard } from "./dashboard";
 import { annualEvolution, monthlyEvolution, weekComparison } from "./evolution";
 import { PRODUCT_TYPES, type ProductType, causeAndDestinationRanking, productRanking } from "./rankings";
 import { type RatioValues, weekRatios } from "./ratios";
+import { recoveryDashboard } from "./valorisation";
 import { weeklySummary } from "./weekly";
 
-export const EXPORT_TABS = ["general", "synthese", "zones", "equipes", "evolution", "ratios", "produits", "causes"] as const;
+export const EXPORT_TABS = ["general", "synthese", "zones", "equipes", "evolution", "ratios", "produits", "causes", "valorisation"] as const;
 export type ExportTab = (typeof EXPORT_TABS)[number];
 
 export interface StatsExport {
@@ -170,6 +172,50 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           { title: "Destinations", headers: ["Période", "Destination", "Kg alimentaires", "Pertes"], rows: ranking.destinations.map((d) => [label, d.name, roundKg(d.foodKg), d.events]) },
         ],
       };
+    }
+
+    case "valorisation": {
+      const anchor = await anchorWeek(db, ctx);
+      const data = await recoveryDashboard(db, user, ctx.period, anchor, ctx.filters);
+      const groupLabel = new Map<string, string>(RECOVERY_GROUPS.map((g) => [g.key, g.label]));
+      const headers = [
+        "Lignes",
+        "Kg alimentaires",
+        "Lignes sans kg",
+        "Lignes emballages / moules",
+        ...(withCosts ? ["Coût des produits (€)", "Lignes sans coût", "Recettes (€)", "Ventes recette à saisir", "Part récupérée (%)", "Recette par kg (€)"] : []),
+      ];
+      // Recette, part récupérée et recette par kg : ventes seulement (vide pour les autres groupes).
+      const cells = (t: RecoveryTotals, sale: boolean): CsvValue[] => [
+        t.lines,
+        roundKg(t.foodKg),
+        t.notConverted,
+        t.nonFood,
+        ...(t.cost
+          ? [t.cost.grossEur, t.cost.unvalued, ...(sale ? [t.cost.recoveredEur, t.cost.recoveryMissing, percent(recoveredShare(t)), recoveryPerKg(t)] : [null, null, null, null])]
+          : []),
+      ];
+      const tables: CsvTable[] = [
+        {
+          title: "Destinations",
+          headers: ["Période", "Groupe", "Destination", ...headers],
+          rows: [
+            ...RECOVERY_GROUPS.map((g) => [label, g.label, "Total du groupe", ...cells(data.groups[g.key], g.key === "avec_recette")]),
+            ...data.destinations.map((d) => [label, groupLabel.get(d.group)!, d.name, ...cells(d, d.group === "avec_recette")]),
+          ],
+        },
+      ];
+      if (data.series.length)
+        tables.push({
+          title: "12 semaines",
+          headers: ["Semaine", ...RECOVERY_GROUPS.map((g) => `Kg ${g.label.toLowerCase()}`), ...(withCosts ? ["Recettes (€)"] : [])],
+          rows: data.series.map((w) => [
+            formatProductionWeek(w),
+            ...RECOVERY_GROUPS.map((g) => roundKg(w.groups[g.key].foodKg)),
+            ...(withCosts ? [w.groups.avec_recette.cost?.recoveredEur ?? 0] : []),
+          ]),
+        });
+      return { name: fileName("valorisation", label), tables };
     }
 
     case "evolution": {

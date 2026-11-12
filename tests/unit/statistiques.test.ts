@@ -27,8 +27,8 @@ const cost = (gross: number, recovered = 0) => ({ materialEur: gross, packagingE
 
 describe("agrégats des statistiques", () => {
   const facts = [
-    fact({ netKg: 3.3, netQuantity: 10, netUnitCode: "barquette", cost: cost(13.3, 6), destinations: [{ destinationId: "tgtg", kind: "vente", quantity: 10, netKg: 3.3 }] }),
-    fact({ teamId: "C", causeId: "c2", netKg: 1.5, cost: cost(2), destinations: [{ destinationId: "a", kind: "compost", quantity: 1, netKg: 1 }, { destinationId: "d", kind: "don", quantity: 0.5, netKg: 0.5 }] }),
+    fact({ netKg: 3.3, netQuantity: 10, netUnitCode: "barquette", cost: cost(13.3, 6), destinations: [{ destinationId: "tgtg", kind: "vente", quantity: 10, netKg: 3.3, recoveredEur: 6 }] }),
+    fact({ teamId: "C", causeId: "c2", netKg: 1.5, cost: cost(2), destinations: [{ destinationId: "a", kind: "compost", quantity: 1, netKg: 1, recoveredEur: null }, { destinationId: "d", kind: "don", quantity: 0.5, netKg: 0.5, recoveredEur: null }] }),
     fact({ netKg: null, netQuantity: 3, netUnitCode: "barquette" }),
     fact({ food: false, category: "consommable", netKg: null, netQuantity: 40, netUnitCode: "piece" }),
   ];
@@ -51,7 +51,7 @@ describe("agrégats des statistiques", () => {
   });
 
   it("totalise les destinations, sans les kg des emballages", () => {
-    const totals = destinationTotals([...facts, fact({ food: false, netKg: null, destinations: [{ destinationId: "a", kind: "compost", quantity: 5, netKg: 9 }] })]);
+    const totals = destinationTotals([...facts, fact({ food: false, netKg: null, destinations: [{ destinationId: "a", kind: "compost", quantity: 5, netKg: 9, recoveredEur: null }] })]);
     expect(Object.fromEntries(totals)).toEqual({
       tgtg: { kind: "vente", foodKg: 3.3, events: 1 },
       a: { kind: "compost", foodKg: 1, events: 2 },

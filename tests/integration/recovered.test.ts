@@ -6,6 +6,7 @@ import { createAccount } from "@/modules/auth/accounts";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
 import { createDeclaration, setRecoveredAmounts } from "@/modules/declarations/service";
+import { recoveryDashboard } from "@/modules/statistiques/valorisation";
 import { weekCatalogs } from "@/modules/imports/catalog";
 import { buildWeekImport } from "@/modules/imports/merge";
 import { parsePlan } from "@/modules/imports/plan/parse-plan";
@@ -91,5 +92,20 @@ describe("recettes récupérées et coût net", () => {
     expect(rev?.reason).toBe("Recette encaissée");
     await expect(setRecoveredAmounts(t.db, admin, r.id, { expectedRevision: 1, amounts: { [ref.tgtg!]: 1 } }, NOW)).rejects.toThrow();
     await expect(setRecoveredAmounts(t.db, admin, r.id, { expectedRevision: 2, amounts: { [ref.compost!]: 1 } }, NOW)).rejects.toThrow(/introuvable|recette/);
+  });
+
+  it("valorisation : ventes avec recette (dernière version), compost sans recette, coût au prorata", async () => {
+    const week = { kind: "semaine" as const, year: 2026, number: 45 };
+    const data = await recoveryDashboard(t.db, admin, week, week, {});
+    // TGTG : 6 barquettes sur 10 (4,50 €) puis 10 barquettes (7,99 € saisis plus tard) ; Alchimistes : 4 barquettes.
+    expect(data.groups.avec_recette.cost).toMatchObject({ grossEur: 21.28, recoveredEur: 12.49, recoveryMissing: 0 });
+    expect(data.groups.sans_recette).toMatchObject({ lines: 1, cost: { grossEur: 5.32, recoveredEur: 0 } });
+    expect(data.groups.a_part.lines).toBe(0);
+    expect(data.destinations.map((d) => [d.name, d.lines])).toEqual([
+      ["Too Good To Go", 2],
+      ["Les Alchimistes – compost", 1],
+    ]);
+    expect(data.series.at(-1)!.groups.avec_recette.cost?.recoveredEur).toBe(12.49);
+    expect(data.series).toHaveLength(12);
   });
 });

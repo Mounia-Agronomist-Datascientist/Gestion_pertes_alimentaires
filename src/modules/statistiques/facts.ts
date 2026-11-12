@@ -103,19 +103,20 @@ export async function loadFacts(db: Db, user: AuthUser, period: Period, filters:
       kind: s.destinations.kind,
       quantity: s.declarationDestinations.quantity,
       netKg: s.declarationDestinations.netKg,
+      recoveredAmount: s.declarationDestinations.recoveredAmount,
     })
     .from(s.declarationDestinations)
     .innerJoin(s.destinations, eq(s.destinations.id, s.declarationDestinations.destinationId))
     .where(inArray(s.declarationDestinations.declarationId, rows.map((r) => r.id)));
+  const withCosts = can(user, "indicators.read");
   const revisionOf = new Map(rows.map((r) => [r.id, r.revision]));
   const destinationsOf = new Map<string, LossFact["destinations"]>();
   for (const l of lines) {
     if (revisionOf.get(l.declarationId) !== l.revision) continue;
     const list = destinationsOf.get(l.declarationId) ?? destinationsOf.set(l.declarationId, []).get(l.declarationId)!;
-    list.push({ destinationId: l.destinationId, kind: l.kind, quantity: l.quantity, netKg: l.netKg });
+    list.push({ destinationId: l.destinationId, kind: l.kind, quantity: l.quantity, netKg: l.netKg, recoveredEur: withCosts ? l.recoveredAmount : null });
   }
 
-  const withCosts = can(user, "indicators.read");
   const facts = rows.map((r): LossFact => {
     // Coût brut figé ; une perte saisie avant le coût brut (Phase 2) compte pour son coût matière (comme « Coûts des pertes »).
     const gross = r.grossCostEur ?? r.materialCostEur;

@@ -14,7 +14,8 @@ Cela couvre :
 | 12/11/2026 | Valorisation (§10.4, §20.1) | **Ce qui rapporte de l'argent est séparé de ce qui n'en rapporte pas.** Avec recette : ventes flash, Too Good To Go. Sans recette : personnel, association / don, ordures ménagères, Les Alchimistes. |
 | 12/11/2026 | Poids des Alchimistes (§21) | **Fichier Excel ou CSV** fourni par Les Alchimistes, déposé dans l'application, avec un aperçu avant validation. |
 | 12/11/2026 | Précision du CO2e (§20.2, §29 point 10) | **Calcul à partir de la recette Melba.** Chaque ingrédient du tome est rattaché à une famille alimentaire. Le facteur de chaque famille vient d'Agribalyse (ADEME) et doit être validé avant usage. L'impact d'un plat est la somme de ses ingrédients. Une perte hors liste reçoit une estimation par famille, signalée comme telle. |
-| 12/11/2026 | Retours fournisseurs et avoirs | **Classés à part**, ni avec recette ni sans recette. La réutilisation reste à classer. |
+| 12/11/2026 | Retours fournisseurs et avoirs | **Classés à part**, ni avec recette ni sans recette. |
+| 12/11/2026 | Réutilisation dans une autre préparation | **À part, avec les retours fournisseurs.** |
 | 12/11/2026 | Versions des facteurs CO2e | **Les anciennes versions sont conservées.** Un calcul fait avec une version de facteur n'est pas réécrit quand le facteur change (même principe que les coûts, §22). |
 | 12/11/2026 | Semaine d'une collecte | **Calculée automatiquement à partir de la date de collecte**, avec le calendrier de production de l'application. La colonne « Correspondance aux semaines de prod » du fichier n'est plus à remplir à la main ; si elle est remplie et diffère, l'aperçu le signale. |
 | 12/11/2026 | N° de poubelle | **Facultatif à la saisie en attendant**, obligatoire à nouveau dès que l'on obtient les n° des bacs collectés. Les n° sont visibles dans l'agenda en ligne des Alchimistes, jour par jour, mais pas dans leur fichier CSV ; demande envoyée aux Alchimistes pour les ajouter. Réglage dans Administration → Destinations (migration 0017). |
@@ -44,7 +45,7 @@ Cela couvre :
 
 | Étape | Contenu | État |
 |---|---|---|
-| 5.1 | **Valorisation** : nouvel onglet des statistiques. Il présente deux blocs. **Avec recette** (ventes) : kg, nombre de ventes, recettes, recette par kg, coût brut des produits vendus et part récupérée. **Sans recette** (don, personnel, compost, ordures) : kg et coût des produits. Suivi des dons, des ventes et des réutilisations sur 12 semaines. Exports Excel et CSV. | À faire |
+| 5.1 | **Valorisation** : onglet des statistiques en trois groupes (avec recette, sans recette, à part), détail par destination, suivi sur 12 semaines, exports Excel et CSV. | ✅ |
 | 5.2 | **Import des poids des Alchimistes** : dépôt du fichier, aperçu, enregistrement des versions et de la source. Chaque bac collecté garde sa date, son poids, son type de bac, sa qualité et l'incident éventuel. | Extrait reçu |
 | 5.3 | **Rapprochement** : par semaine de production ou par mois, kg déclarés vers Les Alchimistes comparés aux kg qu'ils ont mesurés. Écart en kg et en %, périodes non rapprochées. | Après 5.2 |
 | 5.4 | **Facteurs d'émission** : écran des familles alimentaires et de leurs facteurs. Je préparerai une proposition tirée d'Agribalyse, que vous validerez. | À faire |
@@ -54,10 +55,27 @@ Cela couvre :
 
 ## À confirmer
 
-- **Réutilisation** dans une autre préparation : avec recette, sans recette, ou à part avec les retours
-  fournisseurs ?
 - **N° des bacs collectés** : réponse des Alchimistes attendue (colonne « Identifiant du contenant » dans leur
   export). D'ici là, le rapprochement se fait par semaine seulement.
+
+## 5.1 — Onglet « Valorisation » ✅
+
+Statistiques → Valorisation, avec la même période, les mêmes filtres et les mêmes droits que les autres onglets.
+- Trois groupes :
+  - **avec recette** : ventes (Too Good To Go, vente flash) ;
+  - **sans recette** : ordures ménagères, compost (Les Alchimistes), don, personnel, autre ;
+  - **à part** : réutilisation dans une autre préparation, retours fournisseurs.
+- Pour chaque destination : kg, nombre de lignes et, pour les profils qui voient les euros, coût des produits
+  et recette. Pour les ventes : part du coût récupérée et recette par kg.
+- **Coût des produits d'une destination** : coût brut figé de la perte, réparti entre ses destinations au
+  prorata des quantités affectées.
+- Remarques affichées : lignes sans kg, emballages et moules (jamais en kg), lignes sans coût, ventes dont la
+  recette reste à saisir.
+- Suivi des 12 dernières semaines : kg par groupe (colonnes empilées) et recettes encaissées.
+- Exports : tableau des destinations (totaux par groupe puis détail) et tableau des 12 semaines.
+- Code : `src/domain/valorisation.ts` (calcul pur), `src/modules/statistiques/valorisation.ts`,
+  `src/app/(app)/statistiques/valorisation/page.tsx`. Tests : `tests/unit/valorisation.test.ts`,
+  `tests/integration/recovered.test.ts`.
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 

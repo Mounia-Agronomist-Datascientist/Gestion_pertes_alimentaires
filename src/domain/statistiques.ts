@@ -42,7 +42,8 @@ export interface LossFact {
   netUnitCode: string;
   /** null : perte sans coût connu, ou coûts non visibles pour ce profil. */
   cost: FactCost | null;
-  destinations: { destinationId: string; kind: string; quantity: number; netKg: number | null }[];
+  /** recoveredEur : recette encaissée sur une ligne de vente (null : à saisir, ou euros non visibles). */
+  destinations: { destinationId: string; kind: string; quantity: number; netKg: number | null; recoveredEur: number | null }[];
 }
 
 export interface CostSummary extends FactCost {
