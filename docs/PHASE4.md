@@ -34,7 +34,7 @@ semaines ; ratios de pertes ; graphiques économiques.
 | 4.2 | **Tableau de bord général** (§19.1) : kg, coût, quantités détruite / compostée / donnée / vendue / réutilisée, évolution par rapport à la période précédente, barre de filtres | ✅ Page « Statistiques » |
 | 4.3 | **Analyses par zone, sous-zone et équipe** (§19.2, §19.3) : quantités, coûts, causes principales, produits, destinations, évolution ; comparaison des équipes pour les profils autorisés | ✅ Onglets « Par zone » et « Par équipe » |
 | 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ✅ Onglets « Produits » et « Causes et destinations » |
-| 4.5 | **Comparaison des semaines** (§19.6) : courbe semaine par semaine, moyenne des dernières semaines, mois, année, même semaine l'année précédente si elle existe | ⏳ |
+| 4.5 | **Comparaison des semaines** (§19.6) : courbe semaine par semaine, moyenne des dernières semaines, mois, année, même semaine l'année précédente si elle existe | ✅ Onglet « Évolution » |
 | 4.6 | **Ratios de pertes** (§19.7) : barquettes perdues / barquettes produites, kg perdus / kg produits, prévu et réel côte à côte, avec dénominateur affiché | ⏳ |
 | 4.7 | **Graphiques économiques** : évolution du coût brut et net, répartition par composante dans le temps (complète « Coûts des pertes ») | ⏳ |
 | 4.8 | **Exports Excel et CSV** de chaque tableau de bord, avec ses filtres | ⏳ |
@@ -117,3 +117,23 @@ Les pertes par quantité produite (§19.4) arriveront avec les ratios (étape 4.
 
 Vérifié : 1 test unitaire + 2 tests d'intégration (formule, sous-recette partagée et ses plats, compte équipe
 sans euros, causes et destinations) ; pages vérifiées dans le navigateur (mobile) avec un compte équipe.
+
+## Comparaison des semaines (4.5)
+
+Onglet **Évolution** (§19.6), toujours à partir d'une semaine (celle choisie, sinon la semaine en cours) :
+- **comparaison de la semaine** : semaine choisie, semaine précédente, moyenne des 4 semaines d'avant, même
+  semaine l'année précédente (si des pertes y sont enregistrées) ; kg, barquettes perdues, nombre de pertes, coût
+  brut (profils qui voient les euros), **barquettes prévues** et **kg pour 1 000 barquettes prévues** ;
+- **à volume égal** : le volume est celui du **plan de production importé** de chaque semaine (barquettes prévues,
+  toutes équipes, ou celles de l'équipe filtrée / du compte équipe). Sans plan importé, le chiffre n'est pas
+  calculé (tiret) ; la moyenne à volume égal ne compte que les semaines qui ont un plan ;
+- **dernières semaines** : histogramme des 12 dernières semaines, en kg ou à volume égal, valeurs dans un
+  tableau dépliable ;
+- **évolution mensuelle** (date réelle de la perte, 12 mois au plus à partir de la première perte) et
+  **annuelle** (années de production), chacune comparée à la précédente.
+
+Volume prévu : `src/modules/statistiques/production.ts` (barquettes du plan × poids d'une portion Melba pour les
+kg, décision du 10/11/2026), réutilisé pour les ratios de l'étape 4.6.
+
+Vérifié : 3 tests d'intégration (volume prévu total et par équipe, comparaison et moyenne, mois et années) ;
+page vérifiée dans le navigateur (mobile, compte équipe : volume de l'équipe D).

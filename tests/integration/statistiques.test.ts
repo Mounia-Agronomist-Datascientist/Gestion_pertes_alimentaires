@@ -14,6 +14,8 @@ import { saveWeekImport } from "@/modules/imports/service";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
 import { axisDetail, compareAxis, recentWeeks } from "@/modules/statistiques/analysis";
 import { generalDashboard } from "@/modules/statistiques/dashboard";
+import { annualEvolution, kgPerThousand, monthlyEvolution, weekComparison } from "@/modules/statistiques/evolution";
+import { plannedVolumes } from "@/modules/statistiques/production";
 import { causeAndDestinationRanking, productRanking } from "@/modules/statistiques/rankings";
 import { adjacentOf, loadFacts } from "@/modules/statistiques/facts";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
@@ -189,6 +191,43 @@ describe("lecture des pertes pour les statistiques", () => {
         ["Too Good To Go", 1],
       ]),
     );
+  });
+
+  it("volume prévu de la semaine d'après le plan importé, pour toutes les équipes ou une seule", async () => {
+    const [week] = await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)));
+    const all = (await plannedVolumes(t.db, [week!.id])).get(week!.id)!;
+    const teamOnly = (await plannedVolumes(t.db, [week!.id], teamDId)).get(week!.id)!;
+    expect(all.barquettes).toBeGreaterThan(teamOnly.barquettes);
+    expect(teamOnly.barquettes).toBeGreaterThan(0);
+    expect(all.kg).toBeGreaterThan(all.barquettes * 0.25);
+    expect((await plannedVolumes(t.db, [week!.id])).size).toBe(1);
+    expect(kgPerThousand(10, { barquettes: 20000, kg: null, dishesWithoutWeight: 0 })).toBe(0.5);
+    expect(kgPerThousand(10, null)).toBeNull();
+  });
+
+  it("compare la semaine à la précédente, à la moyenne et à volume égal", async () => {
+    const c = (await weekComparison(t.db, direction, { year: 2026, number: 45 }, {}, 6))!;
+    expect(c.series.map((p) => p.number)).toEqual([40, 41, 42, 43, 44, 45]);
+    expect(c.current.summary.events).toBe(4);
+    expect(c.current.planned?.barquettes).toBeGreaterThan(0);
+    expect(c.current.perThousand).toBe(kgPerThousand(c.current.summary.foodKg, c.current.planned));
+    expect(c.previous?.planned).toBeNull();
+    expect(c.average).toMatchObject({ weeks: 4, events: 0, perThousand: null });
+    expect(c.lastYear).toBeNull();
+    // Une équipe compare avec le volume prévu de son équipe.
+    const team = (await weekComparison(t.db, teamD, { year: 2026, number: 45 }, {}, 2))!;
+    expect(team.volumeTeam).toBe(teamDId);
+    expect(await weekComparison(t.db, direction, { year: 2031, number: 45 }, {})).toBeNull();
+  });
+
+  it("évolution mensuelle (date réelle) et annuelle (année de production)", async () => {
+    const months = await monthlyEvolution(t.db, direction, { year: 2026, month: 11 }, {}, 3);
+    expect(months.map((m) => [m.month, m.summary.events])).toEqual([
+      [9, 0],
+      [10, 1],
+      [11, 3],
+    ]);
+    expect((await annualEvolution(t.db, direction, 2026, {})).map((y) => [y.year, y.summary.events])).toEqual([[2026, 4]]);
   });
 
   it("refusé sans droit de statistiques", async () => {
