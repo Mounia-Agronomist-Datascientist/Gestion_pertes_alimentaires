@@ -46,7 +46,7 @@ Cela couvre :
 | Étape | Contenu | État |
 |---|---|---|
 | 5.1 | **Valorisation** : onglet des statistiques en trois groupes (avec recette, sans recette, à part), détail par destination, suivi sur 12 semaines, exports Excel et CSV. | ✅ |
-| 5.2 | **Import des poids des Alchimistes** : dépôt du fichier, aperçu, enregistrement des versions et de la source. Chaque bac collecté garde sa date, son poids, son type de bac, sa qualité et l'incident éventuel. | Extrait reçu |
+| 5.2 | **Import des poids des Alchimistes** : dépôt du fichier (CSV ou Excel), aperçu par semaine de production, conservation de chaque dépôt ; un fichier plus récent remplace les collectes de sa période. | ✅ |
 | 5.3 | **Rapprochement** : par semaine de production ou par mois, kg déclarés vers Les Alchimistes comparés aux kg qu'ils ont mesurés. Écart en kg et en %, périodes non rapprochées. | Après 5.2 |
 | 5.4 | **Facteurs d'émission** : écran des familles alimentaires et de leurs facteurs. Je préparerai une proposition tirée d'Agribalyse, que vous validerez. | À faire |
 | 5.5 | **Rattachement des ingrédients Melba aux familles** : suggestions automatiques par mot-clé, validées par vous. On commence par les ingrédients les plus fréquents. | Après 5.4 |
@@ -76,6 +76,25 @@ Statistiques → Valorisation, avec la même période, les mêmes filtres et les
 - Code : `src/domain/valorisation.ts` (calcul pur), `src/modules/statistiques/valorisation.ts`,
   `src/app/(app)/statistiques/valorisation/page.tsx`. Tests : `tests/unit/valorisation.test.ts`,
   `tests/integration/recovered.test.ts`.
+
+## 5.2 — Import des pesées des Alchimistes ✅
+
+Administration → Import de la semaine → « Pesées des Alchimistes ».
+- Le fichier (CSV avec « ; », « , » ou tabulation, ou Excel : premier onglet) est lu **sur l'ordinateur** ;
+  seules les collectes sont envoyées. Région, nom du client et nom de l'établissement ne sont jamais lus.
+- Gardé pour chaque bac : date, poids net, type de contenant, n° du bac (si une colonne « Identifiant du
+  contenant » apparaît), qualité, incident, type de matière, semaine écrite dans le fichier (pour contrôle).
+- **Semaine de production** : tirée du calendrier de l'application à partir de la date (jeudi → mercredi). Si
+  la colonne « Correspondance aux semaines de prod » donne une autre semaine, l'aperçu le signale.
+- Aperçu : période, nombre de bacs, kg, livraisons ignorées, bacs et kg par semaine de production, points à
+  vérifier (collecte à 0 kg, plusieurs contenants sur une ligne, type inconnu, semaine différente), et
+  avertissement si des collectes sont déjà enregistrées sur la période.
+- **Remplacement** : un nouveau dépôt remplace les collectes en vigueur entre sa première et sa dernière date.
+  Les collectes remplacées restent en base (`replaced_by_import_id`) ; chaque dépôt est tracé dans le journal.
+- Les poids ne s'ajoutent jamais aux pertes déclarées : ils serviront au rapprochement (5.3).
+- Tables `alchimistes_imports` et `alchimistes_collections` (migration 0018). Code :
+  `src/modules/imports/alchimistes/`, `src/app/(app)/admin/import/alchimistes-wizard.tsx`. Tests :
+  `tests/unit/parse-alchimistes.test.ts`, `tests/integration/alchimistes.test.ts`.
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 

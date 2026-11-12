@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
+import { alchimistesPayloadSchema, saveAlchimistesImport } from "@/modules/imports/alchimistes/service";
 import { decomptePayloadSchema, saveProductionCount } from "@/modules/imports/decompte/service";
 import { buildWeekImport } from "@/modules/imports/merge";
 import { importPayloadSchema } from "@/modules/imports/payload";
@@ -55,6 +56,31 @@ export async function importDecompteAction(_prev: ImportActionState, formData: F
     revalidatePath("/admin/import");
     return {
       message: `Décompte S${parsed.data.week}-${parsed.data.year} enregistré (version ${saved.version}) : ${parsed.data.rows.length} codes, ${saved.total.toLocaleString("fr-FR")} barquettes produites.`,
+    };
+  } catch (e) {
+    if (e instanceof ImportError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+}
+
+/** Valide le fichier des Alchimistes : collectes revérifiées par le serveur, semaine tirée du calendrier stocké. */
+export async function importAlchimistesAction(_prev: ImportActionState, formData: FormData): Promise<ImportActionState> {
+  const admin = await requireUser();
+  let raw: unknown;
+  try {
+    raw = JSON.parse(String(formData.get("payload") ?? ""));
+  } catch {
+    return { error: "Données illisibles : rechargez la page et déposez à nouveau le fichier" };
+  }
+  const parsed = alchimistesPayloadSchema.safeParse(raw);
+  if (!parsed.success) return { error: "Données inattendues : rechargez la page et déposez à nouveau le fichier" };
+  try {
+    const saved = await saveAlchimistesImport(db, admin, parsed.data);
+    revalidatePath("/admin/import");
+    return {
+      message: `Pesées des Alchimistes enregistrées : ${saved.collections} collectes, ${saved.totalKg.toLocaleString("fr-FR")} kg${
+        saved.replaced ? ` (${saved.replaced} collectes déjà enregistrées sur la période remplacées)` : ""
+      }.`,
     };
   } catch (e) {
     if (e instanceof ImportError || e instanceof ForbiddenError) return { error: e.message };

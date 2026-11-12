@@ -7,3 +7,4 @@ export * from "./declarations";
 export * from "./alertes";
 export * from "./imports";
 export * from "./couts";
+export * from "./alchimistes";

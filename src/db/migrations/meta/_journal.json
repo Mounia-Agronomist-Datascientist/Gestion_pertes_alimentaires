@@ -127,6 +127,13 @@
       "when": 1794495633536,
       "tag": "0017_numero_poubelle_facultatif",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794497686600,
+      "tag": "0018_alchimistes",
+      "breakpoints": true
     }
   ]
 }
