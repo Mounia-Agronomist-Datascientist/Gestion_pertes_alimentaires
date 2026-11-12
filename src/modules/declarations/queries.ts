@@ -46,6 +46,7 @@ export async function listDeclarations(db: Db, user: AuthUser, filters: Declarat
       declaredAt: s.lossDeclarations.declaredAt,
       isLate: s.lossDeclarations.isLate,
       productName: s.lossDeclarations.productName,
+      productCode: s.lossDeclarations.productCode,
       productUnlisted: s.lossDeclarations.productUnlisted,
       netQuantity: s.lossDeclarations.netQuantity,
       netUnitCode: s.lossDeclarations.netUnitCode,

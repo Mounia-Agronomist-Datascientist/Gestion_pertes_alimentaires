@@ -146,7 +146,7 @@ describe("lecture des pertes pour les statistiques", () => {
     expect(cuisine.label).toBe("Cuisine / Production");
     expect(cuisine.causes).toHaveLength(1);
     expect(cuisine.products.map((p) => [p.label, p.summary.events])).toEqual(
-      expect.arrayContaining([["Carottes", 1], [expect.stringMatching(/^VI01 – /) as unknown as string, 2]]),
+      expect.arrayContaining([["Carottes", 1], [expect.stringMatching(/^VI01_/) as unknown as string, 2]]),
     );
     expect(cuisine.teams.map((x) => x.label).sort()).toEqual(["Équipe C – Rose", "Équipe D – Jaune"]);
   });
@@ -169,7 +169,7 @@ describe("lecture des pertes pour les statistiques", () => {
 
   it("classe les plats par formule et compte une sous-recette une fois, avec les plats qui l'utilisent", async () => {
     const plats = await productRanking(t.db, direction, S45, {}, "plats", "kg");
-    expect(plats.rows.map((r) => [r.label.slice(0, 7), r.summary.events, r.summary.barquettes])).toEqual([["VI01 – ", 2, 13]]);
+    expect(plats.rows.map((r) => [r.label.slice(0, 5), r.summary.events, r.summary.barquettes])).toEqual([["VI01_", 2, 13]]);
     expect(plats.rows[0]!.mainCause).toMatchObject({ name: expect.any(String), share: 1 });
 
     const subs = await productRanking(t.db, direction, S45, {}, "sous_recettes", "kg");

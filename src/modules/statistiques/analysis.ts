@@ -9,12 +9,11 @@
 import { and, desc, eq, lte } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import { productLabel } from "@/domain/produits";
 import { monthBounds, type Period } from "@/domain/periodes";
 import { type LossFact, rankGroups, type StatsSummary, summarize } from "@/domain/statistiques";
 import { type AuthUser, can, ForbiddenError } from "@/modules/auth/permissions";
 import { adjacentOf, loadFacts, type StatsFilters } from "./facts";
-
-const productLabel = (f: LossFact) => (f.productCode ? `${f.productCode} – ${f.productName}` : f.productName);
 
 export type Axis = "zone" | "equipe";
 
@@ -122,7 +121,7 @@ export async function axisDetail(db: Db, user: AuthUser, axis: Axis, id: string,
     label: (axis === "zone" ? names.zone : names.team).get(id)?.label ?? null,
     summary: summarize(facts, withCosts),
     causes: ranked((f) => f.causeId).map((g) => ({ ...g, label: firstName.get(g.key)!.causeName })),
-    products: ranked((f) => f.productKey).map((g) => ({ ...g, label: productLabel(firstName.get(g.key)!), category: firstName.get(g.key)!.category })),
+    products: ranked((f) => f.productKey).map((g) => ({ ...g, label: productLabel(firstName.get(g.key)!.productName, firstName.get(g.key)!.productCode), category: firstName.get(g.key)!.category })),
     subzones: ranked((f) => f.subzoneId).map((g) => ({ ...g, label: names.subzone.get(g.key) ?? "—" })),
     teams:
       axis === "zone" && can(user, "stats.compare_teams")

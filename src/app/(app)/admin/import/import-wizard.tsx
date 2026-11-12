@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useRef, useState } from "react";
+import { productLabel } from "@/domain/produits";
 import { buildWeekImport, isSnackCode } from "@/modules/imports/merge";
 import { type PlanParseResult, parsePlan } from "@/modules/imports/plan/parse-plan";
 import type { OpenedWorkbook } from "@/modules/imports/plan/read-workbook";
@@ -156,7 +157,7 @@ export function ImportWizard({ existing }: { existing: { year: number; week: num
                 <ul className="text-sm text-slate-700">
                   {recipes.map((r) => (
                     <li key={r.code}>
-                      <span className="font-mono">{r.code}</span> {r.name}
+                      {productLabel(r.name, r.code)}
                       {r.weekBarquettes != null && <span className="text-slate-500"> · {r.weekBarquettes} barq.</span>}
                     </li>
                   ))}

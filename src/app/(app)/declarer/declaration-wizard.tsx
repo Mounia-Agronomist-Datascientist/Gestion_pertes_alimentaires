@@ -1,5 +1,6 @@
 "use client";
 
+import { productLabel } from "@/domain/produits";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
@@ -1119,7 +1120,7 @@ function ProductStep({
       kind: "week",
       itemKind: "plat",
       id: d.id,
-      name: d.name,
+      name: productLabel(d.name, d.code),
       category: d.snack ? "produit_externe" : "produit_fini",
       unitWeightKg: gramsToKg(d.portionWeightG),
       week: week!,
@@ -1191,7 +1192,7 @@ function ProductStep({
     const sub = current.kind === "sous_recette" ? catalog.subRecipes[current.id] : undefined;
     const lines = dish?.lines ?? sub?.lines ?? [];
     return (
-      <Section title={dish ? `${dish.code} — ${dish.name}` : (sub?.name ?? "")}>
+      <Section title={dish ? productLabel(dish.name, dish.code) : (sub?.name ?? "")}>
         <button type="button" className="self-start text-slate-700 underline" onClick={() => setPath(path.slice(0, -1))}>
           {path.length > 1 ? "← Revenir au niveau précédent" : "← Tous les plats"}
         </button>
@@ -1289,9 +1290,7 @@ function ProductStep({
           <div className="flex flex-col gap-2">
             {dishes.map((d) => (
               <Tile key={d.id} compact onClick={() => setPath([{ kind: "plat", id: d.id }])}>
-                <span>
-                  <span className="font-mono">{d.code}</span> {d.name}
-                </span>
+                <span>{productLabel(d.name, d.code)}</span>
                 <small className="font-normal opacity-70">{d.lines.length} composant{d.lines.length > 1 ? "s" : ""} →</small>
               </Tile>
             ))}
@@ -1343,7 +1342,7 @@ function searchWeek(catalog: WeekCatalog, dishes: WeekCatalog["dishes"], term: s
   const fold = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
   const wanted = fold(term);
   const matches: WeekMatch[] = [];
-  for (const d of dishes) if (fold(`${d.code} ${d.name}`).includes(wanted)) matches.push({ kind: "plat", id: d.id, label: `${d.code} — ${d.name}`, dish: d });
+  for (const d of dishes) if (fold(`${d.code} ${d.name}`).includes(wanted)) matches.push({ kind: "plat", id: d.id, label: productLabel(d.name, d.code), dish: d });
   // Sous-recettes et ingrédients accessibles depuis les plats proposés.
   const seenSubs = new Set<string>();
   const seenIngredients = new Set<string>();

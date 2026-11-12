@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { productLabel } from "@/domain/produits";
 import { db } from "@/db/client";
 import type { UnitCost } from "@/domain/couts";
 import { computeProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
@@ -44,7 +45,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
           kind: "week",
           itemKind: weekItem.kind,
           id: weekItem.id,
-          name: d.productName,
+          name: productLabel(d.productName, d.productCode),
           category: d.productCategory,
           unitWeightKg: d.conversionFactorUsed,
           week: { year: lossWeek.year, number: lossWeek.number },

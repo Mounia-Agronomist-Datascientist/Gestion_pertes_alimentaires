@@ -10,6 +10,7 @@
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import { productLabel } from "@/domain/produits";
 import type { Period } from "@/domain/periodes";
 import { destinationTotals, type LossFact, type RankBy, rankGroups, type StatsSummary } from "@/domain/statistiques";
 import { type AuthUser, can } from "@/modules/auth/permissions";
@@ -76,9 +77,9 @@ export async function productRanking(db: Db, user: AuthUser, period: Period, fil
     for (const f of list) if (f.weekSubRecipeId) for (const c of usedBy.get(f.weekSubRecipeId) ?? []) codes.add(c);
     return {
       key: g.key,
-      label: first.productCode ? (names.length > 1 ? `${first.productCode} (formule)` : `${first.productCode} – ${first.productName}`) : first.productName,
+      label: first.productCode && names.length > 1 ? `${first.productCode} (formule)` : productLabel(first.productName, first.productCode),
       category: first.category,
-      names: names.length > 1 ? names : [],
+      names: names.length > 1 ? names.map((n) => productLabel(n, first.productCode)) : [],
       summary: g.summary,
       mainCause: mainCause(list),
       usedIn: first.category === "sous_recette" ? [...codes].sort() : null,

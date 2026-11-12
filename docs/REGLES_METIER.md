@@ -210,3 +210,8 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
   les kg (signalé).
 - Par équipe : codes attribués à l'équipe par le plan de la semaine.
 - Sans plan ou sans décompte, le volume correspondant n'existe pas : aucun ratio n'est calculé ni estimé.
+
+## R16 — Nom affiché d'un plat (12/11/2026)
+
+Partout dans l'application (saisie, historique, détail, statistiques, import), un plat de la semaine s'affiche
+avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregistré sur la perte ne change pas.

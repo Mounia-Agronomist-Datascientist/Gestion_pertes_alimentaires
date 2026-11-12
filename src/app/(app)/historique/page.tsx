@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { db } from "@/db/client";
+import { productLabel } from "@/domain/produits";
 import { addDays, formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { listDeclarations } from "@/modules/declarations/queries";
@@ -63,7 +64,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Para
               <Link href={`/historique/${d.id}`} className="flex flex-col gap-1 rounded-2xl bg-white p-4 shadow-sm">
                 <span className="flex items-start justify-between gap-2">
                   <span className="font-semibold">
-                    {d.productName}
+                    {productLabel(d.productName, d.productCode)}
                     {d.productUnlisted && <span className="text-sm font-normal text-amber-700"> (hors liste)</span>}
                   </span>
                   <span className="whitespace-nowrap font-semibold">{fmtQuantity(d.netQuantity, d.netUnitCode, d.netKg)}</span>

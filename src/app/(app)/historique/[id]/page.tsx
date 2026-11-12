@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db/client";
+import { productLabel } from "@/domain/produits";
 import { formatProductionWeek } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
@@ -70,7 +71,7 @@ export default async function DeclarationDetailPage({
       )}
 
       <div className="flex items-start justify-between gap-3">
-        <h1 className="text-2xl font-bold">{d.productName}</h1>
+        <h1 className="text-2xl font-bold">{productLabel(d.productName, d.productCode)}</h1>
         <span className={`rounded-full px-3 py-1 text-sm font-medium ${STATUS_STYLES[d.status]}`}>{STATUS_LABELS[d.status]}</span>
       </div>
 
@@ -97,7 +98,7 @@ export default async function DeclarationDetailPage({
         )}
         <dt className="text-slate-500">Produit</dt>
         <dd>
-          {d.productName} <span className="text-sm text-slate-500">({PRODUCT_CATEGORY_LABELS[d.productCategory]})</span>
+          {productLabel(d.productName, d.productCode)} <span className="text-sm text-slate-500">({PRODUCT_CATEGORY_LABELS[d.productCategory]})</span>
           {d.productUnlisted && <span className="block text-sm text-amber-700">Hors liste : à rattacher au référentiel</span>}
         </dd>
         {d.costImportId && (
@@ -214,7 +215,7 @@ export default async function DeclarationDetailPage({
                 {r.reason && <p>Motif : {r.reason}</p>}
                 {changes.length > 0 && <p className="text-slate-600">Modifié : {changes.join(", ")}</p>}
                 <p className="text-slate-500">
-                  {String(data.declaration.productName)} ·{" "}
+                  {productLabel(String(data.declaration.productName), data.declaration.productCode as string | null)} ·{" "}
                   {fmtQuantity(
                     Number(data.declaration.netQuantity),
                     String(data.declaration.netUnitCode),
