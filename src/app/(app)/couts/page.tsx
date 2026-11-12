@@ -5,20 +5,13 @@ import { addDays, formatProductionWeek, toProductionLocalDate } from "@/domain/s
 import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
 import { COST_COMPONENTS, type CostTotals, weekCostSummary } from "@/modules/couts/summary";
+import { COMPONENT_COLORS } from "./colors";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
 export const metadata = { title: "Coûts — Pertes" };
 
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 const pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 1 });
-
-/** Couleurs fixes par composante (palette catégorielle validée, ordre fixe : jamais réattribuées). */
-const COMPONENT_COLORS: Record<(typeof COST_COMPONENTS)[number]["key"], string> = {
-  materialEur: "#2a78d6",
-  labourEur: "#eb6834",
-  packagingEur: "#1baf7a",
-  indirectEur: "#eda100",
-};
 
 const COMPONENT_NOTES: Partial<Record<(typeof COST_COMPONENTS)[number]["key"], string>> = {
   labourEur: "non imputée : méthode à définir",

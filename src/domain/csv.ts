@@ -17,3 +17,16 @@ function cell(value: CsvValue): string {
 export function toCsv(headers: readonly string[], rows: readonly (readonly CsvValue[])[]): string {
   return `﻿${[headers, ...rows].map((r) => r.map(cell).join(";")).join("\r\n")}\r\n`;
 }
+
+export interface CsvTable {
+  /** Titre du tableau (nom de l'onglet dans Excel). */
+  title: string;
+  headers: string[];
+  rows: CsvValue[][];
+}
+
+/** Plusieurs tableaux dans un seul CSV : chacun précédé de son titre, séparés par une ligne vide. Un seul : sans titre. */
+export function tablesToCsv(tables: readonly CsvTable[]): string {
+  if (tables.length === 1) return toCsv(tables[0]!.headers, tables[0]!.rows);
+  return `﻿${tables.map((t) => toCsv([t.title], [t.headers, ...t.rows]).slice(1)).join("\r\n")}`;
+}

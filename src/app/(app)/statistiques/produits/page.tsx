@@ -8,7 +8,7 @@ import { can } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { PRODUCT_TYPES, type ProductType, productRanking, RANK_BY_LABELS } from "@/modules/statistiques/rankings";
-import { BarTable, Card, euro, FilterForm, num, OptionChips, type Params, PeriodNav, pct, scopeNote, StatsTabs, statsContext } from "../shared";
+import { BarTable, Card, euro, ExportLinks, FilterForm, num, OptionChips, type Params, PeriodNav, pct, scopeNote, StatsTabs, statsContext } from "../shared";
 
 export const metadata = { title: "Produits — Statistiques — Pertes" };
 
@@ -73,10 +73,11 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </>
         )}
       </Card>
+      <ExportLinks tab="produits" ctx={ctx} keep={keep} note="Tous les produits du classement (pas seulement les 20 premiers), avec la même période et les mêmes filtres." />
       <p className="text-sm text-slate-500">
         Un plat est suivi par sa formule (code Melba) ; une sous-recette, sans code Melba, par son nom (identification au mieux d&apos;une semaine à
-        l&apos;autre) et comptée une seule fois même si elle sert à plusieurs plats. Les pertes par quantité produite arriveront avec les ratios
-        (étape 4.6).
+        l&apos;autre) et comptée une seule fois même si elle sert à plusieurs plats. Les pertes rapportées à la production sont dans l&apos;onglet
+        « Ratios ».
       </p>
     </div>
   );

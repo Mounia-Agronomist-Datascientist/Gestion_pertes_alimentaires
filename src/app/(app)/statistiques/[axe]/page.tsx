@@ -14,6 +14,7 @@ import {
   DestinationBars,
   detailOf,
   euro,
+  ExportLinks,
   FilterForm,
   isUuid,
   num,
@@ -120,6 +121,7 @@ async function Comparison({ user, ctx, axe }: { user: Awaited<ReturnType<typeof 
               {result.withoutTeam} perte{result.withoutTeam > 1 ? "s" : ""} sans équipe (attribuée{result.withoutTeam > 1 ? "s" : ""} à une zone) : voir « Par zone ».
             </p>
           )}
+          <ExportLinks tab={axe} ctx={ctx} />
         </>
       )}
     </div>
@@ -200,6 +202,7 @@ async function Detail({ user, ctx, axe, id }: { user: Awaited<ReturnType<typeof 
           <p className="text-xs text-slate-500">Les {detail.weeks.length} dernières semaines de production jusqu&apos;à la fin de la période, avec les mêmes filtres.</p>
         </Card>
       )}
+      <ExportLinks tab={axe} ctx={ctx} keep={keep} />
     </div>
   );
 }

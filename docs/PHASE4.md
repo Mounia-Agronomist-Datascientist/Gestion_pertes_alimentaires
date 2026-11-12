@@ -36,8 +36,8 @@ semaines ; ratios de pertes ; graphiques économiques.
 | 4.4 | **Recettes, sous-recettes, causes, destinations** (§19.4, §19.5) : classements en quantité, en coût et en nombre d'événements ; une sous-recette utilisée dans plusieurs plats est comptée une seule fois | ✅ Onglets « Produits » et « Causes et destinations » |
 | 4.5 | **Comparaison des semaines** (§19.6) : courbe semaine par semaine, moyenne des dernières semaines, mois, année, même semaine l'année précédente si elle existe | ✅ Onglet « Évolution » |
 | 4.6 | **Ratios de pertes** (§19.7) : barquettes perdues / barquettes produites, kg perdus / kg produits, prévu et réel côte à côte, avec dénominateur affiché | ✅ Dépôt du « Décompte barquettes » + onglet « Ratios » |
-| 4.7 | **Graphiques économiques** : évolution du coût brut et net, répartition par composante dans le temps (complète « Coûts des pertes ») | 🔄 Synthèse de la semaine (coût brut par semaine) ; reste net et composantes dans le temps |
-| 4.8 | **Exports Excel et CSV** de chaque tableau de bord, avec ses filtres | 🔄 CSV de la synthèse (12 semaines, détail) ; reste les autres onglets |
+| 4.7 | **Graphiques économiques** : évolution du coût brut et net, répartition par composante dans le temps (complète « Coûts des pertes ») | ✅ Onglet « Évolution » (coût par composante et coût net par semaine, par mois) |
+| 4.8 | **Exports Excel et CSV** de chaque tableau de bord, avec ses filtres | ✅ Boutons « Excel » et « CSV » sur chaque onglet |
 
 ## Barquettes réellement produites (décisions du 12/11/2026)
 
@@ -189,9 +189,51 @@ Onglet **Synthèse de la semaine** (aussi sur l'accueil), pour voir directement 
   (ou si aucune perte de la semaine n'est chiffrée) en kg ;
 - **semaine après semaine** : coût brut, kg, kg pour 1 000 barquettes produites, sur 12 semaines ;
 - **Imprimer la synthèse** : menus, onglets et filtres masqués à l'impression ;
-- **export CSV** (Excel français : « ; », virgule décimale) : les 12 dernières semaines (kg, barquettes, pertes,
+- **export CSV et Excel** (Excel français : « ; », virgule décimale) : les 12 dernières semaines (kg, barquettes, pertes,
   coûts, production prévue et réelle, kg pour 1 000 barquettes) et le détail de la semaine (zones, causes,
   produits, avec la semaine précédente et l'écart). Mêmes droits et mêmes filtres que la page.
 
 Vérifié : 1 test unitaire (CSV) + 1 test d'intégration (synthèse en euros et en kg) ; page et deux exports
 vérifiés dans le navigateur (S45).
+
+## Graphiques économiques (4.7)
+
+Onglet **Évolution**, profils qui voient les euros seulement, carte « Coût des pertes semaine après semaine » :
+- **coût brut par composante** (matières premières, main-d'œuvre, emballages, charges indirectes), en colonnes
+  empilées sur les 12 dernières semaines, avec les mêmes couleurs que « Coûts des pertes » ; légende écrite,
+  montants au survol et tableau des valeurs ;
+- **coût net** (coût brut moins les recettes des dons et ventes) par semaine ;
+- **par mois** : coût brut, recettes, coût net et évolution du net par rapport au mois d'avant.
+
+Le coût est celui figé sur chaque perte à la saisie. La main-d'œuvre et les charges indirectes n'apparaissent
+qu'une fois imputées (méthode à définir, §18.2 et §18.4).
+
+## Exports Excel et CSV (4.8)
+
+Chaque onglet des statistiques a une carte **Exporter** avec deux boutons, **Excel** et **CSV**. L'export reprend
+la période, les filtres et les choix de l'écran (type de produit, classement, zone ou équipe détaillée) et les
+mêmes droits : une équipe n'exporte que ses pertes, sans euros.
+
+| Onglet | Tableaux |
+|---|---|
+| Vue générale | indicateurs de la période et de la précédente ; devenir des pertes (kg par destination) |
+| Synthèse de la semaine | 12 semaines ; détail de la semaine (zones, causes, produits, écart avec la semaine précédente) |
+| Par zone / Par équipe | comparaison avec la période précédente ; pour une zone ou une équipe : causes, produits, sous-zones, équipes, semaines |
+| Évolution | 12 semaines (avec production prévue et réelle), mois, années |
+| Ratios | 12 semaines et cumul de l'année, sur le prévu et sur le réel |
+| Produits | tout le classement (pas seulement les 20 premiers), cause principale, plats liés |
+| Causes et destinations | causes (zone principale) ; destinations |
+
+Colonnes communes : kg alimentaires (au gramme près), barquettes perdues, nombre de pertes. Avec les euros, le
+coût détaillé : matières, main-d'œuvre, emballages, charges indirectes, coût brut, recettes, coût net.
+
+Formats :
+- **Excel** : un onglet par tableau, en-têtes en gras et figés ;
+- **CSV** : format Excel français (« ; », virgule décimale, accents conservés). Plusieurs tableaux se suivent
+  dans le fichier, chacun précédé de son titre ;
+- une cellule de texte qui commence par = + - @ n'est jamais lue comme une formule.
+
+Vérifié : 1 test unitaire (CSV à plusieurs tableaux) + 1 test d'intégration (les 8 onglets, droits d'une équipe,
+filtres, classeur Excel relu). Graphiques et les 16 exports vérifiés dans le navigateur (S45).
+
+**Phase 4 terminée.** Les rapports PDF viendront avec la Phase 5.

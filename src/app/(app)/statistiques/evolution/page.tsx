@@ -7,8 +7,11 @@ import { requireUser } from "@/modules/auth/next-session";
 import { annualEvolution, monthlyEvolution, weekComparison, type WeekPoint } from "@/modules/statistiques/evolution";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
-import { BarTable, Card, detailOf, euro, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, shortTrend, StatsTabs, statsContext } from "../shared";
+import { BarTable, Card, detailOf, euro, ExportLinks, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, shortTrend, StatsTabs, statsContext } from "../shared";
+import { COST_COMPONENTS } from "@/modules/couts/summary";
+import { COMPONENT_COLORS } from "../../couts/colors";
 import { ColumnChart } from "./column-chart";
+import { StackedColumnChart } from "./stacked-chart";
 
 export const metadata = { title: "Évolution — Statistiques — Pertes" };
 
@@ -160,6 +163,65 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
         </p>
       </Card>
 
+      {withCosts && (
+        <Card title="Coût des pertes semaine après semaine">
+          <h3 className="font-medium">Coût brut, par composante</h3>
+          <StackedColumnChart
+            caption="Coût brut des pertes par semaine, réparti par composante"
+            format={(n) => euro.format(n)}
+            segments={COST_COMPONENTS.map((c) => ({ key: c.key, label: c.label, color: COMPONENT_COLORS[c.key] }))}
+            columns={comparison.series.map((p) => ({
+              key: `b-${p.id}`,
+              label: `S${String(p.number).padStart(2, "0")}`,
+              values: Object.fromEntries(COST_COMPONENTS.map((c) => [c.key, p.summary.cost?.[c.key] ?? 0])),
+              total: p.summary.cost?.grossEur ?? 0,
+              text: euro.format(p.summary.cost?.grossEur ?? 0),
+              highlight: p.id === current.id,
+            }))}
+          />
+          <h3 className="font-medium">Coût net (coût brut moins les recettes)</h3>
+          <ColumnChart
+            caption="Coût net des pertes par semaine"
+            columns={comparison.series.map((p) => ({
+              key: `n-${p.id}`,
+              label: `S${String(p.number).padStart(2, "0")}`,
+              value: Math.max(p.summary.cost?.netEur ?? 0, 0),
+              text: euro.format(p.summary.cost?.netEur ?? 0),
+              highlight: p.id === current.id,
+            }))}
+          />
+          <h3 className="font-medium">Par mois</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[24rem] text-sm">
+              <thead>
+                <tr className="text-left text-slate-500">
+                  <th className="py-1 font-medium" />
+                  <th className="py-1 pl-3 text-right font-medium">Coût brut</th>
+                  <th className="py-1 pl-3 text-right font-medium">Recettes</th>
+                  <th className="py-1 pl-3 text-right font-medium">Coût net</th>
+                  <th className="py-1 pl-3 text-right font-medium">Évolution du net</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shownMonths.map((m, i) => (
+                  <tr key={`${m.year}-${m.month}`} className="border-t border-slate-100">
+                    <td className="py-2">{`${MONTHS[m.month - 1]} ${m.year}`}</td>
+                    <td className={cell}>{euro.format(m.summary.cost?.grossEur ?? 0)}</td>
+                    <td className={cell}>{m.summary.cost?.recoveredEur ? `− ${euro.format(m.summary.cost.recoveredEur)}` : euro.format(0)}</td>
+                    <td className={`${cell} font-medium`}>{euro.format(m.summary.cost?.netEur ?? 0)}</td>
+                    <td className={`${cell} text-slate-600`}>{i > 0 ? shortTrend(m.summary.cost?.netEur ?? 0, shownMonths[i - 1]!.summary.cost?.netEur) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-slate-500">
+            Coût figé sur chaque perte au moment de la saisie ; recettes : dons et ventes encaissés. La main-d&apos;œuvre et les charges indirectes
+            n&apos;apparaissent que lorsqu&apos;elles sont imputées (méthode à définir). Les pertes sans coût connu ne sont pas comptées.
+          </p>
+        </Card>
+      )}
+
       <Card title="Évolution mensuelle">
         <BarTable
           caption="Kg par mois"
@@ -194,6 +256,7 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
         )}
         <p className="text-xs text-slate-500">Années de production (semaines S01 à S52/S53). L&apos;année en cours n&apos;est pas complète.</p>
       </Card>
+      <ExportLinks tab="evolution" ctx={ctx} note="Les 12 dernières semaines (avec le détail du coût), les mois et les années, avec les mêmes filtres." />
     </div>
   );
 }

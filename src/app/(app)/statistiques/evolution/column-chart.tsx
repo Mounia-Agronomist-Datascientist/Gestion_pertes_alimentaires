@@ -41,7 +41,7 @@ export function ColumnChart({ columns, caption }: { columns: Column[]; caption: 
                 </text>
               )}
               {c.highlight && c.value != null && (
-                <text x={x + bar / 2} y={Math.max(y - 4, 10)} textAnchor="middle" fontSize={10} fontWeight={600} fill="#0f172a">
+                <text {...valueAnchor(i, columns.length, x, bar)} y={Math.max(y - 4, 10)} fontSize={10} fontWeight={600} fill="#0f172a">
                   {c.text}
                 </text>
               )}
@@ -68,4 +68,11 @@ export function ColumnChart({ columns, caption }: { columns: Column[]; caption: 
       </details>
     </figure>
   );
+}
+
+/** Valeur écrite au-dessus d'une colonne : alignée sur le bord pour la première et la dernière, pour ne pas sortir du cadre. */
+export function valueAnchor(i: number, count: number, x: number, bar: number) {
+  if (count > 1 && i === count - 1) return { x: x + bar, textAnchor: "end" as const };
+  if (count > 1 && i === 0) return { x, textAnchor: "start" as const };
+  return { x: x + bar / 2, textAnchor: "middle" as const };
 }

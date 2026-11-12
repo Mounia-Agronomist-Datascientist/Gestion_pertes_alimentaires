@@ -5,7 +5,7 @@ import { periodLabel } from "@/domain/periodes";
 import { requireUser } from "@/modules/auth/next-session";
 import { generalDashboard } from "@/modules/statistiques/dashboard";
 import { canReadStats } from "@/modules/statistiques/facts";
-import { Card, DestinationBars, FilterForm, type Params, PeriodNav, scopeNote, StatsTabs, statsContext, SummaryNotes, SummaryTiles } from "./shared";
+import { Card, DestinationBars, ExportLinks, FilterForm, type Params, PeriodNav, scopeNote, StatsTabs, statsContext, SummaryNotes, SummaryTiles } from "./shared";
 
 export const metadata = { title: "Statistiques — Pertes" };
 
@@ -38,6 +38,8 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
       <Card title="Devenir des pertes alimentaires">
         <DestinationBars summary={dashboard.current} />
       </Card>
+
+      <ExportLinks tab="general" ctx={ctx} />
 
       <p className="text-sm text-slate-500">
         Pourcentages de pertes par rapport à la production prévue et réelle : onglet « Ratios ».

@@ -7,7 +7,7 @@ import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { causeAndDestinationRanking, RANK_BY_LABELS } from "@/modules/statistiques/rankings";
-import { BarTable, Card, euro, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, StatsTabs, statsContext } from "../shared";
+import { BarTable, Card, euro, ExportLinks, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, StatsTabs, statsContext } from "../shared";
 
 export const metadata = { title: "Causes et destinations — Statistiques — Pertes" };
 
@@ -81,6 +81,7 @@ export default async function CausesPage({ searchParams }: { searchParams: Promi
           Une perte répartie entre plusieurs destinations compte dans chacune. Les emballages et moules n&apos;entrent pas dans les kg.
         </p>
       </Card>
+      <ExportLinks tab="causes" ctx={ctx} keep={keep} />
     </div>
   );
 }

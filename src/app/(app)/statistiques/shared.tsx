@@ -1,52 +1,21 @@
 /** Éléments communs des pages de statistiques : paramètres d'adresse, filtres, navigation, tuiles et barres. */
 import Link from "next/link";
 import { db } from "@/db/client";
-import { parsePeriod, type Period, periodLabel, periodParams } from "@/domain/periodes";
+import { type Period, periodLabel, periodParams } from "@/domain/periodes";
 import { evolution, type StatsSummary } from "@/domain/statistiques";
-import { toProductionLocalDate } from "@/domain/semaine-production";
-import { type AuthUser, can } from "@/modules/auth/permissions";
+import type { AuthUser } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
-import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
+import { type Params, type StatsContext, statsContext as parseStatsContext } from "@/modules/statistiques/context";
 import { dashboardFilterOptions, DESTINATION_KIND_STATS } from "@/modules/statistiques/dashboard";
-import type { StatsFilters } from "@/modules/statistiques/facts";
 import { PeriodFields } from "./period-fields";
 
 export const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 export const num = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
 export const pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
-const UUID = /^[0-9a-f-]{36}$/i;
-export const isUuid = (v: string | undefined): v is string => !!v && UUID.test(v);
+export { isUuid, type Params, type StatsContext } from "@/modules/statistiques/context";
 
-export type Params = Record<string, string | undefined>;
-
-export interface StatsContext {
-  today: string;
-  period: Period;
-  filters: StatsFilters;
-  /** Filtres actifs, à reporter dans les liens. */
-  filterParams: Record<string, string>;
-  compareTeams: boolean;
-}
-
-/** Période (semaine en cours par défaut) et filtres lus dans l'adresse, validés. */
-export async function statsContext(user: AuthUser, params: Params): Promise<StatsContext> {
-  const today = toProductionLocalDate(new Date());
-  let period = parsePeriod(params);
-  if (!period) {
-    const week = await findStoredProductionWeek(db, today);
-    period = week ? { kind: "semaine", year: week.year, number: week.number } : { kind: "mois", year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) };
-  }
-  const compareTeams = can(user, "stats.compare_teams");
-  const filters: StatsFilters = {
-    zoneId: isUuid(params.zone) ? params.zone : undefined,
-    teamId: compareTeams && isUuid(params.equipe) ? params.equipe : undefined,
-    category: params.categorie && (PRODUCT_CATEGORIES as readonly string[]).includes(params.categorie) ? params.categorie : undefined,
-  };
-  const filterParams = Object.fromEntries(
-    Object.entries({ zone: filters.zoneId, equipe: filters.teamId, categorie: filters.category }).filter((e): e is [string, string] => !!e[1]),
-  );
-  return { today, period, filters, filterParams, compareTeams };
-}
+/** Période et filtres de la page, lus dans l'adresse. */
+export const statsContext = (user: AuthUser, params: Params) => parseStatsContext(db, user, params);
 
 /** Adresse d'une page de statistiques avec la période et les filtres (et des paramètres en plus). */
 export function statsHref(path: string, ctx: StatsContext, period: Period = ctx.period, extra: Record<string, string> = {}) {
@@ -333,6 +302,25 @@ export function Card({ title, children }: { title: string; children: React.React
     <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold">{title}</h2>
       {children}
+    </section>
+  );
+}
+
+/** Boutons d'export de l'onglet (CSV et Excel), avec la période, les filtres et les choix de l'écran. */
+export function ExportLinks({ tab, ctx, keep = {}, note }: { tab: string; ctx: StatsContext; keep?: Record<string, string>; note?: string }) {
+  const href = (format: "csv" | "xlsx") => statsHref("/statistiques/export", ctx, ctx.period, { ...keep, onglet: tab, format });
+  return (
+    <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm print:hidden">
+      <h2 className="text-lg font-semibold">Exporter</h2>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <a className="btn-secondary flex flex-1 items-center justify-center" href={href("xlsx")}>
+          Excel
+        </a>
+        <a className="btn-secondary flex flex-1 items-center justify-center" href={href("csv")}>
+          CSV
+        </a>
+      </div>
+      <p className="text-xs text-slate-500">{note ?? "Les tableaux de cet onglet, avec la même période et les mêmes filtres."}</p>
     </section>
   );
 }

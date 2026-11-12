@@ -48,7 +48,8 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
   const inEuros = data.by === "cout";
   const unit = inEuros ? "€" : "kg";
   const fmtValue = (v: number) => (inEuros ? euro.format(v) : `${num.format(v)} kg`);
-  const csv = (type: string) => `${path}/csv?${new URLSearchParams({ ...periodParams(anchor), ...ctx.filterParams, type })}`;
+  const exportHref = (format: "csv" | "xlsx", tableau?: string) =>
+    `/statistiques/export?${new URLSearchParams({ ...periodParams(anchor), ...ctx.filterParams, onglet: "synthese", format, ...(tableau ? { tableau } : {}) })}`;
   const rows = (list: WeeklyRow[], limit: number) =>
     list.slice(0, limit).map((r) => ({
       key: r.key,
@@ -194,15 +195,18 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
       </Card>
 
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm print:hidden">
-        <h2 className="text-lg font-semibold">Exporter (CSV pour Excel)</h2>
-        <a className="btn-secondary flex items-center justify-center" href={csv("semaines")}>
-          Les 12 dernières semaines
+        <h2 className="text-lg font-semibold">Exporter</h2>
+        <a className="btn-secondary flex items-center justify-center" href={exportHref("xlsx")}>
+          Excel (les 12 semaines et le détail de la semaine)
         </a>
-        <a className="btn-secondary flex items-center justify-center" href={csv("detail")}>
-          Détail de {formatProductionWeek(anchor)} (zones, causes, produits)
+        <a className="btn-secondary flex items-center justify-center" href={exportHref("csv", "semaines")}>
+          CSV : les 12 dernières semaines
+        </a>
+        <a className="btn-secondary flex items-center justify-center" href={exportHref("csv", "detail")}>
+          CSV : détail de {formatProductionWeek(anchor)} (zones, causes, produits)
         </a>
         <p className="text-xs text-slate-500">
-          Mêmes filtres que la page. Le fichier s&apos;ouvre dans Excel ; les graphiques s&apos;y refont à partir des colonnes.
+          Mêmes filtres que la page. Les graphiques se refont dans Excel à partir des colonnes.
         </p>
       </section>
     </div>

@@ -18,6 +18,11 @@ import { annualEvolution, kgPerThousand, monthlyEvolution, weekComparison } from
 import { plannedVolumes } from "@/modules/statistiques/production";
 import { causeAndDestinationRanking, productRanking } from "@/modules/statistiques/rankings";
 import { weeklySummary } from "@/modules/statistiques/weekly";
+import ExcelJS from "exceljs";
+import { tablesToCsv } from "@/domain/csv";
+import { statsContext } from "@/modules/statistiques/context";
+import { EXPORT_TABS, fileName, roundKg, statsExport } from "@/modules/statistiques/exports";
+import { tablesToXlsx } from "@/modules/statistiques/xlsx";
 import { adjacentOf, loadFacts } from "@/modules/statistiques/facts";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
@@ -242,6 +247,47 @@ describe("lecture des pertes pour les statistiques", () => {
     const team = (await weeklySummary(t.db, teamC, { year: 2026, number: 45 }, {}))!;
     expect(team).toMatchObject({ withCosts: false, by: "kg", summary: { events: 1, foodKg: 1.5 } });
     expect(team.byProduct.map((r) => [r.label, r.value])).toEqual([["Carottes", 1.5]]);
+  });
+
+  it("exporte chaque onglet avec la période, les filtres et les droits de l'écran", async () => {
+    const params = { periode: "semaine", annee: "2026", semaine: "45" };
+    const exportOf = async (user: AuthUser, tab: (typeof EXPORT_TABS)[number], extra: Record<string, string> = {}) =>
+      statsExport(t.db, user, tab, await statsContext(t.db, user, { ...params, ...extra }), { ...params, ...extra });
+    for (const tab of EXPORT_TABS) {
+      const result = await exportOf(direction, tab);
+      expect(result, tab).not.toBeNull();
+      expect(result!.tables.length, tab).toBeGreaterThan(0);
+      for (const table of result!.tables) for (const row of table.rows) expect(row, `${tab} / ${table.title}`).toHaveLength(table.headers.length);
+    }
+    // Direction : détail du coût par composante ; vue générale = S45 puis S44.
+    const general = (await exportOf(direction, "general"))!;
+    expect(general.name).toBe("statistiques-s45-2026");
+    const indicators = general.tables[0]!;
+    expect(indicators.headers).toEqual(expect.arrayContaining(["Matières premières (€)", "Coût brut (€)", "Recettes (€)", "Coût net (€)"]));
+    const dashboard = await generalDashboard(t.db, direction, S45, {});
+    expect(indicators.rows[0]!.slice(0, 4)).toEqual(["S45-2026", roundKg(dashboard.current.foodKg), dashboard.current.barquettes, dashboard.current.events]);
+    expect(indicators.rows[0]!.at(-1)).toBe(dashboard.current.cost!.netEur);
+    // Une équipe : ses pertes, aucun euro, et pas de comparaison des équipes.
+    const team = (await exportOf(teamC, "general"))!;
+    expect(team.tables[0]!.headers.some((h) => h.includes("€"))).toBe(false);
+    expect(team.tables[0]!.rows[0]!.slice(0, 4)).toEqual(["S45-2026", 1.5, 0, 1]);
+    const ownTeam = (await exportOf(teamC, "equipes"))!;
+    expect(ownTeam.tables.map((x) => x.title)).toContain("Semaines");
+    expect(await exportOf(teamC, "equipes", { id: teamDId })).toBeNull();
+    // Filtres de l'écran : équipe D seulement.
+    const filtered = (await exportOf(direction, "causes", { equipe: teamDId }))!;
+    const teamDFood = (await generalDashboard(t.db, direction, S45, { teamId: teamDId })).current.foodKg;
+    expect(filtered.tables[0]!.rows.map((r) => r[2])).toEqual([roundKg(teamDFood)]);
+    // Synthèse : un seul tableau demandé, ou les deux.
+    expect((await exportOf(direction, "synthese", { tableau: "semaines" }))!.tables.map((x) => x.title)).toEqual(["12 semaines"]);
+    expect((await exportOf(direction, "synthese"))!.tables).toHaveLength(2);
+    // Classeur Excel : un onglet par tableau, en-têtes et nombres conservés.
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load((await tablesToXlsx(general.tables)).buffer as ArrayBuffer);
+    expect(workbook.worksheets.map((w) => w.name)).toEqual(["Indicateurs", "Devenir des pertes"]);
+    expect(workbook.worksheets[0]!.getCell("B2").value).toBe(roundKg(dashboard.current.foodKg));
+    expect(tablesToCsv(general.tables)).toContain("Indicateurs\r\nPériode;Kg alimentaires");
+    expect(fileName("Produits", "Sous-recettes", "S45-2026")).toBe("produits-sous-recettes-s45-2026");
   });
 
   it("refusé sans droit de statistiques", async () => {

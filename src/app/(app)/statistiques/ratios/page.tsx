@@ -8,7 +8,7 @@ import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { type RatioValues, weekRatios } from "@/modules/statistiques/ratios";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { ColumnChart } from "../evolution/column-chart";
-import { Card, euro, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, StatsTabs, statsContext } from "../shared";
+import { Card, euro, ExportLinks, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, StatsTabs, statsContext } from "../shared";
 
 export const metadata = { title: "Ratios — Statistiques — Pertes" };
 
@@ -118,6 +118,7 @@ export default async function RatiosPage({ searchParams }: { searchParams: Promi
         ))}
         <p className="text-xs text-slate-500">Un tiret : pas de plan importé ou pas de décompte déposé pour cette semaine.</p>
       </Card>
+      <ExportLinks tab="ratios" ctx={ctx} note="Les 12 dernières semaines et le cumul de l'année, sur le prévu et sur le réel, avec les mêmes filtres." />
     </div>
   );
 }
