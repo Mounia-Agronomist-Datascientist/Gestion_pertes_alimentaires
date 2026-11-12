@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { db } from "@/db/client";
 import { requireUser } from "@/modules/auth/next-session";
+import { listProductionCounts } from "@/modules/imports/decompte/service";
 import { listWeekImports } from "@/modules/imports/service";
+import { DecompteWizard } from "./decompte-wizard";
 import { ImportWizard } from "./import-wizard";
 
 export const metadata = { title: "Import de la semaine — Administration" };
@@ -10,7 +12,7 @@ const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month:
 
 export default async function ImportPage() {
   const admin = await requireUser();
-  const imports = await listWeekImports(db, admin);
+  const [imports, counts] = await Promise.all([listWeekImports(db, admin), listProductionCounts(db, admin)]);
   return (
     <>
       <Link href="/admin" className="self-start rounded-xl px-2 py-2 font-medium text-slate-700">
@@ -28,6 +30,10 @@ export default async function ImportPage() {
           .map((i) => ({ year: i.weekYear, week: i.weekNumber, version: i.version }))}
       />
 
+      <DecompteWizard
+        existing={counts.filter((c) => c.status === "validee").map((c) => ({ year: c.weekYear, week: c.weekNumber, version: c.version }))}
+      />
+
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Imports enregistrés</h2>
         {imports.length === 0 && <p className="text-slate-600">Aucun import pour l&apos;instant.</p>}
@@ -43,6 +49,27 @@ export default async function ImportPage() {
               <span className="block text-sm text-slate-600">
                 {dateTimeFormat.format(i.createdAt)} par {i.createdByName} · {i.tomeFileName} · onglet {i.planSheetName}
                 {i.anomalies.length > 0 && ` · ${i.anomalies.length} point${i.anomalies.length > 1 ? "s" : ""} à vérifier`}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold">Décomptes enregistrés</h2>
+        {counts.length === 0 && <p className="text-slate-600">Aucun décompte pour l&apos;instant.</p>}
+        <ul className="flex flex-col gap-2">
+          {counts.map((c) => (
+            <li key={c.id} className={`rounded-2xl bg-white p-4 shadow-sm ${c.status === "remplacee" ? "opacity-60" : ""}`}>
+              <span className="font-semibold">
+                S{c.weekNumber}-{c.weekYear} · version {c.version}
+              </span>
+              <span className={`ml-2 rounded-full px-2 text-sm ${c.status === "validee" ? "bg-emerald-100 text-emerald-900" : "bg-slate-200"}`}>
+                {c.status === "validee" ? "En vigueur" : "Remplacé"}
+              </span>
+              <span className="block text-sm text-slate-600">
+                {dateTimeFormat.format(c.createdAt)} par {c.createdByName} · {c.fileName} · onglet {c.sheetName}
+                {c.anomalies.length > 0 && ` · ${c.anomalies.length} point${c.anomalies.length > 1 ? "s" : ""} à vérifier`}
               </span>
             </li>
           ))}

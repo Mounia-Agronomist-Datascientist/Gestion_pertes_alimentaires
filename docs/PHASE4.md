@@ -39,11 +39,11 @@ semaines ; ratios de pertes ; graphiques économiques.
 | 4.7 | **Graphiques économiques** : évolution du coût brut et net, répartition par composante dans le temps (complète « Coûts des pertes ») | ⏳ |
 | 4.8 | **Exports Excel et CSV** de chaque tableau de bord, avec ses filtres | ⏳ |
 
-## Reste à préciser pour l'étape 4.6
+## Barquettes réellement produites (décisions du 12/11/2026)
 
-Le **mode d'accès au « Décompte barquettes »** (barquettes réellement produites) : import d'un fichier exporté
-chaque semaine, comme le plan, ou lecture du Google Sheet. En attendant, le ratio « réel » s'affiche
-« non disponible » et seul le ratio « prévu » est calculé.
+- Source : **colonne « Ma production »** de l'onglet récapitulatif « Semaine NN » du « Décompte barquettes ».
+- Accès : **fichier déposé chaque semaine** (Google Sheets → Télécharger → Microsoft Excel), comme le plan ;
+  l'application n'a aucun accès au Google Sheet.
 
 ## Moteur de statistiques (4.1)
 
@@ -137,3 +137,17 @@ kg, décision du 10/11/2026), réutilisé pour les ratios de l'étape 4.6.
 
 Vérifié : 3 tests d'intégration (volume prévu total et par équipe, comparaison et moyenne, mois et années) ;
 page vérifiée dans le navigateur (mobile, compte équipe : volume de l'équipe D).
+
+## Dépôt du « Décompte barquettes » (4.6, première partie)
+
+Administration → **Import de la semaine** → « Barquettes réellement produites » :
+- le classeur (≈ 50 Mo, 250 onglets) est lu **dans le navigateur, onglet par onglet** : seule la liste des onglets
+  et l'onglet « Semaine NN » choisi sont ouverts ; les onglets des jours, qui comportent des noms d'opérateurs, ne
+  sont jamais lus ;
+- la semaine la plus récente est proposée ; l'aperçu donne le nombre de codes et le total de barquettes ;
+- seuls les codes et les nombres sont envoyés et revérifiés par le serveur ; chaque dépôt crée une **version**
+  (l'ancienne passe en « remplacée », rien n'est effacé) et une ligne du journal d'audit.
+
+Vérifié : 5 tests unitaires (lecture de l'onglet, année par les onglets des jours, lecture ciblée du classeur) et
+3 tests d'intégration (versions, journal, volumes réels par équipe, refus) ; vrai fichier du 06/11 lu en 0,1 s
+(48 semaines ; S45 : 60 codes, 64 462 barquettes, VI01 = 2 938) et S45 enregistrée dans la base locale.

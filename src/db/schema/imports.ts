@@ -119,3 +119,45 @@ export const weekRecipeLines = pgTable(
     index("week_recipe_lines_sub_recipe_idx").on(t.subRecipeId),
   ],
 );
+
+/**
+ * Barquettes réellement produites d'une semaine, lues dans le « Décompte barquettes » (onglet « Semaine NN »,
+ * colonne « Ma production »), docs/PHASE4.md étape 4.6. Même principe que l'import de la semaine : instantané
+ * figé, nouvelle lecture = nouvelle version, l'ancienne passe en « remplacée ».
+ */
+export const productionCounts = pgTable(
+  "production_counts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productionWeekId: uuid("production_week_id")
+      .notNull()
+      .references(() => productionWeeks.id),
+    version: smallint("version").notNull(),
+    status: weeklyImportStatusEnum("status").notNull().default("validee"),
+    fileName: text("file_name").notNull(),
+    sheetName: text("sheet_name").notNull(),
+    anomalies: jsonb("anomalies").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    replacedAt: timestamp("replaced_at", { withTimezone: true }),
+  },
+  (t) => [
+    unique("production_counts_week_version_key").on(t.productionWeekId, t.version),
+    uniqueIndex("production_counts_one_valid_per_week").on(t.productionWeekId).where(sql`${t.status} = 'validee'`),
+  ],
+);
+
+export const productionCountLines = pgTable(
+  "production_count_lines",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    countId: uuid("count_id")
+      .notNull()
+      .references(() => productionCounts.id),
+    code: text("code").notNull(),
+    madeBarquettes: integer("made_barquettes").notNull(),
+  },
+  (t) => [unique("production_count_lines_count_code_key").on(t.countId, t.code), check("production_count_lines_positive", sql`${t.madeBarquettes} >= 0`)],
+);

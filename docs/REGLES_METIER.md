@@ -200,3 +200,13 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
   non convertie en kg est comptée à part.
 - Périmètre : une équipe ses pertes, un responsable de zone ses zones ; production, direction et administration
   toute l'entreprise. Les euros (coûts figés sur chaque perte) seulement pour les profils « indicateurs économiques ».
+
+## R15 — Volume de production (Phase 4, 12/11/2026)
+
+- **Prévu** : barquettes par code du plan de production importé (import en vigueur de la semaine).
+- **Réel** : colonne « Ma production » de l'onglet « Semaine NN » du « Décompte barquettes », déposé chaque semaine
+  (Administration → Import) ; l'année de la semaine est celle des onglets des jours (« 2026 S45A Jeudi »).
+- Kg produits = barquettes × poids d'une portion du tome Melba de la semaine ; un code sans poids n'entre pas dans
+  les kg (signalé).
+- Par équipe : codes attribués à l'équipe par le plan de la semaine.
+- Sans plan ou sans décompte, le volume correspondant n'existe pas : aucun ratio n'est calculé ni estimé.

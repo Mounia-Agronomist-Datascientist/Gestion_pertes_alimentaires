@@ -52,6 +52,7 @@
 | 2026-11-06 | Équipes inactives pour une semaine (en cours / suivante) | 1 test d'intégration ; écran vérifié |
 | 2026-11-06 | Causes : proposition par les utilisateurs pendant la saisie, validation (avec reformulation et choix des zones) ou rejet, création, modification, désactivation, doublons de formulation refusés, « Autres pertes » toujours disponible | 6 tests d'intégration ; proposition → validation vérifiée dans le navigateur et en base |
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
+| 2026-11-12 | Phase 4 — dépôt du « Décompte barquettes » (Administration → Import) : onglet « Semaine NN », colonne « Ma production », lecture ciblée d'un onglet (fichier de 50 Mo), versions tracées ; barquettes réelles par semaine et par équipe | 5 tests unitaires + 3 tests d'intégration ; vrai fichier lu (48 semaines, S45 = 64 462 barquettes) et S45 enregistrée en local |
 | 2026-11-12 | Phase 4 — comparaison des semaines : semaine précédente, moyenne des 4 semaines, même semaine un an avant, à volume égal (kg pour 1 000 barquettes prévues du plan importé), histogramme des 12 semaines, évolution mensuelle et annuelle | 3 tests d'intégration ; page vérifiée dans le navigateur (mobile) |
 | 2026-11-12 | Phase 4 — classements des produits (formules, sous-recettes partagées et leurs plats, cause principale), des causes et des destinations | 1 test unitaire + 2 tests d'intégration ; pages vérifiées dans le navigateur (mobile, compte équipe) |
 | 2026-11-10 | Phase 4 — analyses par zone et par équipe : comparaison avec évolution, détail (causes, produits, sous-zones, équipes, devenir, 8 dernières semaines), « Mon équipe » pour les comptes équipe | 3 tests d'intégration ; pages vérifiées dans le navigateur (mobile) |
@@ -115,6 +116,7 @@
 | `0012_cout_brut` | Colonnes du coût brut figé (emballages, main-d'œuvre, indirect, brut, méthode, date, détail) | Déclarations existantes sans coût brut (colonnes vides) |
 | `0013_cout_net` | Colonnes `recovered_eur`, `net_cost_eur` sur les déclarations | Recettes vides, coût net vide pour les déclarations existantes |
 | `0014_main_oeuvre` | Table `labour_rates` (coût horaire daté par zone) | Nouvelle table vide |
+| `0015_decompte_barquettes` | Tables `production_counts` et `production_count_lines` (barquettes réellement produites par semaine) | Nouvelles tables vides |
 | `0005_alertes_rien_de_note` | Tables `production_days` et `missing_declaration_alerts` | Aucune modification des tables existantes |
 | `0003_declarations` | Création des 5 tables de déclarations, tares utilisées, destinations, versions et lots | Aucune modification des tables existantes |
 | `0002_causes_par_sous_zone` | Création de `cause_subzones` | Aucune modification des tables existantes ; base de dév. recréée (aucune donnée réelle) |
