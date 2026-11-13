@@ -5,6 +5,8 @@ import { seed } from "@/db/seed/seed";
 import { createAccount } from "@/modules/auth/accounts";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
+import { createDeclaration } from "@/modules/declarations/service";
+import { alchimistesReconciliation } from "@/modules/statistiques/alchimistes";
 import { type AlchimistesPayload, alchimistesCoverage, listAlchimistesImports, saveAlchimistesImport } from "@/modules/imports/alchimistes/service";
 import { createTestDb } from "../helpers/test-db";
 
@@ -76,5 +78,40 @@ describe("pesées des Alchimistes", () => {
   it("refuse une date hors calendrier et un compte sans droit", async () => {
     await expect(saveAlchimistesImport(t.db, admin, payload("1990-01-04", "1990-01-04", [collection("1990-01-04", 1)]), NOW)).rejects.toThrow(/hors du calendrier/);
     await expect(saveAlchimistesImport(t.db, team, payload("2026-05-06", "2026-05-06", [collection("2026-05-06", 1)]), NOW)).rejects.toThrow();
+  });
+
+  it("rapproche les kg déclarés vers Les Alchimistes et les kg pesés, par semaine et par mois", async () => {
+    const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
+    const subzoneId = await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE")));
+    const causeId = await id(t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION")));
+    const alc = await id(t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")));
+    const ordures = await id(t.db.select().from(s.destinations).where(eq(s.destinations.code, "ORDURES")));
+    const declare = (occurredOn: string, quantity: number, destinations: object[]) =>
+      createDeclaration(
+        t.db,
+        team,
+        { occurredOn, subzoneId, product: { freeLabel: "Carottes", category: "matiere_premiere" }, method: "pesee", quantity, unitCode: "kg", causeId, destinations },
+        new Date(`${occurredOn}T14:00:00Z`),
+      );
+    // S45 (jeudi 29/10 → mercredi 04/11) : 2 kg puis 3 kg dont 1 kg aux ordures ; S46 : 1 kg, sans fichier.
+    await declare("2026-11-02", 2, [{ destinationId: alc, quantity: 2 }]);
+    await declare("2026-11-03", 3, [
+      { destinationId: alc, quantity: 2 },
+      { destinationId: ordures, quantity: 1 },
+    ]);
+    await declare("2026-11-06", 1, [{ destinationId: alc, quantity: 1 }]);
+    await saveAlchimistesImport(t.db, admin, payload("2026-10-29", "2026-11-04", [collection("2026-10-29", 6.5), collection("2026-11-02", 3.5)]), new Date("2026-11-12T12:00:00Z"));
+
+    const r = (await alchimistesReconciliation(t.db, admin, { year: 2026, number: 46 }))!;
+    expect(r.weeks).toHaveLength(12);
+    const [s45, s46] = r.weeks.slice(-2);
+    expect(s45).toMatchObject({ label: "S45-2026", declaredKg: 4, declaredLines: 2, measuredKg: 10, bins: 2, status: "rapproche", gapKg: 6, gapRate: 0.6 });
+    expect(s46).toMatchObject({ label: "S46-2026", declaredKg: 1, status: "sans_fichier", gapKg: null });
+    expect(r.weeksTotal).toMatchObject({ periods: 1, declaredKg: 4, measuredKg: 10 });
+    // Par mois : la collecte du 29/10 compte en octobre, les déclarations de novembre en novembre.
+    const [october, november] = r.months.slice(-2);
+    expect(october).toMatchObject({ label: "10/2026", declaredKg: 0, measuredKg: 6.5, status: "sans_declaration" });
+    expect(november).toMatchObject({ label: "11/2026", declaredKg: 5, measuredKg: 3.5, gapKg: -1.5 });
+    await expect(alchimistesReconciliation(t.db, team, { year: 2026, number: 46 })).rejects.toThrow();
   });
 });

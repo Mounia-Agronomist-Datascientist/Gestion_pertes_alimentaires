@@ -47,7 +47,7 @@ Cela couvre :
 |---|---|---|
 | 5.1 | **Valorisation** : onglet des statistiques en trois groupes (avec recette, sans recette, à part), détail par destination, suivi sur 12 semaines, exports Excel et CSV. | ✅ |
 | 5.2 | **Import des poids des Alchimistes** : dépôt du fichier (CSV ou Excel), aperçu par semaine de production, conservation de chaque dépôt ; un fichier plus récent remplace les collectes de sa période. | ✅ |
-| 5.3 | **Rapprochement** : par semaine de production ou par mois, kg déclarés vers Les Alchimistes comparés aux kg qu'ils ont mesurés. Écart en kg et en %, périodes non rapprochées. | Après 5.2 |
+| 5.3 | **Rapprochement** : onglet « Alchimistes » des statistiques, kg déclarés vers Les Alchimistes et kg pesés par semaine de production et par mois, écart en kg et en %, périodes non rapprochées, bacs de la semaine, exports. | ✅ |
 | 5.4 | **Facteurs d'émission** : écran des familles alimentaires et de leurs facteurs. Je préparerai une proposition tirée d'Agribalyse, que vous validerez. | À faire |
 | 5.5 | **Rattachement des ingrédients Melba aux familles** : suggestions automatiques par mot-clé, validées par vous. On commence par les ingrédients les plus fréquents. | Après 5.4 |
 | 5.6 | **Tableau de bord environnemental** : kg par catégorie et par devenir, CO2e mesuré, estimé ou non couvert, évolution. | Après 5.5 |
@@ -95,6 +95,27 @@ Administration → Import de la semaine → « Pesées des Alchimistes ».
 - Tables `alchimistes_imports` et `alchimistes_collections` (migration 0018). Code :
   `src/modules/imports/alchimistes/`, `src/app/(app)/admin/import/alchimistes-wizard.tsx`. Tests :
   `tests/unit/parse-alchimistes.test.ts`, `tests/integration/alchimistes.test.ts`.
+
+## 5.3 — Rapprochement avec Les Alchimistes ✅
+
+Statistiques → Alchimistes (profils qui comparent les équipes : production, direction, administration).
+- **Toute l'entreprise** : les pesées ne se répartissent ni par zone ni par équipe ; les filtres ne s'appliquent
+  pas.
+- **Déclaré** : kg nets des lignes de destination « Les Alchimistes » (code `ALCHIMISTES`) des pertes non
+  annulées, dernière version ; les lignes sans poids en kg sont comptées à part, jamais estimées.
+- **Pesé** : collectes en vigueur (dernier fichier déposé pour chaque date).
+- Par **semaine de production** (date de la perte d'un côté, date de collecte de l'autre) sur 12 semaines, et
+  par **mois** sur 12 mois.
+- **Écart** = pesé − déclaré, en kg et rapporté au poids pesé.
+- État de chaque période : rapprochée ; pesées non déposées (aucun fichier ne couvre la période) ; aucune
+  collecte ; rien de déclaré vers Les Alchimistes. Le total ne compte que les périodes comparables.
+- Un écart n'est pas présenté comme une erreur (dates de collecte décalées, contenu des bacs non déclaré).
+- Détail des bacs pesés de la semaine (date, n° si connu, poids, qualité, incident). Le rapprochement bac par bac
+  attend les n° des bacs dans le fichier.
+- Exports Excel et CSV : semaines et mois.
+- Code : `src/domain/rapprochement.ts`, `src/modules/statistiques/alchimistes.ts`,
+  `src/app/(app)/statistiques/alchimistes/page.tsx`. Tests : `tests/unit/rapprochement.test.ts`,
+  `tests/integration/alchimistes.test.ts`.
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 

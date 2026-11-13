@@ -7,6 +7,7 @@ import type { CsvTable, CsvValue } from "@/domain/csv";
 import { periodLabel } from "@/domain/periodes";
 import { formatProductionWeek } from "@/domain/semaine-production";
 import type { RankBy, StatsSummary } from "@/domain/statistiques";
+import { RECONCILIATION_STATUS_LABELS } from "@/domain/rapprochement";
 import { RECOVERY_GROUPS, type RecoveryTotals, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { COST_COMPONENTS } from "@/modules/couts/summary";
@@ -19,9 +20,10 @@ import { annualEvolution, monthlyEvolution, weekComparison } from "./evolution";
 import { PRODUCT_TYPES, type ProductType, causeAndDestinationRanking, productRanking } from "./rankings";
 import { type RatioValues, weekRatios } from "./ratios";
 import { recoveryDashboard } from "./valorisation";
+import { alchimistesReconciliation, type ReconciliationPeriod } from "./alchimistes";
 import { weeklySummary } from "./weekly";
 
-export const EXPORT_TABS = ["general", "synthese", "zones", "equipes", "evolution", "ratios", "produits", "causes", "valorisation"] as const;
+export const EXPORT_TABS = ["general", "synthese", "zones", "equipes", "evolution", "ratios", "produits", "causes", "valorisation", "alchimistes"] as const;
 export type ExportTab = (typeof EXPORT_TABS)[number];
 
 export interface StatsExport {
@@ -216,6 +218,34 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           ]),
         });
       return { name: fileName("valorisation", label), tables };
+    }
+
+    case "alchimistes": {
+      if (!ctx.compareTeams) return null;
+      const anchor = await anchorWeek(db, ctx);
+      if (!anchor) return null;
+      const data = await alchimistesReconciliation(db, user, anchor);
+      if (!data) return null;
+      const headers = ["Du", "Au", "Kg déclarés vers Les Alchimistes", "Lignes déclarées", "Lignes sans kg", "Kg pesés", "Bacs", "Écart pesé − déclaré (kg)", "Écart / pesé (%)", "État"];
+      const cells = (r: ReconciliationPeriod): CsvValue[] => [
+        r.from,
+        r.to,
+        roundKg(r.declaredKg),
+        r.declaredLines,
+        r.notConverted,
+        r.status === "sans_fichier" ? null : roundKg(r.measuredKg),
+        r.status === "sans_fichier" ? null : r.bins,
+        r.gapKg == null ? null : roundKg(r.gapKg),
+        percent(r.gapRate),
+        RECONCILIATION_STATUS_LABELS[r.status],
+      ];
+      return {
+        name: fileName("alchimistes", periodLabel(anchor)),
+        tables: [
+          { title: "Semaines", headers: ["Semaine", ...headers], rows: data.weeks.map((w) => [w.label, ...cells(w)]) },
+          { title: "Mois", headers: ["Mois", ...headers], rows: data.months.map((m) => [m.label, ...cells(m)]) },
+        ],
+      };
     }
 
     case "evolution": {
