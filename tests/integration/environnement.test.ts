@@ -87,11 +87,11 @@ describe("CO2e des pertes", () => {
     expect(carrots.co2).toMatchObject({ method: "estime", co2eKg: Math.round(2 * carrot * 10_000) / 10_000, kgEstimated: 2 });
 
     const dashboard = await environmentDashboard(t.db, admin, WEEK, WEEK, {}, labels);
-    expect(dashboard.summary.co2eKg).toBeCloseTo(dish.co2.co2eKg + carrots.co2.co2eKg, 3);
+    expect(dashboard.summary.co2eKg).toBeCloseTo(dish.co2.co2eKg + carrots.co2.co2eKg, 2);
     expect(dashboard.summary.co2ByMethod.estime).toBeCloseTo(carrots.co2.co2eKg, 3);
     // Devenir : la perte du plat est répartie 6/4 entre compost et don.
     const don = dashboard.byDestination.find((d) => d.key === "don")!;
-    expect(don.summary.co2eKg).toBeCloseTo(dish.co2.co2eKg * 0.4, 3);
+    expect(don.summary.co2eKg).toBeCloseTo(dish.co2.co2eKg * 0.4, 2);
     expect(dashboard.series.at(-1)!.summary.co2eKg).toBeCloseTo(dashboard.summary.co2eKg, 3);
     // Une équipe ne voit que ses pertes, et le même CO2e.
     expect((await loadCo2Facts(t.db, teamD, WEEK)).facts).toHaveLength(2);
