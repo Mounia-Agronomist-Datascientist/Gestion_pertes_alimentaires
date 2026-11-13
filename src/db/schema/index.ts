@@ -8,3 +8,4 @@ export * from "./alertes";
 export * from "./imports";
 export * from "./couts";
 export * from "./alchimistes";
+export * from "./environnement";

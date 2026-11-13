@@ -48,7 +48,7 @@ Cela couvre :
 | 5.1 | **Valorisation** : onglet des statistiques en trois groupes (avec recette, sans recette, à part), détail par destination, suivi sur 12 semaines, exports Excel et CSV. | ✅ |
 | 5.2 | **Import des poids des Alchimistes** : dépôt du fichier (CSV ou Excel), aperçu par semaine de production, conservation de chaque dépôt ; un fichier plus récent remplace les collectes de sa période. | ✅ |
 | 5.3 | **Rapprochement** : onglet « Alchimistes » des statistiques, kg déclarés vers Les Alchimistes et kg pesés par semaine de production et par mois, écart en kg et en %, périodes non rapprochées, bacs de la semaine, exports. | ✅ |
-| 5.4 | **Facteurs d'émission** : écran des familles alimentaires et de leurs facteurs. Je préparerai une proposition tirée d'Agribalyse, que vous validerez. | À faire |
+| 5.4 | **Facteurs d'émission** : écran Administration → Facteurs d'émission (CO2e) ; proposition de 54 familles tirée d'Agribalyse 3.2, à valider ; versions conservées. | ✅ (validation des valeurs : à faire par vous) |
 | 5.5 | **Rattachement des ingrédients Melba aux familles** : suggestions automatiques par mot-clé, validées par vous. On commence par les ingrédients les plus fréquents. | Après 5.4 |
 | 5.6 | **Tableau de bord environnemental** : kg par catégorie et par devenir, CO2e mesuré, estimé ou non couvert, évolution. | Après 5.5 |
 | 5.7 | **Rapports PDF** : hebdomadaire, mensuel et annuel, valorisation, environnemental avec Les Alchimistes. | À la fin |
@@ -116,6 +116,90 @@ Statistiques → Alchimistes (profils qui comparent les équipes : production, d
 - Code : `src/domain/rapprochement.ts`, `src/modules/statistiques/alchimistes.ts`,
   `src/app/(app)/statistiques/alchimistes/page.tsx`. Tests : `tests/unit/rapprochement.test.ts`,
   `tests/integration/alchimistes.test.ts`.
+
+## 5.4 — Facteurs d'émission ✅
+
+Administration → Facteurs d'émission (CO2e).
+- **Familles alimentaires** (`food_families`) et **facteurs versionnés** (`emission_factors`, migration 0019) :
+  valeur en kg CO2e par kg, source, version, date des données, produit de référence (code AGB), valeurs par
+  étape du cycle de vie, hypothèses, qui a proposé et validé, et quand.
+- Statuts : proposé → validé ; une nouvelle version validée **remplace** l'ancienne (conservée, close à cette
+  date) ; une proposition peut être refusée. Une seule version validée et une seule proposition par famille.
+- **Aucun facteur n'est utilisé avant d'être validé.** Les calculs (étape 5.6) garderont la version utilisée.
+- Bouton « Charger la proposition Agribalyse » : crée les familles manquantes et propose un facteur à celles
+  qui n'en ont aucun (rien n'est validé automatiquement).
+- « Proposer une autre valeur » : valeur saisie avec sa source et ses hypothèses (fiche fournisseur, autre
+  produit Agribalyse…), à valider ensuite.
+
+### Origine des valeurs proposées
+
+- Jeu de données officiel « AGRIBALYSE – Détail par étape » de l'ADEME (data.ademe.fr, identifiant
+  `agribalyse-31-detail-par-etape`, version **3.2**, mis à jour le 30/06/2026), téléchargé le 13/11/2026. Les
+  jeux « AGRIBALYSE 4 » visibles sur le même site appartiennent à un département de tests de l'ADEME et ne sont
+  pas utilisés.
+- Indicateur « Changement climatique », par étape. **Valeur proposée = agriculture + transformation + emballage
+  + transport** : l'impact du produit jusqu'à sa livraison. La distribution en magasin et la consommation
+  (cuisson à domicile) ne sont pas retenues ; elles restent affichées. Hypothèse à valider avec la proposition.
+- Un **produit cru représentatif** par famille. Le DQR d'Agribalyse (qualité des données, 1 = très bonne,
+  5 = très faible) est indiqué dans les hypothèses.
+- Fichier généré : `src/modules/environnement/agribalyse-proposal.ts`.
+
+| Catégorie | Famille | Produit Agribalyse retenu (code AGB) | kg CO2e / kg |
+|---|---|---|---|
+| Viandes | Bœuf | Boeuf, faux-filet, cru (6111) | 28,909 |
+| Viandes | Veau | Veau, escalope, crue (6521) | 23,095 |
+| Viandes | Agneau | Agneau, gigot, cru (21502) | 41,286 |
+| Viandes | Porc | Porc, filet, maigre, cru (28201) | 6,52 |
+| Viandes | Poulet | Poulet, filet, sans peau, cru (36017) | 5,535 |
+| Viandes | Dinde | Dinde, escalope, crue (36304) | 5,535 |
+| Viandes | Canard | Canard, viande, crue (36201) | 7,921 |
+| Viandes | Jambon cuit | Jambon cuit, choix (28910) | 7,592 |
+| Viandes | Lardons | Lardon nature, cru (28501) | 7,064 |
+| Poissons et fruits de mer | Saumon | Saumon, cru, élevage (26036) | 5,51 |
+| Poissons et fruits de mer | Poisson blanc (cabillaud, colin) | Cabillaud, cru (26043) | 12,039 |
+| Poissons et fruits de mer | Thon | Thon, cru (26053) | 4,936 |
+| Poissons et fruits de mer | Crevettes | Crevette, crue (10021) | 19,845 |
+| Œufs et produits laitiers | Œufs | Oeuf, cru (22000) | 1,788 |
+| Œufs et produits laitiers | Lait | Lait demi-écrémé, UHT (19041) | 1,258 |
+| Œufs et produits laitiers | Crème | Crème de lait, 30% MG, semi-épaisse, UHT (19415) | 3,729 |
+| Œufs et produits laitiers | Beurre | Beurre à 82% MG, doux (16400) | 7,901 |
+| Œufs et produits laitiers | Fromage à pâte dure (emmental, comté, parmesan) | Emmental ou emmenthal (12115) | 6,172 |
+| Œufs et produits laitiers | Mozzarella | Mozzarella au lait de vache (19590) | 4,671 |
+| Œufs et produits laitiers | Yaourt et fromage blanc | Yaourt, lait fermenté ou spécialité laitière, nature (19593) | 1,851 |
+| Féculents et légumineuses | Riz | Riz blanc, cru (9100) | 1,994 |
+| Féculents et légumineuses | Pâtes sèches | Pâtes sèches standard, crues (9810) | 1,953 |
+| Féculents et légumineuses | Semoule | Semoule de blé dur, crue (9610) | 1,736 |
+| Féculents et légumineuses | Farine de blé | Farine de blé tendre ou froment T65 (9435) | 0,763 |
+| Féculents et légumineuses | Pain | Pain, baguette, courante (7001) | 0,765 |
+| Féculents et légumineuses | Pomme de terre | Pomme de terre, sans peau, crue (4008) | 0,76 |
+| Féculents et légumineuses | Lentilles | Lentille, sèche (20504) | 0,515 |
+| Féculents et légumineuses | Pois chiches | Pois chiche, sec (20516) | 0,832 |
+| Légumes | Tomate | Tomate, crue (20047_1) | 0,644 |
+| Légumes | Carotte | Carotte, crue (20009) | 0,345 |
+| Légumes | Oignon | Oignon, cru (20034) | 0,369 |
+| Légumes | Ail | Ail, cru (11000) | 0,282 |
+| Légumes | Courgette | Courgette, pulpe et peau, crue (20020) | 0,443 |
+| Légumes | Aubergine | Aubergine, crue (20053) | 0,443 |
+| Légumes | Poivron | Poivron, vert, jaune ou rouge, cru (20041) | 0,604 |
+| Légumes | Poireau | Poireau, cru (20039) | 0,509 |
+| Légumes | Courge | Courge, crue (20139) | 0,53 |
+| Légumes | Épinard | Épinard, cru (20059) | 0,366 |
+| Légumes | Brocoli | Brocoli, cru (20057) | 0,835 |
+| Légumes | Chou-fleur | Chou-fleur, cru (20016) | 0,605 |
+| Légumes | Haricot vert | Haricot vert, cru (20061_1) | 0,379 |
+| Légumes | Petits pois | Petits pois, crus (20072) | 0,674 |
+| Légumes | Salade | Laitue, crue (20031) | 0,579 |
+| Légumes | Concombre | Concombre, pulpe et peau, cru (20019) | 0,458 |
+| Fruits | Pomme | Pomme, pulpe et peau, crue (13039) | 0,354 |
+| Fruits | Banane | Banane, pulpe, crue (13005) | 0,742 |
+| Fruits | Orange | Orange, pulpe, crue (13034) | 0,576 |
+| Fruits | Citron | Citron, pulpe, cru (13009) | 0,6 |
+| Fruits | Fraise | Fraise, crue (13014_1) | 0,51 |
+| Matières grasses, sucre et autres | Huile d'olive | Huile d'olive vierge extra (17270) | 1,608 |
+| Matières grasses, sucre et autres | Huile de tournesol | Huile de tournesol (17440) | 2,34 |
+| Matières grasses, sucre et autres | Sucre | Sucre blanc (31016) | 0,725 |
+| Matières grasses, sucre et autres | Chocolat noir | Chocolat noir à 40% de cacao minimum, à pâtisser, tablette (31085) | 15,418 |
+| Matières grasses, sucre et autres | Lait de coco | Lait de coco ou Crème de coco (18041) | 0,642 |
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 
