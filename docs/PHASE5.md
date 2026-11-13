@@ -19,6 +19,7 @@ Cela couvre :
 | 12/11/2026 | Versions des facteurs CO2e | **Les anciennes versions sont conservées.** Un calcul fait avec une version de facteur n'est pas réécrit quand le facteur change (même principe que les coûts, §22). |
 | 12/11/2026 | Semaine d'une collecte | **Calculée automatiquement à partir de la date de collecte**, avec le calendrier de production de l'application. La colonne « Correspondance aux semaines de prod » du fichier n'est plus à remplir à la main ; si elle est remplie et diffère, l'aperçu le signale. |
 | 12/11/2026 | N° de poubelle | **Facultatif à la saisie en attendant**, obligatoire à nouveau dès que l'on obtient les n° des bacs collectés. Les n° sont visibles dans l'agenda en ligne des Alchimistes, jour par jour, mais pas dans leur fichier CSV ; demande envoyée aux Alchimistes pour les ajouter. Réglage dans Administration → Destinations (migration 0017). |
+| 13/11/2026 | Étapes du cycle de vie retenues pour le CO2e | **Jusqu'à la livraison** : agriculture + transformation + emballage + transport d'Agribalyse. Ni la distribution en magasin, ni la cuisson chez le consommateur. |
 | 12/11/2026 | Rapports PDF (§23) | Quatre rapports : hebdomadaire ; mensuel et annuel ; valorisation ; environnemental avec le rapprochement des Alchimistes. |
 
 ## Principes
@@ -138,8 +139,8 @@ Administration → Facteurs d'émission (CO2e).
   jeux « AGRIBALYSE 4 » visibles sur le même site appartiennent à un département de tests de l'ADEME et ne sont
   pas utilisés.
 - Indicateur « Changement climatique », par étape. **Valeur proposée = agriculture + transformation + emballage
-  + transport** : l'impact du produit jusqu'à sa livraison. La distribution en magasin et la consommation
-  (cuisson à domicile) ne sont pas retenues ; elles restent affichées. Hypothèse à valider avec la proposition.
+  + transport** : l'impact du produit jusqu'à sa livraison (règle validée le 13/11/2026). La distribution en
+  magasin et la consommation (cuisson à domicile) ne sont pas retenues ; elles restent affichées.
 - Un **produit cru représentatif** par famille. Le DQR d'Agribalyse (qualité des données, 1 = très bonne,
   5 = très faible) est indiqué dans les hypothèses.
 - Fichier généré : `src/modules/environnement/agribalyse-proposal.ts`.
