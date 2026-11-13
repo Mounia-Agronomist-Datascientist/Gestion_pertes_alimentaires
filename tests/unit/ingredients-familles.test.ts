@@ -36,6 +36,9 @@ describe("suggestion de famille d'un ingrédient Melba", () => {
     expect(suggest("champignon émincé")).toBeNull();
     expect(suggest("Préparation hachée de bœuf (15% MG)")).toBe("BOEUF");
     expect(suggest("pâte à lasagne")).toBe("PATES");
+    expect(
+      ["semoule de chou-fleur CE2 FR", "Assaisonnement Potatoes", "saucisse piment d'espelette 80gr", "Rösti aux oignons à l'huile de tournesol", "fond tartelette sucré carré 7*7", "Crackers aux pois chiches et romarin", "Financier amande", "Financier filet Dinde (haché de Dinde)"].map(suggest),
+    ).toEqual(["CHOU_FLEUR", "EPICES", "PORC", "POMME_DE_TERRE", "PATE_BRISEE", "BISCUIT", "CAKE", "DINDE"]);
   });
 
   it("ne suggère que des familles de la proposition", () => {

@@ -14,9 +14,16 @@ const RULES: readonly (readonly [RegExp, string | null])[] = [
   [/\b(moule (rond|rectangulaire|individuel)|plat a gratin|barquette|papier cuisson|film)\b/, "non_alimentaire"],
   // Pâtes à tarte, biscuits, plats végétariens et épices : avant les mots qu'ils contiennent (« noix de coco », « tomate »…).
   [/\bpate a lasagne/, "PATES"],
+  // Le produit l'emporte sur l'ingrédient qui le décrit (« semoule de chou-fleur », « rösti à l'huile »…).
+  [/\b(semoule|riz) de chou fleur\b/, "CHOU_FLEUR"],
+  [/\brosti\b/, "POMME_DE_TERRE"],
+  [/\bsaucisses?\b/, "PORC"],
+  [/\bassaisonnement\b/, "EPICES"],
+  [/\bfinanciers? (amande|nature|pistache|noisette)/, "CAKE"],
   [/\b(pate brisee|tartelette brise)/, "PATE_BRISEE"],
   [/\bpate feuilletee\b/, "PATE_FEUILLETEE"],
-  [/\b(cookies?|biscuits?|sables?|monka)\b/, "BISCUIT"],
+  [/\b(cookies?|biscuits?|sables?|monka|crackers?|barres? de cereales)\b/, "BISCUIT"],
+  [/\bfond (de )?tartelette\b/, "PATE_BRISEE"],
   [/\bcake\b/, "CAKE"],
   [/\bfalafels?\b/, "FALAFEL"],
   [/\b(boulettes? (vege|soja|vegetale)|steak vegetal)/, "BOULETTE_VEGETALE"],

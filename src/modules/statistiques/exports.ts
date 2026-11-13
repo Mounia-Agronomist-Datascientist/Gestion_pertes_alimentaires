@@ -20,10 +20,11 @@ import { annualEvolution, monthlyEvolution, weekComparison } from "./evolution";
 import { PRODUCT_TYPES, type ProductType, causeAndDestinationRanking, productRanking } from "./rankings";
 import { type RatioValues, weekRatios } from "./ratios";
 import { recoveryDashboard } from "./valorisation";
+import { type Co2Group, environmentDashboard } from "./environnement";
 import { alchimistesReconciliation, type ReconciliationPeriod } from "./alchimistes";
 import { weeklySummary } from "./weekly";
 
-export const EXPORT_TABS = ["general", "synthese", "zones", "equipes", "evolution", "ratios", "produits", "causes", "valorisation", "alchimistes"] as const;
+export const EXPORT_TABS = ["general", "synthese", "zones", "equipes", "evolution", "ratios", "produits", "causes", "valorisation", "environnement", "alchimistes"] as const;
 export type ExportTab = (typeof EXPORT_TABS)[number];
 
 export interface StatsExport {
@@ -218,6 +219,25 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           ]),
         });
       return { name: fileName("valorisation", label), tables };
+    }
+
+    case "environnement": {
+      const anchor = await anchorWeek(db, ctx);
+      const data = await environmentDashboard(db, user, ctx.period, anchor, ctx.filters, {
+        category: (c) => PRODUCT_CATEGORY_LABELS[c as keyof typeof PRODUCT_CATEGORY_LABELS] ?? c,
+        destinationKind: (k) => DESTINATION_KIND_STATS.find((d) => d.kind === k)?.label ?? k,
+      });
+      const headers = ["kg CO2e", "dont mesuré (kg CO2e)", "dont estimé (kg CO2e)", "Kg mesurés", "Kg estimés", "Kg non couverts", "Pertes"];
+      const cells = (s: Co2Group["summary"]): CsvValue[] => [s.co2eKg, s.co2ByMethod.mesure, s.co2ByMethod.estime, roundKg(s.kg.mesure), roundKg(s.kg.estime), roundKg(s.kg.non_couvert), s.losses];
+      const group = (title: string, first: string, groups: Co2Group[]): CsvTable => ({ title, headers: ["Période", first, ...headers], rows: groups.map((g) => [label, g.label, ...cells(g.summary)]) });
+      const tables: CsvTable[] = [
+        { title: "Synthèse", headers: ["Période", ...headers], rows: [[label, ...cells(data.summary)]] },
+        group("Par catégorie", "Catégorie", data.byCategory),
+        group("Par devenir", "Devenir", data.byDestination),
+        group("Produits", "Produit", data.byProduct),
+      ];
+      if (data.series.length) tables.push({ title: "12 semaines", headers: ["Semaine", ...headers], rows: data.series.map((w) => [formatProductionWeek(w), ...cells(w.summary)]) });
+      return { name: fileName("environnement", label), tables };
     }
 
     case "alchimistes": {

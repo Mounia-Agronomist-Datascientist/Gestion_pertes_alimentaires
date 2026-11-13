@@ -22,9 +22,10 @@ export interface FamilyOption {
   validated: boolean;
 }
 
-type Filter = "a_rattacher" | "rattaches" | "tous";
+type Filter = "a_rattacher" | "a_revoir" | "rattaches" | "tous";
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "a_rattacher", label: "À rattacher" },
+  { value: "a_revoir", label: "À revoir" },
   { value: "rattaches", label: "Rattachés" },
   { value: "tous", label: "Tous" },
 ];
@@ -47,15 +48,22 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
   const familyName = new Map(families.map((f) => [`f:${f.id}`, f.name]));
   const label = (value: string) => familyName.get(value) ?? (value === "non_couvert" ? "Non couvert" : value === "non_alimentaire" ? "Non alimentaire" : "");
 
+  // Rattachement validé qui diffère de la suggestion actuelle (suggestions corrigées depuis) : à vérifier.
+  const toReview = (r: MappingRow) => r.mapping != null && r.suggestion != null && valueOf(r.mapping) !== r.suggestion;
   const shown = useMemo(
     () =>
       rows.filter(
-        (r) => (filter === "tous" || (filter === "rattaches") === (r.mapping != null)) && (!search.trim() || normalize(r.label).includes(normalize(search.trim()))),
+        (r) =>
+          (filter === "tous" || (filter === "a_revoir" ? toReview(r) : (filter === "rattaches") === (r.mapping != null))) &&
+          (!search.trim() || normalize(r.label).includes(normalize(search.trim()))),
       ),
     [rows, filter, search],
   );
-  const choiceOf = (r: MappingRow) => choices[r.key] ?? (valueOf(r.mapping) || r.suggestion || "");
+  const reviewCount = rows.filter(toReview).length;
+  const choiceOf = (r: MappingRow) => choices[r.key] ?? (filter === "a_revoir" && r.suggestion ? r.suggestion : valueOf(r.mapping) || r.suggestion || "");
   const pendingSuggestions = shown.filter((r) => !r.mapping && choiceOf(r));
+  // « À revoir » : remplacer les rattachements affichés par la suggestion actuelle (ou le choix fait dans la liste).
+  const reviewed = filter === "a_revoir" ? shown.filter((r) => choiceOf(r) && choiceOf(r) !== valueOf(r.mapping)) : [];
   const done = rows.filter((r) => r.mapping).length;
   const usesDone = rows.filter((r) => r.mapping).reduce((a, r) => a + r.uses, 0);
   const usesTotal = rows.reduce((a, r) => a + r.uses, 0);
@@ -78,6 +86,7 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
               className={`rounded-full px-4 py-2 text-sm font-medium ${filter === f.value ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
             >
               {f.label}
+              {f.value === "a_revoir" && reviewCount > 0 && ` (${reviewCount})`}
             </button>
           ))}
         </nav>
@@ -95,6 +104,18 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
           </button>
         </form>
       )}
+      {reviewed.length > 0 && (
+        <form action={action} className="flex flex-col gap-2 rounded-2xl bg-amber-50 p-4 text-amber-950">
+          <input type="hidden" name="entries" value={JSON.stringify(reviewed.map((r) => entryOf(r, choiceOf(r))))} />
+          <p>
+            {reviewed.length} rattachement{reviewed.length > 1 ? "s" : ""} diffère{reviewed.length > 1 ? "nt" : ""} de la suggestion actuelle (familles ajoutées ou
+            suggestions corrigées depuis). Chaque liste affiche la suggestion ; pour garder votre choix précédent (écrit sous le nom), remettez-le dans la liste.
+          </p>
+          <button type="submit" disabled={pending} className="btn-secondary">
+            Appliquer les {reviewed.length} suggestions affichées
+          </button>
+        </form>
+      )}
       {shown.length === 0 && <p className="text-slate-600">Aucun ingrédient dans cette liste.</p>}
       <ul className="flex flex-col gap-2">
         {shown.map((r) => {
@@ -109,6 +130,7 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
                   {r.uses} ligne{r.uses > 1 ? "s" : ""} de recette
                   {r.mapping ? ` · rattaché : ${label(saved)}` : r.suggestion ? ` · proposé : ${label(r.suggestion)}` : " · aucune proposition"}
                 </span>
+                {toReview(r) && <span className="text-xs text-amber-800">Suggestion actuelle : {label(r.suggestion!)}. À vérifier.</span>}
               </div>
               <form action={action} className="flex gap-2">
                 <input type="hidden" name="entries" value={choice ? JSON.stringify([entryOf(r, choice)]) : "[]"} />

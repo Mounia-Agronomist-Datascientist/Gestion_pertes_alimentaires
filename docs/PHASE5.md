@@ -51,7 +51,7 @@ Cela couvre :
 | 5.3 | **Rapprochement** : onglet « Alchimistes » des statistiques, kg déclarés vers Les Alchimistes et kg pesés par semaine de production et par mois, écart en kg et en %, périodes non rapprochées, bacs de la semaine, exports. | ✅ |
 | 5.4 | **Facteurs d'émission** : écran Administration → Facteurs d'émission (CO2e) ; proposition de 102 familles tirée d'Agribalyse 3.2, à valider ; versions conservées. | ✅ (validation des valeurs : à faire par vous) |
 | 5.5 | **Rattachement des ingrédients Melba aux familles** : écran Administration → Facteurs d'émission → Ingrédients Melba et familles ; suggestions par mot-clé, validées par vous ; les plus utilisés d'abord. | ✅ (rattachements : à valider par vous) |
-| 5.6 | **Tableau de bord environnemental** : kg par catégorie et par devenir, CO2e mesuré, estimé ou non couvert, évolution. | Après 5.5 |
+| 5.6 | **Tableau de bord environnemental** : onglet « Environnement » des statistiques ; CO2e mesuré (recette Melba), estimé (hors liste) ou non couvert ; par catégorie, par devenir, par produit ; 12 semaines ; exports. | ✅ |
 | 5.7 | **Rapports PDF** : hebdomadaire, mensuel et annuel, valorisation, environnemental avec Les Alchimistes. | À la fin |
 
 ## À confirmer
@@ -278,6 +278,44 @@ Administration → Facteurs d'émission (CO2e) → Ingrédients Melba et famille
   la validation du facteur de la famille.
 - Table `ingredient_families` (migration 0020).
 - Tests : `tests/unit/ingredients-familles.test.ts`, `tests/integration/ingredient-families.test.ts`.
+
+## 5.6 — Tableau de bord environnemental ✅
+
+Statistiques → Environnement, avec la même période, les mêmes filtres et les mêmes droits que les autres onglets
+(une équipe ne voit que ses pertes ; pas d'euros).
+- **Mesuré** : produit du tome Melba (plat, sous-recette ou ingrédient de la semaine de la perte).
+  - Plat : CO2e d'une portion = ingrédients de la portion + sous-recettes déroulées (part de sous-recette
+    utilisée ÷ poids net de la sous-recette après cuisson, à défaut son poids brut).
+  - Sous-recette : CO2e de ses ingrédients ÷ son poids net. Ingrédient : facteur de sa famille.
+  - Perte comptée (barquettes, pièces) : nombre × CO2e par portion ; perte pesée : poids net × CO2e au kg (même
+    règle que le coût, R11).
+- **Couverture** : un ingrédient sans famille, sans facteur validé ou « non couvert » n'est jamais estimé. Sa part
+  du poids des ingrédients de la recette passe en kg « non couverts » ; le CO2e ne compte que la partie couverte.
+  Les contenants (« non alimentaire ») sont ignorés.
+- **Estimé** : perte hors tome (produit du référentiel ou libellé libre), poids net × facteur de la famille de son
+  libellé (rattachement validé s'il existe, sinon suggestion par mot-clé), signalé comme estimation.
+- **Non couvert** : le reste (pas de famille, pas de facteur validé, pas de poids). Les pertes non alimentaires
+  (emballages, moules) ne sont jamais comptées.
+- **Versions** : chaque perte prend la version du facteur en vigueur à sa date ; une perte antérieure à la
+  première validation prend la première version validée. Une nouvelle valeur ne change donc pas l'impact des
+  pertes passées. Les rattachements d'ingrédients, eux, s'appliquent tels qu'ils sont au moment du calcul.
+- Indicateurs : CO2e (kg ou t), kg mesurés / estimés / non couverts et leur part ; par catégorie de produit, par
+  devenir (perte répartie au prorata des quantités entre ses destinations), 15 produits qui pèsent le plus ;
+  12 semaines (colonnes empilées mesuré / estimé).
+- Exports Excel et CSV : synthèse, catégories, devenirs, produits, 12 semaines.
+- Code : `src/domain/co2e.ts`, `src/modules/statistiques/environnement.ts`,
+  `src/app/(app)/statistiques/environnement/page.tsx`. Tests : `tests/unit/co2e.test.ts`,
+  `tests/integration/environnement.test.ts`.
+
+### Contrôle sur les données locales (S45)
+
+VI01 (poulet rôti) : 1,133 kg CO2e par portion, dont 0,83 pour le poulet. Le détail a révélé un rattachement
+erroné, « semoule de chou-fleur » rattachée à la semoule de blé : la suggestion lisait « semoule » avant
+« chou-fleur ». Corrigé avec d'autres pièges du même type (« Assaisonnement Potatoes », « saucisse piment »,
+« Rösti à l'huile de tournesol », « fond tartelette sucré », « crackers… romarin », « financier amande »). Les
+rattachements déjà validés ne changent pas d'eux-mêmes : l'écran des ingrédients a un filtre **« À revoir »**
+(rattachement différent de la suggestion actuelle), où les suggestions peuvent être appliquées en une fois après
+relecture.
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 
