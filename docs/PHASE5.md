@@ -21,6 +21,9 @@ Cela couvre :
 | 12/11/2026 | N° de poubelle | **Facultatif à la saisie en attendant**, obligatoire à nouveau dès que l'on obtient les n° des bacs collectés. Les n° sont visibles dans l'agenda en ligne des Alchimistes, jour par jour, mais pas dans leur fichier CSV ; demande envoyée aux Alchimistes pour les ajouter. Réglage dans Administration → Destinations (migration 0017). |
 | 13/11/2026 | Étapes du cycle de vie retenues pour le CO2e | **Jusqu'à la livraison** : agriculture + transformation + emballage + transport d'Agribalyse. Ni la distribution en magasin, ni la cuisson chez le consommateur. |
 | 12/11/2026 | Rapports PDF (§23) | Quatre rapports : hebdomadaire ; mensuel et annuel ; valorisation ; environnemental avec le rapprochement des Alchimistes. |
+| 13/11/2026 | Linkee | **Destination à part** « Linkee » (don, sans recette), à côté d'« Association / don » qui reste pour les autres dons. |
+| 13/11/2026 | Ventes et dons de surplus de barquettes | **Les fichiers de l'entreprise font foi** : « VENTES TGTG », « VENTES FLASH » et « Gestion des surplus barquettes pour association Linkee ». Les équipes n'ont plus à déclarer ces destinations. |
+| 13/11/2026 | Coût des barquettes Linkee | **Calculé avec le n° de lot** : le code plat du lot (L41-071026-L2-VI01 → VI01) donne le coût Melba de la portion, multiplié par le nombre de barquettes. |
 
 ## Principes
 
@@ -369,3 +372,41 @@ Lecture prévue :
 - une ligne déjà importée n'est jamais comptée deux fois quand un fichier couvre une période déjà déposée.
   Une même date peut avoir plusieurs bacs de même poids : le fichier le plus récent remplace donc toutes les
   collectes de sa période.
+
+## Étape 5.8 proposée — fichiers de ventes et de dons des surplus (reçus le 13/11/2026)
+
+Trois Google Sheets, lus en **lecture seule** (jamais modifiés). On les télécharge en Excel et on les dépose dans
+Administration → Import, comme le fichier des Alchimistes.
+
+**« VENTES TGTG »** : un onglet par année (TGTG2024, TGTG2025, TGTG2026). Dates sans année (« 7/1 ») : l'année
+vient du nom de l'onglet. Deux sortes de lignes mélangées :
+- les lignes de vente : barquettes proposées, barquettes vendues, formule (« 6P », « 2P + 1 PDJ »,
+  « 2P + 1 encas ») et chiffre d'affaires TGTG ;
+- les lignes de stock : barquettes à vendre et barquettes vendues en vente flash ce jour-là.
+Une colonne « Résultat réel » porte des cumuls ; elle n'est pas reprise (l'application fait ses propres totaux).
+
+**« VENTES FLASH »** : un onglet par année (VF2024, VF2025, VF2026). Une ligne par vente : date, code de vente,
+nombre de clients sollicités, formule (« 10P (1 ou 2 box) »), prix, boxes vendues (« 70 (dont 22 x 2box) ») et
+chiffre d'affaires TTC. Les commentaires (« Changement tarifs box VF ») sont gardés comme note.
+
+**« Gestion des surplus barquettes pour association Linkee »** : une ligne par plat collecté : date de collecte,
+total de la collecte, barquettes du plat, nom du plat, n° de lot, DLC, collecté (oui ou non).
+- Le n° de lot donne la semaine, la date de production et le **code plat** (L41-071026-L2-**VI01**).
+- Les produits hors Melba (yaourts, lot « 20260203 ») sont gardés sans coût.
+- Une quantité « - » est signalée dans l'aperçu.
+- Les colonnes de contacts (prénoms, téléphones) ne sont **ni lues ni enregistrées**.
+
+Ce que fera l'étape :
+1. Destination « Linkee » (don, sans recette).
+2. Too Good To Go, vente flash et Linkee ne sont plus proposés aux équipes à la saisie ; les déclarations
+   passées restent dans l'historique.
+3. Dépôt des trois fichiers avec aperçu ; un fichier redéposé remplace l'année ou la période qu'il couvre.
+4. Onglet Valorisation : barquettes et recettes des ventes, barquettes, kg (poids Melba de la portion) et coût
+   des dons Linkee, par semaine de production.
+5. Rapport PDF de valorisation et export mis à jour.
+
+Points à valider avant de coder :
+- **Montants** : TTC ou HT ? Pour Too Good To Go, avant ou après la commission ? (vérification en cours ; montants
+  repris tels quels en attendant).
+- **Vente flash** : une box « 10P » = 10 barquettes, et les boxes doubles sont déjà comptées deux fois dans
+  « Quantités boxes vendues » (c'est ce que montre la feuille TGTG : 615 boxes → 6 150 barquettes le 2/1).
