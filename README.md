@@ -34,7 +34,7 @@ causes, destinations, impact environnemental).
 | 2 | Référentiels et imports (Melba, CSV/Excel) | ✅ Développée — import hebdomadaire (tome + plan), saisie à partir des plats de la semaine, coût matière figé |
 | 3 | Calcul des coûts | ✅ Développée — emballages, coût brut et net par perte, main-d'œuvre (non imputée), écran « Coûts des pertes » ([docs/PHASE3.md](docs/PHASE3.md)) |
 | 4 | Tableaux de bord et statistiques | ✅ Terminée ([docs/PHASE4.md](docs/PHASE4.md)) |
-| 5 | Valorisation et environnement | 🔄 En cours ([docs/PHASE5.md](docs/PHASE5.md)) |
+| 5 | Valorisation et environnement | ✅ Terminée — valorisation, Alchimistes (import et rapprochement), CO2e (Agribalyse 3.2), rapports PDF ([docs/PHASE5.md](docs/PHASE5.md)) |
 | 6 | Optimisation et automatisation | ⏳ |
 
 ## Lancement

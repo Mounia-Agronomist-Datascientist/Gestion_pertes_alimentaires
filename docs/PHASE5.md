@@ -52,7 +52,7 @@ Cela couvre :
 | 5.4 | **Facteurs d'émission** : écran Administration → Facteurs d'émission (CO2e) ; proposition de 102 familles tirée d'Agribalyse 3.2, à valider ; versions conservées. | ✅ (validation des valeurs : à faire par vous) |
 | 5.5 | **Rattachement des ingrédients Melba aux familles** : écran Administration → Facteurs d'émission → Ingrédients Melba et familles ; suggestions par mot-clé, validées par vous ; les plus utilisés d'abord. | ✅ (rattachements : à valider par vous) |
 | 5.6 | **Tableau de bord environnemental** : onglet « Environnement » des statistiques ; CO2e mesuré (recette Melba), estimé (hors liste) ou non couvert ; par catégorie, par devenir, par produit ; 12 semaines ; exports. | ✅ |
-| 5.7 | **Rapports PDF** : hebdomadaire, mensuel et annuel, valorisation, environnemental avec Les Alchimistes. | À la fin |
+| 5.7 | **Rapports PDF** : onglet « Rapports PDF » des statistiques ; hebdomadaire, mensuel, annuel, valorisation, environnemental avec Les Alchimistes. | ✅ |
 
 ## À confirmer
 
@@ -316,6 +316,32 @@ erroné, « semoule de chou-fleur » rattachée à la semoule de blé : la sugge
 rattachements déjà validés ne changent pas d'eux-mêmes : l'écran des ingrédients a un filtre **« À revoir »**
 (rattachement différent de la suggestion actuelle), où les suggestions peuvent être appliquées en une fois après
 relecture.
+
+## 5.7 — Rapports PDF ✅
+
+Statistiques → Rapports PDF : la période et les filtres choisis, puis un bouton par rapport (fichier PDF
+téléchargé, `/statistiques/rapport?type=…`).
+- **Hebdomadaire** (semaine de production) : chiffres clés et évolution, « où s'améliorer », zones, causes,
+  produits, 12 dernières semaines.
+- **Mensuel** et **annuel** (date réelle de la perte) : chiffres clés, devenir, zones, équipes (vues d'entreprise),
+  causes, produits, 12 derniers mois ou mois de l'année. Pour une semaine choisie, le mois est celui de son lundi.
+- **Valorisation** : avec recette, sans recette, à part ; tableau par destination, 12 semaines.
+- **Environnemental** : CO2e mesuré / estimé / non couvert, catégories, devenirs, produits, 12 semaines, et
+  rapprochement avec Les Alchimistes (vues d'entreprise seulement).
+- Mêmes droits que l'écran : une équipe n'a que ses pertes, jamais d'euros ni de rapprochement.
+- Fabrication : `pdf-lib` (polices standard du PDF, aucun fichier à charger, fonctionne sur Netlify). Les
+  caractères hors de l'encodage de ces polices (espaces fines des nombres, emoji des libellés Melba) sont
+  remplacés ou retirés. Un tableau qui tient sur une page n'est pas coupé ; sinon ses titres de colonnes sont
+  repris sur la page suivante.
+- Code : `src/modules/rapports/` (`pdf.ts`, `reports.ts`), `src/app/(app)/statistiques/rapport/route.ts`,
+  `src/app/(app)/statistiques/rapports/page.tsx`. Tests : `tests/integration/rapports.test.ts` (les cinq
+  rapports relus avec pdfjs, droits d'une équipe).
+
+## Phase 5 terminée
+
+Les sept étapes sont faites. Restent de votre côté : valider les facteurs et les rattachements d'ingrédients
+(filtre « À revoir »), déposer les fichiers des Alchimistes, et la mise en ligne des migrations 0017 à 0020
+(voir docs/SUIVI.md).
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 
