@@ -49,8 +49,8 @@ Cela couvre :
 | 5.1 | **Valorisation** : onglet des statistiques en trois groupes (avec recette, sans recette, à part), détail par destination, suivi sur 12 semaines, exports Excel et CSV. | ✅ |
 | 5.2 | **Import des poids des Alchimistes** : dépôt du fichier (CSV ou Excel), aperçu par semaine de production, conservation de chaque dépôt ; un fichier plus récent remplace les collectes de sa période. | ✅ |
 | 5.3 | **Rapprochement** : onglet « Alchimistes » des statistiques, kg déclarés vers Les Alchimistes et kg pesés par semaine de production et par mois, écart en kg et en %, périodes non rapprochées, bacs de la semaine, exports. | ✅ |
-| 5.4 | **Facteurs d'émission** : écran Administration → Facteurs d'émission (CO2e) ; proposition de 54 familles tirée d'Agribalyse 3.2, à valider ; versions conservées. | ✅ (validation des valeurs : à faire par vous) |
-| 5.5 | **Rattachement des ingrédients Melba aux familles** : suggestions automatiques par mot-clé, validées par vous. On commence par les ingrédients les plus fréquents. | Après 5.4 |
+| 5.4 | **Facteurs d'émission** : écran Administration → Facteurs d'émission (CO2e) ; proposition de 80 familles tirée d'Agribalyse 3.2, à valider ; versions conservées. | ✅ (validation des valeurs : à faire par vous) |
+| 5.5 | **Rattachement des ingrédients Melba aux familles** : écran Administration → Facteurs d'émission → Ingrédients Melba et familles ; suggestions par mot-clé, validées par vous ; les plus utilisés d'abord. | ✅ (rattachements : à valider par vous) |
 | 5.6 | **Tableau de bord environnemental** : kg par catégorie et par devenir, CO2e mesuré, estimé ou non couvert, évolution. | Après 5.5 |
 | 5.7 | **Rapports PDF** : hebdomadaire, mensuel et annuel, valorisation, environnemental avec Les Alchimistes. | À la fin |
 
@@ -143,7 +143,9 @@ Administration → Facteurs d'émission (CO2e).
   magasin et la consommation (cuisson à domicile) ne sont pas retenues ; elles restent affichées.
 - Un **produit cru représentatif** par famille. Le DQR d'Agribalyse (qualité des données, 1 = très bonne,
   5 = très faible) est indiqué dans les hypothèses.
-- Fichier généré : `src/modules/environnement/agribalyse-proposal.ts`.
+- Fichier généré : `src/modules/environnement/agribalyse-proposal.ts`. 54 familles au départ, 26 ajoutées à l'étape
+  5.5 pour couvrir les ingrédients fréquents du tome (huile de colza, eau, sel, échalote, amidon, vin…). Le bouton
+  « Charger la proposition » ajoute les familles manquantes sans toucher aux autres.
 
 | Catégorie | Famille | Produit Agribalyse retenu (code AGB) | kg CO2e / kg |
 |---|---|---|---|
@@ -167,6 +169,8 @@ Administration → Facteurs d'émission (CO2e).
 | Œufs et produits laitiers | Fromage à pâte dure (emmental, comté, parmesan) | Emmental ou emmenthal (12115) | 6,172 |
 | Œufs et produits laitiers | Mozzarella | Mozzarella au lait de vache (19590) | 4,671 |
 | Œufs et produits laitiers | Yaourt et fromage blanc | Yaourt, lait fermenté ou spécialité laitière, nature (19593) | 1,851 |
+| Œufs et produits laitiers | Fromage frais | Fromage frais type petit suisse, nature, 4% MG environ (19664) | 1,983 |
+| Œufs et produits laitiers | Fromage de chèvre | Fromage de chèvre bûche (12812) | 5,8 |
 | Féculents et légumineuses | Riz | Riz blanc, cru (9100) | 1,994 |
 | Féculents et légumineuses | Pâtes sèches | Pâtes sèches standard, crues (9810) | 1,953 |
 | Féculents et légumineuses | Semoule | Semoule de blé dur, crue (9610) | 1,736 |
@@ -175,6 +179,11 @@ Administration → Facteurs d'émission (CO2e).
 | Féculents et légumineuses | Pomme de terre | Pomme de terre, sans peau, crue (4008) | 0,76 |
 | Féculents et légumineuses | Lentilles | Lentille, sèche (20504) | 0,515 |
 | Féculents et légumineuses | Pois chiches | Pois chiche, sec (20516) | 0,832 |
+| Féculents et légumineuses | Quinoa | Quinoa, cru (9340_1) | 5,832 |
+| Féculents et légumineuses | Boulgour | Boulgour de blé, cru (9690) | 0,932 |
+| Féculents et légumineuses | Épeautre | Épeautre, cru (9001) | 0,932 |
+| Féculents et légumineuses | Polenta | Polenta ou semoule de maïs, précuite, sèche (9614) | 1,452 |
+| Féculents et légumineuses | Amidon de maïs | Amidon de maïs ou fécule de maïs (9510) | 1,524 |
 | Légumes | Tomate | Tomate, crue (20047_1) | 0,644 |
 | Légumes | Carotte | Carotte, crue (20009) | 0,345 |
 | Légumes | Oignon | Oignon, cru (20034) | 0,369 |
@@ -191,16 +200,52 @@ Administration → Facteurs d'émission (CO2e).
 | Légumes | Petits pois | Petits pois, crus (20072) | 0,674 |
 | Légumes | Salade | Laitue, crue (20031) | 0,579 |
 | Légumes | Concombre | Concombre, pulpe et peau, cru (20019) | 0,458 |
+| Légumes | Échalote | Échalote, crue (20097) | 0,344 |
+| Légumes | Céleri | Céleri-rave, cru (20055) | 0,392 |
+| Légumes | Chou | Chou blanc, cru (20116) | 0,654 |
+| Légumes | Navet | Navet, pelé, cru (20064) | 0,345 |
+| Légumes | Panais | Panais, cru (20181) | 0,392 |
 | Fruits | Pomme | Pomme, pulpe et peau, crue (13039) | 0,354 |
 | Fruits | Banane | Banane, pulpe, crue (13005) | 0,742 |
 | Fruits | Orange | Orange, pulpe, crue (13034) | 0,576 |
 | Fruits | Citron | Citron, pulpe, cru (13009) | 0,6 |
 | Fruits | Fraise | Fraise, crue (13014_1) | 0,51 |
+| Fruits | Poire | Poire, pulpe et peau, crue (13037) | 0,341 |
+| Fruits | Abricot | Abricot, dénoyauté, cru (13000) | 1,346 |
+| Fruits | Myrtille et fruits rouges | Myrtille, crue (13028) | 0,891 |
 | Matières grasses, sucre et autres | Huile d'olive | Huile d'olive vierge extra (17270) | 1,608 |
 | Matières grasses, sucre et autres | Huile de tournesol | Huile de tournesol (17440) | 2,34 |
 | Matières grasses, sucre et autres | Sucre | Sucre blanc (31016) | 0,725 |
 | Matières grasses, sucre et autres | Chocolat noir | Chocolat noir à 40% de cacao minimum, à pâtisser, tablette (31085) | 15,418 |
 | Matières grasses, sucre et autres | Lait de coco | Lait de coco ou Crème de coco (18041) | 0,642 |
+| Matières grasses, sucre et autres | Huile de colza | Huile de colza (17130) | 2,478 |
+| Matières grasses, sucre et autres | Amande | Amande (avec peau) (15000) | 2,611 |
+| Matières grasses, sucre et autres | Noix | Noix, séchée, cerneaux (15005) | 3,742 |
+| Matières grasses, sucre et autres | Miel | Miel (31008) | 1,55 |
+| Matières grasses, sucre et autres | Cacao | Cacao, non sucré, poudre soluble (18100) | 29,049 |
+| Matières grasses, sucre et autres | Vin | Vin blanc sec (5215) | 1,46 |
+| Matières grasses, sucre et autres | Vinaigre | Vinaigre (11018) | 0,944 |
+| Matières grasses, sucre et autres | Moutarde | Moutarde à l'ancienne (11021) | 1,565 |
+| Matières grasses, sucre et autres | Sel | Sel blanc alimentaire, non iodé, non fluoré (marin, ignigène ou gemme) (11017) | 0,605 |
+| Matières grasses, sucre et autres | Herbes fraîches | Persil, frais (11014) | 1,075 |
+| Matières grasses, sucre et autres | Eau | Eau du robinet (18066) | 0 |
+
+## 5.5 — Rattachement des ingrédients Melba ✅
+
+Administration → Facteurs d'émission (CO2e) → Ingrédients Melba et familles.
+- Liste : ingrédients des recettes des imports en vigueur (lignes qui ne sont pas des sous-recettes, libellé
+  normalisé), classés par nombre de lignes de recette ; filtres « À rattacher », « Rattachés », « Tous » et
+  recherche.
+- Pour chaque ingrédient : une famille, **non couvert** (aliment sans famille : épices, fonds, levure… ; compté à
+  part dans le CO2e) ou **non alimentaire** (contenant listé dans une recette : moules, plats à gratin ; jamais
+  compté).
+- **Suggestion** par mots-clés (`src/domain/ingredients-familles.ts`), préremplie mais jamais enregistrée sans
+  validation : une ligne à la fois, ou toutes les suggestions affichées d'un coup. Sur les 228 ingrédients des
+  imports locaux, 156 reçoivent une suggestion, soit environ 80 % des lignes de recette.
+- Chaque rattachement est tracé dans le journal (création, modification). Un rattachement est indépendant de
+  la validation du facteur de la famille.
+- Table `ingredient_families` (migration 0020).
+- Tests : `tests/unit/ingredients-familles.test.ts`, `tests/integration/ingredient-families.test.ts`.
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)
 

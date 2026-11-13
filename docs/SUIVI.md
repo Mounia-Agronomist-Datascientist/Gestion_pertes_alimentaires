@@ -54,6 +54,7 @@
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
 | 2026-11-12 | Phase 4 terminée — coût par composante et coût net semaine après semaine et par mois (onglet « Évolution ») ; exports Excel et CSV de chaque onglet des statistiques, avec la période, les filtres et les droits de l'écran | 1 test unitaire + 1 test d'intégration ; graphiques et 16 exports vérifiés dans le navigateur |
 | 2026-11-12 | Synthèse de la semaine (montants, zones, causes, produits, plus fortes hausses, 12 semaines), version imprimable et exports CSV | 1 test unitaire + 1 test d'intégration ; page et exports vérifiés dans le navigateur |
+| 2026-11-13 | Phase 5 — étape 5.5 : rattachement des ingrédients Melba aux familles (suggestions par mot-clé, validation ligne par ligne ou en bloc) ; 26 familles Agribalyse ajoutées à la proposition (80 au total) | Tests unitaires et d'intégration ; écran vérifié dans le navigateur (ordinateur et téléphone), aucun rattachement enregistré |
 | 2026-11-13 | Phase 5 — étape 5.4 : facteurs d'émission (familles, versions proposé / validé / remplacé / refusé, proposition de 54 familles tirée d'Agribalyse 3.2, écran d'administration) | Tests d'intégration ; chargement de la proposition et affichage vérifiés dans le navigateur (rien de validé) |
 | 2026-11-13 | Phase 5 — étape 5.3 : rapprochement avec Les Alchimistes (onglet « Alchimistes », semaines et mois, écart en kg et %, périodes non rapprochées, bacs de la semaine, exports) | Tests unitaires et d'intégration ; page (ordinateur et téléphone) et exports vérifiés dans le navigateur |
 | 2026-11-12 | Phase 5 — étape 5.2 : import des pesées des Alchimistes (CSV ou Excel, aperçu par semaine de production, remplacement de la période, noms du client jamais lus) | Tests unitaires et d'intégration ; dépôt, aperçu et remplacement vérifiés dans le navigateur avec un fichier fictif |
@@ -127,6 +128,7 @@
 | `0013_cout_net` | Colonnes `recovered_eur`, `net_cost_eur` sur les déclarations | Recettes vides, coût net vide pour les déclarations existantes |
 | `0014_main_oeuvre` | Table `labour_rates` (coût horaire daté par zone) | Nouvelle table vide |
 | `0016_numero_poubelle` | `destinations.bin_number_required` (activé pour Les Alchimistes), `declaration_destinations.bin_number` | Colonnes ajoutées, Les Alchimistes mis à jour |
+| `0020_rattachement_ingredients` | Table `ingredient_families` | Nouvelle table vide |
 | `0019_facteurs_emission` | Tables `food_families` et `emission_factors` | Nouvelles tables vides (proposition chargée depuis l'écran) |
 | `0018_alchimistes` | Tables `alchimistes_imports` et `alchimistes_collections` | Nouvelles tables vides |
 | `0017_numero_poubelle_facultatif` | `destinations.bin_number_mode` (aucun / facultatif / obligatoire) remplace `bin_number_required` | Les Alchimistes passent en « facultatif » ; colonne `bin_number_required` supprimée |

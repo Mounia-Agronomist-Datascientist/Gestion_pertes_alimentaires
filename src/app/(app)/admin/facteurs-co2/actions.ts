@@ -6,6 +6,7 @@ import { AdminError } from "@/modules/admin/accounts";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { loadAgribalyseProposal, proposeFactor, rejectFactor, validateFactors } from "@/modules/environnement/factors";
+import { type IngredientMappingInput, saveIngredientMappings } from "@/modules/environnement/ingredients";
 
 export interface FactorActionState {
   error?: string;
@@ -53,6 +54,25 @@ export async function factorAction(_prev: FactorActionState, formData: FormData)
     }
     revalidatePath("/admin/facteurs-co2");
     return { message };
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+}
+
+/** Enregistre des rattachements d'ingrédients (une ligne ou toutes les suggestions affichées). */
+export async function ingredientMappingAction(_prev: FactorActionState, formData: FormData): Promise<FactorActionState> {
+  const admin = await requireUser();
+  let entries: IngredientMappingInput[];
+  try {
+    entries = JSON.parse(String(formData.get("entries") ?? "[]"));
+  } catch {
+    return { error: "Données illisibles : rechargez la page" };
+  }
+  try {
+    const n = await saveIngredientMappings(db, admin, entries);
+    revalidatePath("/admin/facteurs-co2/ingredients");
+    return { message: n ? `${plural(n, "ingrédient")} ${n > 1 ? "rattachés" : "rattaché"}.` : "Aucun changement." };
   } catch (e) {
     if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
     throw e;

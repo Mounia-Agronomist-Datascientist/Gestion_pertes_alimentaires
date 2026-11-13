@@ -54,6 +54,10 @@ export default async function FactorsPage() {
           suivants ; l&apos;ancienne reste conservée et les calculs déjà faits ne changent pas.
         </p>
       </div>
+      <Link href="/admin/facteurs-co2/ingredients" className="flex flex-col gap-1 rounded-2xl bg-white p-4 shadow-sm">
+        <span className="text-lg font-semibold">Ingrédients Melba et familles →</span>
+        <span className="text-sm text-slate-600">Rattacher chaque ingrédient des recettes à une famille (les plus utilisés d&apos;abord)</span>
+      </Link>
       <FactorsAdmin
         missing={AGRIBALYSE_PROPOSAL.filter((p) => !codes.has(p.code)).length}
         families={families.map((f) => ({

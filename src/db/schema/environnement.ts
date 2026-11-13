@@ -69,3 +69,30 @@ export const emissionFactors = pgTable(
     check("emission_factors_positive", sql`${t.kgCo2ePerKg} >= 0`),
   ],
 );
+
+export const ingredientMappingStatusEnum = pgEnum("ingredient_mapping_status", ["famille", "non_couvert", "non_alimentaire"]);
+
+/**
+ * Rattachement d'un ingrédient du tome Melba (libellé normalisé, `tomeKey`) à une famille alimentaire (étape
+ * 5.5), validé par l'administration. « Non couvert » : aliment sans famille (épices, fonds…), compté à part dans
+ * le CO2e ; « non alimentaire » : contenant ou ustensile listé dans une recette, jamais compté.
+ */
+export const ingredientFamilies = pgTable(
+  "ingredient_families",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ingredientKey: text("ingredient_key").notNull(),
+    /** Libellé tel qu'il apparaît dans le tome (exemple). */
+    label: text("label").notNull(),
+    status: ingredientMappingStatusEnum("status").notNull(),
+    familyId: uuid("family_id").references(() => foodFamilies.id),
+    decidedBy: uuid("decided_by")
+      .notNull()
+      .references(() => users.id),
+    decidedAt: timestamp("decided_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("ingredient_families_key").on(t.ingredientKey),
+    check("ingredient_families_family_iff_status", sql`(${t.status} = 'famille') = (${t.familyId} is not null)`),
+  ],
+);
