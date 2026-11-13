@@ -40,7 +40,7 @@ export async function listIngredientsForMapping(db: Db, admin: AuthUser): Promis
   const rows = new Map<string, IngredientRow>();
   const add = (key: string, label: string, uses: number) => {
     const m = mappingOf.get(key);
-    const suggestion = suggestFamily(key);
+    const suggestion = suggestFamily(label);
     rows.set(key, {
       key,
       label,

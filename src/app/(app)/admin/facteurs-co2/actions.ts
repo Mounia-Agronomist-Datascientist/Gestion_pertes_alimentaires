@@ -5,7 +5,7 @@ import { db } from "@/db/client";
 import { AdminError } from "@/modules/admin/accounts";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
-import { loadAgribalyseProposal, proposeFactor, rejectFactor, validateFactors } from "@/modules/environnement/factors";
+import { createFamily, loadAgribalyseProposal, proposeFactor, rejectFactor, validateFactors } from "@/modules/environnement/factors";
 import { type IngredientMappingInput, saveIngredientMappings } from "@/modules/environnement/ingredients";
 
 export interface FactorActionState {
@@ -47,6 +47,11 @@ export async function factorAction(_prev: FactorActionState, formData: FormData)
           hypotheses: text("hypotheses") ?? "",
         });
         message = "Nouvelle valeur proposée : elle sera utilisée une fois validée.";
+        break;
+      }
+      case "family": {
+        const family = await createFamily(db, admin, { name: String(formData.get("name") ?? ""), category: String(formData.get("category") ?? "") });
+        message = `Famille « ${family.name} » créée : proposez sa valeur avec sa source, puis validez-la.`;
         break;
       }
       default:

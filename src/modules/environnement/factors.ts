@@ -150,6 +150,29 @@ export async function proposeFactor(db: Db, admin: AuthUser, familyId: string, r
   });
 }
 
+const familySchema = z.object({
+  name: z.string().trim().min(2, "Indiquez le nom de la famille").max(80),
+  category: z.string().trim().min(2, "Indiquez la catégorie").max(60),
+});
+
+/** Nouvelle famille sans facteur : sa valeur se propose ensuite avec sa source (« Proposer une autre valeur »). */
+export async function createFamily(db: Db, admin: AuthUser, raw: z.input<typeof familySchema>, now = new Date()) {
+  requirePermission(admin, "referentiel.manage");
+  const parsed = familySchema.safeParse(raw);
+  if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Saisie invalide");
+  const families = await db.select().from(s.foodFamilies);
+  const key = (n: string) => n.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  if (families.some((f) => key(f.name) === key(parsed.data.name))) throw new AdminError("Cette famille existe déjà");
+  let code = key(parsed.data.name).toUpperCase().replace(/ /g, "_").slice(0, 40) || "FAMILLE";
+  if (families.some((f) => f.code === code)) code = `${code}_${families.length + 1}`;
+  const [created] = await db
+    .insert(s.foodFamilies)
+    .values({ code, ...parsed.data, displayOrder: Math.max(0, ...families.map((f) => f.displayOrder)) + 1, createdAt: now })
+    .returning();
+  await writeAudit(db, { userId: admin.id, action: "create", entity: "food_family", entityId: created!.id, after: parsed.data, occurredAt: now });
+  return created!;
+}
+
 /** Facteurs validés en vigueur, par famille (pour les calculs des étapes suivantes). */
 export async function validFactors(db: Db) {
   const rows = await db.select().from(s.emissionFactors).where(eq(s.emissionFactors.status, "valide"));

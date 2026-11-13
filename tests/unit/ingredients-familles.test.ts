@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { suggestFamily } from "@/domain/ingredients-familles";
-import { tomeKey } from "@/modules/imports/tome/parse-tome";
 import { AGRIBALYSE_PROPOSAL } from "@/modules/environnement/agribalyse-proposal";
 
 const suggest = (label: string) => {
-  const s = suggestFamily(tomeKey(label));
+  const s = suggestFamily(label);
   return s?.kind === "famille" ? s.code : (s?.kind ?? null);
 };
 
@@ -27,10 +26,16 @@ describe("suggestion de famille d'un ingrédient Melba", () => {
     expect(suggest("MOULE ROND INDIVIDUEL BIODEG 180mL")).toBe("non_alimentaire");
     expect(suggest("Petit plat à gratin format individuel")).toBe("non_alimentaire");
     expect(suggest("Pate de citron confit en poche")).toBe("CITRON");
-    expect(suggest("muscade moulue")).toBeNull();
+    expect(suggest("muscade moulue")).toBe("EPICES");
     expect(suggest("noix de coco râpée")).toBeNull();
     expect(suggest("eau de vie de poire")).toBeNull();
-    expect(suggest("poivre noir")).toBeNull();
+    expect(suggest("Boulette soja tomate basilic 19/20G")).toBe("BOULETTE_VEGETALE");
+    expect(suggest("PZB_Biscuits à la noix de coco")).toBe("BISCUIT");
+    expect(suggest("romarin frais")).toBe("HERBES");
+    expect(suggest("thym flocon")).toBe("HERBES_SECHEES");
+    expect(suggest("champignon émincé")).toBeNull();
+    expect(suggest("Préparation hachée de bœuf (15% MG)")).toBe("BOEUF");
+    expect(suggest("pâte à lasagne")).toBe("PATES");
   });
 
   it("ne suggère que des familles de la proposition", () => {

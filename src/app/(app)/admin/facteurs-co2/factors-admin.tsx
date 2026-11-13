@@ -108,6 +108,33 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
         </form>
       )}
 
+      <details className="rounded-2xl bg-white p-4 shadow-sm">
+        <summary className="cursor-pointer font-medium">Ajouter une famille</summary>
+        <form action={action} className="mt-3 flex flex-col gap-2">
+          <input type="hidden" name="intent" value="family" />
+          <p className="text-sm text-slate-600">
+            Pour un produit qu&apos;aucune famille ne couvre. La famille est créée sans valeur : proposez ensuite sa valeur avec sa source (Agribalyse,
+            fiche fournisseur…), puis validez-la.
+          </p>
+          <label className="flex flex-col gap-1">
+            <span className="font-medium">Nom</span>
+            <input name="name" required className="field" placeholder="ex. Champignons" />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="font-medium">Catégorie</span>
+            <input name="category" required className="field" list="family-categories" />
+            <datalist id="family-categories">
+              {categories.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
+          </label>
+          <button type="submit" disabled={pending} className="btn-primary">
+            Créer la famille
+          </button>
+        </form>
+      </details>
+
       {categories.map((category) => (
         <section key={category} className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">{category}</h2>

@@ -6,7 +6,7 @@ import { createAccount } from "@/modules/auth/accounts";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
 import { AGRIBALYSE_PROPOSAL } from "@/modules/environnement/agribalyse-proposal";
-import { listFamiliesForAdmin, loadAgribalyseProposal, proposeFactor, rejectFactor, retainedValue, validateFactors, validFactors } from "@/modules/environnement/factors";
+import { createFamily, listFamiliesForAdmin, loadAgribalyseProposal, proposeFactor, rejectFactor, retainedValue, validateFactors, validFactors } from "@/modules/environnement/factors";
 import { createTestDb } from "../helpers/test-db";
 
 const NOW = new Date("2026-11-13T10:00:00Z");
@@ -72,5 +72,14 @@ describe("facteurs d'émission", () => {
     expect((await listFamiliesForAdmin(t.db, admin)).find((f) => f.code === "VEAU")!.proposal).toBeNull();
     await expect(proposeFactor(t.db, admin, veal.id, { kgCo2ePerKg: -1, source: "Test", sourceVersion: null, referenceName: null, hypotheses: "Hypothèse de test." })).rejects.toThrow(/négative/);
     await expect(proposeFactor(t.db, admin, veal.id, { kgCo2ePerKg: 3, source: "", sourceVersion: null, referenceName: null, hypotheses: "Hypothèse de test." })).rejects.toThrow(/source/);
+  });
+
+  it("crée une famille sans facteur, à compléter avec une valeur sourcée", async () => {
+    const family = await createFamily(t.db, admin, { name: "Champignons", category: "Légumes" }, NOW);
+    expect(family).toMatchObject({ code: "CHAMPIGNONS", name: "Champignons", category: "Légumes" });
+    await expect(createFamily(t.db, admin, { name: "champignons", category: "Légumes" }, NOW)).rejects.toThrow(/existe déjà/);
+    await expect(createFamily(t.db, team, { name: "Vanille", category: "Épices" }, NOW)).rejects.toThrow();
+    const listed = (await listFamiliesForAdmin(t.db, admin)).find((f) => f.id === family.id)!;
+    expect(listed).toMatchObject({ current: null, proposal: null, versions: [] });
   });
 });
