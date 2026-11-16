@@ -1,0 +1,59 @@
+# Phase 6 — Optimisation et automatisation
+
+Objectif (cahier des charges §26, phase 6) : rendre l'outil plus efficace. Le cahier des charges donne des
+**pistes**, pas une liste figée. Chaque piste est analysée ici. Celles retenues seront développées une par une,
+comme les phases précédentes, après validation.
+
+## Analyse des pistes (16/11/2026)
+
+| # | Piste | Ce qui existe déjà | Ce qu'il faudrait | Décision attendue |
+|---|---|---|---|---|
+| 1 | **Connexion API Melba** | Le tome Melba (PDF « Imprimer les recettes ») est déposé chaque semaine et lu par l'application. | Une API Melba : documentation, identifiants, droit d'accès. Rien n'est connu à ce jour (point 6 de POINTS_A_VALIDER). | Existe-t-il un accès API Melba pour l'entreprise ? |
+| 2 | **Automatisation des imports** | Dépôts manuels avec aperçu : tome + plan de production, « Décompte barquettes », Alchimistes, TGTG, ventes flash, Linkee. | Lecture directe des Google Sheets par un **compte de service Google**, en lecture seule. Chaque fichier doit être partagé avec ce compte, y compris le plan de production qui appartient à un autre service : son propriétaire doit l'accepter. Aucun fichier n'est jamais modifié. Les Alchimistes n'ont pas d'accès automatique connu. | Les propriétaires des fichiers acceptent-ils ce partage ? |
+| 3 | **Alertes sur les pertes inhabituelles** | Alerte « rien de noté » (Phase 1, règle R8), tâche de nuit sur GitHub. Comparaisons semaine / moyenne 4 semaines / an passé (Phase 4). | Une règle : par exemple, une équipe ou un plat dont les kg (ou les kg pour 1 000 barquettes) dépassent de X % la moyenne des 4 semaines précédentes. Seuils à fixer par vous, réglables dans l'administration. Affichage à l'accueil des responsables ; courriel en option. | Seuils et destinataires. |
+| 4 | **Alertes sur les causes récurrentes** | Classement des causes (Phase 4). | Une règle : par exemple, la même cause N fois en M semaines pour une équipe ou un plat. | N, M et destinataires. |
+| 5 | **Suivi des objectifs** | Rien. | Objectifs datés, saisis par l'administration (par exemple : kg pour 1 000 barquettes, coût net, part valorisée), pour l'entreprise ou par équipe ; écart affiché dans les statistiques et les rapports. | Indicateurs, niveaux (entreprise, équipe) et valeurs. |
+| 6 | **Analyse de tendances** | Évolution sur 12 semaines, 12 mois, années (Phase 4). | Moyenne glissante et sens de la tendance (hausse, stable, baisse) sur les indicateurs principaux. Calcul simple, sans règle métier nouvelle. | Validation de la méthode. |
+| 7 | **Lots et dates de péremption** | Les n° de lot (« L41-071026-L2-VI01 ») et les DLC existent dans le fichier Linkee. | Un n° de lot facultatif à la déclaration, ou lu sur l'étiquette ; contrôle de cohérence avec la semaine de production. Utile seulement si les équipes ont le lot sous la main. | Les équipes ont-elles le n° de lot au moment de la perte ? |
+| 8 | **Fonctionnement hors ligne** | PWA installable, en ligne seulement. | File d'attente sur la tablette, envoi au retour du réseau, contrôles refaits par le serveur. Développement lourd, utile seulement si le réseau manque en cuisine. | Le réseau est-il fiable dans les zones de saisie ? |
+| 9 | **Autres coûts indirects** | Composante « indirect » prévue et vide (Phase 3, §18.4) ; main-d'œuvre non imputée (§18.2). | Une méthode d'imputation décidée par l'entreprise. | Méthode de l'entreprise (en attente depuis la Phase 3). |
+
+## Proposition d'ordre
+
+1. **Alertes** (pistes 3 et 4) et **tendances** (piste 6) : elles s'appuient sur les données déjà collectées et
+   sur la tâche de nuit existante.
+2. **Objectifs** (piste 5) : dès que vous avez des valeurs cibles.
+3. **Imports automatiques** (piste 2), si les partages sont accordés ; **API Melba** (piste 1) si elle existe.
+4. **Lots** (piste 7) et **hors ligne** (piste 8) seulement si l'essai pilote montre qu'ils sont utiles.
+5. **Coûts indirects** (piste 9) quand la méthode sera décidée.
+
+L'essai pilote avec les équipes peut se faire en parallèle : il ne dépend d'aucune de ces pistes.
+
+## Décisions
+
+| Date | Sujet | Décision |
+|---|---|---|
+| 16/11/2026 | Pistes retenues | **Alertes et tendances** d'abord (pistes 3, 4 et 6). |
+| 16/11/2026 | Réseau en cuisine | **Coupures fréquentes** : la saisie hors ligne (piste 8) devient utile ; à proposer après les alertes. |
+| 16/11/2026 | API Melba, partage des Google Sheets | **Renseignements en cours** de votre côté ; dépôts manuels en attendant. |
+| 16/11/2026 | Perte inhabituelle | Alerte quand une équipe, une zone ou un plat dépasse de **50 %** la moyenne des **4 semaines précédentes**, à volume égal (kg pour 1 000 barquettes produites) quand la production est connue, sinon en kg. |
+| 16/11/2026 | Seuil minimal | **5 kg** : pas d'alerte en dessous, même si la hausse dépasse 50 %. |
+| 16/11/2026 | Cause récurrente | Alerte quand la **même cause est en tête** des pertes d'une équipe ou d'un plat **3 semaines de production de suite**. |
+| 16/11/2026 | Destinataires | **Dans l'application** : encadré à l'accueil des responsables (toutes les alertes) et de l'équipe concernée (les siennes), avec le détail et un bouton « vu ». Seuils réglables dans l'administration. |
+
+## Étapes proposées
+
+| Étape | Contenu | État |
+|---|---|---|
+| 6.1 | **Tendances** : moyenne glissante sur 4 semaines et sens de la tendance (hausse, stable, baisse) pour les kg, le coût net et les kg pour 1 000 barquettes, dans « Évolution », la synthèse de la semaine et les rapports. | Proposée |
+| 6.2 | **Pertes inhabituelles** : calcul à la fin de chaque semaine de production (tâche de nuit existante) par équipe, zone et plat ; seuils réglables (50 %, 5 kg). | Proposée |
+| 6.3 | **Causes récurrentes** : même cause en tête 3 semaines de suite, par équipe et par plat. | Proposée |
+| 6.4 | **Affichage des alertes** : encadré à l'accueil, détail, bouton « vu », historique ; réglages dans l'administration. | Proposée |
+
+Points de méthode à valider avec l'étape concernée :
+- **Tendance (6.1)** : « stable » quand la moyenne des 4 dernières semaines s'écarte de moins de 10 % de celle des
+  4 semaines d'avant (seuil proposé, réglable).
+- **Plats (6.2, 6.3)** : un plat ne revient pas chaque semaine ; sa référence est la moyenne des semaines où il a
+  été produit parmi les 4 précédentes, et il en faut au moins 2. Sinon, pas d'alerte.
+- **Semaine terminée** : une semaine est analysée la nuit qui suit son mercredi, pour ne pas alerter sur une
+  semaine incomplète.

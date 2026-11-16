@@ -17,6 +17,7 @@ causes, destinations, impact environnemental).
 | [docs/PHASE3.md](docs/PHASE3.md) | Phase 3 : calcul des coûts (décisions, étapes) |
 | [docs/PHASE4.md](docs/PHASE4.md) | Phase 4 : tableaux de bord et statistiques (décisions, étapes) |
 | [docs/PHASE5.md](docs/PHASE5.md) | Phase 5 : valorisation et environnement (décisions, étapes) |
+| [docs/PHASE6.md](docs/PHASE6.md) | Phase 6 : optimisation et automatisation (analyse des pistes, décisions, étapes) |
 | [docs/SECURITE.md](docs/SECURITE.md) | Rôles, matrice d'autorisation, règles de sécurité |
 | [docs/PLAN_TESTS.md](docs/PLAN_TESTS.md) | Stratégie et plan de tests |
 | [docs/REGLES_METIER.md](docs/REGLES_METIER.md) | Règles de calcul centralisées (semaines, unités, tares, destinations) |
@@ -35,7 +36,7 @@ causes, destinations, impact environnemental).
 | 3 | Calcul des coûts | ✅ Développée — emballages, coût brut et net par perte, main-d'œuvre (non imputée), écran « Coûts des pertes » ([docs/PHASE3.md](docs/PHASE3.md)) |
 | 4 | Tableaux de bord et statistiques | ✅ Terminée ([docs/PHASE4.md](docs/PHASE4.md)) |
 | 5 | Valorisation et environnement | ✅ Terminée — valorisation, Alchimistes (import et rapprochement), CO2e (Agribalyse 3.2), rapports PDF ([docs/PHASE5.md](docs/PHASE5.md)) |
-| 6 | Optimisation et automatisation | ⏳ |
+| 6 | Optimisation et automatisation | 🟡 Analyse faite, alertes et tendances retenues ([docs/PHASE6.md](docs/PHASE6.md)) |
 
 ## Lancement
 
