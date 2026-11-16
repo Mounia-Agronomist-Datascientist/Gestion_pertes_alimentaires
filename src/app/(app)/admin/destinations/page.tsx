@@ -26,6 +26,7 @@ export default async function DestinationsPage() {
           kind: d.kind,
           financialRecovery: d.financialRecovery,
           binNumberMode: d.binNumberMode,
+          declarable: d.declarable,
           active: d.active,
           used: d.used,
         }))}

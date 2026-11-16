@@ -40,7 +40,8 @@ type PreparedDeclaration = Awaited<ReturnType<typeof prepareDeclaration>>;
  * Utilisé à la création et à la correction : les règles ne sont écrites qu'une fois.
  * `declaredAt` : horodatage de la saisie initiale (conservé lors d'une correction).
  */
-async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now: Date, declaredAt: Date) {
+/** `keptDestinationIds` : destinations de la version corrigée, acceptées même si elles ne sont plus proposées aux équipes. */
+async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now: Date, declaredAt: Date, keptDestinationIds: readonly string[] = []) {
   const parsed = declarationInputSchema.safeParse(rawInput);
   if (!parsed.success) {
     throw new DeclarationError(parsed.error.issues[0]?.message ?? "Saisie invalide");
@@ -273,6 +274,9 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
   for (const d of input.destinations) {
     const row = destinationRows.find((r) => r.id === d.destinationId);
     if (!row || !row.active) throw new DeclarationError("Destination inconnue ou désactivée");
+    if (!row.declarable && !keptDestinationIds.includes(row.id)) {
+      throw new DeclarationError(`« ${row.name} » n'est plus déclarée par les équipes : ses chiffres viennent des fichiers de l'entreprise`);
+    }
     if (d.recoveredAmountEur != null && !row.financialRecovery) {
       throw new DeclarationError(`« ${row.name} » ne rapporte pas de recette : seules les ventes ont un montant encaissé`);
     }
@@ -593,8 +597,15 @@ export async function correctDeclaration(
   now: Date = new Date(),
 ): Promise<CreatedDeclaration> {
   const { existing, reason } = await loadForChange(db, user, id, options, now);
-  const prepared = await prepareDeclaration(db, user, rawInput, now, existing.declaredAt);
   const before = await currentSnapshot(db, existing);
+  const prepared = await prepareDeclaration(
+    db,
+    user,
+    rawInput,
+    now,
+    existing.declaredAt,
+    before.destinations.map((d) => d.destinationId),
+  );
 
   return db.transaction(async (tx) => {
     const revision = existing.revision + 1;

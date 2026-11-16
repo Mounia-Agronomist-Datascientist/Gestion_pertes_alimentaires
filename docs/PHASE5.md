@@ -23,6 +23,7 @@ Cela couvre :
 | 12/11/2026 | Rapports PDF (§23) | Quatre rapports : hebdomadaire ; mensuel et annuel ; valorisation ; environnemental avec le rapprochement des Alchimistes. |
 | 13/11/2026 | Linkee | **Destination à part** « Linkee » (don, sans recette), à côté d'« Association / don » qui reste pour les autres dons. |
 | 13/11/2026 | Ventes et dons de surplus de barquettes | **Les fichiers de l'entreprise font foi** : « VENTES TGTG », « VENTES FLASH » et « Gestion des surplus barquettes pour association Linkee ». Les équipes n'ont plus à déclarer ces destinations. |
+| 16/11/2026 | Montants des ventes | **Too Good To Go** : le montant en rouge (« RESULTAT REEL ») est ce que l'on reçoit, HT après commission. **Vente flash** : chiffre d'affaires TTC ; « 41 dt 18 avec PDJ » = 41 boxes de 10 barquettes à 70 € TTC, dont 18 avec 5 barquettes de petit-déjeuner, vendues 10 € de plus. |
 | 13/11/2026 | Coût des barquettes Linkee | **Calculé avec le n° de lot** : le code plat du lot (L41-071026-L2-VI01 → VI01) donne le coût Melba de la portion, multiplié par le nombre de barquettes. |
 
 ## Principes
@@ -56,6 +57,7 @@ Cela couvre :
 | 5.5 | **Rattachement des ingrédients Melba aux familles** : écran Administration → Facteurs d'émission → Ingrédients Melba et familles ; suggestions par mot-clé, validées par vous ; les plus utilisés d'abord. | ✅ (rattachements : à valider par vous) |
 | 5.6 | **Tableau de bord environnemental** : onglet « Environnement » des statistiques ; CO2e mesuré (recette Melba), estimé (hors liste) ou non couvert ; par catégorie, par devenir, par produit ; 12 semaines ; exports. | ✅ |
 | 5.7 | **Rapports PDF** : onglet « Rapports PDF » des statistiques ; hebdomadaire, mensuel, annuel, valorisation, environnemental avec Les Alchimistes. | ✅ |
+| 5.8 | **Ventes et dons des surplus** : dépôt des fichiers TGTG, ventes flash et Linkee ; destination Linkee ; ces destinations retirées de la saisie des équipes ; section dans l'onglet Valorisation, le rapport PDF et l'export. | ✅ |
 
 ## À confirmer
 
@@ -342,7 +344,7 @@ téléchargé, `/statistiques/rapport?type=…`).
 
 ## Phase 5 terminée
 
-Les sept étapes sont faites. Restent de votre côté : valider les facteurs et les rattachements d'ingrédients
+Les huit étapes sont faites. Restent de votre côté : valider les facteurs et les rattachements d'ingrédients
 (filtre « À revoir »), déposer les fichiers des Alchimistes, et la mise en ligne des migrations 0017 à 0020
 (voir docs/SUIVI.md).
 
@@ -373,7 +375,7 @@ Lecture prévue :
   Une même date peut avoir plusieurs bacs de même poids : le fichier le plus récent remplace donc toutes les
   collectes de sa période.
 
-## Étape 5.8 proposée — fichiers de ventes et de dons des surplus (reçus le 13/11/2026)
+## Étape 5.8 — fichiers de ventes et de dons des surplus (reçus le 13/11/2026, faite le 16/11/2026)
 
 Trois Google Sheets, lus en **lecture seule** (jamais modifiés). On les télécharge en Excel et on les dépose dans
 Administration → Import, comme le fichier des Alchimistes.
@@ -383,7 +385,8 @@ vient du nom de l'onglet. Deux sortes de lignes mélangées :
 - les lignes de vente : barquettes proposées, barquettes vendues, formule (« 6P », « 2P + 1 PDJ »,
   « 2P + 1 encas ») et chiffre d'affaires TGTG ;
 - les lignes de stock : barquettes à vendre et barquettes vendues en vente flash ce jour-là.
-Une colonne « Résultat réel » porte des cumuls ; elle n'est pas reprise (l'application fait ses propres totaux).
+La colonne « RESULTAT REEL » porte, en rouge, les versements reçus de Too Good To Go (HT, après commission) ; les
+notes à côté (« Au 30/10 », « CA = … ») ne sont pas reprises.
 
 **« VENTES FLASH »** : un onglet par année (VF2024, VF2025, VF2026). Une ligne par vente : date, code de vente,
 nombre de clients sollicités, formule (« 10P (1 ou 2 box) »), prix, boxes vendues (« 70 (dont 22 x 2box) ») et
@@ -396,17 +399,26 @@ total de la collecte, barquettes du plat, nom du plat, n° de lot, DLC, collect�
 - Une quantité « - » est signalée dans l'aperçu.
 - Les colonnes de contacts (prénoms, téléphones) ne sont **ni lues ni enregistrées**.
 
-Ce que fera l'étape :
-1. Destination « Linkee » (don, sans recette).
-2. Too Good To Go, vente flash et Linkee ne sont plus proposés aux équipes à la saisie ; les déclarations
-   passées restent dans l'historique.
-3. Dépôt des trois fichiers avec aperçu ; un fichier redéposé remplace l'année ou la période qu'il couvre.
-4. Onglet Valorisation : barquettes et recettes des ventes, barquettes, kg (poids Melba de la portion) et coût
-   des dons Linkee, par semaine de production.
-5. Rapport PDF de valorisation et export mis à jour.
+Ce qui est fait (règle R18 de docs/REGLES_METIER.md) :
+1. Destination « Linkee » (don, sans recette). Too Good To Go, vente flash et Linkee ne sont plus proposés aux
+   équipes (réglage « Proposée aux équipes à la saisie » d'Administration → Destinations) ; une déclaration passée
+   qui les porte peut toujours être corrigée.
+2. Administration → Import → « Ventes et dons des surplus de barquettes » : fichier Excel téléchargé depuis Google
+   Sheets, reconnu tout seul (onglets « TGTG2026 », « VF2026 », ou colonne « Date de collecte »), aperçu par année
+   et points à vérifier, puis enregistrement. Un fichier redéposé remplace sa source sur sa période.
+3. Lecture des particularités des vrais fichiers :
+   - TGTG : colonnes repérées par leur titre (leur ordre change d'une année à l'autre), lignes de l'année ignorées,
+     date d'une autre année que l'onglet ramenée à l'année de l'onglet (signalé), versement sans date (« Arrêt
+     maladie ») daté de la ligne précédente (signalé), dates hors ordre et ventes sans montant signalées ;
+   - ventes flash : formats « dt 18 avec PDJ », « (dont 16 PDJ) », « (dont 22 x 2box) », « (25x1 et 11x2) » ; une
+     formule « 10P / 10P + PDJ » sans nombre de petits-déjeuners est comptée sans petit-déjeuner (signalé) ;
+     l'onglet 2024 n'a pas de chiffre d'affaires ;
+   - Linkee : la date vaut pour les lignes suivantes de la même collecte, une date « 0 » prend celle de la ligne
+     suivante (signalé), « 180 + 144 yaourts » = 324, total de chaque collecte contrôlé, n° de lot illisible
+     signalé.
+4. Onglet Valorisation : section « Ventes et dons des surplus de barquettes » (vues d'entreprise ; euros avec le
+   droit aux indicateurs économiques) avant les pertes déclarées par les équipes ; barquettes par canal sur
+   12 semaines. Même section dans le rapport PDF de valorisation et dans l'export.
 
-Points à valider avant de coder :
-- **Montants** : TTC ou HT ? Pour Too Good To Go, avant ou après la commission ? (vérification en cours ; montants
-  repris tels quels en attendant).
-- **Vente flash** : une box « 10P » = 10 barquettes, et les boxes doubles sont déjà comptées deux fois dans
-  « Quantités boxes vendues » (c'est ce que montre la feuille TGTG : 615 boxes → 6 150 barquettes le 2/1).
+Vrais fichiers lus le 16/11/2026 : 213 lignes TGTG (2024 à 2026, dont 9 versements en 2026), 92 ventes flash,
+157 plats Linkee ; 15, 5 et 6 points à vérifier respectivement (dates à revoir dans le fichier TGTG notamment).

@@ -78,6 +78,11 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     comment: d.comment ?? "",
   };
 
-  const options = await getDeclarationOptions(db, user, toProductionLocalDate(new Date()));
+  const options = await getDeclarationOptions(
+    db,
+    user,
+    toProductionLocalDate(new Date()),
+    detail.destinations.map((x) => x.destinationId),
+  );
   return <DeclarationWizard options={options} userTeam={user.team} correction={{ id, revision: d.revision, initial }} />;
 }

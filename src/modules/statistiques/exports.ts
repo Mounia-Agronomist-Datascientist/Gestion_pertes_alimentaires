@@ -8,6 +8,7 @@ import { periodLabel } from "@/domain/periodes";
 import { formatProductionWeek } from "@/domain/semaine-production";
 import type { RankBy, StatsSummary } from "@/domain/statistiques";
 import { RECONCILIATION_STATUS_LABELS } from "@/domain/rapprochement";
+import { SURPLUS_SOURCES, type SurplusTotals, surplusTrays } from "@/domain/surplus";
 import { RECOVERY_GROUPS, type RecoveryTotals, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { COST_COMPONENTS } from "@/modules/couts/summary";
@@ -19,6 +20,7 @@ import { DESTINATION_KIND_STATS, generalDashboard } from "./dashboard";
 import { annualEvolution, monthlyEvolution, weekComparison } from "./evolution";
 import { PRODUCT_TYPES, type ProductType, causeAndDestinationRanking, productRanking } from "./rankings";
 import { type RatioValues, weekRatios } from "./ratios";
+import { canReadSurplus, surplusDashboard } from "./surplus";
 import { recoveryDashboard } from "./valorisation";
 import { type Co2Group, environmentDashboard } from "./environnement";
 import { alchimistesReconciliation, type ReconciliationPeriod } from "./alchimistes";
@@ -218,6 +220,41 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
             ...(withCosts ? [w.groups.avec_recette.cost?.recoveredEur ?? 0] : []),
           ]),
         });
+      // Ventes et dons des surplus d'après les fichiers de l'entreprise (vues d'entreprise seulement).
+      const surplus = canReadSurplus(user) ? await surplusDashboard(db, user, ctx.period, anchor) : null;
+      if (surplus?.hasFiles) {
+        const sourceHeaders = ["Barquettes TGTG", "Barquettes ventes flash", "Barquettes Linkee"];
+        const sourceCells = (s: SurplusTotals): CsvValue[] => {
+          const trays = surplusTrays(s);
+          return SURPLUS_SOURCES.map((k) => trays[k]);
+        };
+        const money = (s: SurplusTotals): CsvValue[] => (withCosts ? [s.tgtg.clientEur, s.tgtg.receivedEur, s.flash.revenueEur, s.linkee.costEur] : []);
+        const moneyHeaders = withCosts ? ["TGTG prix payé par les clients (€)", "TGTG versements reçus HT (€)", "Ventes flash CA TTC (€)", "Linkee coût matières Melba (€)"] : [];
+        tables.unshift({
+          title: "Ventes et dons des surplus (fichiers de l'entreprise)",
+          headers: ["Période", "Ventes TGTG", "Versements TGTG", "Ventes flash", "Boxes vendues", "dont avec petit-déjeuner", "Collectes Linkee", ...sourceHeaders, "Kg Linkee", ...moneyHeaders],
+          rows: [
+            [
+              label,
+              surplus.totals.tgtg.sales,
+              surplus.totals.tgtg.payouts,
+              surplus.totals.flash.sales,
+              surplus.totals.flash.boxes,
+              surplus.totals.flash.breakfastBoxes,
+              surplus.totals.linkee.collections,
+              ...sourceCells(surplus.totals),
+              roundKg(surplus.totals.linkee.kg),
+              ...money(surplus.totals),
+            ],
+          ],
+        });
+        if (surplus.series.length)
+          tables.push({
+            title: "Ventes et dons des surplus, 12 semaines",
+            headers: ["Semaine", ...sourceHeaders, "Kg Linkee", ...moneyHeaders],
+            rows: surplus.series.map((w) => [formatProductionWeek(w), ...sourceCells(w.totals), roundKg(w.totals.linkee.kg), ...money(w.totals)]),
+          });
+      }
       return { name: fileName("valorisation", label), tables };
     }
 

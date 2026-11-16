@@ -3,10 +3,12 @@ import { db } from "@/db/client";
 import { requireUser } from "@/modules/auth/next-session";
 import { alchimistesCoverage, listAlchimistesImports } from "@/modules/imports/alchimistes/service";
 import { listProductionCounts } from "@/modules/imports/decompte/service";
+import { listSurplusImports, SURPLUS_SOURCE_LABELS, surplusCoverage } from "@/modules/imports/surplus/service";
 import { listWeekImports } from "@/modules/imports/service";
 import { AlchimistesWizard } from "./alchimistes-wizard";
 import { DecompteWizard } from "./decompte-wizard";
 import { ImportWizard } from "./import-wizard";
+import { SurplusWizard } from "./surplus-wizard";
 
 export const metadata = { title: "Import de la semaine — Administration" };
 
@@ -15,11 +17,13 @@ const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month:
 
 export default async function ImportPage() {
   const admin = await requireUser();
-  const [imports, counts, alchimistes, coverage] = await Promise.all([
+  const [imports, counts, alchimistes, coverage, surplus, surplusCovered] = await Promise.all([
     listWeekImports(db, admin),
     listProductionCounts(db, admin),
     listAlchimistesImports(db, admin),
     alchimistesCoverage(db, admin),
+    listSurplusImports(db, admin),
+    surplusCoverage(db, admin),
   ]);
   return (
     <>
@@ -43,6 +47,8 @@ export default async function ImportPage() {
       />
 
       <AlchimistesWizard coverage={coverage} />
+
+      <SurplusWizard coverage={surplusCovered} />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Imports enregistrés</h2>
@@ -103,6 +109,25 @@ export default async function ImportPage() {
           ))}
         </ul>
         <p className="text-xs text-slate-500">Un fichier plus récent remplace les collectes de sa période ; les anciennes restent conservées.</p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold">Ventes et dons des surplus enregistrés</h2>
+        {surplus.length === 0 && <p className="text-slate-600">Aucun fichier pour l&apos;instant.</p>}
+        <ul className="flex flex-col gap-2">
+          {surplus.map((f) => (
+            <li key={f.id} className="rounded-2xl bg-white p-4 shadow-sm">
+              <span className="font-semibold">
+                {SURPLUS_SOURCE_LABELS[f.source]} · du {shortDate(f.periodFrom)} au {shortDate(f.periodTo)} · {f.entries} lignes
+              </span>
+              <span className="block text-sm text-slate-600">
+                {dateTimeFormat.format(f.createdAt)} par {f.createdByName} · {f.fileName} · {f.sheets}
+                {f.anomalies.length > 0 && ` · ${f.anomalies.length} point${f.anomalies.length > 1 ? "s" : ""} à vérifier`}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-slate-500">Un fichier plus récent remplace les lignes de sa source sur sa période ; les anciennes restent conservées.</p>
       </section>
     </>
   );

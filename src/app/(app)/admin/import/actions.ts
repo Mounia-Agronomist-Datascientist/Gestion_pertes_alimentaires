@@ -8,6 +8,7 @@ import { alchimistesPayloadSchema, saveAlchimistesImport } from "@/modules/impor
 import { decomptePayloadSchema, saveProductionCount } from "@/modules/imports/decompte/service";
 import { buildWeekImport } from "@/modules/imports/merge";
 import { importPayloadSchema } from "@/modules/imports/payload";
+import { SURPLUS_SOURCE_LABELS, saveSurplusImport, surplusPayloadSchema } from "@/modules/imports/surplus/service";
 import { ImportError, saveWeekImport } from "@/modules/imports/service";
 
 export interface ImportActionState {
@@ -82,6 +83,34 @@ export async function importAlchimistesAction(_prev: ImportActionState, formData
         saved.replaced ? ` (${saved.replaced} collectes déjà enregistrées sur la période remplacées)` : ""
       }.`,
     };
+  } catch (e) {
+    if (e instanceof ImportError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+}
+
+/** Valide un fichier de ventes ou de dons des surplus : lignes revérifiées par le serveur, plats Linkee retrouvés dans Melba. */
+export async function importSurplusAction(_prev: ImportActionState, formData: FormData): Promise<ImportActionState> {
+  const admin = await requireUser();
+  let raw: unknown;
+  try {
+    raw = JSON.parse(String(formData.get("payload") ?? ""));
+  } catch {
+    return { error: "Données illisibles : rechargez la page et déposez à nouveau le fichier" };
+  }
+  const parsed = surplusPayloadSchema.safeParse(raw);
+  if (!parsed.success) return { error: "Données inattendues : rechargez la page et déposez à nouveau le fichier" };
+  try {
+    const saved = await saveSurplusImport(db, admin, parsed.data);
+    revalidatePath("/admin/import");
+    const details = [
+      `${saved.entries} ligne${saved.entries > 1 ? "s" : ""}`,
+      parsed.data.source === "linkee" ? `${saved.matched} plat${saved.matched > 1 ? "s" : ""} retrouvé${saved.matched > 1 ? "s" : ""} dans Melba (poids et coût calculés)` : null,
+      saved.unmatched ? `${saved.unmatched} code${saved.unmatched > 1 ? "s" : ""} plat absent${saved.unmatched > 1 ? "s" : ""} des imports Melba (sans coût)` : null,
+      saved.outside ? `${saved.outside} ligne${saved.outside > 1 ? "s" : ""} hors du calendrier de production (comptée${saved.outside > 1 ? "s" : ""} par date)` : null,
+      saved.replaced ? `${saved.replaced} ligne${saved.replaced > 1 ? "s" : ""} déjà enregistrée${saved.replaced > 1 ? "s" : ""} sur la période remplacée${saved.replaced > 1 ? "s" : ""}` : null,
+    ].filter(Boolean);
+    return { message: `${SURPLUS_SOURCE_LABELS[parsed.data.source]} enregistré : ${details.join(" · ")}.` };
   } catch (e) {
     if (e instanceof ImportError || e instanceof ForbiddenError) return { error: e.message };
     throw e;

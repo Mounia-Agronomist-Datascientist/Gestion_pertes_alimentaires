@@ -17,6 +17,7 @@ import {
   DeclarationError,
 } from "@/modules/declarations/service";
 import { createTestDb } from "../helpers/test-db";
+import { allowDeclaredSales } from "../helpers/ventes-declarees";
 
 // Jeudi 12/11/2026 à 10h (Paris) : semaine S47.
 const NOW = new Date("2026-11-12T09:00:00Z");
@@ -45,6 +46,7 @@ describe("déclaration de perte", () => {
   beforeAll(async () => {
     t = await createTestDb();
     await seed(t.db);
+    await allowDeclaredSales(t.db);
     await byCode(await t.db.select().from(s.subzones), "sz");
     await byCode(await t.db.select().from(s.zones), "zone");
     await byCode(await t.db.select().from(s.causes), "cause");

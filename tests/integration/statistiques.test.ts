@@ -26,6 +26,7 @@ import { tablesToXlsx } from "@/modules/statistiques/xlsx";
 import { adjacentOf, loadFacts } from "@/modules/statistiques/facts";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
+import { allowDeclaredSales } from "../helpers/ventes-declarees";
 
 const NOW = new Date("2026-11-02T14:00:00Z");
 const S45 = { kind: "semaine", year: 2026, number: 45 } as const;
@@ -44,6 +45,7 @@ describe("lecture des pertes pour les statistiques", () => {
   beforeAll(async () => {
     t = await createTestDb();
     await seed(t.db);
+    await allowDeclaredSales(t.db);
     const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
     const team = (letter: string) => id(t.db.select().from(s.teams).where(eq(s.teams.letter, letter)));
     const account = async (login: string, roleCode: string, teamId?: string) =>

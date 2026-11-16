@@ -227,3 +227,23 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   qu'au changement de poubelle. En mode obligatoire, la perte ne peut pas être validée sans n°.
 - Le n° est gardé à chaque nouvelle version (correction, annulation, recette, rattachement) ; il servira au
   rapprochement avec les pesées des Alchimistes (Phase 5).
+
+## R18 — Ventes et dons des surplus de barquettes (13/11 et 16/11/2026)
+
+- Les fichiers de l'entreprise **font foi** : « VENTES TGTG », « VENTES FLASH » et « Gestion des surplus barquettes
+  pour association Linkee », déposés en Excel (Administration → Import). Too Good To Go, la vente flash et Linkee
+  ne sont plus proposés aux équipes à la saisie (réglage « Proposée aux équipes » d'Administration →
+  Destinations) ; une déclaration passée qui les porte peut toujours être corrigée.
+- **Linkee** : destination à part, de type don, sans recette.
+- **Too Good To Go** : « CA TGTG » = prix payé par les clients ; « RESULTAT REEL » (en rouge) = versement reçu,
+  **HT après commission**, compté à sa date (il couvre les ventes précédentes).
+- **Vente flash** : montant = chiffre d'affaires **TTC**. « 41 dt 18 avec PDJ » = 41 boxes de 10 barquettes, dont
+  18 avec 5 barquettes de petit-déjeuner (vendues 10 € de plus) ; « 70 (dont 22 x 2box) » = 70 boxes dont 22 achats
+  de deux boxes, déjà comptés dans les 70. Le nombre de barquettes par box vient de la formule (« 10P », « 12P »).
+- Les montants des trois sources **ne s'additionnent jamais** : leurs bases diffèrent.
+- **Coût Linkee** : le n° de lot donne la date de production et le code plat (« L41-071026-L2-VI01 ») ; coût
+  matières = barquettes × coût Melba d'une portion, kg = barquettes × poids d'une portion, d'après l'import Melba en
+  vigueur de la semaine de production (à défaut de date lisible : n° de semaine du lot). Figés au dépôt. Plat non
+  retrouvé ou produit hors Melba (yaourts) : barquettes comptées, sans kg ni coût.
+- Un fichier redéposé remplace les lignes en vigueur de sa source sur sa période ; les anciennes restent en base.
+  Les contacts du fichier Linkee ne sont jamais lus.

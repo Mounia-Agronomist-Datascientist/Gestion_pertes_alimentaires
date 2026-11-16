@@ -167,6 +167,11 @@ export const destinations = pgTable(
      * facultatif tant que leur fichier ne donne pas les n° des bacs collectés, obligatoire ensuite.
      */
     binNumberMode: binNumberModeEnum("bin_number_mode").notNull().default("aucun"),
+    /**
+     * Proposée aux équipes à la saisie. Non pour Too Good To Go, la vente flash et Linkee : leurs chiffres viennent
+     * des fichiers de l'entreprise (décision du 13/11/2026, docs/PHASE5.md étape 5.8).
+     */
+    declarable: boolean("declarable").notNull().default(true),
     displayOrder: smallint("display_order").notNull().default(0),
     active: boolean("active").notNull().default(true),
     ...timestamps,

@@ -269,6 +269,7 @@ export async function destinationAction(_prev: PlaceActionState, formData: FormD
     kind: String(formData.get("kind") ?? "") as never,
     financialRecovery: formData.get("financialRecovery") === "on",
     binNumberMode: String(formData.get("binNumberMode") ?? "aucun") as never,
+    declarable: formData.get("declarable") === "on",
   });
   let message: string | undefined;
   try {

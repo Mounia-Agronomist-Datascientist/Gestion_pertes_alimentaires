@@ -36,7 +36,11 @@ export async function lastBinNumbers(db: Db, zoneIds: readonly string[]): Promis
   return last;
 }
 
-export async function getDeclarationOptions(db: Db, user: AuthUser, today: LocalDate) {
+/**
+ * `keepDestinationIds` : destinations déjà portées par la déclaration corrigée, gardées même si elles ne sont plus
+ * proposées aux équipes.
+ */
+export async function getDeclarationOptions(db: Db, user: AuthUser, today: LocalDate, keepDestinationIds: readonly string[] = []) {
   const limitedToOwnZones = can(user, "declaration.read.zone") && !can(user, "declaration.read.all");
 
   const [zoneRows, subzoneRows, causeRows, causeZoneRows, causeSubzoneRows, destinationRows, unitRows, containerRows, productRows] =
@@ -46,7 +50,11 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
       db.select().from(s.causes).where(eq(s.causes.status, "active")).orderBy(asc(s.causes.displayOrder)),
       db.select().from(s.causeZones),
       db.select().from(s.causeSubzones),
-      db.select().from(s.destinations).where(eq(s.destinations.active, true)).orderBy(asc(s.destinations.displayOrder)),
+      db
+        .select()
+        .from(s.destinations)
+        .where(and(eq(s.destinations.active, true), keepDestinationIds.length ? or(eq(s.destinations.declarable, true), inArray(s.destinations.id, [...keepDestinationIds])) : eq(s.destinations.declarable, true)))
+        .orderBy(asc(s.destinations.displayOrder)),
       db.select().from(s.units).where(eq(s.units.active, true)).orderBy(asc(s.units.displayOrder)),
       db
         .select({ type: s.containerTypes, tare: s.containerTares })

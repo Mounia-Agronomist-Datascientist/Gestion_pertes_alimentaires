@@ -18,6 +18,7 @@ interface Destination {
   kind: DestinationKind;
   financialRecovery: boolean;
   binNumberMode: BinNumberMode;
+  declarable: boolean;
   active: boolean;
   used: boolean;
 }
@@ -78,6 +79,7 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
                   {DESTINATION_KIND_LABELS[d.kind]}
                   {d.financialRecovery && " · peut rapporter une recette"}
                   {d.binNumberMode !== "aucun" && ` · n° de poubelle ${d.binNumberMode}`}
+                  {!d.declarable && " · non proposée aux équipes (fichiers de l'entreprise)"}
                 </span>
                 <form action={action} className="flex flex-wrap items-center gap-4">
                   <input type="hidden" name="id" value={d.id} />
@@ -143,6 +145,10 @@ function DestinationFields({ destination }: { destination?: Destination }) {
         {locked && destination!.financialRecovery && <input type="hidden" name="financialRecovery" value="on" />}
         <input type="checkbox" name="financialRecovery" defaultChecked={destination?.financialRecovery} disabled={locked} className="size-5" />
         Peut rapporter une recette (ventes uniquement)
+      </label>
+      <label className="flex items-center gap-2">
+        <input type="checkbox" name="declarable" defaultChecked={destination?.declarable ?? true} className="size-5" />
+        Proposée aux équipes à la saisie (sinon : chiffres repris des fichiers de l&apos;entreprise)
       </label>
       <label className="flex flex-col gap-1">
         <span className="font-medium">N° de poubelle à chaque perte</span>

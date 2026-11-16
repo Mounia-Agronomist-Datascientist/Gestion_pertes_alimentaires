@@ -14,6 +14,7 @@ import { saveWeekImport } from "@/modules/imports/service";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
+import { allowDeclaredSales } from "../helpers/ventes-declarees";
 
 const NOW = new Date("2026-11-02T14:00:00Z");
 
@@ -27,6 +28,7 @@ describe("synthèse des coûts d'une semaine", () => {
   beforeAll(async () => {
     t = await createTestDb();
     await seed(t.db);
+    await allowDeclaredSales(t.db);
     const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
     admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
     production = await loadAuthUser(t.db, await createAccount(t.db, { login: "prod", displayName: "Production", roleCode: "resp_production", password: "mot-de-passe-prod" }));

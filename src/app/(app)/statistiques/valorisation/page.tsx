@@ -4,11 +4,14 @@ import { db } from "@/db/client";
 import { periodLabel } from "@/domain/periodes";
 import { RECOVERY_GROUPS, type RecoveryGroup, type RecoveryTotals, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { requireUser } from "@/modules/auth/next-session";
+import { can } from "@/modules/auth/permissions";
 import { anchorWeek } from "@/modules/statistiques/context";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
+import { canReadSurplus, surplusDashboard } from "@/modules/statistiques/surplus";
 import { recoveryDashboard } from "@/modules/statistiques/valorisation";
 import { ColumnChart } from "../evolution/column-chart";
 import { StackedColumnChart } from "../evolution/stacked-chart";
+import { SurplusSection } from "./surplus-section";
 import { BarTable, Card, euro, ExportLinks, FilterForm, num, type Params, PeriodNav, pct, scopeNote, Stat, StatsTabs, statsContext } from "../shared";
 
 export const metadata = { title: "Valorisation — Statistiques — Pertes" };
@@ -17,8 +20,9 @@ export const metadata = { title: "Valorisation — Statistiques — Pertes" };
 const GROUP_COLORS: Record<RecoveryGroup, string> = { avec_recette: "#2a78d6", sans_recette: "#eb6834", a_part: "#1baf7a" };
 
 const GROUP_NOTES: Record<RecoveryGroup, string> = {
-  avec_recette: "Ventes (Too Good To Go, vente flash) : seules destinations qui rapportent une recette.",
-  sans_recette: "Ordures ménagères, compost (Les Alchimistes), don, personnel et autres : aucune recette.",
+  avec_recette:
+    "Ventes déclarées par les équipes (Too Good To Go, vente flash) : seules destinations qui rapportent une recette. Depuis le 13/11/2026, ces ventes viennent des fichiers de l'entreprise (section ci-dessus).",
+  sans_recette: "Ordures ménagères, compost (Les Alchimistes), don, personnel et autres : aucune recette. Les dons à Linkee viennent de leur fichier (section ci-dessus).",
   a_part: "Réutilisation dans une autre préparation et retours fournisseurs : ni vente, ni perte sans valeur.",
 };
 
@@ -40,7 +44,12 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
   const params = await searchParams;
   const ctx = await statsContext(user, params);
   const anchor = await anchorWeek(db, ctx);
-  const [data, previous, next] = await Promise.all([recoveryDashboard(db, user, ctx.period, anchor, ctx.filters), adjacentOf(db, ctx.period, -1), adjacentOf(db, ctx.period, 1)]);
+  const [data, surplus, previous, next] = await Promise.all([
+    recoveryDashboard(db, user, ctx.period, anchor, ctx.filters),
+    canReadSurplus(user) ? surplusDashboard(db, user, ctx.period, anchor) : Promise.resolve(null),
+    adjacentOf(db, ctx.period, -1),
+    adjacentOf(db, ctx.period, 1),
+  ]);
   const path = "/statistiques/valorisation";
   const note = scopeNote(user, ctx.compareTeams);
   const { groups, withCosts } = data;
@@ -64,12 +73,15 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
         La valorisation ne retire rien des pertes : un plat vendu, donné ou composté reste une perte. Cet onglet dit seulement ce qu&apos;il est devenu.
       </p>
 
+      {surplus && <SurplusSection data={surplus} anchor={anchor} isAdmin={can(user, "referentiel.manage")} />}
+
+      <h2 className="text-lg font-semibold">Pertes déclarées par les équipes</h2>
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Indicateurs principaux">
         {RECOVERY_GROUPS.map((g) => (
           <Stat key={g.key} label={g.key === "a_part" ? "À part" : g.label} value={`${num.format(groups[g.key].foodKg)} kg`} change={plural(groups[g.key].lines, "ligne")} />
         ))}
         {withCosts && sales.cost && (
-          <Stat label="Recettes encaissées" value={euro.format(sales.cost.recoveredEur)} change={share != null ? `${pct.format(share)} du coût des produits vendus` : null} />
+          <Stat label="Recettes déclarées" value={euro.format(sales.cost.recoveredEur)} change={share != null ? `${pct.format(share)} du coût des produits vendus` : null} />
         )}
       </section>
 

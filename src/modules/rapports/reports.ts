@@ -14,6 +14,7 @@ import { type Period, periodLabel } from "@/domain/periodes";
 import { RECONCILIATION_STATUS_LABELS } from "@/domain/rapprochement";
 import { formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { type StatsSummary } from "@/domain/statistiques";
+import { SURPLUS_SOURCES, surplusTrays } from "@/domain/surplus";
 import { RECOVERY_GROUPS, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
@@ -25,6 +26,7 @@ import { environmentDashboard } from "@/modules/statistiques/environnement";
 import { monthlyEvolution } from "@/modules/statistiques/evolution";
 import { fileName } from "@/modules/statistiques/exports";
 import { causeAndDestinationRanking, productRanking } from "@/modules/statistiques/rankings";
+import { canReadSurplus, surplusDashboard } from "@/modules/statistiques/surplus";
 import { recoveryDashboard } from "@/modules/statistiques/valorisation";
 import { weeklySummary } from "@/modules/statistiques/weekly";
 import { ReportPdf, ROW_HEIGHT } from "./pdf";
@@ -221,11 +223,55 @@ async function recovery(db: Db, user: AuthUser, ctx: StatsContext, r: () => Prom
   setTitle("Rapport de valorisation", label);
   const pdf = await r();
   pdf.cover(`${await scopeText(db, user, ctx)} La valorisation ne retire rien des pertes : un plat vendu, donné ou composté reste une perte.`);
+
+  // Ventes et dons des surplus d'après les fichiers de l'entreprise (étape 5.8) : vues d'entreprise seulement.
+  const surplus = canReadSurplus(user) ? await surplusDashboard(db, user, ctx.period, anchor) : null;
+  if (surplus?.hasFiles) {
+    const t = surplus.totals;
+    const money = surplus.withCosts;
+    pdf.heading("Ventes et dons des surplus de barquettes", tableHeight(4));
+    pdf.paragraph("D'après les fichiers de l'entreprise (Too Good To Go, ventes flash, Linkee), qui font foi. Toute l'entreprise, sans les filtres. Les montants ne s'additionnent pas : ils n'ont pas la même base.", {
+      muted: true,
+      size: 9,
+    });
+    pdf.table(
+      [
+        { header: "Canal", width: 1.6 },
+        { header: "Ventes / collectes", width: 1.1, align: "right" },
+        { header: "Barquettes", width: 1, align: "right" },
+        ...(money ? [{ header: "Montant", width: 1.2, align: "right" as const }, { header: "Base du montant", width: 2, align: "left" as const }] : []),
+      ],
+      [
+        ["Too Good To Go", String(t.tgtg.sales), num.format(t.tgtg.trays), ...(money ? [euro.format(t.tgtg.clientEur ?? 0), "payé par les clients"] : [])],
+        ...(money ? [["TGTG – versements", String(t.tgtg.payouts), "", euro.format(t.tgtg.receivedEur ?? 0), "reçu HT après commission"]] : []),
+        ["Ventes flash", String(t.flash.sales), num.format(t.flash.trays + t.flash.breakfastTrays), ...(money ? [euro.format(t.flash.revenueEur ?? 0), "chiffre d'affaires TTC"] : [])],
+        ["Linkee (don)", String(t.linkee.collections), num.format(t.linkee.trays), ...(money ? [euro.format(t.linkee.costEur ?? 0), "coût matières Melba (sans recette)"] : [])],
+      ],
+    );
+    const notes = [
+      t.flash.breakfastTrays ? `Ventes flash : ${num.format(t.flash.boxes)} boxes, dont ${num.format(t.flash.breakfastBoxes)} avec petit-déjeuner (${num.format(t.flash.breakfastTrays)} barquettes de petit-déjeuner).` : null,
+      t.linkee.trays ? `Linkee : ${kg(t.linkee.kg)} donnés${t.linkee.weighedTrays < t.linkee.trays ? ` (pour ${num.format(t.linkee.weighedTrays)} barquettes retrouvées dans Melba)` : ""}.` : null,
+      t.linkee.notCollectedTrays ? `${num.format(t.linkee.notCollectedTrays)} barquettes Linkee sans « Collecté ? » coché.` : null,
+    ].filter((n): n is string => n != null);
+    if (notes.length) pdf.bullets(notes);
+    if (surplus.series.length) {
+      pdf.heading("Barquettes vendues ou données, 12 dernières semaines", tableHeight(surplus.series.length));
+      pdf.table(
+        [{ header: "Semaine", width: 1 }, { header: "Too Good To Go", width: 1, align: "right" }, { header: "Ventes flash", width: 1, align: "right" }, { header: "Linkee", width: 1, align: "right" }],
+        surplus.series.map((w) => {
+          const trays = surplusTrays(w.totals);
+          return [formatProductionWeek(w), ...SURPLUS_SOURCES.map((k) => num.format(trays[k]))];
+        }),
+      );
+    }
+    pdf.heading("Pertes déclarées par les équipes", 120);
+  }
+
   const sales = data.groups.avec_recette;
   pdf.figures([
     ...RECOVERY_GROUPS.map((g) => ({ label: g.key === "a_part" ? "À part (réutilisation, retours)" : g.label, value: kg(data.groups[g.key].foodKg), note: plural(data.groups[g.key].lines, "ligne") })),
     ...(data.withCosts && sales.cost
-      ? [{ label: "Recettes encaissées", value: euro.format(sales.cost.recoveredEur), note: recoveredShare(sales) != null ? `${pct.format(recoveredShare(sales)!)} du coût des ventes` : null }]
+      ? [{ label: "Recettes déclarées", value: euro.format(sales.cost.recoveredEur), note: recoveredShare(sales) != null ? `${pct.format(recoveredShare(sales)!)} du coût des ventes` : null }]
       : []),
   ]);
   for (const g of RECOVERY_GROUPS) {
