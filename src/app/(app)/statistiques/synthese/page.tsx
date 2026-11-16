@@ -8,6 +8,7 @@ import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { type WeeklyRow, weeklySummary } from "@/modules/statistiques/weekly";
 import { ColumnChart } from "../evolution/column-chart";
+import { TrendTable } from "../evolution/trend-table";
 import {
   BarTable,
   Card,
@@ -153,6 +154,10 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         </Card>
       )}
 
+      <Card title="Tendance sur 8 semaines">
+        <TrendTable trends={comparison.trends} />
+      </Card>
+
       <Card title="Semaine après semaine">
         {withCosts && (
           <>
@@ -179,6 +184,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
             text: `${num.format(p.summary.foodKg)} kg`,
             highlight: p.id === comparison.current.id,
           }))}
+            average={{ label: "Moyenne sur 4 semaines", values: comparison.trends.find((x) => x.key === "kg")!.average, text: (n) => `${num.format(n)} kg` }}
         />
         <h3 className="font-medium">Kg pour 1 000 barquettes produites</h3>
         <ColumnChart
@@ -190,6 +196,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
             text: p.perThousandActual == null ? "—" : `${num.format(p.perThousandActual)} kg`,
             highlight: p.id === comparison.current.id,
           }))}
+            average={{ label: "Moyenne sur 4 semaines", values: comparison.trends.find((x) => x.key === "reel")!.average, text: (n) => `${num.format(n)} kg` }}
         />
         <p className="text-xs text-slate-500">12 dernières semaines de production ; un tiret : pas de « Décompte barquettes » déposé.</p>
       </Card>

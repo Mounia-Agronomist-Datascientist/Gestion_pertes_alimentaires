@@ -12,17 +12,42 @@ export interface Column {
   highlight?: boolean;
 }
 
-export function ColumnChart({ columns, caption }: { columns: Column[]; caption: string }) {
+/** Couleur de la moyenne glissante : contraste avec les colonnes vertes (palette catégorielle validée). */
+const AVERAGE_COLOR = "#eb6834";
+
+/**
+ * `average` : moyenne glissante tracée en ligne sur les colonnes (même unité, même axe), avec sa légende et sa
+ * colonne dans le tableau des valeurs.
+ */
+export function ColumnChart({ columns, caption, average }: { columns: Column[]; caption: string; average?: { label: string; values: (number | null)[]; text: (n: number) => string } }) {
   const width = 360;
   const height = 170;
   const top = 18;
   const bottom = 22;
-  const max = Math.max(0, ...columns.map((c) => c.value ?? 0));
+  const max = Math.max(0, ...columns.map((c) => c.value ?? 0), ...(average?.values ?? []).map((v) => v ?? 0));
   const slot = width / Math.max(columns.length, 1);
   const bar = Math.min(22, slot - 6);
   const scale = (v: number) => (max > 0 ? (v / max) * (height - top - bottom) : 0);
+  // Segments de la moyenne : interrompus là où elle n'est pas calculée.
+  const segments: { x: number; y: number }[][] = [];
+  average?.values.forEach((v, i) => {
+    if (v == null) return segments.push([]);
+    const point = { x: i * slot + slot / 2, y: height - bottom - scale(v) };
+    if (!segments.length) segments.push([]);
+    segments.at(-1)!.push(point);
+  });
   return (
     <figure className="flex flex-col gap-2">
+      {average && (
+        <p className="flex items-center gap-3 text-xs text-slate-600">
+          <span className="flex items-center gap-1">
+            <span className="inline-block size-2.5 rounded-sm bg-[#0f766e]" aria-hidden /> Semaine
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-0.5 w-4" style={{ background: AVERAGE_COLOR }} aria-hidden /> {average.label}
+          </span>
+        </p>
+      )}
       <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label={caption}>
         <line x1={0} x2={width} y1={height - bottom} y2={height - bottom} stroke="#cbd5e1" strokeWidth={1} />
         {columns.map((c, i) => {
@@ -51,16 +76,34 @@ export function ColumnChart({ columns, caption }: { columns: Column[]; caption: 
             </g>
           );
         })}
+        {segments
+          .filter((s) => s.length > 0)
+          .map((s, k) => (
+            <g key={`avg-${k}`}>
+              {s.length > 1 && <polyline points={s.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke={AVERAGE_COLOR} strokeWidth={2} strokeLinejoin="round" />}
+              {s.map((p) => (
+                <circle key={`${p.x}`} cx={p.x} cy={p.y} r={2.5} fill={AVERAGE_COLOR} stroke="#ffffff" strokeWidth={1} />
+              ))}
+            </g>
+          ))}
       </svg>
       <figcaption className="sr-only">{caption}</figcaption>
       <details className="text-sm">
         <summary className="cursor-pointer text-slate-600">Voir les valeurs</summary>
         <table className="mt-2 w-full">
           <tbody>
-            {columns.map((c) => (
+            {average && (
+              <tr className="text-slate-500">
+                <th className="py-1 text-left font-medium" />
+                <th className="py-1 text-right font-medium">Semaine</th>
+                <th className="py-1 text-right font-medium">{average.label}</th>
+              </tr>
+            )}
+            {columns.map((c, i) => (
               <tr key={c.key} className="border-t border-slate-100">
                 <td className="py-1">{c.label}</td>
                 <td className="py-1 text-right tabular-nums">{c.value != null ? c.text : "—"}</td>
+                {average && <td className="py-1 text-right tabular-nums">{average.values[i] != null ? average.text(average.values[i]!) : "—"}</td>}
               </tr>
             ))}
           </tbody>

@@ -247,3 +247,15 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   retrouvé ou produit hors Melba (yaourts) : barquettes comptées, sans kg ni coût.
 - Un fichier redéposé remplace les lignes en vigueur de sa source sur sa période ; les anciennes restent en base.
   Les contacts du fichier Linkee ne sont jamais lus.
+
+## R19 — Tendance des pertes (Phase 6, 16/11/2026)
+
+- **Moyenne glissante** d'une semaine de production : moyenne de cette semaine et des 3 précédentes, sur les
+  valeurs connues (au moins 2).
+- **Sens de la tendance** : moyenne des 4 dernières semaines (semaine choisie comprise) comparée à celle des
+  4 semaines d'avant. **Stable** sous 10 % d'écart, sinon **en hausse** ou **en baisse** ; toujours écrit avec
+  son symbole (▲, =, ▼), jamais par la seule couleur.
+- Les semaines d'avant la première perte enregistrée de la série ne comptent pas.
+- Indicateurs : kg de pertes alimentaires, kg pour 1 000 barquettes prévues et produites, coût net (euros réservés
+  aux profils « indicateurs économiques »).
+

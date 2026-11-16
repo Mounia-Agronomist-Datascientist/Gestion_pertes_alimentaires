@@ -12,6 +12,7 @@ import { COST_COMPONENTS } from "@/modules/couts/summary";
 import { COMPONENT_COLORS } from "../../couts/colors";
 import { ColumnChart } from "./column-chart";
 import { StackedColumnChart } from "./stacked-chart";
+import { TrendTable } from "./trend-table";
 
 export const metadata = { title: "Évolution — Statistiques — Pertes" };
 
@@ -123,6 +124,10 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
         </p>
       </Card>
 
+      <Card title="Tendance sur 8 semaines">
+        <TrendTable trends={comparison.trends} />
+      </Card>
+
       <Card title="Dernières semaines">
         <OptionChips
           label="Afficher"
@@ -153,6 +158,11 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
               highlight: p.id === current.id,
             };
           })}
+          average={{
+            label: "Moyenne sur 4 semaines",
+            values: comparison.trends.find((x) => x.key === measure)!.average,
+            text: (n) => `${num.format(n)} kg`,
+          }}
         />
         <p className="text-xs text-slate-500">
           {measure === "kg"
@@ -189,6 +199,11 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
               text: euro.format(p.summary.cost?.netEur ?? 0),
               highlight: p.id === current.id,
             }))}
+            average={{
+              label: "Moyenne sur 4 semaines",
+              values: comparison.trends.find((x) => x.key === "net")?.average.map((v) => (v == null ? null : Math.max(v, 0))) ?? [],
+              text: (n) => euro.format(n),
+            }}
           />
           <h3 className="font-medium">Par mois</h3>
           <div className="overflow-x-auto">

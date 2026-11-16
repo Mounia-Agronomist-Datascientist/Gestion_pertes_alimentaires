@@ -10,6 +10,7 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { monthBounds } from "@/domain/periodes";
 import { type LossFact, type StatsSummary, summarize } from "@/domain/statistiques";
+import { movingAverage, type Trend, trendOf } from "@/domain/tendances";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { loadFacts, type StatsFilters } from "./facts";
 import { actualVolumes, type PlannedVolume, plannedVolumes } from "./production";
@@ -88,6 +89,37 @@ export async function recentWeeks(db: Db, anchor: { year: number; number: number
   ).reverse();
 }
 
+export interface TrendIndicator {
+  key: "kg" | "volume" | "reel" | "net";
+  label: string;
+  unit: "kg" | "eur";
+  /** Valeur de chaque semaine de la série et sa moyenne glissante sur 4 semaines. */
+  values: (number | null)[];
+  average: (number | null)[];
+  trend: Trend;
+}
+
+/**
+ * Tendances des indicateurs principaux sur la série des semaines (docs/PHASE6.md, étape 6.1) : kg, kg pour
+ * 1 000 barquettes prévues et produites, coût net pour les profils qui voient les euros. Sans aucune perte sur la
+ * série, rien n'est calculé.
+ */
+export function weekTrends(series: readonly WeekPoint[], withCosts: boolean): TrendIndicator[] {
+  // Les semaines d'avant la première perte enregistrée de la série ne comptent pas : l'outil n'était pas encore
+  // utilisé, elles feraient croire à une hausse (même règle que l'évolution mensuelle).
+  const first = series.findIndex((p) => p.summary.events > 0);
+  const indicator = (key: TrendIndicator["key"], label: string, unit: TrendIndicator["unit"], all: (number | null)[]): TrendIndicator => {
+    const values = all.map((v, i) => (first >= 0 && i >= first ? v : null));
+    return { key, label, unit, values, average: movingAverage(values), trend: trendOf(values) };
+  };
+  return [
+    indicator("kg", "Kg de pertes alimentaires", "kg", series.map((p) => p.summary.foodKg)),
+    indicator("volume", "Kg pour 1 000 barquettes prévues", "kg", series.map((p) => p.perThousand)),
+    indicator("reel", "Kg pour 1 000 barquettes produites", "kg", series.map((p) => p.perThousandActual)),
+    ...(withCosts ? [indicator("net", "Coût net", "eur", series.map((p) => p.summary.cost?.netEur ?? null))] : []),
+  ];
+}
+
 export async function weekComparison(db: Db, user: AuthUser, anchor: { year: number; number: number }, filters: StatsFilters, count = 12) {
   const recent = await recentWeeks(db, anchor, count);
   if (!recent) return null;
@@ -119,6 +151,7 @@ export async function weekComparison(db: Db, user: AuthUser, anchor: { year: num
     /** Même semaine l'année précédente, seulement si des pertes y sont enregistrées. */
     lastYear: lastYearPoint && lastYearPoint.summary.events > 0 ? lastYearPoint : null,
     series: points,
+    trends: weekTrends(points, can(user, "indicators.read")),
     volumeTeam: volumeTeam(user, filters),
   };
 }

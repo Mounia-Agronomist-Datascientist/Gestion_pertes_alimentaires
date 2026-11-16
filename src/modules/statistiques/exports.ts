@@ -9,6 +9,7 @@ import { formatProductionWeek } from "@/domain/semaine-production";
 import type { RankBy, StatsSummary } from "@/domain/statistiques";
 import { RECONCILIATION_STATUS_LABELS } from "@/domain/rapprochement";
 import { SURPLUS_SOURCES, type SurplusTotals, surplusTrays } from "@/domain/surplus";
+import { TREND_LABELS } from "@/domain/tendances";
 import { RECOVERY_GROUPS, type RecoveryTotals, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { COST_COMPONENTS } from "@/modules/couts/summary";
@@ -343,6 +344,22 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
             rows: (firstMonth < 0 ? months.slice(-1) : months.slice(firstMonth)).map((m) => [`${MONTHS[m.month - 1]} ${m.year}`, ...summaryCells(m.summary, withCosts)]),
           },
           { title: "Années", headers: ["Année de production", ...summaryHeaders(withCosts)], rows: years.map((y) => [String(y.year), ...summaryCells(y.summary, withCosts)]) },
+          {
+            title: "Tendance sur 8 semaines",
+            headers: ["Indicateur", "Moyenne des 4 dernières semaines", "Moyenne des 4 semaines d'avant", "Écart (%)", "Tendance"],
+            rows: comparison.trends.map((x) => [
+              x.unit === "eur" ? `${x.label} (€)` : x.label,
+              x.trend.recent,
+              x.trend.previous,
+              percent(x.trend.rate),
+              x.trend.direction ? TREND_LABELS[x.trend.direction] : "Pas assez de semaines",
+            ]),
+          },
+          {
+            title: "Moyenne glissante sur 4 semaines",
+            headers: ["Semaine", ...comparison.trends.map((x) => (x.unit === "eur" ? `${x.label} (€)` : x.label))],
+            rows: comparison.series.map((p, i) => [formatProductionWeek(p), ...comparison.trends.map((x) => x.average[i] ?? null)]),
+          },
         ],
       };
     }

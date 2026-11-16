@@ -41,11 +41,11 @@ L'essai pilote avec les équipes peut se faire en parallèle : il ne dépend d'a
 | 16/11/2026 | Cause récurrente | Alerte quand la **même cause est en tête** des pertes d'une équipe ou d'un plat **3 semaines de production de suite**. |
 | 16/11/2026 | Destinataires | **Dans l'application** : encadré à l'accueil des responsables (toutes les alertes) et de l'équipe concernée (les siennes), avec le détail et un bouton « vu ». Seuils réglables dans l'administration. |
 
-## Étapes proposées
+## Étapes
 
 | Étape | Contenu | État |
 |---|---|---|
-| 6.1 | **Tendances** : moyenne glissante sur 4 semaines et sens de la tendance (hausse, stable, baisse) pour les kg, le coût net et les kg pour 1 000 barquettes, dans « Évolution », la synthèse de la semaine et les rapports. | Proposée |
+| 6.1 | **Tendances** : moyenne glissante sur 4 semaines et sens de la tendance (hausse, stable, baisse) pour les kg, le coût net et les kg pour 1 000 barquettes, dans « Évolution », la synthèse de la semaine et les rapports. | ✅ |
 | 6.2 | **Pertes inhabituelles** : calcul à la fin de chaque semaine de production (tâche de nuit existante) par équipe, zone et plat ; seuils réglables (50 %, 5 kg). | Proposée |
 | 6.3 | **Causes récurrentes** : même cause en tête 3 semaines de suite, par équipe et par plat. | Proposée |
 | 6.4 | **Affichage des alertes** : encadré à l'accueil, détail, bouton « vu », historique ; réglages dans l'administration. | Proposée |
@@ -57,3 +57,20 @@ Points de méthode à valider avec l'étape concernée :
   été produit parmi les 4 précédentes, et il en faut au moins 2. Sinon, pas d'alerte.
 - **Semaine terminée** : une semaine est analysée la nuit qui suit son mercredi, pour ne pas alerter sur une
   semaine incomplète.
+
+## Étape 6.1 — Tendances (faite le 16/11/2026)
+
+Règle R19 de docs/REGLES_METIER.md.
+- **Calcul** (`src/domain/tendances.ts`) : moyenne glissante d'une semaine = moyenne de cette semaine et des 3
+  précédentes ; sens = moyenne des 4 dernières semaines (semaine choisie comprise) comparée à celle des 4 semaines
+  d'avant ; « stable » sous 10 % d'écart. Il faut au moins 2 semaines connues dans chaque moyenne.
+- **Semaines d'avant la première perte enregistrée** : non comptées. Sinon, au début de l'utilisation de l'outil,
+  chaque indicateur paraîtrait « en hausse » par rapport à des semaines vides (même règle que l'évolution
+  mensuelle).
+- **Indicateurs** : kg de pertes alimentaires, kg pour 1 000 barquettes prévues, kg pour 1 000 barquettes
+  produites, coût net (profils qui voient les euros).
+- **Où** : onglet « Évolution » (tableau « Tendance sur 8 semaines », ligne de moyenne sur les histogrammes des kg
+  et du coût net), synthèse de la semaine (tableau et ligne de moyenne), rapport PDF hebdomadaire, export de
+  l'onglet « Évolution » (tendance et moyenne glissante semaine par semaine).
+- Le seuil de 10 % est une constante pour l'instant ; il deviendra réglable avec les seuils des alertes
+  (étape 6.4).

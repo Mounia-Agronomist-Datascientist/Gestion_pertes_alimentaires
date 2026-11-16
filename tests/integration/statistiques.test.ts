@@ -228,6 +228,24 @@ describe("lecture des pertes pour les statistiques", () => {
     expect(await weekComparison(t.db, direction, { year: 2031, number: 45 }, {})).toBeNull();
   });
 
+  it("tendance sur 8 semaines : moyenne glissante et sens, sans euros pour une équipe", async () => {
+    const c = (await weekComparison(t.db, direction, { year: 2026, number: 45 }, {}))!;
+    expect(c.trends.map((x) => x.key)).toEqual(["kg", "volume", "reel", "net"]);
+    const kgTrend = c.trends.find((x) => x.key === "kg")!;
+    // Semaines d'avant la première perte de la série : non comptées (l'outil n'était pas encore utilisé).
+    const first = c.series.findIndex((p) => p.summary.events > 0);
+    expect(first).toBeGreaterThan(0);
+    expect(kgTrend.values).toEqual(c.series.map((p, i) => (i >= first ? p.summary.foodKg : null)));
+    // Ici, seule S45 a des pertes : une seule semaine connue, pas de moyenne ni de tendance.
+    expect(first).toBe(c.series.length - 1);
+    expect(kgTrend.trend).toEqual({ recent: null, previous: null, rate: null, direction: null });
+    expect(kgTrend.average.every((v) => v == null)).toBe(true);
+    // Seule S45 a un plan importé : pas assez de semaines pour une tendance à volume égal.
+    expect(c.trends.find((x) => x.key === "volume")!.trend.direction).toBeNull();
+    const team = (await weekComparison(t.db, teamD, { year: 2026, number: 45 }, {}))!;
+    expect(team.trends.map((x) => x.key)).toEqual(["kg", "volume", "reel"]);
+  });
+
   it("évolution mensuelle (date réelle) et annuelle (année de production)", async () => {
     const months = await monthlyEvolution(t.db, direction, { year: 2026, month: 11 }, {}, 3);
     expect(months.map((m) => [m.month, m.summary.events])).toEqual([

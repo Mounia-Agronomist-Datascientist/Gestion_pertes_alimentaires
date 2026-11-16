@@ -15,6 +15,7 @@ import { RECONCILIATION_STATUS_LABELS } from "@/domain/rapprochement";
 import { formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { type StatsSummary } from "@/domain/statistiques";
 import { SURPLUS_SOURCES, surplusTrays } from "@/domain/surplus";
+import { TREND_LABELS, TREND_STABLE_RATE, TREND_SYMBOLS } from "@/domain/tendances";
 import { RECOVERY_GROUPS, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
@@ -130,6 +131,31 @@ async function weekly(db: Db, user: AuthUser, ctx: StatsContext, r: () => Promis
     pdf.heading("Produits qui pèsent le plus", barsHeight(data.byProduct.length));
     pdf.bars(bars(data.byProduct));
   }
+  const trends = data.comparison.trends;
+  pdf.heading("Tendance sur 8 semaines", tableHeight(trends.length) + 20);
+  pdf.paragraph(`Moyenne des 4 dernières semaines (semaine comprise) comparée à celle des 4 semaines d'avant ; « stable » sous ${pct.format(TREND_STABLE_RATE)} d'écart.`, {
+    muted: true,
+    size: 8.5,
+  });
+  pdf.table(
+    [
+      { header: "Indicateur", width: 2.2 },
+      { header: "4 dernières sem.", width: 1.2, align: "right" },
+      { header: "4 sem. d'avant", width: 1.2, align: "right" },
+      { header: "Écart", width: 0.8, align: "right" },
+      { header: "Tendance", width: 1.3, align: "right" },
+    ],
+    trends.map((x) => {
+      const fmt = (v: number | null) => (v == null ? "—" : x.unit === "eur" ? euro.format(v) : kg(v));
+      return [
+        x.label,
+        fmt(x.trend.recent),
+        fmt(x.trend.previous),
+        x.trend.rate == null ? "—" : `${x.trend.rate > 0 ? "+" : x.trend.rate < 0 ? "-" : ""}${pct.format(Math.abs(x.trend.rate))}`,
+        x.trend.direction ? `${TREND_SYMBOLS[x.trend.direction]} ${TREND_LABELS[x.trend.direction]}` : "Pas assez de semaines",
+      ];
+    }),
+  );
   pdf.heading("Les 12 dernières semaines", tableHeight(data.comparison.series.length) + 20);
   pdf.paragraph("Kg pour 1 000 barquettes : un tiret quand le « Décompte barquettes » de la semaine n'est pas déposé.", { muted: true, size: 8.5 });
   pdf.table(
