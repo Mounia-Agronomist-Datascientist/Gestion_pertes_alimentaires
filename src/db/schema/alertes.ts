@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, numeric, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, jsonb, numeric, pgEnum, pgTable, smallint, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { teams } from "./organisation";
 import { productionWeeks } from "./production-weeks";
@@ -55,5 +55,71 @@ export const missingDeclarationAlerts = pgTable(
   (t) => [
     unique("missing_declaration_alerts_team_week_window_key").on(t.teamId, t.productionWeekId, t.window),
     check("missing_declaration_alerts_positive", sql`${t.estimatedKg} > 0`),
+  ],
+);
+
+// ─── Alertes d'analyse (docs/PHASE6.md, étapes 6.2 à 6.4) ────────────────────
+
+/** Seuils des alertes d'analyse et des tendances : une seule ligne, réglable dans l'administration (étape 6.4). */
+export const alertSettings = pgTable(
+  "alert_settings",
+  {
+    id: smallint("id").primaryKey().default(1),
+    /** Dépassement de la moyenne des 4 semaines précédentes (0,5 = +50 %). */
+    unusualRate: numeric("unusual_rate", { precision: 5, scale: 3, mode: "number" }).notNull().default(0.5),
+    /** Kg de pertes de la semaine sous lesquels aucune alerte n'est émise. */
+    minKg: numeric("min_kg", { precision: 8, scale: 3, mode: "number" }).notNull().default(5),
+    /** Semaines de suite où la même cause est en tête. */
+    recurrenceWeeks: smallint("recurrence_weeks").notNull().default(3),
+    /** Écart sous lequel une tendance est stable. */
+    trendStableRate: numeric("trend_stable_rate", { precision: 5, scale: 3, mode: "number" }).notNull().default(0.1),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: uuid("updated_by").references(() => users.id),
+  },
+  (t) => [
+    check("alert_settings_single_row", sql`${t.id} = 1`),
+    check("alert_settings_values", sql`${t.unusualRate} > 0 and ${t.minKg} >= 0 and ${t.recurrenceWeeks} >= 2 and ${t.trendStableRate} >= 0`),
+  ],
+);
+
+export const lossAlertKindEnum = pgEnum("loss_alert_kind", ["perte_inhabituelle", "cause_recurrente"]);
+export const lossAlertScopeEnum = pgEnum("loss_alert_scope", ["equipe", "zone", "plat"]);
+
+/**
+ * Alerte d'analyse d'une semaine de production terminée : perte inhabituelle (6.2) ou cause récurrente (6.3).
+ * Calculée par la tâche de nuit ; recalculée tant que la semaine est dans la période revue (une correction peut
+ * la faire disparaître tant qu'elle n'a pas été vue).
+ */
+export const lossAlerts = pgTable(
+  "loss_alerts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: lossAlertKindEnum("kind").notNull(),
+    productionWeekId: uuid("production_week_id")
+      .notNull()
+      .references(() => productionWeeks.id),
+    scope: lossAlertScopeEnum("scope").notNull(),
+    /** Équipe, zone (id) ou code du plat. */
+    subjectKey: text("subject_key").notNull(),
+    /** Équipe concernée (alerte d'équipe, ou équipe du plat d'après le plan) : elle voit l'alerte. */
+    teamId: uuid("team_id").references(() => teams.id),
+    label: text("label").notNull(),
+    /** Perte inhabituelle : « kg_1000 » ou « kg », valeur de la semaine, moyenne de référence, dépassement. */
+    measure: text("measure"),
+    value: numeric("value", { precision: 12, scale: 3, mode: "number" }),
+    reference: numeric("reference", { precision: 12, scale: 3, mode: "number" }),
+    rate: numeric("rate", { precision: 8, scale: 3, mode: "number" }),
+    referenceWeeks: smallint("reference_weeks"),
+    /** Contexte affiché (causes et produits principaux, ou cause récurrente et ses semaines). */
+    details: jsonb("details").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    detectedAt: timestamp("detected_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    seenAt: timestamp("seen_at", { withTimezone: true }),
+    seenBy: uuid("seen_by").references(() => users.id),
+  },
+  (t) => [
+    unique("loss_alerts_subject_key").on(t.kind, t.productionWeekId, t.scope, t.subjectKey),
+    index("loss_alerts_week_idx").on(t.productionWeekId),
+    index("loss_alerts_team_idx").on(t.teamId),
   ],
 );

@@ -259,3 +259,14 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Indicateurs : kg de pertes alimentaires, kg pour 1 000 barquettes prévues et produites, coût net (euros réservés
   aux profils « indicateurs économiques »).
 
+## R20 — Pertes inhabituelles (Phase 6, 16/11/2026)
+
+- Calculées la nuit pour chaque **semaine de production terminée**, par **équipe**, **zone** et **plat**.
+- Alerte quand les pertes de la semaine dépassent d'au moins **50 %** la moyenne des **4 semaines précédentes**
+  où l'unité était concernée (il en faut au moins 2), et jamais sous **5 kg** dans la semaine.
+- **À volume égal** (kg pour 1 000 barquettes produites, « Décompte barquettes ») quand la production de la semaine
+  et d'au moins 2 semaines de référence est connue ; sinon en kg. Volume d'une équipe : ses plats d'après le plan ;
+  d'une zone : toute l'entreprise ; d'un plat : son code.
+- Semaines de référence : après la mise en service (`ALERTES_DEBUT`), équipe active, plat au plan ou au décompte.
+- Les seuils sont enregistrés en base (`alert_settings`) et deviendront réglables dans l'administration.
+

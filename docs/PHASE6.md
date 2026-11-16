@@ -46,7 +46,7 @@ L'essai pilote avec les équipes peut se faire en parallèle : il ne dépend d'a
 | Étape | Contenu | État |
 |---|---|---|
 | 6.1 | **Tendances** : moyenne glissante sur 4 semaines et sens de la tendance (hausse, stable, baisse) pour les kg, le coût net et les kg pour 1 000 barquettes, dans « Évolution », la synthèse de la semaine et les rapports. | ✅ |
-| 6.2 | **Pertes inhabituelles** : calcul à la fin de chaque semaine de production (tâche de nuit existante) par équipe, zone et plat ; seuils réglables (50 %, 5 kg). | Proposée |
+| 6.2 | **Pertes inhabituelles** : calcul à la fin de chaque semaine de production (tâche de nuit existante) par équipe, zone et plat ; seuils réglables (50 %, 5 kg). | ✅ (affichage à l'étape 6.4) |
 | 6.3 | **Causes récurrentes** : même cause en tête 3 semaines de suite, par équipe et par plat. | Proposée |
 | 6.4 | **Affichage des alertes** : encadré à l'accueil, détail, bouton « vu », historique ; réglages dans l'administration. | Proposée |
 
@@ -74,3 +74,24 @@ Règle R19 de docs/REGLES_METIER.md.
   l'onglet « Évolution » (tendance et moyenne glissante semaine par semaine).
 - Le seuil de 10 % est une constante pour l'instant ; il deviendra réglable avec les seuils des alertes
   (étape 6.4).
+
+## Étape 6.2 — Pertes inhabituelles (faite le 16/11/2026)
+
+Règle R20 de docs/REGLES_METIER.md.
+- **Calcul** (`src/domain/pertes-inhabituelles.ts`) : pertes de la semaine comparées à la moyenne des 4 semaines
+  précédentes où l'unité était concernée (au moins 2) ; à volume égal (kg pour 1 000 barquettes produites) quand
+  la production de la semaine et d'au moins 2 semaines de référence est connue, sinon en kg ; alerte à partir de
+  +50 %, jamais sous 5 kg. Une moyenne nulle avec au moins 5 kg est signalée sans pourcentage.
+- **Unités** : équipe (production de ses plats d'après le plan), zone (production de toute l'entreprise : une zone
+  ne produit pas de barquettes), plat (pertes déclarées sur le plat lui-même ; semaines de référence : celles où il
+  est au plan ou au décompte).
+- **Semaines de référence** : seulement après la mise en service (`ALERTES_DEBUT`), et pas celles où l'équipe est
+  déclarée inactive.
+- **Tâche de nuit** (`npm run alertes:evaluer`, workflow « Alertes quotidiennes ») : chaque semaine terminée des
+  21 derniers jours est recalculée. Une correction peut faire disparaître une alerte tant qu'elle n'a pas été vue.
+- **Contexte enregistré** avec chaque alerte : les 3 causes et les 3 produits qui pèsent le plus dans la semaine.
+- **Tables** (migration 0022) : `loss_alerts` (alertes d'analyse, aussi pour l'étape 6.3) et `alert_settings`
+  (seuils : +50 %, 5 kg, 3 semaines, 10 % pour la tendance ; écran de réglage à l'étape 6.4).
+- Essai sur la base locale : 4 alertes calculées correctement (S45 et S46), puis effacées avec les alertes « rien
+  de noté » créées par cet essai.
+

@@ -1,4 +1,4 @@
-# Évaluation quotidienne des alertes « saisie incomplète », après la fin de l'équipe H (20h45).
+# Évaluation quotidienne des alertes « saisie incomplète » et des alertes d'analyse des semaines terminées, après la fin de l'équipe H (20h45).
 # Secret : DATABASE_URL_DIRECT. Variable du dépôt : ALERTES_DEBUT (vide = aucune alerte).
 name: Alertes quotidiennes
 on:

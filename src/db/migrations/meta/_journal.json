@@ -155,6 +155,13 @@
       "when": 1794841378744,
       "tag": "0021_ventes_dons_surplus",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794844597578,
+      "tag": "0022_alertes_analyse",
+      "breakpoints": true
     }
   ]
 }
