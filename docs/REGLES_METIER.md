@@ -270,3 +270,13 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Semaines de référence : après la mise en service (`ALERTES_DEBUT`), équipe active, plat au plan ou au décompte.
 - Les seuils sont enregistrés en base (`alert_settings`) et deviendront réglables dans l'administration.
 
+## R21 — Causes récurrentes (Phase 6, 16/11/2026)
+
+- Calculées la nuit pour chaque semaine de production terminée, par **équipe** et par **plat**.
+- **Cause en tête** d'une semaine : la plus lourde en kg de pertes alimentaires, puis la plus fréquente ; pas de
+  cause en tête en cas d'égalité parfaite.
+- Alerte quand la **même cause est en tête 3 semaines de suite** : semaines consécutives pour une équipe (une
+  semaine sans perte interrompt la série), dernières semaines de production pour un plat.
+- Seulement des semaines postérieures à la mise en service (`ALERTES_DEBUT`). Le nombre de semaines est réglable
+  (`alert_settings`).
+

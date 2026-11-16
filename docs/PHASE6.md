@@ -47,7 +47,7 @@ L'essai pilote avec les équipes peut se faire en parallèle : il ne dépend d'a
 |---|---|---|
 | 6.1 | **Tendances** : moyenne glissante sur 4 semaines et sens de la tendance (hausse, stable, baisse) pour les kg, le coût net et les kg pour 1 000 barquettes, dans « Évolution », la synthèse de la semaine et les rapports. | ✅ |
 | 6.2 | **Pertes inhabituelles** : calcul à la fin de chaque semaine de production (tâche de nuit existante) par équipe, zone et plat ; seuils réglables (50 %, 5 kg). | ✅ (affichage à l'étape 6.4) |
-| 6.3 | **Causes récurrentes** : même cause en tête 3 semaines de suite, par équipe et par plat. | Proposée |
+| 6.3 | **Causes récurrentes** : même cause en tête 3 semaines de suite, par équipe et par plat. | ✅ (affichage à l'étape 6.4) |
 | 6.4 | **Affichage des alertes** : encadré à l'accueil, détail, bouton « vu », historique ; réglages dans l'administration. | Proposée |
 
 Points de méthode à valider avec l'étape concernée :
@@ -94,4 +94,18 @@ Règle R20 de docs/REGLES_METIER.md.
   (seuils : +50 %, 5 kg, 3 semaines, 10 % pour la tendance ; écran de réglage à l'étape 6.4).
 - Essai sur la base locale : 4 alertes calculées correctement (S45 et S46), puis effacées avec les alertes « rien
   de noté » créées par cet essai.
+
+## Étape 6.3 — Causes récurrentes (faite le 16/11/2026)
+
+Règle R21 de docs/REGLES_METIER.md.
+- **Calcul** (`src/domain/causes-recurrentes.ts`) : cause en tête d'une semaine = celle qui pèse le plus en kg de
+  pertes alimentaires, puis celle qui a le plus de pertes déclarées ; une égalité parfaite ne donne pas de cause
+  en tête. Alerte quand la même cause est en tête 3 semaines de suite (réglage `recurrence_weeks`).
+- **Équipe** : ses dernières semaines de production consécutives ; une semaine sans perte interrompt la série.
+- **Plat** : ses dernières semaines de production (au plan ou au décompte), consécutives ou non, puisqu'un plat ne
+  revient pas chaque semaine ; recherche sur les 9 dernières semaines.
+- Semaines prises en compte : seulement après la mise en service (`ALERTES_DEBUT`).
+- **Contexte enregistré** : la cause et, pour chaque semaine de la série, ses kg, son nombre de pertes et sa part
+  des kg de l'unité.
+- Même tâche de nuit et même table `loss_alerts` que l'étape 6.2 (type « cause_recurrente »).
 

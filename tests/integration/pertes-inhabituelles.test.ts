@@ -60,6 +60,8 @@ describe("alertes : pertes inhabituelles", () => {
   });
 
   it("signale l'équipe et la zone qui dépassent de 50 % leur moyenne, pas les autres", async () => {
+    // Même cause chaque semaine dans ces données : les causes récurrentes (étape 6.3) sont testées à part.
+    await t.db.update(s.alertSettings).set({ recurrenceWeeks: 9 });
     // Équipe C : 10 kg par semaine, puis 20 kg en S45 (+100 %). Équipe A : 10 kg, puis 12 kg (+20 %).
     for (const day of ["2026-10-09", "2026-10-16", "2026-10-23"]) {
       await declare(teamC, day, 10);

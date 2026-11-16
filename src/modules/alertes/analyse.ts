@@ -1,12 +1,13 @@
 /**
- * Alertes d'analyse (docs/PHASE6.md, étape 6.2) : pertes inhabituelles par équipe, zone et plat, calculées la nuit
- * pour chaque semaine de production terminée. L'évaluation est idempotente : une semaine est recalculée tant
+ * Alertes d'analyse (docs/PHASE6.md, étapes 6.2 et 6.3) : pertes inhabituelles par équipe, zone et plat, et causes
+ * récurrentes par équipe et plat, calculées la nuit pour chaque semaine de production terminée. L'évaluation est idempotente : une semaine est recalculée tant
  * qu'elle reste dans la période revue (corrections tardives) ; une alerte qui ne se vérifie plus disparaît tant
  * qu'elle n'a pas été vue.
  */
 import { and, eq, gte, inArray, isNull, lt } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import { type CauseWeight, recurringCause } from "@/domain/causes-recurrentes";
 import { type AlertSettings, checkUnusual, DEFAULT_ALERT_SETTINGS, REFERENCE_WEEKS, type UnitWeek, type UnusualResult } from "@/domain/pertes-inhabituelles";
 import { productLabel } from "@/domain/produits";
 import { addDays, type LocalDate, toProductionLocalDate } from "@/domain/semaine-production";
@@ -98,71 +99,141 @@ function context(facts: readonly LossFact[]) {
   return { causes: top((f) => f.causeId, (f) => f.causeName), products: top((f) => f.productKey, (f) => productLabel(f.productName, f.productCode)) };
 }
 
+/** Alerte calculée, prête à enregistrer. */
 interface Detected {
+  kind: "perte_inhabituelle" | "cause_recurrente";
   scope: "equipe" | "zone" | "plat";
   subjectKey: string;
   teamId: string | null;
   label: string;
-  result: UnusualResult;
+  measure: string | null;
+  value: number | null;
+  reference: number | null;
+  rate: number | null;
+  referenceWeeks: number | null;
   details: Record<string, unknown>;
 }
 
-/** Pertes inhabituelles d'une semaine terminée. `startDate` : mise en service ; les semaines d'avant ne servent pas de référence. */
-export async function detectUnusualLosses(db: Db, week: Week, startDate: LocalDate, settings: AlertSettings): Promise<Detected[]> {
-  const window = (await recentWeeks(db, { year: week.year, number: week.number }, REFERENCE_WEEKS + 1)) ?? [];
-  if (!window.length) return [];
+/** Plats de la semaine : pertes déclarées sur le plat lui-même (code Melba). */
+const isDish = (f: LossFact) => f.category === "produit_fini" && f.productCode != null;
+
+/** Pertes, production, équipes et zones des semaines utiles à l'analyse d'une semaine terminée. */
+async function loadAnalysis(db: Db, week: Week, size: number) {
+  const window = (await recentWeeks(db, { year: week.year, number: week.number }, size)) ?? [];
   const ids = window.map((w) => w.id);
   const [facts, production, teams, zones] = await Promise.all([
-    loadFacts(db, SYSTEM_READER, { kind: "periode", from: window[0]!.startDate, to: week.endDate }),
+    window.length ? loadFacts(db, SYSTEM_READER, { kind: "periode", from: window[0]!.startDate, to: week.endDate }) : Promise.resolve([]),
     productionOf(db, ids),
     db.select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName }).from(s.teams),
     db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones),
   ]);
-  const inUse = (w: Week) => w.startDate >= startDate;
   const byWeek = new Map(ids.map((id) => [id, facts.filter((f) => f.productionWeekId === id)]));
   const current = byWeek.get(week.id) ?? [];
-  const history = window.filter((w) => w.id !== week.id);
-  const detected: Detected[] = [];
-  const check = (
-    scope: Detected["scope"],
-    subjectKey: string,
-    select: (f: LossFact) => boolean,
-    unit: (w: Week, facts: LossFact[]) => Omit<UnitWeek, "kg">,
-    meta: { teamId: string | null; label: string },
-  ) => {
-    const mine = current.filter(select);
-    const weekOf = (w: Week): UnitWeek => {
-      const list = (byWeek.get(w.id) ?? []).filter(select);
-      return { kg: foodKg(list), ...unit(w, list) };
-    };
-    const result = checkUnusual(weekOf(week), history.map(weekOf), settings);
-    if (result) detected.push({ scope, subjectKey, ...meta, result, details: context(mine) });
-  };
-
-  for (const teamId of new Set(current.map((f) => f.teamId).filter((t): t is string => t != null))) {
+  const teamLabel = (teamId: string) => {
     const team = teams.find((t) => t.id === teamId);
+    return team ? `Équipe ${team.letter} – ${team.colorName}` : "Équipe";
+  };
+  const dishMeta = (code: string) => {
+    const recipe = production.recipe(week.id, code);
+    return { teamId: recipe?.teamId ?? null, label: productLabel(recipe?.name ?? current.find((f) => f.productCode === code)!.productName, code) };
+  };
+  return { window, byWeek, current, production, zones, teamLabel, dishMeta };
+}
+type Analysis = Awaited<ReturnType<typeof loadAnalysis>>;
+
+/** Pertes inhabituelles d'une semaine terminée. `startDate` : mise en service ; les semaines d'avant ne servent pas de référence. */
+function detectUnusualLosses(a: Analysis, week: Week, startDate: LocalDate, settings: AlertSettings): Detected[] {
+  const { byWeek, current, production } = a;
+  const history = a.window.filter((w) => w.id !== week.id).slice(-REFERENCE_WEEKS);
+  const inUse = (w: Week) => w.startDate >= startDate;
+  const detected: Detected[] = [];
+  const check = (scope: Detected["scope"], subjectKey: string, select: (f: LossFact) => boolean, unit: (w: Week) => Omit<UnitWeek, "kg">, meta: { teamId: string | null; label: string }) => {
+    const weekOf = (w: Week): UnitWeek => ({ kg: foodKg((byWeek.get(w.id) ?? []).filter(select)), ...unit(w) });
+    const result: UnusualResult | null = checkUnusual(weekOf(week), history.map(weekOf), settings);
+    if (result) detected.push({ kind: "perte_inhabituelle", scope, subjectKey, ...meta, ...result, details: context(current.filter(select)) });
+  };
+  for (const teamId of new Set(current.map((f) => f.teamId).filter((t): t is string => t != null))) {
     check("equipe", teamId, (f) => f.teamId === teamId, (w) => ({ produced: production.produced(w.id, { teamId }), active: inUse(w) && !production.teamInactive(w.id, teamId) }), {
       teamId,
-      label: team ? `Équipe ${team.letter} – ${team.colorName}` : "Équipe",
+      label: a.teamLabel(teamId),
     });
   }
   for (const zoneId of new Set(current.map((f) => f.zoneId))) {
     // Les zones ne produisent pas de barquettes : leur volume est celui de toute l'entreprise.
     check("zone", zoneId, (f) => f.zoneId === zoneId, (w) => ({ produced: production.produced(w.id), active: inUse(w) }), {
       teamId: null,
-      label: zones.find((z) => z.id === zoneId)?.name ?? "Zone",
+      label: a.zones.find((z) => z.id === zoneId)?.name ?? "Zone",
     });
   }
-  const isDish = (f: LossFact) => f.category === "produit_fini" && f.productCode != null;
   for (const code of new Set(current.filter(isDish).map((f) => f.productCode!))) {
-    const recipe = production.recipe(week.id, code);
-    const name = recipe?.name ?? current.find((f) => f.productCode === code)!.productName;
-    check("plat", code, (f) => isDish(f) && f.productCode === code, (w) => ({ produced: production.produced(w.id, { code }), active: inUse(w) && production.dishMade(w.id, code) }), {
-      teamId: recipe?.teamId ?? null,
-      label: productLabel(name, code),
-    });
+    check("plat", code, (f) => isDish(f) && f.productCode === code, (w) => ({ produced: production.produced(w.id, { code }), active: inUse(w) && production.dishMade(w.id, code) }), a.dishMeta(code));
   }
   return detected;
+}
+
+/** Poids de chaque cause dans des pertes. */
+function causeWeights(facts: readonly LossFact[]): CauseWeight[] {
+  const acc = new Map<string, CauseWeight>();
+  for (const f of facts) {
+    const row = acc.get(f.causeId) ?? acc.set(f.causeId, { causeId: f.causeId, causeName: f.causeName, kg: 0, events: 0 }).get(f.causeId)!;
+    row.events++;
+    if (f.food && f.netKg != null) row.kg = Math.round((row.kg + f.netKg) * 1000) / 1000;
+  }
+  return [...acc.values()];
+}
+
+/**
+ * Causes récurrentes d'une semaine terminée : même cause en tête des pertes d'une équipe (semaines consécutives)
+ * ou d'un plat (ses dernières semaines de production) pendant `recurrenceWeeks` semaines, toutes en service.
+ */
+function detectRecurringCauses(a: Analysis, week: Week, startDate: LocalDate, settings: AlertSettings): Detected[] {
+  const { byWeek, current, production } = a;
+  const count = settings.recurrenceWeeks;
+  const inUse = a.window.filter((w) => w.startDate >= startDate);
+  const detected: Detected[] = [];
+  const check = (scope: "equipe" | "plat", subjectKey: string, weeks: Week[], select: (f: LossFact) => boolean, meta: { teamId: string | null; label: string }) => {
+    const found = recurringCause(weeks.map((w) => causeWeights((byWeek.get(w.id) ?? []).filter(select))), count);
+    if (!found) return;
+    const shown = weeks.slice(-count);
+    detected.push({
+      kind: "cause_recurrente",
+      scope,
+      subjectKey,
+      ...meta,
+      measure: "kg",
+      value: found.weeks.at(-1)!.kg,
+      reference: null,
+      rate: null,
+      referenceWeeks: count,
+      details: {
+        causeId: found.causeId,
+        causeName: found.causeName,
+        weeks: found.weeks.map((c, i) => {
+          const total = foodKg((byWeek.get(shown[i]!.id) ?? []).filter(select));
+          return { week: `S${String(shown[i]!.number).padStart(2, "0")}-${shown[i]!.year}`, kg: c.kg, events: c.events, share: total > 0 ? Math.round((c.kg / total) * 1000) / 1000 : null };
+        }),
+      },
+    });
+  };
+  for (const teamId of new Set(current.map((f) => f.teamId).filter((t): t is string => t != null))) {
+    check("equipe", teamId, inUse, (f) => f.teamId === teamId, { teamId, label: a.teamLabel(teamId) });
+  }
+  for (const code of new Set(current.filter(isDish).map((f) => f.productCode!))) {
+    // Un plat ne revient pas chaque semaine : ses semaines de production, consécutives ou non.
+    const made = inUse.filter((w) => w.id === week.id || production.dishMade(w.id, code));
+    check("plat", code, made, (f) => isDish(f) && f.productCode === code, a.dishMeta(code));
+  }
+  return detected;
+}
+
+/** Semaines chargées pour l'analyse : 4 de référence, ou assez pour retrouver les semaines de production d'un plat. */
+const ANALYSIS_WEEKS = 9;
+
+/** Alertes d'analyse d'une semaine terminée (pertes inhabituelles et causes récurrentes). */
+export async function detectWeekAlerts(db: Db, week: Week, startDate: LocalDate, settings: AlertSettings): Promise<Detected[]> {
+  const a = await loadAnalysis(db, week, Math.max(ANALYSIS_WEEKS, settings.recurrenceWeeks + 1, REFERENCE_WEEKS + 1));
+  if (!a.window.length) return [];
+  return [...detectUnusualLosses(a, week, startDate, settings), ...detectRecurringCauses(a, week, startDate, settings)];
 }
 
 export interface AnalysisResult {
@@ -188,31 +259,23 @@ export async function evaluateLossAlerts(db: Db, options: { startDate: LocalDate
   const settings = await loadAlertSettings(db);
   for (const week of weeks) {
     result.weeks++;
-    const detected = await detectUnusualLosses(db, week, options.startDate, settings);
-    const existing = await db.select().from(s.lossAlerts).where(and(eq(s.lossAlerts.kind, "perte_inhabituelle"), eq(s.lossAlerts.productionWeekId, week.id)));
+    const detected = await detectWeekAlerts(db, week, options.startDate, settings);
+    const existing = await db.select().from(s.lossAlerts).where(eq(s.lossAlerts.productionWeekId, week.id));
+    const same = (e: (typeof existing)[number], d: Detected) => e.kind === d.kind && e.scope === d.scope && e.subjectKey === d.subjectKey;
     for (const d of detected) {
-      const values = {
-        teamId: d.teamId,
-        label: d.label,
-        measure: d.result.measure,
-        value: d.result.value,
-        reference: d.result.reference,
-        rate: d.result.rate,
-        referenceWeeks: d.result.referenceWeeks,
-        details: d.details,
-        updatedAt: now,
-      };
-      const before = existing.find((e) => e.scope === d.scope && e.subjectKey === d.subjectKey);
+      const { kind, scope, subjectKey, ...rest } = d;
+      const values = { ...rest, updatedAt: now };
+      const before = existing.find((e) => same(e, d));
       if (before) {
         await db.update(s.lossAlerts).set(values).where(eq(s.lossAlerts.id, before.id));
         result.updated++;
       } else {
-        await db.insert(s.lossAlerts).values({ kind: "perte_inhabituelle", productionWeekId: week.id, scope: d.scope, subjectKey: d.subjectKey, detectedAt: now, ...values });
+        await db.insert(s.lossAlerts).values({ kind, productionWeekId: week.id, scope, subjectKey, detectedAt: now, ...values });
         result.created++;
       }
     }
     // Alertes qui ne se vérifient plus (pertes corrigées) : retirées tant qu'elles n'ont pas été vues.
-    const stale = existing.filter((e) => e.seenAt == null && !detected.some((d) => d.scope === e.scope && d.subjectKey === e.subjectKey));
+    const stale = existing.filter((e) => e.seenAt == null && !detected.some((d) => same(e, d)));
     if (stale.length) {
       await db.delete(s.lossAlerts).where(and(inArray(s.lossAlerts.id, stale.map((e) => e.id)), isNull(s.lossAlerts.seenAt)));
       result.removed += stale.length;
