@@ -299,3 +299,13 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   ce moment. Si elles datent d'un jour précédent, la date de la perte est celle de l'appareil et un avertissement
   s'affiche. Ces pages sont effacées à la déconnexion.
 
+
+## R23 — Prix des matières premières (Phase 6, 17/11/2026)
+
+- Chaque ingrédient des tomes Melba est une matière du référentiel ; ses prix sont des **versions datées**, jamais
+  modifiées après coup.
+- Un nouveau tome crée une version quand le prix ou l'unité change (écart d'au moins 0,5 %, en dessous c'est
+  l'arrondi du tome) ; la version commence le premier jour de la semaine de production du tome.
+- Prix retenu pour une perte : le **dernier prix d'achat** (bon de commande) ou la dernière correction manuelle en
+  vigueur à la date de la perte, à défaut le **coût du tome**. Il est figé sur la déclaration.
+- Un import ne change jamais le nom, l'état ni les réglages faits à la main.

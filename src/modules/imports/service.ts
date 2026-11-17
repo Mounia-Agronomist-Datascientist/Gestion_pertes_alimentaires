@@ -7,6 +7,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { writeAudit } from "@/modules/audit/audit";
+import { syncMaterialsFromImport } from "@/modules/matieres/referentiel";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import type { WeekImportPreview } from "./merge";
 import type { TomeLine } from "./tome/parse-tome";
@@ -124,6 +125,8 @@ export async function saveWeekImport(db: Db, admin: AuthUser, input: SaveWeekImp
     ];
     // Insertion par paquets : une semaine compte environ 700 lignes.
     for (let i = 0; i < lines.length; i += 500) await tx.insert(s.weekRecipeLines).values(lines.slice(i, i + 500));
+    // Référentiel des matières premières (docs/PHASE6.md, étape 6.7) : nouvelles matières et prix changés.
+    const materials = await syncMaterialsFromImport(tx, importId, week.startDate, admin.id);
 
     await writeAudit(tx, {
       userId: admin.id,
@@ -136,6 +139,7 @@ export async function saveWeekImport(db: Db, admin: AuthUser, input: SaveWeekImp
         recipes: preview.recipes.length,
         subRecipes: preview.subRecipes.length,
         lines: lines.length,
+        materials: { created: materials.created, linked: materials.linked, newPrices: materials.newPrices },
         files: [input.tomeFileName, `${input.planFileName} (onglet ${input.planSheetName})`],
       },
       reason: previous ? `Remplace la version ${previous.version}` : null,

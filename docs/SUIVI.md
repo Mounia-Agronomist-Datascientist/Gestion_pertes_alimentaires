@@ -56,6 +56,7 @@
 | 2026-11-12 | Synthèse de la semaine (montants, zones, causes, produits, plus fortes hausses, 12 semaines), version imprimable et exports CSV | 1 test unitaire + 1 test d'intégration ; page et exports vérifiés dans le navigateur |
 | 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
+| 2026-11-17 | Phase 6 — étape 6.7 : référentiel des matières premières tiré des tomes (une matière par ingrédient Melba, prix datés, tolérance d'arrondi de 0,5 %, noms et réglages manuels gardés), complété à chaque import, reprise des tomes déjà importés ; coût d'une perte de matière d'après le prix en vigueur à sa date ; règle R23 | 7 tests unitaires + 5 tests d'intégration ; base locale : 268 matières, 362 prix (S45-S47) ; écran Produits et saisie en Réception vérifiés dans le navigateur |
 | 2026-11-17 | Phase 6 — étape 6.6 : ouverture de la saisie sans réseau (service worker : pages de saisie et fichiers gardés, page « Hors ligne », effacement à la déconnexion), date de l'appareil quand les listes sont anciennes ; `/sw.js` exclu du contrôle de session | Build de production local piloté dans un Chrome sans interface : pages ouvertes et saisie qui avance serveur arrêté, page « Hors ligne », effacement à la déconnexion |
 | 2026-11-17 | Phase 6 — étape 6.5 : saisie qui résiste aux coupures (identifiant d'appareil sans doublon, heure de saisie pour le délai, file d'attente IndexedDB, envoi automatique, bandeau, page « Pertes en attente ») ; règle R22 | 4 tests unitaires + 5 tests d'intégration ; coupure simulée dans le navigateur (serveur arrêté), perte gardée puis envoyée une seule fois |
 | 2026-11-17 | Phase 6 — étape 6.4 : alertes d'analyse à l'accueil (« Vu » par compte), page « Alertes d'analyse », visibilité par profil, écran « Seuils des alertes » (audit) ; seuil de tendance réglable | 3 tests d'intégration ; encadré, « Vu », liste et réglages vérifiés dans le navigateur avec des alertes calculées sur la base locale (effacées ensuite) |
@@ -106,7 +107,7 @@
 
 ## Anomalies connues / points de vigilance
 
-- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0024 à passer, dans
+- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0025 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits), dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
 - TypeScript 7 (nouvelle version native) est utilisé ; si un outil devient incompatible, revenir à TypeScript 5.x.

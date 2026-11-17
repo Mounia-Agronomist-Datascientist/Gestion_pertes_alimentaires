@@ -31,6 +31,7 @@ import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { DeclarationError } from "@/modules/declarations/service";
+import { buildMaterialsFromTomes } from "@/modules/matieres/referentiel";
 
 export interface AccountActionState {
   error?: string;
@@ -189,6 +190,11 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
         if (!productId) return { error: "Choisissez le produit de la liste" };
         const n = await linkUnlistedGroup(db, admin, groupKey, productId);
         message = `${n} saisie${n > 1 ? "s rattachées" : " rattachée"} au produit.`;
+        break;
+      }
+      case "build_materials": {
+        const r = await buildMaterialsFromTomes(db, admin);
+        message = `Référentiel complété depuis ${r.weeks.length} tome${r.weeks.length > 1 ? "s" : ""} : ${r.created} matière${r.created > 1 ? "s" : ""} ajoutée${r.created > 1 ? "s" : ""}, ${r.linked} rattachée${r.linked > 1 ? "s" : ""} à un produit existant, ${r.newPrices} prix enregistré${r.newPrices > 1 ? "s" : ""}.`;
         break;
       }
       case "create_link": {

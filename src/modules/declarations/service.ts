@@ -16,6 +16,7 @@ import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules
 import { portionPackagingCost } from "@/modules/admin/packaging";
 import { findWeekItem, type ResolvedWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
 import { currentWeekImport } from "@/modules/imports/service";
+import { materialPriceAt } from "@/modules/matieres/referentiel";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import {
   canModifyDeclaration,
@@ -132,7 +133,7 @@ async function prepareDeclaration(
     densityKgPerL: number | null;
     refs?: { weekRecipeId: string | null; weekSubRecipeId: string | null; weekLineId: string | null };
     /** Coûts du tome de la semaine et import d'origine (produits de la semaine uniquement). */
-    cost?: { item: ResolvedWeekItem["cost"]; importId: string };
+    cost?: { item: ResolvedWeekItem["cost"]; importId: string | null; priceVersion?: { id: string; source: string; validFrom: string } };
   };
   if ("weekItem" in input.product) {
     // Produit de l'import de la semaine (docs/PHASE2.md, étape 2.5).
@@ -175,6 +176,17 @@ async function prepareDeclaration(
       unitWeightKg: row.unitWeightKg,
       densityKgPerL: row.densityKgPerL,
     };
+    // Matière du référentiel : prix en vigueur à la date de la perte (docs/PHASE6.md, étape 6.7).
+    const price = await materialPriceAt(db, row.id, input.occurredOn);
+    if (price) {
+      const unitCost = { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur };
+      const mould = row.category === "moule_plat_gratin";
+      product.cost = {
+        item: { food: mould ? { perKgEur: null, perUnitEur: null } : unitCost, mouldPerPortionEur: null, portionKind: null, portionWeightKg: null, packagingItself: mould ? unitCost : null },
+        importId: price.weeklyImportId,
+        priceVersion: { id: price.id, source: price.source, validFrom: price.validFrom },
+      };
+    }
   } else {
     product = {
       id: null,
@@ -359,6 +371,7 @@ async function prepareDeclaration(
         packagingComplete: packaging?.complete ?? null,
         packagingLines: packaging?.lines ?? [],
         packagingItself: c.packagingItself,
+        priceVersion: product.cost.priceVersion ?? null,
         labour: "non imputée : méthode d'affectation à définir (cahier des charges §18.2)",
       },
     };

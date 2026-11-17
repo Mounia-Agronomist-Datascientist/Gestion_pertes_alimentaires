@@ -345,7 +345,7 @@ téléchargé, `/statistiques/rapport?type=…`).
 ## Phase 5 terminée
 
 Les huit étapes sont faites. Restent de votre côté : valider les facteurs et les rattachements d'ingrédients
-(filtre « À revoir »), déposer les fichiers des Alchimistes, et la mise en ligne des migrations (0014 à 0024 avec la Phase 6)
+(filtre « À revoir »), déposer les fichiers des Alchimistes, et la mise en ligne des migrations (0014 à 0025 avec la Phase 6)
 (voir docs/SUIVI.md).
 
 ## Fichier des Alchimistes (extrait reçu le 12/11/2026)

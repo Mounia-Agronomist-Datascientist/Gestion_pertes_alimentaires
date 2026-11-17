@@ -10,3 +10,4 @@ export * from "./couts";
 export * from "./alchimistes";
 export * from "./environnement";
 export * from "./surplus";
+export * from "./matieres";

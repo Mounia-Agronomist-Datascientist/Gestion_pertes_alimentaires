@@ -17,7 +17,14 @@ interface Product {
   densityKgPerL: number | null;
   source: string;
   active: boolean;
+  /** Matière tirée des tomes Melba (référentiel des matières premières). */
+  melba: boolean;
+  price: { perKgEur: number | null; perUnitEur: number | null; unit: string | null; source: string; validFrom: string; versions: number } | null;
 }
+
+const PRICE_SOURCES: Record<string, string> = { tome: "tome", bon_commande: "bon de commande", manuel: "saisi à la main" };
+/** Au centime ; jusqu'à 4 décimales pour un petit montant (prix d'un gramme, d'une pincée). */
+const fmtEur = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: n < 0.1 ? 4 : 2 });
 
 interface Group {
   key: string;
@@ -126,6 +133,21 @@ export function ProductsAdmin({ products, groups, units }: Props) {
         </section>
       )}
 
+      <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold">Matières premières des tomes ({products.filter((p) => p.melba).length})</h2>
+        <p className="text-sm text-slate-600">
+          Chaque nouvel import de la semaine ajoute les nouveaux ingrédients et enregistre les prix qui changent, sans
+          toucher aux pertes passées ni aux noms modifiés ici. Ce bouton reprend les tomes déjà importés ; il peut être
+          relancé sans risque.
+        </p>
+        <form action={action}>
+          <input type="hidden" name="intent" value="build_materials" />
+          <button type="submit" disabled={pending} className="btn-secondary">
+            Compléter depuis les tomes importés
+          </button>
+        </form>
+      </section>
+
       {!creating ? (
         <button type="button" className="btn-secondary" onClick={() => setCreating(true)}>
           + Ajouter un produit
@@ -198,7 +220,22 @@ export function ProductsAdmin({ products, groups, units }: Props) {
                     {p.code && ` · code ${p.code}`} · unité {units.find((u) => u.code === p.defaultUnit)?.label ?? p.defaultUnit}
                     {p.unitWeightKg != null && ` · ${fmtNumber(p.unitWeightKg)} kg par unité`}
                     {p.densityKgPerL != null && ` · densité ${fmtNumber(p.densityKgPerL)} kg/L`}
+                    {p.melba && " · tome Melba"}
                   </span>
+                  {p.price ? (
+                    <span className="text-sm text-slate-700">
+                      Prix :{" "}
+                      {[p.price.perKgEur != null && `${fmtEur(p.price.perKgEur)} / kg`, p.price.perUnitEur != null && `${fmtEur(p.price.perUnitEur)} / ${p.price.unit ?? "unité"}`]
+                        .filter(Boolean)
+                        .join(" · ")}{" "}
+                      <span className="text-slate-500">
+                        ({PRICE_SOURCES[p.price.source] ?? p.price.source}, depuis le {fmtDay(p.price.validFrom)}
+                        {p.price.versions > 1 && ` · ${p.price.versions} versions`})
+                      </span>
+                    </span>
+                  ) : (
+                    p.melba && <span className="text-sm text-amber-800">Pas de prix dans les tomes</span>
+                  )}
                   <form action={action} className="flex gap-4">
                     <input type="hidden" name="productId" value={p.id} />
                     <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(p.id)}>

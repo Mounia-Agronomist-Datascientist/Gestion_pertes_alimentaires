@@ -109,6 +109,12 @@ anti-chevauchement.
 | active | bool | |
 
 Unicité : (`external_id`) si non nul ; (`category`,`code`) si non nul. Index trigramme sur `name` pour la recherche.
+Matières tirées des tomes (Phase 6, étape 6.7) : `external_id` = `melba:<clé du tome>`, `source` = `tome`.
+
+**product_prices** (Phase 6, étape 6.7) — versions datées du prix d'un produit : `id`, `product_id`, `source`
+(`tome`|`bon_commande`|`manuel`), `valid_from` (date), `unit` (unité du tome), `unit_weight_g`, `per_kg_eur`,
+`per_unit_eur` (au moins un des deux), `weekly_import_id` null, `created_by` null, `created_at`. Unicité
+(`product_id`,`source`,`valid_from`). Prix en vigueur : règle R23.
 
 **causes** — `id`, `code`, `name`, `description`, `is_other` (cause « Autres pertes », toujours disponible),
 `status` (`proposee`|`active`|`rejetee`|`inactive`), `proposed_by` FK users null, `proposed_at`,

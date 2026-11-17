@@ -280,8 +280,39 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 
 | Étape | Contenu | État |
 |---|---|---|
-| 6.7 | **Référentiel des matières premières** : fournisseurs, catégories Melba, matières (une par ingrédient Melba, rapprochées par le libellé), conditionnements par fournisseur (libellé, contenance, unité), prix datés (source BC ou tome), zone de stockage par catégorie (modifiable par matière). Construit à partir des tomes déjà importés. | Proposée |
+| 6.7 | **Référentiel des matières premières** : matières (une par ingrédient Melba, rapprochées par le libellé) et prix datés tirés des tomes, construit à partir des tomes déjà importés. Les fournisseurs, catégories Melba, conditionnements et zones de stockage arrivent avec les bons de commande (6.8), qui les donnent. | Faite (17/11/2026) |
 | 6.8 | **Import des bons de commande** : dépôt de plusieurs PDF, lecture, aperçu (matières nouvelles, prix changés, lignes illisibles), validation ; un BC redéposé remplace l'ancien (même numéro). Reprise de l'historique du Drive. | Proposée |
 | 6.9 | **Recoupement de la semaine** : pour une semaine de production, ingrédients du tome face aux matières commandées — ingrédients sans commande, commandes absentes du tome, écarts de prix tome/BC. | Proposée |
 | 6.10 | **Saisie en Réception et en Stockage** : d'abord les matières de la semaine (commandées et du tome) et les encas, filtrées par sous-zone de stockage ; tout le référentiel par la recherche ; coût d'après la version en vigueur à la date de la perte. | Proposée |
 | 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; réglage catégorie → zone ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Proposée |
+
+## Étape 6.7 — Référentiel des matières premières (faite le 17/11/2026)
+
+- **Une matière = un produit** (`products`, catégorie « Matière première » ou « Moules et plats à gratin »),
+  identifié par `external_id` = `melba:<clé du tome>` (libellé sans accents, ponctuation ni majuscules : la même clé
+  rapproche les bons de commande, dont les désignations sont les libellés Melba). Unité par défaut : kg pour un
+  ingrédient pesé (g), pièce sinon, avec le poids d'une pièce lu dans le tome (« pot (125 g) »).
+- **Prix datés** (`product_prices`) : source (`tome`, `bon_commande`, `manuel`), date de début (début de la semaine
+  de production du tome), unité du tome, poids d'une pièce, prix au kg et à l'unité, import d'origine. Le prix d'une
+  matière dans un tome vient de sa ligne pesée la plus grande (l'arrondi du coût imprimé y pèse le moins).
+- **À chaque import de la semaine** (dans la même transaction) : nouvelles matières créées ; prix ou unité changés →
+  nouvelle version datée de la semaine. Un écart de moins de **0,5 %** n'est pas un changement (le tome imprime le
+  coût de chaque ligne au centime ; sur S45-S47, 86 « changements » sur 181 n'étaient que des arrondis). Un nouvel
+  import de la même semaine remplace le prix de cette semaine.
+- **Jamais écrasés par un import** : le nom, l'état (désactivé), l'unité et les réglages faits dans Administration →
+  Produits. Un produit saisi à la main avant le référentiel, de même nom, est **rattaché** à la matière Melba au lieu
+  d'être doublé.
+- **Prix en vigueur à une date** : le dernier prix d'achat (bon de commande) ou la dernière correction manuelle, à
+  défaut le dernier coût du tome (décision du 17/11/2026, règle R23).
+- **Coût d'une perte** d'une matière choisie dans la liste des produits : prix en vigueur à la date de la perte,
+  figé sur la déclaration (avec la version de prix utilisée dans le détail du coût). Les pertes passées ne bougent
+  pas quand un prix change.
+- **Administration → Produits** : nombre de matières des tomes, prix en vigueur de chaque produit (source, date de
+  début, nombre de versions), bouton « Compléter depuis les tomes importés » (reprise, sans effet si tout est à jour).
+- Migration **0025** (`product_prices`).
+- **Effet immédiat sur la saisie** : les matières apparaissent dans la liste des produits de toutes les zones (dont
+  Réception et Stockage), par ordre alphabétique avec la recherche. L'ordre « produits de la semaine d'abord » et le
+  filtre par lieu de stockage viennent avec l'étape 6.10.
+- **Vérifié** : 7 tests unitaires et 5 tests d'intégration sur le vrai tome S45 ; base locale : 268 matières, 362
+  prix pour S45 à S47, reprise relancée sans effet ; écran d'administration et saisie en Réception dans le
+  navigateur.
