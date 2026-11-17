@@ -20,6 +20,8 @@ import {
 import type { DeclarationOptions } from "@/modules/declarations/options";
 import type { WeekCatalog, WeekItemKind } from "@/modules/imports/catalog";
 import { gramsToKg, SNACK_ZONE_CODES } from "@/modules/imports/merge";
+import { isNetworkError, stamp } from "@/modules/declarations/offline-queue";
+import { useOfflineQueue } from "../offline-provider";
 import { proposeCauseAction, submitCorrection, submitDeclaration, type SubmitResult } from "./actions";
 
 type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "cause" | "destination" | "recap" | "done";
@@ -144,6 +146,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [comment, setComment] = useState(init?.comment ?? "");
   const [reason, setReason] = useState("");
   const [result, setResult] = useState<SubmitResult | null>(null);
+  /** Perte gardée sur l'appareil faute de réseau (envoyée au retour du réseau). */
+  const [queued, setQueued] = useState(false);
+  /** Identifiant et heure de saisie de la perte en cours : gardés si l'envoi est refait. */
+  const [entry, setEntry] = useState<{ clientId: string; enteredAt: string } | null>(null);
+  const offlineQueue = useOfflineQueue();
   const [lastSubzoneId, setLastSubzoneId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -325,6 +332,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     setComment("");
     setOccurredTime("");
     setResult(null);
+    setQueued(false);
+    setEntry(null);
     if (keepPlace) {
       setStep("product");
     } else {
@@ -411,15 +420,73 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       return;
     }
     startTransition(async () => {
-      const r = correction
-        ? await submitCorrection({ id: correction.id, expectedRevision: correction.revision, reason, payload })
-        : await submitDeclaration(payload);
+      if (correction) {
+        try {
+          const r = await submitCorrection({ id: correction.id, expectedRevision: correction.revision, reason, payload });
+          setResult(r);
+          if (r.ok) setStep("done");
+        } catch (e) {
+          if (!isNetworkError(e)) throw e;
+          offlineQueue.markOffline();
+          setResult({ ok: false, error: "Pas de réseau : la correction n'a pas été envoyée. Réessayez au retour du réseau." });
+        }
+        return;
+      }
+      // Saisie hors ligne (docs/PHASE6.md, étape 6.5) : sans réseau, la perte est gardée sur l'appareil.
+      const sent = stamp({ ...payload, ...entry });
+      setEntry({ clientId: sent.clientId, enteredAt: sent.enteredAt });
+      const keep = async () => {
+        await offlineQueue.enqueue({
+          id: sent.clientId,
+          kind: "une",
+          payloads: [sent],
+          summary: [netLabel, product?.name, options.causes.find((c) => c.id === causeId)?.name].filter(Boolean).join(" — "),
+          enteredAt: sent.enteredAt,
+        });
+        offlineQueue.markOffline();
+        setQueued(true);
+        setStep("done");
+      };
+      if (!navigator.onLine) return keep();
+      let r: SubmitResult;
+      try {
+        r = await submitDeclaration(sent);
+      } catch (e) {
+        if (isNetworkError(e)) return keep();
+        throw e;
+      }
       setResult(r);
       if (r.ok) setStep("done");
     });
   }
 
   // ─── Rendu ──────────────────────────────────────────────────────────────────
+  if (step === "done" && queued) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div role="status" className="flex flex-col items-center gap-2 rounded-2xl bg-amber-50 p-6 text-center text-amber-950">
+          <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-amber-500 text-4xl text-white">
+            ⏳
+          </span>
+          <p className="text-xl font-semibold">Perte gardée sur cet appareil</p>
+          <p>
+            {netLabel} — {product?.name}
+          </p>
+          <p className="text-sm">Pas de réseau : elle sera envoyée toute seule au retour du réseau. Ne videz pas les données du navigateur d&apos;ici là.</p>
+        </div>
+        <button type="button" className="btn-primary" onClick={() => resetForNext(true)}>
+          Nouvelle perte — même endroit
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => resetForNext(false)}>
+          Nouvelle perte — autre endroit
+        </button>
+        <Link href="/declarer/en-attente" className="text-center text-slate-600 underline">
+          Voir les pertes en attente
+        </Link>
+      </div>
+    );
+  }
+
   if (step === "done" && result?.ok) {
     const d = result.declaration;
     const cause = options.causes.find((c) => c.id === causeId);

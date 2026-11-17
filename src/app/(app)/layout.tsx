@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/modules/auth/next-session";
+import { OfflineProvider } from "./offline-provider";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
@@ -32,7 +33,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </form>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 p-4">{children}</main>
+      <main className="mx-auto w-full max-w-3xl flex-1 p-4">
+        <OfflineProvider userId={user.id}>{children}</OfflineProvider>
+      </main>
     </div>
   );
 }

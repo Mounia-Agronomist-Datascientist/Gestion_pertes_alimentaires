@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import type { DeclarationOptions } from "@/modules/declarations/options";
+import { isNetworkError, stamp } from "@/modules/declarations/offline-queue";
+import { useOfflineQueue } from "../../offline-provider";
 import { type BatchResult, submitBatch } from "../actions";
 import { type BatchLine, DeclarationWizard, type WizardInitial } from "../declaration-wizard";
 
@@ -44,6 +46,9 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
   const [result, setResult] = useState<BatchResult | null>(null);
   const [pending, startTransition] = useTransition();
   const [nextKey, setNextKey] = useState(1);
+  /** Nombre de pertes gardées sur l'appareil faute de réseau (envoyées au retour du réseau). */
+  const [queued, setQueued] = useState(0);
+  const offlineQueue = useOfflineQueue();
 
   useEffect(() => {
     const saved = loadLines(userId);
@@ -75,7 +80,30 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
 
   function validate() {
     startTransition(async () => {
-      const r = await submitBatch(lines.map((l) => l.payload));
+      // Identifiant et heure de saisie de chaque ligne, gardés si l'envoi est refait (docs/PHASE6.md, étape 6.5).
+      const stamped = lines.map((l) => ({ ...l, payload: stamp(l.payload) }));
+      setLines(stamped);
+      const payloads = stamped.map((l) => l.payload);
+      const keep = async () => {
+        await offlineQueue.enqueue({
+          id: payloads[0]!.clientId,
+          kind: "serie",
+          payloads,
+          summary: `${payloads.length} perte${payloads.length > 1 ? "s" : ""} : ${stamped.map((l) => l.summary.productName).join(", ")}`,
+          enteredAt: payloads[0]!.enteredAt,
+        });
+        offlineQueue.markOffline();
+        setQueued(payloads.length);
+        setLines([]);
+      };
+      if (!navigator.onLine) return keep();
+      let r: BatchResult;
+      try {
+        r = await submitBatch(payloads);
+      } catch (e) {
+        if (isNetworkError(e)) return keep();
+        throw e;
+      }
       setResult(r);
       if (r.ok) setLines([]);
     });
@@ -100,6 +128,35 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
           onCancel: () => setView({ kind: "list" }),
         }}
       />
+    );
+  }
+
+  if (queued > 0) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div role="status" className="flex flex-col items-center gap-2 rounded-2xl bg-amber-50 p-6 text-center text-amber-950">
+          <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-amber-500 text-4xl text-white">
+            ⏳
+          </span>
+          <p className="text-xl font-semibold">
+            {queued} perte{queued > 1 ? "s" : ""} gardée{queued > 1 ? "s" : ""} sur cet appareil
+          </p>
+          <p className="text-sm">Pas de réseau : elles seront envoyées toutes seules au retour du réseau. Ne videz pas les données du navigateur d&apos;ici là.</p>
+        </div>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => {
+            setQueued(0);
+            openWizard(undefined, "zone", null);
+          }}
+        >
+          Nouvelle série
+        </button>
+        <Link href="/declarer/en-attente" className="text-center text-slate-600 underline">
+          Voir les pertes en attente
+        </Link>
+      </div>
     );
   }
 

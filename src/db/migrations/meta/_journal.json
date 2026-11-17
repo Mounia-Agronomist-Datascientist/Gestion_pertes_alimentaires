@@ -169,6 +169,13 @@
       "when": 1794904338962,
       "tag": "0023_alertes_vues",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794905983609,
+      "tag": "0024_saisie_hors_ligne",
+      "breakpoints": true
     }
   ]
 }

@@ -282,3 +282,15 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Seulement des semaines postérieures à la mise en service (`ALERTES_DEBUT`). Le nombre de semaines est réglable
   (`alert_settings`).
 
+## R22 — Pertes saisies sans réseau (Phase 6, 17/11/2026)
+
+- Une perte validée sans réseau est **gardée sur l'appareil** puis envoyée automatiquement ; elle ne compte dans
+  l'historique, les statistiques et les alertes qu'une fois reçue.
+- Le **délai de 7 jours** des équipes se compte depuis l'**heure de saisie** sur l'appareil. L'heure de réception
+  est gardée quand la perte arrive plus d'une minute après.
+- Refus à la réception : heure de saisie en avance de plus de 5 minutes sur le serveur ; pour une équipe, saisie
+  datant de plus de 7 jours. Une perte refusée reste sur l'appareil avec le motif.
+- Une même perte reçue deux fois n'est enregistrée qu'une fois (identifiant créé sur l'appareil).
+- Sans réseau, seule la déclaration est possible (une perte ou une série) ; corrections, historique, statistiques
+  et administration restent en ligne.
+

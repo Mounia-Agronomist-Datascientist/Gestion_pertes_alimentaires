@@ -41,7 +41,18 @@ type PreparedDeclaration = Awaited<ReturnType<typeof prepareDeclaration>>;
  * `declaredAt` : horodatage de la saisie initiale (conservé lors d'une correction).
  */
 /** `keptDestinationIds` : destinations de la version corrigée, acceptées même si elles ne sont plus proposées aux équipes. */
-async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now: Date, declaredAt: Date, keptDestinationIds: readonly string[] = []) {
+async function prepareDeclaration(
+  db: Db,
+  user: AuthUser,
+  rawInput: unknown,
+  now: Date,
+  declaredAt: Date,
+  keptDestinationIds: readonly string[] = [],
+  /** Heure de la saisie (sur l'appareil pour une perte envoyée plus tard) : le délai des équipes se compte à partir d'elle. */
+  enteredAt: Date = now,
+  /** Heure de réception, pour une perte saisie hors ligne. */
+  receivedAt: Date | null = null,
+) {
   const parsed = declarationInputSchema.safeParse(rawInput);
   if (!parsed.success) {
     throw new DeclarationError(parsed.error.issues[0]?.message ?? "Saisie invalide");
@@ -63,7 +74,7 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
   }
 
   // ─── Semaines ───────────────────────────────────────────────────────────
-  const today = toProductionLocalDate(now);
+  const today = toProductionLocalDate(enteredAt);
   if (input.occurredOn > today) {
     throw new DeclarationError("La date de la perte ne peut pas être dans le futur");
   }
@@ -346,6 +357,8 @@ async function prepareDeclaration(db: Db, user: AuthUser, rawInput: unknown, now
       occurredOn: input.occurredOn,
       occurredTime: input.occurredTime ?? null,
       declaredAt,
+      ...(input.clientId ? { clientId: input.clientId } : {}),
+      ...(receivedAt ? { receivedAt } : {}),
       productionWeekId: lossWeek.id,
       declaredWeekId: declaredWeek.id,
       isLate,
@@ -473,6 +486,46 @@ async function insertNewDeclaration(
   return summarize(declaration);
 }
 
+// ─── Saisie hors ligne (docs/PHASE6.md, étape 6.5) ─────────────────────────────
+
+/** Avance tolérée de l'horloge d'un appareil sur celle du serveur. */
+export const DEVICE_CLOCK_TOLERANCE_MS = 5 * 60 * 1000;
+/** Écart au-delà duquel une perte est considérée comme reçue après sa saisie (gardée hors ligne). */
+const RECEIVED_LATER_MS = 60 * 1000;
+
+/**
+ * Heure de saisie d'une perte : celle de l'appareil quand elle est fournie (perte gardée hors ligne), sinon
+ * l'heure de réception. Refusée si elle est dans le futur, ou, pour une équipe, si elle date de plus que le délai
+ * des équipes (horloge de l'appareil à vérifier, ou perte à faire enregistrer par un responsable).
+ */
+function entryTimes(user: AuthUser, rawInput: unknown, now: Date): { enteredAt: Date; receivedAt: Date | null; clientId: string | null } {
+  const raw = (rawInput ?? {}) as { enteredAt?: unknown; clientId?: unknown };
+  const clientId = typeof raw.clientId === "string" ? raw.clientId : null;
+  if (typeof raw.enteredAt !== "string") return { enteredAt: now, receivedAt: null, clientId };
+  const enteredAt = new Date(raw.enteredAt);
+  if (Number.isNaN(enteredAt.getTime())) throw new DeclarationError("Heure de saisie invalide");
+  if (enteredAt.getTime() > now.getTime() + DEVICE_CLOCK_TOLERANCE_MS) {
+    throw new DeclarationError("L'heure de cet appareil est en avance : réglez-la, puis saisissez la perte à nouveau");
+  }
+  if (isBoundByTeamDelay(user) && now.getTime() - enteredAt.getTime() > TEAM_DELAY_DAYS * 86_400_000) {
+    throw new DeclarationError(`Perte saisie il y a plus de ${TEAM_DELAY_DAYS} jours sur cet appareil : à faire enregistrer par un responsable`);
+  }
+  const later = now.getTime() - enteredAt.getTime() > RECEIVED_LATER_MS;
+  // Une saisie « en avance » de quelques minutes (horloge de l'appareil) compte à l'heure de réception.
+  return { enteredAt: enteredAt > now ? now : enteredAt, receivedAt: later ? now : null, clientId };
+}
+
+/** Déclaration déjà reçue avec cet identifiant d'appareil (second envoi d'une même perte) ; null sinon. */
+async function alreadyReceived(db: Db, user: AuthUser, clientId: string | null): Promise<CreatedDeclaration | null> {
+  if (!clientId) return null;
+  const [existing] = await db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.clientId, clientId));
+  if (!existing) return null;
+  if (existing.createdBy !== user.id) throw new DeclarationError("Identifiant de saisie déjà utilisé");
+  return summarize(existing);
+}
+
+const isUniqueViolation = (e: unknown) => (e as { code?: string; cause?: { code?: string } })?.code === "23505" || (e as { cause?: { code?: string } })?.cause?.code === "23505";
+
 export async function createDeclaration(
   db: Db,
   user: AuthUser,
@@ -480,8 +533,18 @@ export async function createDeclaration(
   now: Date = new Date(),
 ): Promise<CreatedDeclaration> {
   requirePermission(user, "declaration.create");
-  const prepared = await prepareDeclaration(db, user, rawInput, now, now);
-  return db.transaction((tx) => insertNewDeclaration(tx, user, prepared, now));
+  const times = entryTimes(user, rawInput, now);
+  const existing = await alreadyReceived(db, user, times.clientId);
+  if (existing) return existing;
+  const prepared = await prepareDeclaration(db, user, rawInput, now, times.enteredAt, [], times.enteredAt, times.receivedAt);
+  try {
+    return await db.transaction((tx) => insertNewDeclaration(tx, user, prepared, now));
+  } catch (e) {
+    // Deux envois simultanés de la même perte : le second retrouve le premier.
+    const again = isUniqueViolation(e) ? await alreadyReceived(db, user, times.clientId) : null;
+    if (again) return again;
+    throw e;
+  }
 }
 
 // ─── Déclaration groupée (docs/ECRANS_PHASE1.md E4) ───────────────────────────
@@ -519,25 +582,32 @@ export async function createDeclarationBatch(
     throw new DeclarationError(`Au plus ${MAX_BATCH_LINES} pertes à la fois`);
   }
 
+  // Lignes déjà reçues (second envoi d'une série gardée hors ligne) : rendues telles quelles, pas réenregistrées.
+  const received: CreatedDeclaration[] = [];
   const prepared: PreparedDeclaration[] = [];
   for (const [index, raw] of rawInputs.entries()) {
     try {
-      prepared.push(await prepareDeclaration(db, user, raw, now, now));
+      const times = entryTimes(user, raw, now);
+      const existing = await alreadyReceived(db, user, times.clientId);
+      if (existing) received.push(existing);
+      else prepared.push(await prepareDeclaration(db, user, raw, now, times.enteredAt, [], times.enteredAt, times.receivedAt));
     } catch (e) {
       if (!isInputError(e)) throw e;
       throw new BatchLineError(index, e.message);
     }
   }
+  if (!prepared.length) return received;
 
-  return db.transaction(async (tx) => {
+  const created = await db.transaction(async (tx) => {
     const [batch] = await tx
       .insert(s.declarationBatches)
       .values({ createdBy: user.id, defaults: { lines: prepared.length }, closedAt: now, createdAt: now })
       .returning();
-    const created: CreatedDeclaration[] = [];
-    for (const p of prepared) created.push(await insertNewDeclaration(tx, user, p, now, batch!.id));
-    return created;
+    const list: CreatedDeclaration[] = [];
+    for (const p of prepared) list.push(await insertNewDeclaration(tx, user, p, now, batch!.id));
+    return list;
   });
+  return [...received, ...created];
 }
 
 // ─── Corrections et annulations (docs/REGLES_METIER.md R5, R6) ─────────────────

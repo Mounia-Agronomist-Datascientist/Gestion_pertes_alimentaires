@@ -14,6 +14,7 @@ import {
   time,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
@@ -57,7 +58,12 @@ export const lossDeclarations = pgTable(
 
     occurredOn: date("occurred_on", { mode: "string" }).notNull(),
     occurredTime: time("occurred_time"),
+    /** Heure de la saisie : sur l'appareil pour une perte gardée hors ligne puis envoyée (docs/PHASE6.md, étape 6.5). */
     declaredAt: timestamp("declared_at", { withTimezone: true }).notNull().defaultNow(),
+    /** Heure de réception par le serveur, quand la perte a été saisie hors ligne ; null : reçue à la saisie. */
+    receivedAt: timestamp("received_at", { withTimezone: true }),
+    /** Identifiant créé sur l'appareil : un même envoi reçu deux fois n'est enregistré qu'une fois. */
+    clientId: uuid("client_id"),
     productionWeekId: uuid("production_week_id")
       .notNull()
       .references(() => productionWeeks.id),
@@ -149,6 +155,7 @@ export const lossDeclarations = pgTable(
     index("loss_declarations_cause_idx").on(t.causeId),
     index("loss_declarations_product_idx").on(t.productId),
     index("loss_declarations_created_by_idx").on(t.createdBy),
+    uniqueIndex("loss_declarations_client_id_key").on(t.clientId).where(sql`${t.clientId} is not null`),
     check("loss_declarations_quantity_positive", sql`${t.quantity} > 0 and ${t.netQuantity} > 0`),
     check(
       "loss_declarations_team_matches_responsibility",

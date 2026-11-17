@@ -3,7 +3,8 @@
 import { db } from "@/db/client";
 import { AdminError } from "@/modules/admin/accounts";
 import { proposeCause } from "@/modules/admin/causes";
-import { requireUser } from "@/modules/auth/next-session";
+import { getCurrentUser, requireUser } from "@/modules/auth/next-session";
+import type { SendResult } from "@/modules/declarations/offline-queue";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import {
   BatchLineError,
@@ -66,5 +67,23 @@ export async function proposeCauseAction(input: { name: string; description: str
   } catch (e) {
     if (e instanceof AdminError || e instanceof ForbiddenError) return { ok: false, error: e.message };
     throw e;
+  }
+}
+
+/**
+ * Envoi d'une perte ou d'une série gardée sur l'appareil pendant une coupure (docs/PHASE6.md, étape 6.5). Ne
+ * redirige jamais vers la connexion : une session expirée est signalée, la perte reste sur l'appareil.
+ */
+export async function sendQueued(kind: "une" | "serie", payloads: unknown[]): Promise<SendResult> {
+  const user = await getCurrentUser();
+  if (!user || user.mustChangePassword) return { ok: false, error: "Reconnectez-vous pour envoyer les pertes gardées sur cet appareil.", authRequired: true };
+  try {
+    if (kind === "une") await createDeclaration(db, user, payloads[0]);
+    else await createDeclarationBatch(db, user, payloads);
+    return { ok: true };
+  } catch (e) {
+    if (isInputError(e)) return { ok: false, error: e.message };
+    console.error("Échec d'envoi d'une perte gardée hors ligne", e);
+    return { ok: false, error: "Erreur inattendue du serveur : nouvel essai plus tard.", retry: true };
   }
 }

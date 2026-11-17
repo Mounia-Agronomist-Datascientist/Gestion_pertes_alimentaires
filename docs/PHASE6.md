@@ -174,8 +174,30 @@ quelques minutes ; délai compté depuis l'heure de saisie ; déclarer seulement
 
 | Étape | Contenu | État |
 |---|---|---|
-| 6.5 | **Envoi qui résiste aux coupures** : identifiant unique créé sur l'appareil (pas de doublon), heure de saisie gardée et utilisée pour le délai, file d'attente sur l'appareil (IndexedDB), bandeau « hors ligne » et compteur des pertes en attente, envoi automatique au retour du réseau, liste « à corriger » pour une perte refusée. Pour une perte ou une série. | Proposée |
+| 6.5 | **Envoi qui résiste aux coupures** : identifiant unique créé sur l'appareil (pas de doublon), heure de saisie gardée et utilisée pour le délai, file d'attente sur l'appareil (IndexedDB), bandeau « hors ligne » et compteur des pertes en attente, envoi automatique au retour du réseau, liste « à corriger » pour une perte refusée. Pour une perte ou une série. | ✅ |
 | 6.6 | **Ouverture sans réseau** : service worker qui garde les pages de saisie et leurs fichiers ; listes de la semaine (postes, causes, destinations, plats, tares) gardées sur l'appareil à chaque ouverture en ligne. | Proposée |
 
-Point de méthode à valider avec l'étape 6.5 : l'heure de saisie vient de l'horloge de l'appareil. Le serveur la
-refuse si elle est dans le futur (plus de 5 minutes d'avance) ; sinon il la garde telle quelle pour le délai.
+Point de méthode appliqué à l'étape 6.5 : l'heure de saisie vient de l'horloge de l'appareil. Le serveur la
+refuse si elle a plus de 5 minutes d'avance ; sinon il la garde telle quelle pour le délai.
+
+## Étape 6.5 — Envoi qui résiste aux coupures (faite le 17/11/2026)
+
+Règle R22 de docs/REGLES_METIER.md.
+- **Serveur** (migration 0024) : chaque perte peut porter un identifiant créé sur l'appareil (`client_id`, unique)
+  et son heure de saisie. Un second envoi du même identifiant rend la perte déjà enregistrée, sans doublon (aussi
+  pour une série). L'heure de saisie devient l'heure de déclaration ; l'heure de réception est gardée
+  (`received_at`) quand la perte arrive plus d'une minute après.
+- **Délai de 7 jours** compté depuis l'heure de saisie. Refus : heure de saisie en avance de plus de 5 minutes ;
+  pour une équipe, saisie de plus de 7 jours (à faire enregistrer par un responsable).
+- **Appareil** (`src/modules/declarations/offline-queue.ts`) : sans réseau, ou si l'envoi échoue faute de réseau,
+  la perte (ou la série) est gardée dans IndexedDB, par compte. Envoi automatique : au démarrage, au retour du
+  réseau, au retour sur l'application et toutes les 20 secondes tant qu'il reste des pertes. Un refus du serveur
+  la passe « refusée » avec le motif ; une session expirée demande de se reconnecter sans rien perdre.
+- **Écrans** : bandeau « Hors ligne » et nombre d'envois en attente sur toutes les pages ; écran « Perte gardée
+  sur cet appareil » après validation ; page « Pertes en attente sur cet appareil » (`/declarer/en-attente`) avec
+  « Renvoyer » et « Supprimer » pour une perte refusée. Les corrections restent en ligne seulement.
+- **Vérifié dans le navigateur** : perte validée serveur arrêté (gardée sur l'appareil, bandeau), page rechargée,
+  serveur relancé : envoyée toute seule et reçue une seule fois. La perte d'essai a ensuite été effacée de la base
+  locale.
+- **Pas encore** : ouvrir l'application sans réseau (étape 6.6).
+

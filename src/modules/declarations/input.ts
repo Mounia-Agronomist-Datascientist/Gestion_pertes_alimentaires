@@ -93,6 +93,10 @@ export const declarationInputSchema = z
       .min(1, "Choisissez au moins une destination"),
     destinationGapJustification: z.string().trim().max(500).nullable().optional(),
     comment: z.string().trim().max(1000).nullable().optional(),
+    /** Identifiant créé sur l'appareil (saisie hors ligne, docs/PHASE6.md étape 6.5) : évite un double enregistrement. */
+    clientId: uuid.optional(),
+    /** Heure de la saisie sur l'appareil, quand la perte a pu être envoyée plus tard. */
+    enteredAt: z.iso.datetime({ offset: true, message: "Heure de saisie invalide" }).optional(),
   })
   .superRefine((v, ctx) => {
     if (v.tare) {
