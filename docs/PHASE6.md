@@ -36,6 +36,7 @@ L'essai pilote avec les équipes peut se faire en parallèle : il ne dépend d'a
 | 16/11/2026 | Pistes retenues | **Alertes et tendances** d'abord (pistes 3, 4 et 6). |
 | 16/11/2026 | Réseau en cuisine | **Coupures fréquentes** : la saisie hors ligne (piste 8) devient utile ; à proposer après les alertes. |
 | 16/11/2026 | API Melba, partage des Google Sheets | **Renseignements en cours** de votre côté ; dépôts manuels en attendant. |
+| 17/11/2026 | API Melba | **Pas d'API** pour l'instant : le tome est déposé chaque semaine (piste 1 abandonnée). |
 | 16/11/2026 | Perte inhabituelle | Alerte quand une équipe, une zone ou un plat dépasse de **50 %** la moyenne des **4 semaines précédentes**, à volume égal (kg pour 1 000 barquettes produites) quand la production est connue, sinon en kg. |
 | 16/11/2026 | Seuil minimal | **5 kg** : pas d'alerte en dessous, même si la hausse dépasse 50 %. |
 | 16/11/2026 | Cause récurrente | Alerte quand la **même cause est en tête** des pertes d'une équipe ou d'un plat **3 semaines de production de suite**. |

@@ -91,7 +91,9 @@ Toutes les saisies sont conservées pour la traçabilité et le suivi des perfor
 
 - Les équipes doivent déclarer leurs pertes **le jour même**. Le nombre de jours entre la perte et sa saisie
   est affiché (« Saisie le jour même », « Saisie 2 jours après la perte »).
-- Délai maximal : **7 jours** après la date de la perte, pour déclarer comme pour corriger ou annuler.
+- Délai pour **déclarer** : **7 jours** après la date de la perte.
+- Délai pour **corriger ou annuler** : jusqu'à **une semaine après la fin de la semaine de production** de la perte
+  (mercredi + 7 jours ; décision du 17/11/2026).
   Au-delà, seul un responsable (zone, production, administrateur) peut le faire.
 - Alerte « rien de noté » : voir R8.
 

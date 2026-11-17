@@ -105,17 +105,15 @@
 ## Anomalies connues / points de vigilance
 
 - TypeScript 7 (nouvelle version native) est utilisé ; si un outil devient incompatible, revenir à TypeScript 5.x.
-- ESLint/Prettier pas encore configurés (prévu au début de la Phase 1).
+- ESLint/Prettier pas encore configurés.
 - En mode groupé, les lignes non validées restent sur l'appareil (stockage du navigateur) : elles sont
   perdues si l'on vide les données du navigateur avant de valider.
-- Le référentiel des produits se saisit à la main (Administration → Produits) en attendant l'import de la Phase 2.
 - L'estimation par contenant (« 2 gastros pleins ») n'est pas convertie en kg : il faudrait un poids de
   référence par produit et par contenant.
 - La base de développement a été réinitialisée le 06/11/2026 (comptes renommés par fonction) ; elle contient
   une cause de test validée : « Bac oublié en chambre froide ».
 - Écran de création de compte : testé par les tests d'intégration, pas encore manuellement dans le navigateur.
 - Base de développement : `ALERTES_DEBUT=2026-11-02` dans le `.env` local (test) ; 8 alertes de test pour S45.
-- Le délai de correction des équipes (fin de la semaine de saisie) est une proposition en attente de validation.
 - Au premier lancement du serveur de développement, Postgres.app peut demander d'autoriser la connexion :
   tant que ce n'est pas accepté, les pages renvoient une erreur de connexion à la base.
 - Les tests de bout en bout automatisés (Playwright) ne sont pas encore en place ; les écrans ont été vérifiés

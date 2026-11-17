@@ -17,7 +17,14 @@ import { portionPackagingCost } from "@/modules/admin/packaging";
 import { findWeekItem, type ResolvedWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
 import { currentWeekImport } from "@/modules/imports/service";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
-import { canModifyDeclaration, canReadDeclaration, isBoundByTeamDelay, isWithinTeamDelay, TEAM_DELAY_DAYS } from "./access";
+import {
+  canModifyDeclaration,
+  canReadDeclaration,
+  isBoundByTeamDelay,
+  isWithinTeamCorrectionDelay,
+  isWithinTeamDelay,
+  TEAM_DELAY_DAYS,
+} from "./access";
 import { declarationInputSchema, isNonFoodCategory } from "./input";
 
 /** Erreur de saisie, affichable telle quelle à l'utilisateur. */
@@ -52,6 +59,8 @@ async function prepareDeclaration(
   enteredAt: Date = now,
   /** Heure de réception, pour une perte saisie hors ligne. */
   receivedAt: Date | null = null,
+  /** Correction : délai des équipes jusqu'à une semaine après la fin de la semaine de production. */
+  correction = false,
 ) {
   const parsed = declarationInputSchema.safeParse(rawInput);
   if (!parsed.success) {
@@ -78,10 +87,13 @@ async function prepareDeclaration(
   if (input.occurredOn > today) {
     throw new DeclarationError("La date de la perte ne peut pas être dans le futur");
   }
-  if (isBoundByTeamDelay(user) && !isWithinTeamDelay(input.occurredOn, today)) {
-    throw new DeclarationError(
-      `Une perte de plus de ${TEAM_DELAY_DAYS} jours ne peut être déclarée que par un responsable`,
-    );
+  if (isBoundByTeamDelay(user)) {
+    if (correction && !isWithinTeamCorrectionDelay(input.occurredOn, today)) {
+      throw new DeclarationError("Le délai de correction (une semaine après la fin de la semaine de production) est dépassé : demandez à un responsable");
+    }
+    if (!correction && !isWithinTeamDelay(input.occurredOn, today)) {
+      throw new DeclarationError(`Une perte de plus de ${TEAM_DELAY_DAYS} jours ne peut être déclarée que par un responsable`);
+    }
   }
   const [lossWeek, declaredWeek] = await Promise.all([
     findStoredProductionWeek(db, input.occurredOn),
@@ -675,6 +687,9 @@ export async function correctDeclaration(
     now,
     existing.declaredAt,
     before.destinations.map((d) => d.destinationId),
+    now,
+    null,
+    true,
   );
 
   return db.transaction(async (tx) => {

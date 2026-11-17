@@ -9,7 +9,7 @@ Stockée en base (`roles`, `permissions`, `role_permissions`), initialisée par 
 |---|:-:|:-:|:-:|:-:|:-:|
 | Déclarer une perte | ✅ (toutes zones, attribuée à l'équipe en cuisine) | ✅ (ses zones) | ✅ | ✅ | — |
 | Lire le détail des déclarations | celles attribuées à son équipe + celles qu'elle a saisies | ses zones | toutes | toutes | — |
-| Corriger / annuler une déclaration | son équipe, ⚠️ délai à définir | ses zones | ✅ | ✅ | — |
+| Corriger / annuler une déclaration | son équipe, jusqu'à une semaine après la fin de la semaine de production | ses zones | ✅ | ✅ | — |
 | Proposer une cause | ✅ | ✅ | ✅ | ✅ | — |
 | Valider une cause proposée | — | — | — | ✅ | — |
 | Statistiques globales simplifiées (sans détail par équipe) | ✅ | ✅ | ✅ | ✅ | ✅ |
