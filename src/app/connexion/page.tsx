@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/modules/auth/next-session";
+import { ClearOfflinePages } from "../service-worker";
 import { LoginForm } from "./login-form";
 
 export const metadata = { title: "Connexion — Pertes" };
@@ -15,6 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <p className="text-slate-600">La Brigade — déclaration des pertes alimentaires et matières</p>
       </div>
       <LoginForm error={erreur} login={login} />
+      <ClearOfflinePages />
     </main>
   );
 }

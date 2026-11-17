@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
-import { computeProductionWeek, formatProductionWeek } from "@/domain/semaine-production";
+import { computeProductionWeek, formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { computeNetWeight } from "@/domain/tares";
 import { convertToKg, type UnitKind } from "@/domain/unites";
 import {
@@ -142,6 +142,18 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [recoveredAmounts, setRecoveredAmounts] = useState<Record<string, string>>(init?.recoveredAmounts ?? {});
   const [binNumbers, setBinNumbers] = useState<Record<string, string>>(init?.binNumbers ?? {});
   const [occurredOn, setOccurredOn] = useState(init?.occurredOn ?? options.today);
+  /**
+   * Date du jour : celle de l'appareil quand la page vient d'une copie gardée pour la saisie hors ligne (étape 6.6)
+   * et date d'un jour précédent.
+   */
+  const [today, setToday] = useState(options.today);
+  useEffect(() => {
+    const local = toProductionLocalDate(new Date());
+    if (local <= options.today) return;
+    setToday(local);
+    if (!init?.occurredOn) setOccurredOn(local);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options.today]);
   const [occurredTime, setOccurredTime] = useState(init?.occurredTime ?? "");
   const [comment, setComment] = useState(init?.comment ?? "");
   const [reason, setReason] = useState("");
@@ -255,8 +267,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   );
 
   const isLate =
-    occurredOn && occurredOn <= options.today
-      ? computeProductionWeek(occurredOn).startDate < computeProductionWeek(options.today).startDate
+    occurredOn && occurredOn <= today
+      ? computeProductionWeek(occurredOn).startDate < computeProductionWeek(today).startDate
       : false;
 
   // Coût matière estimé d'après le tome de la semaine (le serveur refait le calcul et le fige).
@@ -527,6 +539,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
   return (
     <div className="flex flex-col gap-4">
+      {today !== options.today && (
+        <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-950">
+          Listes gardées sur cet appareil le {new Date(`${options.today}T12:00:00Z`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} :
+          sans réseau, les plats proposés peuvent dater d&apos;une autre semaine. La perte sera vérifiée à l&apos;envoi.
+        </p>
+      )}
       <div className="flex items-center justify-between">
         {batch && (stepIndex === 0 || step === "recap" || step === (batch.startStep ?? "zone")) ? (
           <button type="button" onClick={batch.onCancel} className="rounded-xl px-2 py-2 font-medium text-slate-700">
@@ -891,7 +909,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                       Recettes − {fmtEuro(recoveredTotal)} · coût net ≈ {fmtEuro(costPreview.grossEur - recoveredTotal)}
                     </span>
                   )}
-                  {costPreview?.packagingEur != null && occurredOn !== options.today && (
+                  {costPreview?.packagingEur != null && occurredOn !== today && (
                     <span className="block text-sm text-slate-500">
                       Emballages estimés aux prix d&apos;aujourd&apos;hui : l&apos;enregistrement prend ceux de la date de la perte.
                     </span>
@@ -959,7 +977,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               <input
                 type="date"
                 className="field"
-                max={options.today}
+                max={today}
                 value={occurredOn}
                 onChange={(e) => setOccurredOn(e.target.value)}
               />

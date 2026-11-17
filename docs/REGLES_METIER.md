@@ -293,4 +293,7 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Une même perte reçue deux fois n'est enregistrée qu'une fois (identifiant créé sur l'appareil).
 - Sans réseau, seule la déclaration est possible (une perte ou une série) ; corrections, historique, statistiques
   et administration restent en ligne.
+- Sans réseau, l'appareil ouvre la **dernière version reçue** des pages de saisie, avec les listes de la semaine de
+  ce moment. Si elles datent d'un jour précédent, la date de la perte est celle de l'appareil et un avertissement
+  s'affiche. Ces pages sont effacées à la déconnexion.
 

@@ -36,7 +36,7 @@ causes, destinations, impact environnemental).
 | 3 | Calcul des coûts | ✅ Développée — emballages, coût brut et net par perte, main-d'œuvre (non imputée), écran « Coûts des pertes » ([docs/PHASE3.md](docs/PHASE3.md)) |
 | 4 | Tableaux de bord et statistiques | ✅ Terminée ([docs/PHASE4.md](docs/PHASE4.md)) |
 | 5 | Valorisation et environnement | ✅ Terminée — valorisation, Alchimistes (import et rapprochement), CO2e (Agribalyse 3.2), rapports PDF ([docs/PHASE5.md](docs/PHASE5.md)) |
-| 6 | Optimisation et automatisation | 🟡 Tendances et alertes d'analyse faites ; saisie hors ligne, imports automatiques et API Melba à décider ([docs/PHASE6.md](docs/PHASE6.md)) |
+| 6 | Optimisation et automatisation | 🟡 Tendances, alertes d'analyse et saisie hors ligne faites ; imports automatiques et API Melba en attente de vos renseignements ([docs/PHASE6.md](docs/PHASE6.md)) |
 
 ## Lancement
 

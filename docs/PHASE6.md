@@ -175,7 +175,7 @@ quelques minutes ; délai compté depuis l'heure de saisie ; déclarer seulement
 | Étape | Contenu | État |
 |---|---|---|
 | 6.5 | **Envoi qui résiste aux coupures** : identifiant unique créé sur l'appareil (pas de doublon), heure de saisie gardée et utilisée pour le délai, file d'attente sur l'appareil (IndexedDB), bandeau « hors ligne » et compteur des pertes en attente, envoi automatique au retour du réseau, liste « à corriger » pour une perte refusée. Pour une perte ou une série. | ✅ |
-| 6.6 | **Ouverture sans réseau** : service worker qui garde les pages de saisie et leurs fichiers ; listes de la semaine (postes, causes, destinations, plats, tares) gardées sur l'appareil à chaque ouverture en ligne. | Proposée |
+| 6.6 | **Ouverture sans réseau** : service worker qui garde les pages de saisie et leurs fichiers ; listes de la semaine (postes, causes, destinations, plats, tares) gardées sur l'appareil à chaque ouverture en ligne. | ✅ |
 
 Point de méthode appliqué à l'étape 6.5 : l'heure de saisie vient de l'horloge de l'appareil. Le serveur la
 refuse si elle a plus de 5 minutes d'avance ; sinon il la garde telle quelle pour le délai.
@@ -199,5 +199,29 @@ Règle R22 de docs/REGLES_METIER.md.
 - **Vérifié dans le navigateur** : perte validée serveur arrêté (gardée sur l'appareil, bandeau), page rechargée,
   serveur relancé : envoyée toute seule et reçue une seule fois. La perte d'essai a ensuite été effacée de la base
   locale.
-- **Pas encore** : ouvrir l'application sans réseau (étape 6.6).
+
+## Étape 6.6 — Ouverture sans réseau (faite le 17/11/2026)
+
+Règle R22 (complétée) de docs/REGLES_METIER.md.
+- **Service worker** (`public/sw.js`, enregistré en production seulement) :
+  - pages de saisie (accueil, une perte, plusieurs pertes, pertes en attente) : réseau d'abord ; la dernière
+    version reçue est gardée sur l'appareil et servie sans réseau, avec les listes de la semaine qu'elle contient ;
+  - fichiers de l'application (`/_next/static`) gardés à la première lecture (300 au plus) ;
+  - toute autre page sans réseau : page « Hors ligne » avec les liens vers la saisie ;
+  - rien d'autre n'est gardé (ni envois, ni statistiques, ni administration).
+- **Changement de compte** : la page de connexion (après une déconnexion) efface les pages gardées ; un appareil
+  partagé ne montre jamais les listes d'un autre compte. Les pertes en attente restent et partent à la prochaine
+  connexion de leur compte.
+- **Listes d'un jour précédent** : la saisie prend la date de l'appareil et prévient que les plats proposés peuvent
+  dater d'une autre semaine ; la perte est revérifiée à l'envoi (refusée avec son motif si besoin).
+- `/sw.js` est exclu du contrôle de session (il était redirigé vers la connexion) et toujours relu
+  (`Cache-Control: no-cache`) pour qu'une nouvelle version s'installe.
+- **Vérifié** dans un Chrome sans interface (profil temporaire) sur le build de production local : service worker
+  actif, pages gardées ; serveur arrêté : « Déclarer une perte » et « Plusieurs pertes » s'ouvrent et la saisie
+  avance (zone, produit) ; « Statistiques » affiche la page « Hors ligne » ; déconnexion : pages gardées effacées.
+  Le navigateur intégré de l'application Claude n'accepte pas les service workers : l'essai n'y est pas possible.
+- **Reste à faire pendant le pilote** : essai sur une vraie tablette Android en coupant le wifi, avec l'application
+  installée sur l'écran d'accueil.
+
+**Saisie hors ligne terminée** (étapes 6.5 et 6.6).
 
