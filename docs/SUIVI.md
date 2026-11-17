@@ -54,6 +54,7 @@
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
 | 2026-11-12 | Phase 4 terminée — coût par composante et coût net semaine après semaine et par mois (onglet « Évolution ») ; exports Excel et CSV de chaque onglet des statistiques, avec la période, les filtres et les droits de l'écran | 1 test unitaire + 1 test d'intégration ; graphiques et 16 exports vérifiés dans le navigateur |
 | 2026-11-12 | Synthèse de la semaine (montants, zones, causes, produits, plus fortes hausses, 12 semaines), version imprimable et exports CSV | 1 test unitaire + 1 test d'intégration ; page et exports vérifiés dans le navigateur |
+| 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
 | 2026-11-17 | Phase 6 — étape 6.6 : ouverture de la saisie sans réseau (service worker : pages de saisie et fichiers gardés, page « Hors ligne », effacement à la déconnexion), date de l'appareil quand les listes sont anciennes ; `/sw.js` exclu du contrôle de session | Build de production local piloté dans un Chrome sans interface : pages ouvertes et saisie qui avance serveur arrêté, page « Hors ligne », effacement à la déconnexion |
 | 2026-11-17 | Phase 6 — étape 6.5 : saisie qui résiste aux coupures (identifiant d'appareil sans doublon, heure de saisie pour le délai, file d'attente IndexedDB, envoi automatique, bandeau, page « Pertes en attente ») ; règle R22 | 4 tests unitaires + 5 tests d'intégration ; coupure simulée dans le navigateur (serveur arrêté), perte gardée puis envoyée une seule fois |
@@ -120,8 +121,6 @@
 - Base de développement : `ALERTES_DEBUT=2026-11-02` dans le `.env` local (test) ; 8 alertes de test pour S45.
 - Au premier lancement du serveur de développement, Postgres.app peut demander d'autoriser la connexion :
   tant que ce n'est pas accepté, les pages renvoient une erreur de connexion à la base.
-- Les tests de bout en bout automatisés (Playwright) ne sont pas encore en place ; les écrans ont été vérifiés
-  à la main dans le navigateur.
 
 ## Migrations appliquées
 

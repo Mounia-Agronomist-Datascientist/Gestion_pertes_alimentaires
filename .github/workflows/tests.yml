@@ -1,4 +1,5 @@
-# Contrôle automatique à chaque envoi : types TypeScript et tests (base PostgreSQL embarquée, sans secret).
+# Contrôle automatique à chaque envoi : types TypeScript et tests (base PostgreSQL embarquée, sans secret), puis
+# parcours de bout en bout dans Chrome.
 name: Tests
 on:
   push:
@@ -16,3 +17,40 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+
+  # Parcours de bout en bout (docs/PLAN_TESTS.md §6) : application de production + base PostgreSQL jetable, Chrome
+  # déjà installé sur la machine GitHub (aucun navigateur téléchargé).
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pertes_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:e2e
+        env:
+          CI: "true"
+          E2E_DATABASE_URL: postgres://postgres:postgres@localhost:5432/pertes_e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapport-e2e
+          path: playwright-report/
+          retention-days: 7

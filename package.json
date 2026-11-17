@@ -20,7 +20,8 @@
     "db:dev-accounts": "tsx scripts/create-dev-accounts.ts",
     "alertes:evaluer": "tsx scripts/evaluate-alerts.ts",
     "db:setup": "tsx scripts/db-setup.ts",
-    "postinstall": "node scripts/copy-pdf-worker.mjs"
+    "postinstall": "node scripts/copy-pdf-worker.mjs",
+    "test:e2e": "playwright test"
   },
   "repository": {
     "type": "git",
@@ -48,6 +49,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.15",
     "@netlify/plugin-nextjs": "^5.16.6",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4.3.4",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",

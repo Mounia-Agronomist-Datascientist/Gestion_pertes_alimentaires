@@ -44,3 +44,22 @@ Chaque phase se termine par l'exécution complète de la suite (non-régression,
 
 Avant mise en production de la Phase 1 : test avec 1 ou 2 équipes pilotes pendant une semaine, chronométrage
 de la saisie, recueil des retours.
+
+## 6. Tests de bout en bout (17/11/2026)
+
+Parcours essentiels joués dans un vrai navigateur (Chrome, format tablette Android) sur l'application construite
+pour la production et une base dédiée, recréée à chaque lancement (`tests/e2e/`, Playwright) :
+
+1. Une équipe déclare une perte (zone, poste, produit hors liste, pesée, cause, destination), la retrouve dans
+   l'historique et la corrige.
+2. Une équipe déclare deux pertes d'un coup (série).
+3. Une équipe ne voit pas les pertes d'une autre équipe, ni l'administration ; Too Good To Go, vente flash et
+   Linkee ne lui sont pas proposés.
+4. Sans réseau : la page de saisie s'ouvre, la perte est gardée sur l'appareil (bandeau « Hors ligne »), les autres
+   pages affichent « Hors ligne » ; au retour du réseau, la perte part toute seule et apparaît dans l'historique.
+5. L'administration consulte les alertes d'analyse et enregistre les seuils.
+
+Lancement local : `npm run test:e2e` (base PostgreSQL `pertes_e2e`, créée une fois avec `createdb pertes_e2e` ; le
+script de préparation refuse toute base dont le nom ne finit pas par `_e2e`). Comptes de test aux mots de passe
+tirés au hasard à chaque lancement, jamais commités. Dans GitHub Actions : tâche « e2e » du workflow « Tests »,
+avec une base PostgreSQL jetable ; rapport joint en cas d'échec.

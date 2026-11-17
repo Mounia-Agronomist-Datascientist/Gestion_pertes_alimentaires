@@ -63,6 +63,7 @@ npm run db:check                     # vérifie la connexion
 |---|---|
 | `npm run dev` | Lance l'application sur http://localhost:3001 (le port 3000 est réservé à une autre application) |
 | `npm test` | Tests unitaires et d'intégration (PostgreSQL embarqué, sans configuration) |
+| `npm run test:e2e` | Parcours de bout en bout dans Chrome (base `pertes_e2e`, voir docs/PLAN_TESTS.md §6) |
 | `npm run typecheck` | Vérification des types TypeScript |
 | `npm run db:generate -- --name <nom>` | Génère une migration après modification de `src/db/schema/` |
 | `npm run db:migrate` | Applique les migrations en attente |
