@@ -226,3 +226,31 @@ Règle R22 (complétée) de docs/REGLES_METIER.md.
 
 **Saisie hors ligne terminée** (étapes 6.5 et 6.6).
 
+
+## Référentiel des matières premières tiré des tomes — analyse (17/11/2026)
+
+**Constat** : en Réception et en Stockage, la saisie ne propose que les encas de la semaine (règle R9) et les
+produits saisis à la main (Administration → Produits, presque vide). Les ingrédients des tomes ne sont proposés
+qu'en cuisine, sous chaque plat.
+
+**Ce que donnent les tomes** : pour chaque ingrédient, son libellé, son unité d'utilisation (g, ou « pot (125 g) »,
+« portion (25 g) », « sachet (40 g) »… avec le poids d'une pièce) et son coût, donc un prix au kg ou à la pièce.
+Les 3 tomes déjà importés (S45 à S47) comptent 268 ingrédients différents. Ils ne donnent **pas** le colis
+fournisseur (carton de 6, sac de 10 kg).
+
+**Décisions du 17/11/2026** :
+
+| Sujet | Décision |
+|---|---|
+| Zones | La liste des ingrédients de la semaine est proposée en **Réception** et en **Stockage** (avec les encas). |
+| Conditionnement | L'unité et le prix du tome, **et aussi le colis fournisseur** : saisi dans l'administration (ou importé si un fichier fournisseur existe). |
+| Modifications manuelles | **Gardées** : un nouveau tome ajoute les nouveaux produits et met à jour le prix et l'unité par une nouvelle version datée, sans toucher au nom ni aux réglages faits à la main. |
+| Menu de la saisie | **Les produits de la semaine d'abord** (ingrédients et encas du tome de la semaine), tous les autres produits connus restant trouvables par la recherche. |
+
+**Étapes proposées** :
+
+| Étape | Contenu | État |
+|---|---|---|
+| 6.7 | **Référentiel des matières premières** : un produit par ingrédient Melba ; versions datées (unité du tome, poids d'une pièce, prix, colis fournisseur) ; construit à partir de tous les tomes déjà importés, puis complété à chaque import (nouveaux produits ajoutés, prix ou unité changés : nouvelle version à partir de la semaine du tome). Les pertes passées gardent leur coût figé. | Proposée |
+| 6.8 | **Saisie en Réception et en Stockage** : « Cette semaine » (ingrédients du tome de la semaine, encas), puis recherche dans tout le référentiel ; coût d'après la version en vigueur à la date de la perte. | Proposée |
+| 6.9 | **Administration → Produits** : versions et prix de chaque produit, modification (nom, poids d'une pièce, colis fournisseur : nouvelle version datée), ajout d'un produit, désactivation ; modifications gardées aux imports suivants. | Proposée |
