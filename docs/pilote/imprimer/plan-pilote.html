@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Plan de l'essai pilote</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .tag { display: inline-block; background: var(--amber-light); color: var(--amber); border-radius: 4px; padding: 0 5px; font-size: 8pt; font-weight: 700; white-space: nowrap; }
+  .chrono td { height: 9mm; }
+  .q { break-inside: avoid; margin: 8px 0 2px; font-weight: 600; }
+  .answer { height: 17mm; border-bottom: 1px dashed var(--line); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<header class="doc">
+  <div>
+    <div class="kicker">Application Pertes · essai pilote</div>
+    <h1>Plan de l'essai pilote</h1>
+  </div>
+  <div class="meta">1 ou 2 équipes · une semaine de production<br>Version du 17/11/2026</div>
+</header>
+
+<div class="box info">
+  <p><strong>Objectif</strong> : faire utiliser l'application par 1 ou 2 équipes pendant une semaine de production, mesurer le temps de saisie, recueillir les retours et corriger avant d'étendre à toutes les équipes.</p>
+  <p class="small">Les mentions <span class="tag">à valider</span> sont des propositions à confirmer avant le début de l'essai.</p>
+</div>
+
+<h2>1. Avant l'essai</h2>
+<table class="check">
+  <thead><tr><th></th><th>Action</th><th style="width:22%">Qui</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tick"></span></td><td>Mise en ligne (à partir du 8 décembre) : sauvegarde, migrations 0014 à 0024 (workflow « Base de données »), déploiement, vérification de la connexion.</td><td>Administration</td></tr>
+    <tr><td><span class="tick"></span></td><td>Après la mise en ligne : « Charger la proposition Agribalyse » (Administration → Facteurs d'émission) ; déposer les fichiers TGTG, ventes flash et Linkee.</td><td>Administration</td></tr>
+    <tr><td><span class="tick"></span></td><td>Choisir les équipes pilotes : une équipe de cuisine + le conditionnement, pour couvrir les deux modes (équipe et zone). <span class="tag">à valider</span></td><td>Production</td></tr>
+    <tr><td><span class="tick"></span></td><td>Créer ou vérifier leurs comptes (sans prénom) ; noter les mots de passe hors de l'application.</td><td>Administration</td></tr>
+    <tr><td><span class="tick"></span></td><td>Tablettes Android : Chrome à jour, application installée sur l'écran d'accueil, première connexion faite <strong>avec réseau</strong> (pour garder les pages de saisie).</td><td>Administration + équipes</td></tr>
+    <tr><td><span class="tick"></span></td><td>Import de la semaine de l'essai (tome + plan) le mardi d'avant.</td><td>Administration</td></tr>
+    <tr><td><span class="tick"></span></td><td>Imprimer la <strong>fiche équipe</strong> et la poser près de chaque tablette.</td><td>Administration</td></tr>
+    <tr><td><span class="tick"></span></td><td>Présentation de 15 minutes aux équipes pilotes : une perte, une série, une correction, le mode hors ligne.</td><td>Administration</td></tr>
+    <tr><td><span class="tick"></span></td><td>Alertes : ne pas fixer <code>ALERTES_DEBUT</code> pendant la semaine d'essai (pas de 150 kg estimés tant que les équipes apprennent), puis le fixer au lundi qui suit la fin de l'essai. <span class="tag">à valider</span></td><td>Administration</td></tr>
+  </tbody>
+</table>
+
+<h2>2. Pendant l'essai (une semaine, du jeudi au mercredi)</h2>
+<ul>
+  <li>Les équipes pilotes déclarent <strong>toutes</strong> leurs pertes dans l'application, au moment où elles ont lieu (ou en série en fin de service).</li>
+  <li>Garder l'<strong>ancien suivi en parallèle</strong> pendant cette semaine, pour comparer les quantités. <span class="tag">à valider</span></li>
+  <li>Un <strong>point de 5 minutes</strong> chaque jour avec les équipes pilotes : ce qui a bloqué, ce qui manque.</li>
+  <li><strong>Chronométrer</strong> quelques saisies chaque jour (feuille page suivante).</li>
+  <li><strong>Tester volontairement une coupure</strong> une fois : couper le wifi de la tablette, ouvrir l'application, déclarer une perte, rallumer le wifi, vérifier qu'elle apparaît dans « Pertes déclarées ».</li>
+</ul>
+
+<h2>3. Grille d'observation</h2>
+<table>
+  <thead><tr><th>Observation</th><th>Comment la mesurer</th><th style="width:24%">Objectif <span class="tag" style="background:#fff">à valider</span></th></tr></thead>
+  <tbody>
+    <tr><td>Temps d'une saisie simple (pesée, une destination)</td><td>Chronomètre, de « Déclarer une perte » à « Perte enregistrée »</td><td>Moins de 45 secondes</td></tr>
+    <tr><td>Temps d'une série de 5 pertes</td><td>Chronomètre</td><td>Moins de 3 minutes</td></tr>
+    <tr><td>Pertes oubliées</td><td>Comparaison avec l'ancien suivi</td><td>Aucune</td></tr>
+    <tr><td>Produits introuvables</td><td>Saisies « hors liste » (Administration → Produits)</td><td>Moins de 5 % des saisies</td></tr>
+    <tr><td>Causes qui manquent</td><td>Causes proposées, « Autres pertes » avec commentaire</td><td>Liste à compléter</td></tr>
+    <tr><td>Quantités non converties en kg</td><td>Statistiques : « sans poids en kg »</td><td>À identifier (estimations par contenant)</td></tr>
+    <tr><td>Coupures de réseau</td><td>Bandeau « Hors ligne », pertes en attente</td><td>Aucune perte perdue</td></tr>
+    <tr><td>Erreurs de saisie corrigées</td><td>Historique des versions</td><td>À suivre</td></tr>
+  </tbody>
+</table>
+
+<h2>4. Après l'essai</h2>
+<ol>
+  <li>Relire avec les équipes pilotes les pertes de la semaine (Statistiques → Synthèse de la semaine, rapport PDF).</li>
+  <li>Comparer avec l'ancien suivi.</li>
+  <li>Lister les corrections à faire (causes, produits, écrans), les faire, puis décider de l'extension aux autres équipes.</li>
+  <li>Fixer la date de mise en service des alertes (<code>ALERTES_DEBUT</code>, variable du dépôt GitHub).</li>
+  <li>Déposer le « Décompte barquettes » de la semaine pour vérifier les ratios.</li>
+</ol>
+
+<section class="page-break">
+  <header class="doc">
+    <div>
+      <div class="kicker">Essai pilote · à remplir pendant la semaine</div>
+      <h1>Feuille de chronométrage</h1>
+    </div>
+    <div class="meta">Équipe : <span class="blank" style="min-width:35mm"></span><br>Semaine : <span class="blank" style="min-width:35mm"></span></div>
+  </header>
+  <p>De l'appui sur « Déclarer une perte » (ou « Déclarer plusieurs pertes ») jusqu'à « Perte enregistrée ».</p>
+  <table class="chrono">
+    <thead><tr><th style="width:13%">Jour</th><th style="width:17%">Type</th><th style="width:12%">Pertes</th><th style="width:13%">Durée</th><th>Ce qui a fait perdre du temps / remarque</th></tr></thead>
+    <tbody>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+      <tr><td></td><td>une / série</td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <h3>Coupure de réseau (essai volontaire)</h3>
+  <table>
+    <tbody>
+      <tr><td style="width:55%">Perte saisie wifi coupé : écran « Perte gardée sur cet appareil » affiché ?</td><td>oui / non</td></tr>
+      <tr><td>Wifi rallumé : la perte apparaît dans « Pertes déclarées » ?</td><td>oui / non — après combien de temps ?</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="page-break">
+  <header class="doc">
+    <div>
+      <div class="kicker">Essai pilote · fin de semaine</div>
+      <h1>Vos retours</h1>
+    </div>
+    <div class="meta">Équipe : <span class="blank" style="min-width:35mm"></span></div>
+  </header>
+  <p>Merci d'avoir testé l'application. Vos réponses servent à l'améliorer avant de l'étendre à toutes les équipes.</p>
+  <p class="q">1. Combien de temps vous prend une déclaration ? Est-ce acceptable pendant le service ?</p><div class="answer"></div>
+  <p class="q">2. Qu'est-ce qui vous a fait hésiter ou perdre du temps ?</p><div class="answer"></div>
+  <p class="q">3. Avez-vous trouvé vos produits ? Lesquels manquaient ?</p><div class="answer"></div>
+  <p class="q">4. Les causes proposées correspondent-elles à ce qui se passe ? Lesquelles ajouter ?</p><div class="answer"></div>
+  <p class="q">5. Avez-vous eu des coupures de réseau ? La perte est-elle bien partie ensuite ?</p><div class="answer"></div>
+  <p class="q">6. Préférez-vous déclarer au fil de l'eau ou en fin de service ?</p><div class="answer"></div>
+  <p class="q">7. Qu'est-ce qu'il faudrait changer avant d'étendre à toutes les équipes ?</p><div class="answer"></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Guide de l'administration — la semaine type</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc">
+  <div>
+    <div class="kicker">Application Pertes · administration</div>
+    <h1>La semaine type</h1>
+  </div>
+  <div class="meta">Semaine de production : jeudi → mercredi<br>Version du 17/11/2026</div>
+</header>
+
+<h2>Chaque semaine</h2>
+<table>
+  <thead><tr><th>Quand</th><th>Où</th><th>Quoi</th></tr></thead>
+  <tbody>
+    <tr><td class="when">Mardi</td><td>Administration → <strong>Import de la semaine</strong></td><td>Déposer le <strong>tome Melba</strong> (PDF « Imprimer les recettes ») et le <strong>plan de production</strong> (Google Sheets → Fichier → Télécharger → Microsoft Excel). Vérifier l'aperçu (plats par équipe, anomalies), puis valider. <em>Sans import, les équipes ne voient pas les plats de la semaine.</em></td></tr>
+    <tr><td class="when">Mardi</td><td>Administration → <strong>Équipes par semaine</strong></td><td>Désactiver une équipe qui ne travaille pas : pas d'alerte « saisie incomplète » pour elle.</td></tr>
+    <tr><td class="when">Avant un férié</td><td>Administration → <strong>Jours de production</strong></td><td>Retirer le jour férié, ajouter un samedi travaillé.</td></tr>
+    <tr><td class="when">Jeudi</td><td>Administration → <strong>Import</strong> → Barquettes réellement produites</td><td>Déposer le <strong>« Décompte barquettes »</strong> de la semaine terminée : ratios et comparaison à volume égal.</td></tr>
+    <tr><td class="when">Jeudi</td><td>Accueil · <strong>Alertes d'analyse</strong></td><td>Pertes inhabituelles et causes récurrentes de la semaine terminée, calculées dans la nuit. Les lire, noter « Vu ».</td></tr>
+    <tr><td class="when">Tous les 1-2 jours</td><td><strong>Alertes « saisie incomplète »</strong></td><td>Équipes sans déclaration un jour de production (150 kg estimés). Lever une alerte justifiée, avec un motif.</td></tr>
+    <tr><td class="when">Lundi ou mardi</td><td>Statistiques → <strong>Synthèse de la semaine</strong> · <strong>Rapports PDF</strong></td><td>Rapport hebdomadaire pour la réunion de production.</td></tr>
+    <tr><td class="when">Fichiers mis à jour</td><td>Administration → <strong>Import</strong> → Ventes et dons des surplus</td><td>Déposer <strong>VENTES TGTG</strong>, <strong>VENTES FLASH</strong>, <strong>Linkee</strong> (Excel). Un fichier redéposé remplace sa période.</td></tr>
+    <tr><td class="when">Fichier reçu</td><td>Administration → <strong>Import</strong> → Pesées des Alchimistes</td><td>Déposer leur export (CSV ou Excel).</td></tr>
+    <tr><td class="when">Au fil de l'eau</td><td>Administration → <strong>Causes</strong></td><td>Valider ou refuser les causes proposées par les équipes.</td></tr>
+    <tr><td class="when">Au fil de l'eau</td><td>Administration → <strong>Produits</strong></td><td>Rattacher les saisies « hors liste » à un produit.</td></tr>
+  </tbody>
+</table>
+
+<h2>Ponctuellement</h2>
+<ul>
+  <li><strong>Comptes</strong> (Administration → Comptes) : un compte par équipe et par fonction, <strong>sans prénom</strong>. Réinitialiser le mot de passe d'une équipe à chaque départ : toutes ses sessions sont fermées et le nouveau mot de passe doit être changé à la première connexion. Les pertes en attente sur une tablette partiront après la reconnexion de l'équipe.</li>
+  <li><strong>Seuils des alertes</strong> (Administration → Seuils des alertes) : dépassement (50 %), minimum (5 kg), semaines de suite (3), tendance stable (10 %).</li>
+  <li><strong>Facteurs CO2e</strong> (Administration → Facteurs d'émission) : valider les familles ; rattacher les nouveaux ingrédients Melba (filtre « À rattacher ») après chaque nouveau tome.</li>
+  <li><strong>Emballages et main-d'œuvre</strong> : mettre à jour les coûts datés quand ils changent.</li>
+  <li><strong>Journal d'audit</strong> : qui a fait quoi, avant et après.</li>
+</ul>
+
+<h2>Si…</h2>
+<table>
+  <thead><tr><th style="width:38%">Situation</th><th>Que faire</th></tr></thead>
+  <tbody>
+    <tr><td>Une équipe ne trouve pas un plat</td><td>L'import de la semaine est-il fait ? Le plat est-il dans le plan de son équipe ?</td></tr>
+    <tr><td>Une équipe a dépassé le délai</td><td>Un responsable déclare ou corrige à sa place. Déclaration : 7 jours après la perte ; correction : une semaine après la fin de la semaine de production.</td></tr>
+    <tr><td>Une perte reste « en attente » sur une tablette</td><td>Ouvrir l'application sur cette tablette avec le compte de l'équipe, réseau disponible : l'envoi part tout seul. Page « Pertes en attente » pour voir les refus et leur motif.</td></tr>
+    <tr><td>Tablette changée ou remise à zéro</td><td>Les pertes en attente sur l'ancienne tablette sont perdues : les faire saisir à nouveau.</td></tr>
+    <tr><td>Le site ne répond plus</td><td>Vérifier l'hébergement (Netlify, Neon). Les équipes peuvent continuer à saisir hors ligne quelques minutes.</td></tr>
+  </tbody>
+</table>
+</body>
+</html>

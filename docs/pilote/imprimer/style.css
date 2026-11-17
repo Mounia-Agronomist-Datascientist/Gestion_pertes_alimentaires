@@ -1,0 +1,42 @@
+/* Mise en page imprimable des documents du pilote (A4). Sources des PDF de docs/pilote/imprimer/. */
+@page { size: A4; margin: 14mm 14mm 16mm; }
+:root { --teal: #0f766e; --teal-dark: #0b4f4a; --teal-light: #e6f4f2; --amber: #b45309; --amber-light: #fef3c7; --ink: #0f172a; --muted: #475569; --line: #cbd5e1; --zebra: #f1f5f9; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.42; }
+header.doc { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 3px solid var(--teal); padding-bottom: 8px; margin-bottom: 14px; }
+header.doc .kicker { color: var(--teal); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 8.5pt; }
+header.doc h1 { margin: 2px 0 0; font-size: 21pt; line-height: 1.15; }
+header.doc .meta { text-align: right; color: var(--muted); font-size: 8.5pt; }
+h2 { color: var(--teal-dark); font-size: 13pt; margin: 16px 0 6px; padding-bottom: 3px; border-bottom: 1px solid var(--line); break-after: avoid; }
+h3 { font-size: 11pt; margin: 10px 0 4px; break-after: avoid; }
+p { margin: 4px 0 6px; }
+ul, ol { margin: 4px 0 8px; padding-left: 18px; }
+li { margin: 2px 0; }
+strong { color: var(--ink); }
+code { font-family: "SF Mono", Menlo, monospace; font-size: 9pt; background: var(--zebra); padding: 0 3px; border-radius: 3px; }
+table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9.5pt; break-inside: auto; }
+thead th { background: var(--teal); color: #fff; text-align: left; padding: 5px 7px; font-weight: 600; }
+td { padding: 5px 7px; vertical-align: top; border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(even) td { background: var(--zebra); }
+tr { break-inside: avoid; }
+td.when, td.what { white-space: nowrap; font-weight: 600; }
+.box { border-radius: 8px; padding: 9px 12px; margin: 8px 0; break-inside: avoid; }
+.box.info { background: var(--teal-light); border-left: 4px solid var(--teal); }
+.box.warn { background: var(--amber-light); border-left: 4px solid var(--amber); }
+.box p:first-child { margin-top: 0; } .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+.steps { counter-reset: step; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 10px; margin: 8px 0 10px; }
+.step { counter-increment: step; position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px 8px 40px; break-inside: avoid; background: #fff; }
+.step::before { content: counter(step); position: absolute; left: 9px; top: 8px; width: 22px; height: 22px; border-radius: 50%; background: var(--teal); color: #fff; font-weight: 700; font-size: 10pt; display: flex; align-items: center; justify-content: center; }
+.step .q { font-weight: 700; display: block; margin-bottom: 2px; }
+.step.wide { grid-column: span 2; }
+.btn { display: inline-block; border: 1.5px solid var(--teal); color: var(--teal-dark); border-radius: 6px; padding: 0 6px; font-weight: 600; font-size: 9.5pt; white-space: nowrap; }
+.btn.solid { background: var(--teal); color: #fff; }
+.blank { display: inline-block; min-width: 55mm; border-bottom: 1px solid var(--ink); }
+.check td:first-child { width: 22px; }
+.tick { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--ink); border-radius: 2px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lines { height: 16mm; border-bottom: 1px dashed var(--line); }
+footer.doc { margin-top: 12px; color: var(--muted); font-size: 8pt; border-top: 1px solid var(--line); padding-top: 5px; }
+.page-break { break-before: page; }
+.small { font-size: 9pt; color: var(--muted); }
