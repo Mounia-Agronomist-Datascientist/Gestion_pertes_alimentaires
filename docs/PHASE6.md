@@ -48,7 +48,7 @@ L'essai pilote avec les équipes peut se faire en parallèle : il ne dépend d'a
 | 6.1 | **Tendances** : moyenne glissante sur 4 semaines et sens de la tendance (hausse, stable, baisse) pour les kg, le coût net et les kg pour 1 000 barquettes, dans « Évolution », la synthèse de la semaine et les rapports. | ✅ |
 | 6.2 | **Pertes inhabituelles** : calcul à la fin de chaque semaine de production (tâche de nuit existante) par équipe, zone et plat ; seuils réglables (50 %, 5 kg). | ✅ (affichage à l'étape 6.4) |
 | 6.3 | **Causes récurrentes** : même cause en tête 3 semaines de suite, par équipe et par plat. | ✅ (affichage à l'étape 6.4) |
-| 6.4 | **Affichage des alertes** : encadré à l'accueil, détail, bouton « vu », historique ; réglages dans l'administration. | Proposée |
+| 6.4 | **Affichage des alertes** : encadré à l'accueil, détail, bouton « vu », historique ; réglages dans l'administration. | ✅ |
 
 Points de méthode à valider avec l'étape concernée :
 - **Tendance (6.1)** : « stable » quand la moyenne des 4 dernières semaines s'écarte de moins de 10 % de celle des
@@ -72,8 +72,7 @@ Règle R19 de docs/REGLES_METIER.md.
 - **Où** : onglet « Évolution » (tableau « Tendance sur 8 semaines », ligne de moyenne sur les histogrammes des kg
   et du coût net), synthèse de la semaine (tableau et ligne de moyenne), rapport PDF hebdomadaire, export de
   l'onglet « Évolution » (tendance et moyenne glissante semaine par semaine).
-- Le seuil de 10 % est une constante pour l'instant ; il deviendra réglable avec les seuils des alertes
-  (étape 6.4).
+- Le seuil de 10 % est réglable dans Administration → Seuils des alertes (étape 6.4).
 
 ## Étape 6.2 — Pertes inhabituelles (faite le 16/11/2026)
 
@@ -108,4 +107,28 @@ Règle R21 de docs/REGLES_METIER.md.
 - **Contexte enregistré** : la cause et, pour chaque semaine de la série, ses kg, son nombre de pertes et sa part
   des kg de l'unité.
 - Même tâche de nuit et même table `loss_alerts` que l'étape 6.2 (type « cause_recurrente »).
+
+## Étape 6.4 — Affichage des alertes et réglages (faite le 17/11/2026)
+
+- **Accueil** : encadré « N alertes d'analyse à voir », les 3 plus récentes avec leur détail et un bouton « Vu »,
+  lien vers la liste complète.
+- **Page Alertes d'analyse** (`/alertes/analyse`) : « À voir » ou « Toutes », « Tout marquer comme vu », rappel des
+  seuils en vigueur. Chaque alerte donne :
+  - perte inhabituelle : valeur de la semaine, moyenne de référence, dépassement, causes et produits principaux ;
+  - cause récurrente : la cause, les semaines de la série, ses kg et sa part des pertes chaque semaine.
+- **Qui voit quoi** :
+  - toutes les alertes : production, administration, direction (profils qui voient toutes les alertes ou
+    comparent les équipes) ;
+  - responsable de zone : les alertes de ses zones ;
+  - équipe : son alerte d'équipe et celles de ses plats (équipe du plat d'après le plan).
+- **« Vu » par compte** (table `loss_alert_views`, migration 0023) : chacun retire l'alerte de son accueil. La
+  première lecture fige l'alerte : une correction ne la fait plus disparaître de l'historique.
+- **Administration → Seuils des alertes** : dépassement (50 %), minimum (5 kg), semaines de suite (3), tendance
+  stable (10 %). Chaque modification est inscrite au journal d'audit. Le seuil de tendance s'applique tout de
+  suite aux statistiques et aux rapports ; les autres à la prochaine analyse de nuit.
+- Vérifié dans le navigateur avec 4 alertes calculées sur la base locale (puis effacées) : encadré, « Vu »,
+  liste complète, enregistrement des seuils.
+
+**Alertes et tendances terminées.** Les alertes partiront dès que la date de mise en service (`ALERTES_DEBUT`) sera
+fixée ; les premières pertes inhabituelles demandent 2 semaines de référence, les causes récurrentes 3 semaines.
 

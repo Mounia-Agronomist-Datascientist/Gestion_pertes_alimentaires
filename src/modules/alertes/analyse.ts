@@ -8,13 +8,16 @@ import { and, eq, gte, inArray, isNull, lt } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { type CauseWeight, recurringCause } from "@/domain/causes-recurrentes";
-import { type AlertSettings, checkUnusual, DEFAULT_ALERT_SETTINGS, REFERENCE_WEEKS, type UnitWeek, type UnusualResult } from "@/domain/pertes-inhabituelles";
+import { type AlertSettings, checkUnusual, REFERENCE_WEEKS, type UnitWeek, type UnusualResult } from "@/domain/pertes-inhabituelles";
 import { productLabel } from "@/domain/produits";
 import { addDays, type LocalDate, toProductionLocalDate } from "@/domain/semaine-production";
 import type { LossFact } from "@/domain/statistiques";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { recentWeeks } from "@/modules/statistiques/evolution";
 import { loadFacts } from "@/modules/statistiques/facts";
+import { loadAlertSettings } from "./reglages";
+
+export { loadAlertSettings };
 
 /** Semaines terminées revues à chaque évaluation (corrections faites dans le délai laissé aux équipes). */
 const LOOKBACK_DAYS = 21;
@@ -34,11 +37,6 @@ const SYSTEM_READER: AuthUser = {
   permissions: new Set(["stats.global", "stats.compare_teams"]),
   mustChangePassword: false,
 };
-
-export async function loadAlertSettings(db: Db): Promise<AlertSettings> {
-  const [row] = await db.select().from(s.alertSettings).where(eq(s.alertSettings.id, 1));
-  return row ? { unusualRate: row.unusualRate, minKg: row.minKg, recurrenceWeeks: row.recurrenceWeeks, trendStableRate: row.trendStableRate } : DEFAULT_ALERT_SETTINGS;
-}
 
 type Week = { id: string; year: number; number: number; startDate: string; endDate: string };
 

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, jsonb, numeric, pgEnum, pgTable, smallint, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, date, index, jsonb, numeric, pgEnum, pgTable, primaryKey, smallint, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { teams } from "./organisation";
 import { productionWeeks } from "./production-weeks";
@@ -122,4 +122,22 @@ export const lossAlerts = pgTable(
     index("loss_alerts_week_idx").on(t.productionWeekId),
     index("loss_alerts_team_idx").on(t.teamId),
   ],
+);
+
+/**
+ * « Vu » d'une alerte d'analyse, par compte : chacun retire l'alerte de son accueil. La première lecture marque
+ * aussi l'alerte (`loss_alerts.seen_at`) : elle reste alors dans l'historique même si une correction la dément.
+ */
+export const lossAlertViews = pgTable(
+  "loss_alert_views",
+  {
+    alertId: uuid("alert_id")
+      .notNull()
+      .references(() => lossAlerts.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    seenAt: timestamp("seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.alertId, t.userId] })],
 );

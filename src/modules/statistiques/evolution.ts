@@ -10,7 +10,8 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { monthBounds } from "@/domain/periodes";
 import { type LossFact, type StatsSummary, summarize } from "@/domain/statistiques";
-import { movingAverage, type Trend, trendOf } from "@/domain/tendances";
+import { movingAverage, TREND_STABLE_RATE, type Trend, trendOf } from "@/domain/tendances";
+import { loadAlertSettings } from "@/modules/alertes/reglages";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { loadFacts, type StatsFilters } from "./facts";
 import { actualVolumes, type PlannedVolume, plannedVolumes } from "./production";
@@ -104,13 +105,13 @@ export interface TrendIndicator {
  * 1 000 barquettes prévues et produites, coût net pour les profils qui voient les euros. Sans aucune perte sur la
  * série, rien n'est calculé.
  */
-export function weekTrends(series: readonly WeekPoint[], withCosts: boolean): TrendIndicator[] {
+export function weekTrends(series: readonly WeekPoint[], withCosts: boolean, stableRate = TREND_STABLE_RATE): TrendIndicator[] {
   // Les semaines d'avant la première perte enregistrée de la série ne comptent pas : l'outil n'était pas encore
   // utilisé, elles feraient croire à une hausse (même règle que l'évolution mensuelle).
   const first = series.findIndex((p) => p.summary.events > 0);
   const indicator = (key: TrendIndicator["key"], label: string, unit: TrendIndicator["unit"], all: (number | null)[]): TrendIndicator => {
     const values = all.map((v, i) => (first >= 0 && i >= first ? v : null));
-    return { key, label, unit, values, average: movingAverage(values), trend: trendOf(values) };
+    return { key, label, unit, values, average: movingAverage(values), trend: trendOf(values, stableRate) };
   };
   return [
     indicator("kg", "Kg de pertes alimentaires", "kg", series.map((p) => p.summary.foodKg)),
@@ -127,7 +128,7 @@ export async function weekComparison(db: Db, user: AuthUser, anchor: { year: num
     .select(WEEK_COLUMNS)
     .from(s.productionWeeks)
     .where(and(eq(s.productionWeeks.year, anchor.year - 1), eq(s.productionWeeks.number, anchor.number)));
-  const points = await weekPoints(db, user, recent, filters);
+  const [points, settings] = await Promise.all([weekPoints(db, user, recent, filters), loadAlertSettings(db)]);
   const [lastYearPoint] = lastYear ? await weekPoints(db, user, [lastYear], filters) : [];
   const current = points.at(-1)!;
   const before = points.slice(0, -1);
@@ -151,7 +152,9 @@ export async function weekComparison(db: Db, user: AuthUser, anchor: { year: num
     /** Même semaine l'année précédente, seulement si des pertes y sont enregistrées. */
     lastYear: lastYearPoint && lastYearPoint.summary.events > 0 ? lastYearPoint : null,
     series: points,
-    trends: weekTrends(points, can(user, "indicators.read")),
+    trends: weekTrends(points, can(user, "indicators.read"), settings.trendStableRate),
+    /** Écart sous lequel la tendance est dite stable (réglage de l'administration). */
+    trendStableRate: settings.trendStableRate,
     volumeTeam: volumeTeam(user, filters),
   };
 }

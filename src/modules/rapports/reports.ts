@@ -15,7 +15,7 @@ import { RECONCILIATION_STATUS_LABELS } from "@/domain/rapprochement";
 import { formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { type StatsSummary } from "@/domain/statistiques";
 import { SURPLUS_SOURCES, surplusTrays } from "@/domain/surplus";
-import { TREND_LABELS, TREND_STABLE_RATE, TREND_SYMBOLS } from "@/domain/tendances";
+import { TREND_LABELS, TREND_SYMBOLS } from "@/domain/tendances";
 import { RECOVERY_GROUPS, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
@@ -133,7 +133,7 @@ async function weekly(db: Db, user: AuthUser, ctx: StatsContext, r: () => Promis
   }
   const trends = data.comparison.trends;
   pdf.heading("Tendance sur 8 semaines", tableHeight(trends.length) + 20);
-  pdf.paragraph(`Moyenne des 4 dernières semaines (semaine comprise) comparée à celle des 4 semaines d'avant ; « stable » sous ${pct.format(TREND_STABLE_RATE)} d'écart.`, {
+  pdf.paragraph(`Moyenne des 4 dernières semaines (semaine comprise) comparée à celle des 4 semaines d'avant ; « stable » sous ${pct.format(data.comparison.trendStableRate)} d'écart.`, {
     muted: true,
     size: 8.5,
   });

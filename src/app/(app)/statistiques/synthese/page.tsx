@@ -155,7 +155,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
       )}
 
       <Card title="Tendance sur 8 semaines">
-        <TrendTable trends={comparison.trends} />
+        <TrendTable trends={comparison.trends} stableRate={comparison.trendStableRate} />
       </Card>
 
       <Card title="Semaine après semaine">

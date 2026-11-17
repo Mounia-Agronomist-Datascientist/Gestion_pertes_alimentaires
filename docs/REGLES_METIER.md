@@ -253,7 +253,7 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - **Moyenne glissante** d'une semaine de production : moyenne de cette semaine et des 3 précédentes, sur les
   valeurs connues (au moins 2).
 - **Sens de la tendance** : moyenne des 4 dernières semaines (semaine choisie comprise) comparée à celle des
-  4 semaines d'avant. **Stable** sous 10 % d'écart, sinon **en hausse** ou **en baisse** ; toujours écrit avec
+  4 semaines d'avant. **Stable** sous 10 % d'écart (réglable), sinon **en hausse** ou **en baisse** ; toujours écrit avec
   son symbole (▲, =, ▼), jamais par la seule couleur.
 - Les semaines d'avant la première perte enregistrée de la série ne comptent pas.
 - Indicateurs : kg de pertes alimentaires, kg pour 1 000 barquettes prévues et produites, coût net (euros réservés
@@ -268,7 +268,9 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   et d'au moins 2 semaines de référence est connue ; sinon en kg. Volume d'une équipe : ses plats d'après le plan ;
   d'une zone : toute l'entreprise ; d'un plat : son code.
 - Semaines de référence : après la mise en service (`ALERTES_DEBUT`), équipe active, plat au plan ou au décompte.
-- Les seuils sont enregistrés en base (`alert_settings`) et deviendront réglables dans l'administration.
+- Les seuils sont enregistrés en base (`alert_settings`) et réglables dans Administration → Seuils des alertes.
+- Visibilité : production, administration et direction voient toutes les alertes ; un responsable de zone celles
+  de ses zones ; une équipe la sienne et celles de ses plats. « Vu » se note par compte.
 
 ## R21 — Causes récurrentes (Phase 6, 16/11/2026)
 

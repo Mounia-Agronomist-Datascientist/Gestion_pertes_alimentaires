@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
+import { markAllLossAlertsSeen, markLossAlertSeen } from "@/modules/alertes/consultation";
 import { AlertError, cancelAlert } from "@/modules/alertes/service";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
@@ -21,4 +22,14 @@ export async function cancelAlertAction(_prev: AlertActionState, formData: FormD
   }
   revalidatePath("/alertes");
   return { message: "Alerte levée : les 150 kg estimés ne sont plus comptés." };
+}
+
+/** « Vu » sur une alerte d'analyse, ou sur toutes celles du compte (alertId absent). */
+export async function markLossAlertSeenAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const alertId = formData.get("alertId");
+  if (alertId) await markLossAlertSeen(db, user, String(alertId));
+  else await markAllLossAlertsSeen(db, user);
+  revalidatePath("/");
+  revalidatePath("/alertes/analyse");
 }

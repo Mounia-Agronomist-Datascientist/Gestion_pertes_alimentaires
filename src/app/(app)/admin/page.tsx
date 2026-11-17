@@ -15,6 +15,7 @@ const SECTIONS = [
   { href: "/admin/facteurs-co2", title: "Facteurs d'émission (CO2e)", text: "Familles alimentaires et facteurs Agribalyse, à valider" },
   { href: "/admin/zones", title: "Zones et postes", text: "Renommer, ajouter ou désactiver un poste" },
   { href: "/admin/causes", title: "Causes", text: "Gérer les causes par zone et valider les propositions" },
+  { href: "/admin/alertes", title: "Seuils des alertes", text: "Pertes inhabituelles, causes récurrentes, tendance stable" },
 ];
 
 export default function AdminPage() {

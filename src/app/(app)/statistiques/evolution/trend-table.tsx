@@ -1,4 +1,4 @@
-import { TREND_LABELS, TREND_STABLE_RATE, TREND_SYMBOLS, type TrendDirection } from "@/domain/tendances";
+import { TREND_LABELS, TREND_SYMBOLS, type TrendDirection } from "@/domain/tendances";
 import type { TrendIndicator } from "@/modules/statistiques/evolution";
 import { euro, num, pct } from "../shared";
 
@@ -9,7 +9,7 @@ const DIRECTION_CLASS: Record<TrendDirection, string> = { hausse: "text-red-800"
  * Tendance des indicateurs principaux (docs/PHASE6.md, étape 6.1) : moyenne des 4 dernières semaines comparée à
  * celle des 4 semaines d'avant.
  */
-export function TrendTable({ trends }: { trends: TrendIndicator[] }) {
+export function TrendTable({ trends, stableRate }: { trends: TrendIndicator[]; stableRate: number }) {
   const format = (t: TrendIndicator, v: number | null) => (v == null ? "—" : t.unit === "eur" ? euro.format(v) : `${num.format(v)} kg`);
   const cell = "py-2 pl-3 text-right tabular-nums whitespace-nowrap";
   return (
@@ -43,7 +43,7 @@ export function TrendTable({ trends }: { trends: TrendIndicator[] }) {
       </div>
       <p className="text-xs text-slate-500">
         Moyenne des 4 dernières semaines de production (semaine choisie comprise) comparée à celle des 4 semaines d&apos;avant. « Stable » : écart de moins de{" "}
-        {pct.format(TREND_STABLE_RATE)}. Il faut au moins 2 semaines connues dans chaque moyenne (une semaine sans plan importé ou sans décompte n&apos;a pas de kg
+        {pct.format(stableRate)}. Il faut au moins 2 semaines connues dans chaque moyenne (une semaine sans plan importé ou sans décompte n&apos;a pas de kg
         pour 1 000 barquettes).
       </p>
     </>

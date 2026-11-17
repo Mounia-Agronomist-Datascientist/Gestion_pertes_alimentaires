@@ -4,8 +4,10 @@ import { formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-pr
 import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
 import { countPendingProposals } from "@/modules/admin/causes";
+import { canReadLossAlerts, listLossAlerts } from "@/modules/alertes/consultation";
 import { alertsStartDateFromEnv, evaluateMissingDeclarations, listAlerts } from "@/modules/alertes/service";
 import { alertTitle, fmtLongDay, missingDaysLabel, regularizationDeadline } from "./alertes/format";
+import { LossAlertCard } from "./alertes/loss-alert-card";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
@@ -23,6 +25,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   await evaluateMissingDeclarations(db, { startDate: alertsStartDateFromEnv() });
   const activeAlerts = await listAlerts(db, user, { onlyActive: true });
   const alertKg = activeAlerts.reduce((sum, a) => sum + a.estimatedKg, 0);
+  // Alertes d'analyse pas encore vues par ce compte (les 3 plus récentes à l'accueil).
+  const lossAlerts = canReadLossAlerts(user) ? await listLossAlerts(db, user, { unseenOnly: true, limit: 50 }) : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,6 +56,24 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             {activeAlerts.length} alerte{activeAlerts.length > 1 ? "s" : ""} « saisie incomplète » — {alertKg} kg estimés →
           </Link>
         ))}
+
+      {lossAlerts.length > 0 && (
+        <section className="flex flex-col gap-2" aria-label="Alertes d'analyse à voir">
+          <h2 className="text-lg font-semibold">
+            {lossAlerts.length} alerte{lossAlerts.length > 1 ? "s" : ""} d&apos;analyse à voir
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {lossAlerts.slice(0, 3).map((a) => (
+              <LossAlertCard key={a.id} alert={a} />
+            ))}
+          </ul>
+          {lossAlerts.length > 3 && (
+            <Link href="/alertes/analyse" className="font-medium text-amber-900 underline">
+              Voir les {lossAlerts.length} alertes →
+            </Link>
+          )}
+        </section>
+      )}
 
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <p className="text-sm text-slate-500">Semaine de production en cours</p>
@@ -86,6 +108,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <Link href="/alertes" className="text-center text-slate-700 underline">
         Alertes « saisie incomplète »
       </Link>
+      {canReadLossAlerts(user) && (
+        <Link href="/alertes/analyse" className="text-center text-slate-700 underline">
+          Alertes d&apos;analyse (pertes inhabituelles, causes récurrentes)
+        </Link>
+      )}
 
       {(can(user, "user.manage") || can(user, "referentiel.manage")) && (
         <Link href="/admin" className="btn-secondary flex items-center justify-center gap-2">
