@@ -39,6 +39,10 @@ L'essai pilote avec les équipes peut se faire en parallèle : il ne dépend d'a
 | 16/11/2026 | Perte inhabituelle | Alerte quand une équipe, une zone ou un plat dépasse de **50 %** la moyenne des **4 semaines précédentes**, à volume égal (kg pour 1 000 barquettes produites) quand la production est connue, sinon en kg. |
 | 16/11/2026 | Seuil minimal | **5 kg** : pas d'alerte en dessous, même si la hausse dépasse 50 %. |
 | 16/11/2026 | Cause récurrente | Alerte quand la **même cause est en tête** des pertes d'une équipe ou d'un plat **3 semaines de production de suite**. |
+| 17/11/2026 | Saisie hors ligne : appareils | **Tablettes Android, téléphones, ordinateurs** (Chrome, Edge, Firefox ; pas d'iPad). |
+| 17/11/2026 | Saisie hors ligne : coupures | **Quelques minutes** (zones blanches, wifi instable). |
+| 17/11/2026 | Saisie hors ligne : délai de 7 jours | **Compté à partir de l'heure de saisie** sur l'appareil ; l'heure de réception est aussi gardée. |
+| 17/11/2026 | Saisie hors ligne : périmètre | **Déclarer** (une perte, plusieurs pertes). Historique, corrections, statistiques et administration restent en ligne. |
 | 16/11/2026 | Destinataires | **Dans l'application** : encadré à l'accueil des responsables (toutes les alertes) et de l'équipe concernée (les siennes), avec le détail et un bouton « vu ». Seuils réglables dans l'administration. |
 
 ## Étapes
@@ -132,3 +136,46 @@ Règle R21 de docs/REGLES_METIER.md.
 **Alertes et tendances terminées.** Les alertes partiront dès que la date de mise en service (`ALERTES_DEBUT`) sera
 fixée ; les premières pertes inhabituelles demandent 2 semaines de référence, les causes récurrentes 3 semaines.
 
+
+## Saisie hors ligne — analyse (17/11/2026)
+
+Décision du 16/11/2026 : le réseau coupe souvent en cuisine, la saisie hors ligne (piste 8) devient utile.
+
+**Aujourd'hui** : l'application est installable (manifeste), mais sans service worker. Une perte se valide par un
+appel au serveur. Si le réseau coupe à ce moment, la saisie échoue : l'équipe doit attendre et recommencer. Une
+page ouverte ou rechargée sans réseau ne s'affiche pas.
+
+**Ce que Next.js 16 apporte** : l'option expérimentale `useOffline` retient un envoi pendant une coupure et le relance
+au retour du réseau, avec un indicateur « hors ligne ». Mais seulement si la page reste ouverte : un envoi en attente
+est perdu si la tablette se met en veille ou si l'onglet se ferme. Il faut donc aussi une file d'attente sur la
+tablette.
+
+**Ce qu'il faudrait** :
+1. **File d'attente sur la tablette** (IndexedDB) : une perte validée sans réseau est gardée sur l'appareil, avec
+   l'heure de la saisie, puis envoyée au retour du réseau. Elle survit à la veille et à la fermeture de l'application.
+2. **Pas de doublon** : chaque perte reçoit un identifiant créé sur la tablette ; le serveur ignore un second envoi
+   du même identifiant (une colonne de plus, migration).
+3. **Application disponible sans réseau** : un service worker garde les pages de saisie et leurs fichiers ; les
+   listes de la semaine (postes, causes, destinations, plats, tares) sont gardées sur la tablette à chaque
+   ouverture en ligne.
+4. **Contrôles à la réception** : le serveur refait tous les contrôles. Une perte refusée (produit retiré, délai
+   dépassé…) reste sur la tablette dans une liste « à corriger », avec le motif.
+5. **Affichage** : bandeau « Hors ligne : vos pertes sont gardées sur cet appareil », compteur des pertes en
+   attente, envoi automatique au retour du réseau.
+
+**Limites** : historique, corrections, statistiques et administration restent en ligne seulement. Une perte en
+attente n'est visible que sur la tablette qui l'a saisie, et ne compte dans les statistiques et les alertes qu'une
+fois reçue. Si la session a expiré pendant la coupure, il faut se reconnecter avant l'envoi : rien n'est perdu.
+
+**Décisions prises le 17/11/2026** (tableau des décisions) : Android, téléphones et ordinateurs ; coupures de
+quelques minutes ; délai compté depuis l'heure de saisie ; déclarer seulement.
+
+**Étapes proposées** :
+
+| Étape | Contenu | État |
+|---|---|---|
+| 6.5 | **Envoi qui résiste aux coupures** : identifiant unique créé sur l'appareil (pas de doublon), heure de saisie gardée et utilisée pour le délai, file d'attente sur l'appareil (IndexedDB), bandeau « hors ligne » et compteur des pertes en attente, envoi automatique au retour du réseau, liste « à corriger » pour une perte refusée. Pour une perte ou une série. | Proposée |
+| 6.6 | **Ouverture sans réseau** : service worker qui garde les pages de saisie et leurs fichiers ; listes de la semaine (postes, causes, destinations, plats, tares) gardées sur l'appareil à chaque ouverture en ligne. | Proposée |
+
+Point de méthode à valider avec l'étape 6.5 : l'heure de saisie vient de l'horloge de l'appareil. Le serveur la
+refuse si elle est dans le futur (plus de 5 minutes d'avance) ; sinon il la garde telle quelle pour le délai.
