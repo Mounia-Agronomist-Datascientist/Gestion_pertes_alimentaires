@@ -54,6 +54,7 @@
 | 2026-11-06 | Alertes « rien de noté » : plages jeudi-vendredi / lundi-mercredi, 150 kg estimés, régularisation, levée avec motif, bandeau équipe, page Alertes, tâche quotidienne | 6 tests unitaires + 9 tests d'intégration ; vues équipe et administration vérifiées dans le navigateur |
 | 2026-11-12 | Phase 4 terminée — coût par composante et coût net semaine après semaine et par mois (onglet « Évolution ») ; exports Excel et CSV de chaque onglet des statistiques, avec la période, les filtres et les droits de l'écran | 1 test unitaire + 1 test d'intégration ; graphiques et 16 exports vérifiés dans le navigateur |
 | 2026-11-12 | Synthèse de la semaine (montants, zones, causes, produits, plus fortes hausses, 12 semaines), version imprimable et exports CSV | 1 test unitaire + 1 test d'intégration ; page et exports vérifiés dans le navigateur |
+| 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
 | 2026-11-17 | Phase 6 — étape 6.6 : ouverture de la saisie sans réseau (service worker : pages de saisie et fichiers gardés, page « Hors ligne », effacement à la déconnexion), date de l'appareil quand les listes sont anciennes ; `/sw.js` exclu du contrôle de session | Build de production local piloté dans un Chrome sans interface : pages ouvertes et saisie qui avance serveur arrêté, page « Hors ligne », effacement à la déconnexion |
 | 2026-11-17 | Phase 6 — étape 6.5 : saisie qui résiste aux coupures (identifiant d'appareil sans doublon, heure de saisie pour le délai, file d'attente IndexedDB, envoi automatique, bandeau, page « Pertes en attente ») ; règle R22 | 4 tests unitaires + 5 tests d'intégration ; coupure simulée dans le navigateur (serveur arrêté), perte gardée puis envoyée une seule fois |
 | 2026-11-17 | Phase 6 — étape 6.4 : alertes d'analyse à l'accueil (« Vu » par compte), page « Alertes d'analyse », visibilité par profil, écran « Seuils des alertes » (audit) ; seuil de tendance réglable | 3 tests d'intégration ; encadré, « Vu », liste et réglages vérifiés dans le navigateur avec des alertes calculées sur la base locale (effacées ensuite) |
@@ -103,6 +104,9 @@
 | 2026-11-06 | Référentiels (équipes, zones, sous-zones, causes, destinations, unités, contenants, tares, rôles, permissions, comptes, audit) + données initiales idempotentes | 11 tests d'intégration |
 
 ## Anomalies connues / points de vigilance
+
+- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0024 à passer, dans
+  l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
 - TypeScript 7 (nouvelle version native) est utilisé ; si un outil devient incompatible, revenir à TypeScript 5.x.
 - ESLint/Prettier pas encore configurés.

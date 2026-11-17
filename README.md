@@ -17,6 +17,7 @@ causes, destinations, impact environnemental).
 | [docs/PHASE3.md](docs/PHASE3.md) | Phase 3 : calcul des coûts (décisions, étapes) |
 | [docs/PHASE4.md](docs/PHASE4.md) | Phase 4 : tableaux de bord et statistiques (décisions, étapes) |
 | [docs/PHASE5.md](docs/PHASE5.md) | Phase 5 : valorisation et environnement (décisions, étapes) |
+| [docs/pilote/](docs/pilote/) | Essai pilote : fiche équipe, guide de l'administration, plan de l'essai |
 | [docs/PHASE6.md](docs/PHASE6.md) | Phase 6 : optimisation et automatisation (analyse des pistes, décisions, étapes) |
 | [docs/SECURITE.md](docs/SECURITE.md) | Rôles, matrice d'autorisation, règles de sécurité |
 | [docs/PLAN_TESTS.md](docs/PLAN_TESTS.md) | Stratégie et plan de tests |

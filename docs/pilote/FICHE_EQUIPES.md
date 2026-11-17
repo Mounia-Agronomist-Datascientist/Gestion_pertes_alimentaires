@@ -1,0 +1,57 @@
+# Déclarer nos pertes — fiche équipe
+
+Application **Pertes** · à garder près de la tablette
+
+## Avant de commencer (une seule fois)
+
+1. Ouvrir l'adresse de l'application dans **Chrome** sur la tablette ou le téléphone.
+2. Se connecter avec l'**identifiant de l'équipe** (ex. `equipe-a`) et son mot de passe, donnés par l'administration.
+   Ne jamais noter le mot de passe sur la tablette.
+3. Menu de Chrome (⋮) → **Installer l'application** (ou « Ajouter à l'écran d'accueil »). L'icône **Pertes**
+   apparaît : l'ouvrir depuis cette icône ensuite. Indispensable pour pouvoir saisir sans réseau.
+
+## Déclarer une perte — au moment où elle a lieu
+
+Accueil → **Déclarer une perte**, puis répondre aux questions :
+
+| Question | Ce qu'on choisit |
+|---|---|
+| **Où a eu lieu la perte ?** | La zone, puis le poste (cuisine, déboîtage…) |
+| **Quelle équipe ?** | Seulement pour les comptes sans équipe |
+| **Quel produit ?** | Le plat de la semaine, une sous-recette ou un ingrédient. Taper quelques lettres ou le code (VI01) pour chercher. Absent ? « Produit absent de la liste » |
+| **Quelle quantité ?** | **Pesée** (kg ; cocher « Pesé dans des gastros » pour retirer la tare), **Comptage** (barquettes, pièces), **Estimation par contenant** ou **Estimation manuelle** |
+| **Pourquoi ?** | La cause. Aucune ne convient : « Autres pertes » + un commentaire, ou « Proposer une nouvelle cause » |
+| **Où part la perte ?** | Compost (Les Alchimistes), ordures ménagères, personnel, don, réutilisation… Plusieurs destinations : « Répartir entre plusieurs destinations ». N° de poubelle des Alchimistes : à noter s'il est demandé |
+| **Vérifier et valider** | Relire, corriger avec « Modifier », puis **Valider la perte** |
+
+✓ **Perte enregistrée** : « Nouvelle perte — même endroit » pour enchaîner.
+
+## Plusieurs pertes d'un coup — en fin de service
+
+Accueil → **Déclarer plusieurs pertes** : ajouter les pertes une par une, vérifier la liste, puis **tout valider**.
+La liste reste sur la tablette tant qu'elle n'est pas validée.
+
+## Sans réseau (chambre froide, plonge…)
+
+- On déclare **normalement**. Écran **« Perte gardée sur cet appareil »** : elle partira toute seule au retour du
+  réseau.
+- Le bandeau orange en haut indique **« Hors ligne »** et le nombre d'envois en attente.
+- **Ne pas vider les données du navigateur** et ne pas changer de tablette tant que des pertes sont en attente.
+- Une perte **refusée** à l'envoi apparaît dans **« Pertes en attente »** avec le motif : la renvoyer ou la saisir à
+  nouveau.
+
+## Les règles à retenir
+
+- **Chaque jour de production**, au moins une perte déclarée par l'équipe. Sinon, l'application compte une perte
+  estimée de **150 kg** pour la plage (jeudi-vendredi ou lundi-mercredi) : elle s'efface quand les jours manquants
+  sont renseignés dans les 7 jours.
+- **Déclarer** une perte : au plus tard **7 jours** après. Au-delà, demander à un responsable.
+- **Corriger ou annuler** : Accueil → **Pertes déclarées et corrections** → la perte → **Corriger**, jusqu'à **une
+  semaine après la fin de la semaine de production** (le mercredi + 7 jours). Chaque correction est gardée.
+- Une perte compostée, jetée, donnée au personnel ou réutilisée **reste une perte** : on la déclare toujours.
+- Les barquettes parties en **Too Good To Go**, **vente flash** ou chez **Linkee** ne se déclarent pas :
+  l'administration reprend leurs fichiers.
+
+## Un souci ?
+
+Prévenir l'administration : ce qui bloque, ce qui manque (une cause, un produit), ce qui prend trop de temps.
