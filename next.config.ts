@@ -12,6 +12,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Développement seulement : ouvrir le serveur local depuis un téléphone ou une tablette du même réseau wifi
+  // (adresse « Network » affichée au lancement, ex. http://192.168.1.20:3001).
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "172.*.*.*"],
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
