@@ -247,10 +247,41 @@ fournisseur (carton de 6, sac de 10 kg).
 | Modifications manuelles | **Gardées** : un nouveau tome ajoute les nouveaux produits et met à jour le prix et l'unité par une nouvelle version datée, sans toucher au nom ni aux réglages faits à la main. |
 | Menu de la saisie | **Les produits de la semaine d'abord** (ingrédients et encas du tome de la semaine), tous les autres produits connus restant trouvables par la recherche. |
 
+**Étapes proposées** : remplacées par celles de la section suivante (bons de commande).
+
+## Bons de commande fournisseurs — analyse (17/11/2026)
+
+**Source** : dossier Drive « bons de commande », un sous-dossier par fournisseur (54 fournisseurs, plusieurs
+centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier « Fiches de répartition par équipe
+(pas des BC) » est ignoré. Les BC de la semaine S+1 sont disponibles au plus tôt le jeudi de la semaine S.
+
+**Ce que donne un BC** (PDF généré par Melba, même mise en page pour tous les fournisseurs) :
+
+- nom du fichier : `AAAAMMJJ_Fournisseur_Snn_BC numéro.pdf` (date de livraison, fournisseur, semaine) ;
+- en-tête : numéro du BC, fournisseur, objet (« S47 Camion A », « S46 100% », « ENCAS S48 »), date de livraison ;
+- une ligne par matière : **désignation** (le même libellé que l'ingrédient du tome, sans la pastille 🟢),
+  **code fournisseur** (parfois absent), **catégorie Melba** (Viande, Épicerie, Légume 4e gamme, Fromages frais
+  & AOP…), **quantité**, **conditionnement** (« Sachet 5kg (5.00 kg) », « Carton (5.00 kg) », « Barquette (20.00
+  Merguez) », « Bouteille 64cl (64.00 cL) »), **prix unitaire HT** (au kg ou au colis) et total HT.
+- **Pas de zone de stockage.**
+- Les adresses e-mail (interlocuteurs du fournisseur, personne de la Brigade) ne sont **jamais lues ni
+  stockées** : seul le nom du fournisseur est gardé.
+
+**Décisions du 17/11/2026** :
+
+| Sujet | Décision |
+|---|---|
+| Entrée des BC | **Dépôt des PDF** dans Administration → Import (sélection de tous les BC de la semaine d'un coup). Aucun accès de l'application au Drive. |
+| Zone de stockage | **Par catégorie** : réglage « catégorie Melba → sous-zone de Stockage » fait une fois, modifiable produit par produit. |
+| Prix d'une perte de matière première | **Dernier prix d'achat du BC**, à défaut le coût du tome. Chaque changement crée une version datée ; les pertes passées gardent leur coût figé. |
+| Historique | **Tous les BC** déjà dans le Drive sont repris au départ. |
+
 **Étapes proposées** :
 
 | Étape | Contenu | État |
 |---|---|---|
-| 6.7 | **Référentiel des matières premières** : un produit par ingrédient Melba ; versions datées (unité du tome, poids d'une pièce, prix, colis fournisseur) ; construit à partir de tous les tomes déjà importés, puis complété à chaque import (nouveaux produits ajoutés, prix ou unité changés : nouvelle version à partir de la semaine du tome). Les pertes passées gardent leur coût figé. | Proposée |
-| 6.8 | **Saisie en Réception et en Stockage** : « Cette semaine » (ingrédients du tome de la semaine, encas), puis recherche dans tout le référentiel ; coût d'après la version en vigueur à la date de la perte. | Proposée |
-| 6.9 | **Administration → Produits** : versions et prix de chaque produit, modification (nom, poids d'une pièce, colis fournisseur : nouvelle version datée), ajout d'un produit, désactivation ; modifications gardées aux imports suivants. | Proposée |
+| 6.7 | **Référentiel des matières premières** : fournisseurs, catégories Melba, matières (une par ingrédient Melba, rapprochées par le libellé), conditionnements par fournisseur (libellé, contenance, unité), prix datés (source BC ou tome), zone de stockage par catégorie (modifiable par matière). Construit à partir des tomes déjà importés. | Proposée |
+| 6.8 | **Import des bons de commande** : dépôt de plusieurs PDF, lecture, aperçu (matières nouvelles, prix changés, lignes illisibles), validation ; un BC redéposé remplace l'ancien (même numéro). Reprise de l'historique du Drive. | Proposée |
+| 6.9 | **Recoupement de la semaine** : pour une semaine de production, ingrédients du tome face aux matières commandées — ingrédients sans commande, commandes absentes du tome, écarts de prix tome/BC. | Proposée |
+| 6.10 | **Saisie en Réception et en Stockage** : d'abord les matières de la semaine (commandées et du tome) et les encas, filtrées par sous-zone de stockage ; tout le référentiel par la recherche ; coût d'après la version en vigueur à la date de la perte. | Proposée |
+| 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; réglage catégorie → zone ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Proposée |
