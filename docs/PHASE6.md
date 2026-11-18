@@ -283,8 +283,8 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 | 6.7 | **Référentiel des matières premières** : matières (une par ingrédient Melba, rapprochées par le libellé) et prix datés tirés des tomes, construit à partir des tomes déjà importés. Les fournisseurs, catégories Melba, conditionnements et zones de stockage arrivent avec les bons de commande (6.8), qui les donnent. | Faite (17/11/2026) |
 | 6.8 | **Import des bons de commande** : dépôt de plusieurs PDF ou du ZIP du dossier Drive, lecture, aperçu, enregistrement ; fournisseurs, catégories Melba, colis fournisseur et prix d'achat ; un BC redéposé remplace l'ancien (même numéro). | Faite (18/11/2026) |
 | 6.9 | **Recoupement de la semaine** : pour une semaine de production, ingrédients du tome face aux matières commandées — ingrédients sans commande, commandes absentes du tome, écarts de prix tome/BC. | Faite (18/11/2026) |
-| 6.10 | **Saisie en Réception et en Stockage** : d'abord les matières de la semaine (commandées et du tome) et les encas, filtrées par sous-zone de stockage ; tout le référentiel par la recherche ; coût d'après la version en vigueur à la date de la perte. | Proposée |
-| 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; réglage catégorie → zone ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Proposée |
+| 6.10 | **Saisie en Réception et en Stockage** : d'abord les matières de la semaine (commandées et du tome) et les encas, filtrées par sous-zone de stockage ; tout le référentiel par la recherche ; coût d'après la version en vigueur à la date de la perte. Le réglage catégorie → lieu de Stockage est avancé ici (sans lui, le filtre n'a pas d'effet). | Faite (18/11/2026) |
+| 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; lieu de stockage d'un produit à la place de celui de sa catégorie ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Proposée |
 
 ## Étape 6.7 — Référentiel des matières premières (faite le 17/11/2026)
 
@@ -342,7 +342,7 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
   conditionnement ne donne pas de prix (le tome reste la référence). Nouvelle version datée du **jour de livraison**
   quand il change (même tolérance de 0,5 %) ; deux bons livrés le même jour : le dernier lu fait foi.
 - **Bon redéposé** (même numéro) : lignes et prix remplacés, version du bon + 1.
-- Migration **0026** : `suppliers`, `material_categories` (avec une sous-zone de stockage, réglée à l'étape 6.11),
+- Migration **0026** : `suppliers`, `material_categories` (avec une sous-zone de stockage, réglée à l'étape 6.10),
   `purchase_orders`, `purchase_order_lines`, `supplier_products`, `products.material_category_id`,
   `product_prices.purchase_order_id`.
 - **Vérifié** : 10 tests unitaires sur 8 vrais bons (APO, Guasch, Metro, Passion Froid, Pro à Pro dont un ancien de
@@ -382,3 +382,22 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
   densité de sa matière) ; un prix d'achat au litre est ramené au kg. Sans migration (colonne de densité existante).
 - **En local** : 17 liquides avec une densité ; huile de sésame à 8,61 €/kg (5,07 € les 64 cl à 0,92 kg/L). Le tome
   la compte à 7,92 €/kg, soit exactement 5,07 € ÷ 0,64 : Melba semble compter 1 L = 1 kg.
+
+## Étape 6.10 — Saisie en Réception et en Stockage (faite le 18/11/2026)
+
+- **Matières de la semaine d'abord** : à l'étape « Quel produit ? » en Réception et en Stockage, la liste propose les
+  matières de la semaine de production — ingrédients du tome en vigueur et matières commandées dans les bons de la
+  semaine, une fois chacune — regroupées par catégorie Melba, avec « Commandée cette semaine » ou « Ingrédient du
+  tome ». Semaine en cours et précédente au choix, comme les plats. Puis les encas de la semaine (règle R9).
+- **Par lieu** : en **Réception**, toutes les matières de la semaine (la marchandise n'est pas encore rangée). En
+  **Stockage**, celles dont la catégorie Melba est rangée dans la sous-zone choisie (Chambre BOF, Légumerie…) ; celles
+  dont le lieu n'est pas réglé (pas de catégorie, catégorie sans lieu) sont proposées à part, repliées. Les matières
+  rangées ailleurs se trouvent par la recherche, comme tout le référentiel.
+- **Coût** : une matière choisie dans cette liste est un produit du référentiel, donc le prix en vigueur à la date
+  de la perte (prix d'achat, sinon tome, règle R23) ; densité et poids unitaire de la matière pour la conversion.
+- **Réglage** : Administration → **Lieux de stockage des matières** — une sous-zone de Stockage par catégorie Melba
+  (ou aucune), vérifiée (sous-zone de la zone Stockage) et tracée dans le journal d'audit. Le choix d'un lieu propre à
+  un produit reste pour l'étape 6.11. Sans migration (colonne prévue en 0026).
+- **Vérifié** : 2 tests unitaires et 2 tests d'intégration (vrai tome S45 et 8 vrais bons) ; en local (Chrome piloté)
+  : catégorie « Légume 4eme gamme » rangée en Légumerie, puis saisie Stockage › Légumerie : les 8 légumes commandés en
+  S47 en premier, les 149 autres matières à part ; réglage remis à vide ensuite (le choix vous revient).

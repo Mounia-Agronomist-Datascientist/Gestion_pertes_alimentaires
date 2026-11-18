@@ -8,6 +8,7 @@ import type { Db } from "@/db/types";
 import type { LocalDate } from "@/domain/semaine-production";
 import { portionPackagingCost } from "@/modules/admin/packaging";
 import { weekCatalogs } from "@/modules/imports/catalog";
+import { materialCategoriesWithStorage, recentWeekMaterials } from "@/modules/matieres/semaine";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
@@ -107,6 +108,10 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
     today,
     /** Plats, sous-recettes et ingrédients de la semaine en cours et de la précédente (imports en vigueur). */
     weekCatalogs: await weekCatalogs(db, user, today),
+    /** Matières de la semaine (tome et bons de commande), proposées d'abord en Réception et en Stockage (étape 6.10). */
+    weekMaterials: await recentWeekMaterials(db, today),
+    /** Catégories Melba et leur sous-zone de Stockage (filtre de la liste des matières). */
+    materialCategories: await materialCategoriesWithStorage(db),
     /** Coût des emballages du référentiel par portion aujourd'hui (aperçu ; le serveur prend la date de la perte). */
     packagingPerPortion: {
       plat: (await portionPackagingCost(db, "plat", today)).totalEur,

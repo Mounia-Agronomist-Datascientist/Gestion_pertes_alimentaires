@@ -30,6 +30,9 @@ Application **Pertes** · semaine de production du **jeudi au mercredi**.
   suite (3), tendance stable (10 %).
 - **Facteurs CO2e** (Administration → Facteurs d'émission) : valider les familles, rattacher les nouveaux
   ingrédients Melba (filtre « À rattacher » après chaque nouveau tome).
+- **Lieux de stockage des matières** (Administration → Lieux de stockage des matières) : ranger chaque catégorie
+  Melba dans un lieu de Stockage, une fois, puis pour chaque nouvelle catégorie apportée par les bons. En Stockage,
+  la saisie propose d'abord les matières de la semaine rangées dans le lieu choisi.
 - **Emballages et main-d'œuvre** : mettre à jour les coûts datés quand ils changent.
 - **Journal d'audit** : qui a fait quoi, avant/après.
 

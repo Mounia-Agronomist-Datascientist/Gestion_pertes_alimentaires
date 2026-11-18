@@ -88,3 +88,25 @@ export function priceInForce<V extends PriceVersion>(versions: readonly V[], on:
   const latest = (list: V[]) => list.reduce<V | null>((acc, v) => (!acc || v.validFrom > acc.validFrom || (v.validFrom === acc.validFrom && v.source === "manuel") ? v : acc), null);
   return latest(started.filter((v) => v.source !== "tome")) ?? latest(started.filter((v) => v.source === "tome"));
 }
+
+/**
+ * Matières de la semaine proposées à un lieu de saisie (docs/PHASE6.md, étape 6.10) :
+ * - Réception : toutes, la marchandise arrive avant d'être rangée ;
+ * - Stockage : celles dont la catégorie Melba est rangée dans cette sous-zone ; à part, celles dont le lieu n'est pas
+ *   encore réglé (pas de catégorie, ou catégorie sans sous-zone). Les autres se trouvent par la recherche.
+ */
+export function materialsForPlace<M extends { categoryId: string | null }>(
+  materials: readonly M[],
+  storageOf: ReadonlyMap<string, string | null>,
+  place: { zoneCode: string; subzoneId: string },
+): { here: M[]; unplaced: M[] } {
+  if (place.zoneCode !== "STOCKAGE") return { here: [...materials], unplaced: [] };
+  const here: M[] = [];
+  const unplaced: M[] = [];
+  for (const m of materials) {
+    const storage = m.categoryId ? (storageOf.get(m.categoryId) ?? null) : null;
+    if (storage === place.subzoneId) here.push(m);
+    else if (storage == null) unplaced.push(m);
+  }
+  return { here, unplaced };
+}

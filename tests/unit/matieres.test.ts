@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type PriceVersion, priceInForce, samePrice, tomeMaterials } from "@/domain/matieres";
+import { materialsForPlace, type PriceVersion, priceInForce, samePrice, tomeMaterials } from "@/domain/matieres";
 
 const line = (over: Partial<Parameters<typeof tomeMaterials>[0][number]>) => ({
   label: "Sel fin",
@@ -62,5 +62,25 @@ describe("prix en vigueur", () => {
 
   it("une correction manuelle passe devant un bon de commande du même jour", () => {
     expect(priceInForce([...versions, v("manuel", "2026-11-03", 3)], "2026-11-04")!.perKgEur).toBe(3);
+  });
+});
+
+describe("matières de la semaine par lieu de saisie", () => {
+  const m = (name: string, categoryId: string | null) => ({ name, categoryId });
+  const materials = [m("ail pelé", "legume"), m("bœuf", "viande"), m("sel", null), m("épices", "epicerie")];
+  const storageOf = new Map<string, string | null>([
+    ["legume", "LEGUMERIE"],
+    ["viande", "BOF"],
+    ["epicerie", null],
+  ]);
+
+  it("Réception : toutes les matières", () => {
+    expect(materialsForPlace(materials, storageOf, { zoneCode: "RECEPTION", subzoneId: "REC" })).toEqual({ here: materials, unplaced: [] });
+  });
+
+  it("Stockage : celles du lieu, et à part celles sans lieu réglé", () => {
+    const r = materialsForPlace(materials, storageOf, { zoneCode: "STOCKAGE", subzoneId: "LEGUMERIE" });
+    expect(r.here.map((x) => x.name)).toEqual(["ail pelé"]);
+    expect(r.unplaced.map((x) => x.name)).toEqual(["sel", "épices"]);
   });
 });

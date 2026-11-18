@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
+import { materialsForPlace } from "@/domain/matieres";
 import { computeProductionWeek, formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { computeNetWeight } from "@/domain/tares";
 import { convertToKg, type UnitKind } from "@/domain/unites";
@@ -635,6 +636,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
         <ProductStep
           products={options.products}
           catalogs={options.weekCatalogs}
+          weekMaterials={options.weekMaterials}
+          materialCategories={options.materialCategories}
+          materialPlace={zone && subzone && MATERIAL_ZONE_CODES.includes(zone.code) ? { zoneCode: zone.code, subzoneId: subzone.id, subzoneName: subzone.name } : null}
+          initialWeek={occurredWeek}
           initialCatalog={catalogForDate}
           packagingPerPortion={options.packagingPerPortion}
           dishScope={subzone?.teamMode === "equipe" ? "equipe" : zone?.code === "CONDITIONNEMENT" ? "toutes" : null}
@@ -1193,9 +1198,16 @@ function Stepper({
 }
 
 /** Produits proposés : ceux de la semaine (plats → sous-recettes → ingrédients), puis le référentiel. */
+/** Zones où les matières de la semaine sont proposées d'abord (étape 6.10). */
+const MATERIAL_ZONE_CODES = ["RECEPTION", "STOCKAGE"];
+
 function ProductStep({
   products,
   catalogs,
+  weekMaterials,
+  materialCategories,
+  materialPlace,
+  initialWeek,
   initialCatalog,
   packagingPerPortion,
   dishScope,
@@ -1206,6 +1218,13 @@ function ProductStep({
   products: DeclarationOptions["products"];
   /** Semaines importées proposées (en cours et précédente). */
   catalogs: WeekCatalog[];
+  /** Matières de la semaine (tome et bons de commande), en cours et précédente. */
+  weekMaterials: DeclarationOptions["weekMaterials"];
+  materialCategories: DeclarationOptions["materialCategories"];
+  /** Réception ou Stockage : matières de la semaine d'abord, filtrées par sous-zone en Stockage. */
+  materialPlace: { zoneCode: string; subzoneId: string; subzoneName: string } | null;
+  /** Semaine de la date de la perte. */
+  initialWeek: { year: number; number: number } | null;
   /** Semaine de la date de la perte, si elle est importée. */
   initialCatalog: WeekCatalog | null;
   /** Emballages du référentiel par portion (aperçu du coût). */
@@ -1226,6 +1245,23 @@ function ProductStep({
   const [path, setPath] = useState<{ kind: "plat" | "sous_recette"; id: string }[]>([]);
   const [catalogId, setCatalogId] = useState(initialCatalog?.weekId ?? catalogs[0]?.weekId ?? null);
   const catalog = catalogs.find((c) => c.weekId === catalogId) ?? null;
+  const initialMaterialsWeek = weekMaterials.find((w) => initialWeek && w.year === initialWeek.year && w.number === initialWeek.number) ?? null;
+  const [materialsWeekId, setMaterialsWeekId] = useState(initialMaterialsWeek?.weekId ?? weekMaterials[0]?.weekId ?? null);
+  const materialsWeek = materialPlace ? (weekMaterials.find((w) => w.weekId === materialsWeekId) ?? null) : null;
+  const placed = useMemo(() => {
+    if (!materialsWeek || !materialPlace) return null;
+    const storageOf = new Map(materialCategories.map((c) => [c.id, c.storageSubzoneId]));
+    return materialsForPlace(materialsWeek.materials, storageOf, materialPlace);
+  }, [materialsWeek, materialPlace, materialCategories]);
+  const categoryName = (id: string | null) => (id ? (materialCategories.find((c) => c.id === id)?.name ?? null) : null);
+  const chooseMaterial = (m: { productId: string; name: string }) => {
+    const p = products.find((x) => x.id === m.productId);
+    onChoose({ kind: "listed", id: m.productId, name: m.name, category: p?.category ?? "matiere_premiere" });
+  };
+  const pickWeek = (weekId: string) => {
+    setMaterialsWeekId(weekId);
+    if (catalogs.some((c) => c.weekId === weekId)) setCatalogId(weekId);
+  };
 
   const week = catalog ? { year: catalog.year, number: catalog.number } : null;
   const dishes = (catalog?.dishes ?? []).filter((d) =>
@@ -1381,6 +1417,63 @@ function ProductStep({
           ))}
           {weekMatches.length === 0 && listedMatches.length === 0 && <p className="text-slate-500">Aucun produit trouvé.</p>}
         </div>
+      ) : placed && materialsWeek ? (
+        <>
+          {(weekMaterials.length > 1 || materialsWeek !== initialMaterialsWeek) && (
+            <nav aria-label="Semaine" className="flex flex-wrap gap-2">
+              {weekMaterials.map((w) => (
+                <button
+                  key={w.weekId}
+                  type="button"
+                  onClick={() => pickWeek(w.weekId)}
+                  className={`rounded-full px-4 py-2 text-sm font-medium ${w.weekId === materialsWeek.weekId ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+                >
+                  S{w.number}
+                  {w === initialMaterialsWeek ? " (cette semaine)" : ""}
+                </button>
+              ))}
+            </nav>
+          )}
+          <MaterialGroups
+            title={
+              materialPlace!.zoneCode === "STOCKAGE"
+                ? `Matières de la semaine S${materialsWeek.number} rangées ici`
+                : `Matières de la semaine S${materialsWeek.number}`
+            }
+            materials={placed.here}
+            categoryName={categoryName}
+            onChoose={chooseMaterial}
+            empty={
+              materialPlace!.zoneCode === "STOCKAGE"
+                ? "Aucune catégorie de matière n'est encore rangée dans ce lieu (Administration → Lieux de stockage des matières)."
+                : "Aucune matière pour cette semaine : le tome ou les bons de commande ne sont pas encore importés."
+            }
+          />
+          {placed.unplaced.length > 0 && (
+            <details className="rounded-xl bg-white p-3 shadow-sm">
+              <summary className="cursor-pointer font-medium text-slate-700">
+                Matières de la semaine sans lieu de stockage réglé ({placed.unplaced.length})
+              </summary>
+              <div className="mt-2">
+                <MaterialGroups materials={placed.unplaced} categoryName={categoryName} onChoose={chooseMaterial} />
+              </div>
+            </details>
+          )}
+          {dishes.length > 0 && catalog?.weekId === materialsWeek.weekId && (
+            <>
+              <p className="font-medium text-slate-700">Encas de la semaine S{catalog.number}</p>
+              <div className="flex flex-col gap-2">
+                {dishes.map((d) => (
+                  <Tile key={d.id} compact onClick={() => setPath([{ kind: "plat", id: d.id }])}>
+                    <span>{productLabel(d.name, d.code)}</span>
+                    <small className="font-normal opacity-70">{d.lines.length} composant{d.lines.length > 1 ? "s" : ""} →</small>
+                  </Tile>
+                ))}
+              </div>
+            </>
+          )}
+          <p className="text-sm text-slate-600">Une autre matière : recherchez-la par son nom.</p>
+        </>
       ) : hasWeek ? (
         <>
           {(catalogs.length > 1 || catalog !== initialCatalog) && (
@@ -1438,6 +1531,45 @@ function ProductStep({
         Produit absent de la liste
       </button>
     </Section>
+  );
+}
+
+/** Matières regroupées par catégorie Melba (les matières sans catégorie à la fin). */
+function MaterialGroups({
+  title,
+  materials,
+  categoryName,
+  onChoose,
+  empty,
+}: {
+  title?: string;
+  materials: DeclarationOptions["weekMaterials"][number]["materials"];
+  categoryName: (id: string | null) => string | null;
+  onChoose: (m: { productId: string; name: string }) => void;
+  empty?: string;
+}) {
+  const groups = new Map<string, typeof materials>();
+  for (const m of materials) {
+    const name = categoryName(m.categoryId) ?? "";
+    groups.set(name, [...(groups.get(name) ?? []), m]);
+  }
+  const ordered = [...groups].sort(([a], [b]) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b, "fr")));
+  return (
+    <div className="flex flex-col gap-3">
+      {title && <p className="font-medium text-slate-700">{title}</p>}
+      {materials.length === 0 && empty && <p className="text-slate-500">{empty}</p>}
+      {ordered.map(([name, list]) => (
+        <div key={name || "-"} className="flex flex-col gap-2">
+          {ordered.length > 1 && <p className="text-sm font-semibold text-slate-600">{name || "Sans catégorie Melba"}</p>}
+          {list.map((m) => (
+            <Tile key={m.productId} compact onClick={() => onChoose(m)}>
+              {m.name}
+              <small className="font-normal opacity-70">{m.ordered ? "Commandée cette semaine" : "Ingrédient du tome"}</small>
+            </Tile>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 

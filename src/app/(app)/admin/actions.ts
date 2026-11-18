@@ -32,6 +32,7 @@ import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { DeclarationError } from "@/modules/declarations/service";
 import { buildMaterialsFromTomes } from "@/modules/matieres/referentiel";
+import { setCategoriesStorage, StorageSettingError } from "@/modules/matieres/semaine";
 
 export interface AccountActionState {
   error?: string;
@@ -420,6 +421,27 @@ export async function labourAction(_prev: PlaceActionState, formData: FormData):
     return { message: `${rate.hourlyCostEur.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € de l'heure à partir du ${rate.validFrom.split("-").reverse().join("/")}.` };
   } catch (e) {
     if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+}
+
+export interface CategoryStorageState {
+  error?: string;
+  message?: string;
+}
+
+/** Lieu de stockage de chaque catégorie Melba (champs « cat:<id> » = sous-zone, vide = pas de lieu). */
+export async function categoryStorageAction(_prev: CategoryStorageState, formData: FormData): Promise<CategoryStorageState> {
+  const admin = await requireUser();
+  const assignments = [...formData.entries()]
+    .filter(([k]) => k.startsWith("cat:"))
+    .map(([k, v]) => ({ categoryId: k.slice(4), subzoneId: String(v) || null }));
+  try {
+    const n = await setCategoriesStorage(db, admin, assignments);
+    revalidatePath("/admin/stockage-matieres");
+    return { message: n ? `${n} catégorie${n > 1 ? "s" : ""} modifiée${n > 1 ? "s" : ""}.` : "Aucun changement." };
+  } catch (e) {
+    if (e instanceof StorageSettingError || e instanceof ForbiddenError) return { error: e.message };
     throw e;
   }
 }

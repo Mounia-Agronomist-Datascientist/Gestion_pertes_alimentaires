@@ -2,12 +2,12 @@
 # Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
 
 mise_a_jour: 2026-11-18
-dernier_commit: "Densités de référence des liquides ; coût du tome et préparation"
+dernier_commit: "Étape 6.10 : saisie en Réception et en Stockage (matières de la semaine d'abord)"
 
 en_cours:
   phase: 6
-  derniere_etape: "6.9"
-  prochaine_etape: "6.10"
+  derniere_etape: "6.10"
+  prochaine_etape: "6.11"
   prochaine_etape_statut: proposee   # à valider avant de coder
 
 phases:
@@ -29,7 +29,7 @@ etapes_phase_6:
   - { id: "6.7", nom: "Référentiel des matières premières", statut: faite, date: 2026-11-17 }
   - { id: "6.8", nom: "Import des bons de commande", statut: faite, date: 2026-11-18 }
   - { id: "6.9", nom: "Recoupement de la semaine (tome / bons de commande)", statut: faite, date: 2026-11-18 }
-  - { id: "6.10", nom: "Saisie en Réception et en Stockage", statut: proposee }
+  - { id: "6.10", nom: "Saisie en Réception et en Stockage", statut: faite, date: 2026-11-18 }
   - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: proposee }
 
 base_de_donnees:
@@ -45,6 +45,7 @@ en_attente:
   - sujet: "Mise en ligne"
     raison: "crédits Netlify épuisés"
     jusqu_au: 2026-12-08
+  - { sujet: "Lieux de stockage des matières", raison: "régler chaque catégorie Melba une fois (Administration)" }
   - sujet: "Essai pilote avec les équipes"
     raison: "préparé (docs/pilote/), pas encore lancé"
   - { sujet: "Mise en service des alertes", point: P4, raison: "après les essais des équipes" }
