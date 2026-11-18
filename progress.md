@@ -5,7 +5,7 @@
 > La même information, lisible par un programme : [progress.yaml](progress.yaml).
 > **Mettre à jour les deux fichiers à chaque commit d'étape.**
 
-Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.11 : colis fournisseur saisi à la main`
+Dernière mise à jour : **18/11/2026** — dernier commit : `Qualité du code : ESLint et Prettier (formatage, git blame)`
 
 ## En ce moment
 

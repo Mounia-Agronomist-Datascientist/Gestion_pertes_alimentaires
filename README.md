@@ -65,6 +65,8 @@ npm run db:check                     # vérifie la connexion
 | `npm test` | Tests unitaires et d'intégration (PostgreSQL embarqué, sans configuration) |
 | `npm run test:e2e` | Parcours de bout en bout dans Chrome (base `pertes_e2e`, voir docs/PLAN_TESTS.md §6) |
 | `npm run typecheck` | Vérification des types TypeScript |
+| `npm run lint` | ESLint (règles Next.js, React, TypeScript) |
+| `npm run format` / `npm run format:check` | Met en forme le code avec Prettier / vérifie la mise en forme (largeur 120 ; la documentation n'est pas touchée) |
 | `npm run db:generate -- --name <nom>` | Génère une migration après modification de `src/db/schema/` |
 | `npm run db:migrate` | Applique les migrations en attente |
 | `npm run build` | Build de production |

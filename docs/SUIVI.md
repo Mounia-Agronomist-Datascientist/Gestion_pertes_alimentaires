@@ -56,6 +56,7 @@
 | 2026-11-12 | Synthèse de la semaine (montants, zones, causes, produits, plus fortes hausses, 12 semaines), version imprimable et exports CSV | 1 test unitaire + 1 test d'intégration ; page et exports vérifiés dans le navigateur |
 | 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
+| 2026-11-18 | Qualité du code : ESLint (eslint-config-next, TypeScript, Prettier) et Prettier (largeur 120, code seulement) ; 7 signalements corrigés ou justifiés ; formatage mécanique dans un commit à part ; `lint` et `format:check` ajoutés aux tests GitHub | 421 tests ; `next build` vérifié |
 | 2026-11-18 | Phase 6 — étape 6.11 (suite) : colis fournisseur saisi à la main sur la fiche produit (fournisseur connu ou nouveau, gardé à côté du colis des bons, information seulement) ; migration 0028 | 1 test d'intégration ; ajout, remplacement et retrait vérifiés en local (Chrome piloté) |
 | 2026-11-18 | Phase 6 — étape 6.11 : Administration → Produits — fiche d'un produit (catégorie Melba, lieu de stockage propre, colis fournisseurs, versions de prix, prix saisi à la main daté et retirable) ; filtres par catégorie Melba et fournisseur ; Administration → Fournisseurs (renommer) ; migration 0027 | 1 test unitaire + 4 tests d'intégration ; fiche, prix et fournisseurs vérifiés en local (Chrome piloté) |
 | 2026-11-18 | Phase 6 — étape 6.10 : saisie en Réception et en Stockage — matières de la semaine (tome et bons) proposées d'abord, par catégorie Melba ; en Stockage, celles rangées dans la sous-zone, les autres à part ; réglage « catégorie → lieu de Stockage » (Administration → Lieux de stockage des matières) | 2 tests unitaires + 2 tests d'intégration ; saisie Stockage › Légumerie vérifiée en local (Chrome piloté) |
@@ -116,8 +117,11 @@
 - **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0028 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
-- TypeScript 7 (nouvelle version native) est utilisé ; si un outil devient incompatible, revenir à TypeScript 5.x.
-- ESLint/Prettier pas encore configurés.
+- TypeScript 7 (nouvelle version native) fait `tsc` (paquet `@typescript/native`) ; TypeScript 6 est installé sous le nom
+  `typescript` pour les outils qui en lisent l'API (typescript-eslint, vérification de types de `next build`), comme le
+  recommande l'annonce de TypeScript 7. À retirer quand typescript-eslint gérera TypeScript 7.
+- ESLint et Prettier configurés le 18/11/2026 ; `lint` et `format:check` font partie des tests GitHub. Le commit de
+  formatage est ignoré par `git blame` (`git config blame.ignoreRevsFile .git-blame-ignore-revs`).
 - En mode groupé, les lignes non validées restent sur l'appareil (stockage du navigateur) : elles sont
   perdues si l'on vide les données du navigateur avant de valider.
 - L'estimation par contenant (« 2 gastros pleins ») n'est pas convertie en kg : il faudrait un poids de

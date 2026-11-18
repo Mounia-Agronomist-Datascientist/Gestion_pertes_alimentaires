@@ -2,7 +2,7 @@
 # Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
 
 mise_a_jour: 2026-11-18
-dernier_commit: "Étape 6.11 : colis fournisseur saisi à la main"
+dernier_commit: "Qualité du code : ESLint et Prettier (formatage, git blame)"
 
 en_cours:
   phase: 6
