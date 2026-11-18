@@ -1,0 +1,2 @@
+ALTER TABLE "products" ADD COLUMN "storage_subzone_id" uuid;--> statement-breakpoint
+ALTER TABLE "products" ADD CONSTRAINT "products_storage_subzone_id_subzones_id_fk" FOREIGN KEY ("storage_subzone_id") REFERENCES "public"."subzones"("id") ON DELETE no action ON UPDATE no action;

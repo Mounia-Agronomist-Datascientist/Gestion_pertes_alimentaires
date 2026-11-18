@@ -32,7 +32,11 @@ Application **Pertes** · semaine de production du **jeudi au mercredi**.
   ingrédients Melba (filtre « À rattacher » après chaque nouveau tome).
 - **Lieux de stockage des matières** (Administration → Lieux de stockage des matières) : ranger chaque catégorie
   Melba dans un lieu de Stockage, une fois, puis pour chaque nouvelle catégorie apportée par les bons. En Stockage,
-  la saisie propose d'abord les matières de la semaine rangées dans le lieu choisi.
+  la saisie propose d'abord les matières de la semaine rangées dans le lieu choisi. Une matière rangée ailleurs que
+  sa catégorie : lieu propre sur sa fiche (Administration → Produits → Fiche).
+- **Prix d'une matière** (Administration → Produits → Fiche) : voir toutes les versions (tome, bon, saisi à la
+  main) ; saisir un prix daté quand le bon ou le tome est faux. Les pertes déjà enregistrées gardent leur coût.
+- **Fournisseurs** (Administration → Fournisseurs) : renommer, voir les matières de chacun.
 - **Emballages et main-d'œuvre** : mettre à jour les coûts datés quand ils changent.
 - **Journal d'audit** : qui a fait quoi, avant/après.
 

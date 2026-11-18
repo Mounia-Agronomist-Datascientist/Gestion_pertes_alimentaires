@@ -284,7 +284,7 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 | 6.8 | **Import des bons de commande** : dépôt de plusieurs PDF ou du ZIP du dossier Drive, lecture, aperçu, enregistrement ; fournisseurs, catégories Melba, colis fournisseur et prix d'achat ; un BC redéposé remplace l'ancien (même numéro). | Faite (18/11/2026) |
 | 6.9 | **Recoupement de la semaine** : pour une semaine de production, ingrédients du tome face aux matières commandées — ingrédients sans commande, commandes absentes du tome, écarts de prix tome/BC. | Faite (18/11/2026) |
 | 6.10 | **Saisie en Réception et en Stockage** : d'abord les matières de la semaine (commandées et du tome) et les encas, filtrées par sous-zone de stockage ; tout le référentiel par la recherche ; coût d'après la version en vigueur à la date de la perte. Le réglage catégorie → lieu de Stockage est avancé ici (sans lui, le filtre n'a pas d'effet). | Faite (18/11/2026) |
-| 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; lieu de stockage d'un produit à la place de celui de sa catégorie ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Proposée |
+| 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; lieu de stockage d'un produit à la place de celui de sa catégorie ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Faite (18/11/2026) |
 
 ## Étape 6.7 — Référentiel des matières premières (faite le 17/11/2026)
 
@@ -401,3 +401,35 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 - **Vérifié** : 2 tests unitaires et 2 tests d'intégration (vrai tome S45 et 8 vrais bons) ; en local (Chrome piloté)
   : catégorie « Légume 4eme gamme » rangée en Légumerie, puis saisie Stockage › Légumerie : les 8 légumes commandés en
   S47 en premier, les 149 autres matières à part ; réglage remis à vide ensuite (le choix vous revient).
+
+## Étape 6.11 — Administration → Produits (faite le 18/11/2026)
+
+- **Fiche d'un produit** (Administration → Produits → « Fiche : prix, colis, lieu ») :
+  - **Produit** : nom, type, code, unité, poids d'une pièce, densité (avec son origine si elle vient du tableau de
+    référence) ; modifier, désactiver ou réactiver. Jamais changés par un import ; les pertes passées gardent ce qui a
+    été enregistré à l'époque.
+  - **Catégorie et lieu de stockage** : catégorie Melba (modifiable) et **lieu propre au produit**, à la place de
+    celui de sa catégorie (« Celui de la catégorie (…) » par défaut). En Stockage, la saisie range une matière
+    d'après son lieu propre, sinon celui de sa catégorie. Vérifié (sous-zone de la zone Stockage) et tracé.
+  - **Colis fournisseurs** : pour chaque fournisseur, le dernier colis commandé, le code fournisseur et la date du
+    dernier bon livré, lus dans les bons (lecture seule).
+  - **Prix** : toutes les versions (tome avec sa semaine, bon de commande avec son numéro et son fournisseur, saisi à
+    la main), la version en vigueur aujourd'hui signalée. **Saisir un prix** : nouvelle version datée (au kg et/ou à
+    l'unité) qui compte comme un prix d'achat (règle R23) ; une seule par date. Un prix saisi à la main peut être
+    **retiré** (erreur de saisie) ; ceux des tomes et des bons, jamais. Les pertes déjà enregistrées gardent leur
+    coût (il est recopié sur la déclaration).
+- **Liste des produits** : catégorie Melba et lieu de stockage effectif de chaque produit (« lieu propre » s'il est
+  réglé sur le produit) ; filtres par catégorie Melba (ou sans) et par fournisseur.
+- **Fournisseurs** (Administration → Fournisseurs) : nombre de bons, de matières, dernière livraison ; « Voir ses
+  matières » (liste des produits filtrée) ; **renommer** (un bon déposé ensuite retrouve le fournisseur par la clé
+  tirée du nom de son fichier et ne le renomme pas). Aucun contact n'est gardé.
+- **Modifications manuelles gardées** : les imports retrouvent une matière par son identifiant Melba, jamais par son
+  nom ; ils ne renseignent la catégorie que d'une matière qui n'en a pas et ne touchent ni au lieu propre, ni au nom,
+  ni à l'état, ni à la densité ou au poids saisis.
+- Migration **0027** : `products.storage_subzone_id` (lieu propre, facultatif).
+- **Vérifié** : 1 test unitaire et 4 tests d'intégration (8 vrais bons, redéposés pour vérifier que les réglages
+  restent) ; en local (Chrome piloté) : lieu propre enregistré, prix saisi, doublon refusé, prix retiré, lieu remis
+  à vide ; liste filtrée par fournisseur.
+- **Pas fait, à décider** : saisir ou corriger un colis fournisseur à la main (les bons le donnent ; la décision du
+  17/11 prévoyait une saisie dans l'administration quand aucun fichier ne le donne).
+

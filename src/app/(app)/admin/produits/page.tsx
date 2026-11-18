@@ -6,6 +6,7 @@ import { listProductsForAdmin, listUnlistedGroups } from "@/modules/admin/produc
 import { toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { pricesInForce } from "@/modules/matieres/referentiel";
+import { listSuppliers, placementChoices, suppliersByProduct } from "@/modules/matieres/fiche";
 import { referenceDensity, referenceDensityLabel } from "@/domain/densites";
 import { ProductsAdmin } from "./products-admin";
 
@@ -17,15 +18,28 @@ const densityReferenceOf = (name: string, density: number | null) => {
 
 export const metadata = { title: "Produits — Administration" };
 
-export default async function ProductsPage() {
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ fournisseur?: string }> }) {
+  const { fournisseur } = await searchParams;
   const admin = await requireUser();
   const today = toProductionLocalDate(new Date());
-  const [products, groups, units, prices] = await Promise.all([
+  const [products, groups, units, prices, choices, suppliers, supplierIdsOf] = await Promise.all([
     listProductsForAdmin(db, admin),
     listUnlistedGroups(db, admin),
     db.select({ code: s.units.code, label: s.units.label }).from(s.units).where(eq(s.units.active, true)).orderBy(asc(s.units.code)),
     pricesInForce(db, today),
+    placementChoices(db),
+    listSuppliers(db, admin),
+    suppliersByProduct(db),
   ]);
+  const categoryOf = new Map(choices.categories.map((c) => [c.id, c]));
+  const placeName = new Map(choices.subzones.map((z) => [z.id, z.name]));
+  /** Lieu de stockage effectif : celui du produit, sinon celui de sa catégorie Melba. */
+  const storageOf = (p: (typeof products)[number]) => {
+    const own = p.storageSubzoneId ? placeName.get(p.storageSubzoneId) : null;
+    if (own) return { name: own, own: true };
+    const fromCategory = p.materialCategoryId ? categoryOf.get(p.materialCategoryId)?.storageSubzoneId : null;
+    return fromCategory ? { name: placeName.get(fromCategory) ?? null, own: false } : null;
+  };
   return (
     <>
       <Link href="/admin" className="self-start rounded-xl px-2 py-2 font-medium text-slate-700">
@@ -34,6 +48,9 @@ export default async function ProductsPage() {
       <h1 className="text-2xl font-bold">Produits</h1>
       <ProductsAdmin
         units={units}
+        materialCategories={choices.categories.map((c) => ({ id: c.id, name: c.name }))}
+        suppliers={suppliers.map((x) => ({ id: x.id, name: x.name }))}
+        initialSupplier={suppliers.some((x) => x.id === fournisseur) ? fournisseur : undefined}
         groups={groups.map(({ declarationIds: _ids, ...g }) => g)}
         products={products.map((p) => ({
           id: p.id,
@@ -48,6 +65,10 @@ export default async function ProductsPage() {
           source: p.source,
           active: p.active,
           melba: p.externalId?.startsWith("melba:") ?? false,
+          materialCategoryId: p.materialCategoryId,
+          materialCategory: p.materialCategoryId ? (categoryOf.get(p.materialCategoryId)?.name ?? null) : null,
+          storage: storageOf(p),
+          supplierIds: supplierIdsOf.get(p.id) ?? [],
           price: prices.get(p.id)
             ? {
                 perKgEur: prices.get(p.id)!.current.perKgEur,

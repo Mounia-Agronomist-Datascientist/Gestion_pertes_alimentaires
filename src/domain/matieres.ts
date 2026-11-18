@@ -92,10 +92,11 @@ export function priceInForce<V extends PriceVersion>(versions: readonly V[], on:
 /**
  * Matières de la semaine proposées à un lieu de saisie (docs/PHASE6.md, étape 6.10) :
  * - Réception : toutes, la marchandise arrive avant d'être rangée ;
- * - Stockage : celles dont la catégorie Melba est rangée dans cette sous-zone ; à part, celles dont le lieu n'est pas
- *   encore réglé (pas de catégorie, ou catégorie sans sous-zone). Les autres se trouvent par la recherche.
+ * - Stockage : celles rangées dans cette sous-zone — lieu propre au produit (étape 6.11), sinon celui de sa catégorie
+ *   Melba ; à part, celles dont le lieu n'est pas encore réglé (ni lieu propre, ni catégorie rangée). Les autres se
+ *   trouvent par la recherche.
  */
-export function materialsForPlace<M extends { categoryId: string | null }>(
+export function materialsForPlace<M extends { categoryId: string | null; storageSubzoneId?: string | null }>(
   materials: readonly M[],
   storageOf: ReadonlyMap<string, string | null>,
   place: { zoneCode: string; subzoneId: string },
@@ -104,7 +105,7 @@ export function materialsForPlace<M extends { categoryId: string | null }>(
   const here: M[] = [];
   const unplaced: M[] = [];
   for (const m of materials) {
-    const storage = m.categoryId ? (storageOf.get(m.categoryId) ?? null) : null;
+    const storage = m.storageSubzoneId ?? (m.categoryId ? (storageOf.get(m.categoryId) ?? null) : null);
     if (storage === place.subzoneId) here.push(m);
     else if (storage == null) unplaced.push(m);
   }

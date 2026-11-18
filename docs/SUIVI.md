@@ -56,6 +56,7 @@
 | 2026-11-12 | Synthèse de la semaine (montants, zones, causes, produits, plus fortes hausses, 12 semaines), version imprimable et exports CSV | 1 test unitaire + 1 test d'intégration ; page et exports vérifiés dans le navigateur |
 | 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
+| 2026-11-18 | Phase 6 — étape 6.11 : Administration → Produits — fiche d'un produit (catégorie Melba, lieu de stockage propre, colis fournisseurs, versions de prix, prix saisi à la main daté et retirable) ; filtres par catégorie Melba et fournisseur ; Administration → Fournisseurs (renommer) ; migration 0027 | 1 test unitaire + 4 tests d'intégration ; fiche, prix et fournisseurs vérifiés en local (Chrome piloté) |
 | 2026-11-18 | Phase 6 — étape 6.10 : saisie en Réception et en Stockage — matières de la semaine (tome et bons) proposées d'abord, par catégorie Melba ; en Stockage, celles rangées dans la sous-zone, les autres à part ; réglage « catégorie → lieu de Stockage » (Administration → Lieux de stockage des matières) | 2 tests unitaires + 2 tests d'intégration ; saisie Stockage › Légumerie vérifiée en local (Chrome piloté) |
 | 2026-11-18 | Densités de référence des liquides (tableau fourni, milieu de la plage, rattachement au plus proche, règle R24) : données aux matières sans densité, conversion des pertes en litres (ingrédients de la semaine compris), prix d'achat au litre ramené au kg ; coût du tome = préparation comprise (point 14), rappelé dans le recoupement | 4 tests unitaires + 2 tests unitaires et 2 d'intégration ajoutés ; en local : 17 densités, prix de l'huile de sésame 8,61 €/kg |
 | 2026-11-18 | Phase 6 — étape 6.9 : recoupement de la semaine (Administration → Recoupement) : ingrédients du tome face aux bons de la même semaine — écarts de prix au-delà de 0,5 %, commandes absentes du tome (avec les autres tomes qui les citent), ingrédients sans commande (avec la dernière commande) | 4 tests unitaires + 4 tests d'intégration ; S47 vérifiée en local (Chrome piloté, ordinateur et téléphone) |
@@ -111,7 +112,7 @@
 
 ## Anomalies connues / points de vigilance
 
-- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0026 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
+- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0027 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
 - TypeScript 7 (nouvelle version native) est utilisé ; si un outil devient incompatible, revenir à TypeScript 5.x.

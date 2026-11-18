@@ -2,13 +2,13 @@
 # Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
 
 mise_a_jour: 2026-11-18
-dernier_commit: "Étape 6.10 : saisie en Réception et en Stockage (matières de la semaine d'abord)"
+dernier_commit: "Étape 6.11 : Administration → Produits (fiche, prix saisis, lieu propre, fournisseurs)"
 
 en_cours:
   phase: 6
-  derniere_etape: "6.10"
-  prochaine_etape: "6.11"
-  prochaine_etape_statut: proposee   # à valider avant de coder
+  derniere_etape: "6.11"
+  prochaine_etape: null
+  prochaine_etape_statut: a_definir   # les 11 étapes proposées sont faites
 
 phases:
   - { id: 0, nom: "Cadrage technique", statut: terminee, fin: 2026-11-06 }
@@ -30,12 +30,12 @@ etapes_phase_6:
   - { id: "6.8", nom: "Import des bons de commande", statut: faite, date: 2026-11-18 }
   - { id: "6.9", nom: "Recoupement de la semaine (tome / bons de commande)", statut: faite, date: 2026-11-18 }
   - { id: "6.10", nom: "Saisie en Réception et en Stockage", statut: faite, date: 2026-11-18 }
-  - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: proposee }
+  - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: faite, date: 2026-11-18 }
 
 base_de_donnees:
-  derniere_migration: "0026_bons_de_commande"
+  derniere_migration: "0027_lieu_stockage_produit"
   production:
-    a_appliquer: "0014 à 0026"
+    a_appliquer: "0014 à 0027"
     puis:
       - "Compléter depuis les tomes importés (Administration → Produits)"
       - "Dépôt du ZIP des bons de commande"
@@ -45,7 +45,7 @@ en_attente:
   - sujet: "Mise en ligne"
     raison: "crédits Netlify épuisés"
     jusqu_au: 2026-12-08
-  - { sujet: "Lieux de stockage des matières", raison: "régler chaque catégorie Melba une fois (Administration)" }
+  - { sujet: "Lieux de stockage des matières", raison: "rangées en local le 18/11 ; à refaire en ligne après le dépôt des bons (Administration)" }
   - sujet: "Essai pilote avec les équipes"
     raison: "préparé (docs/pilote/), pas encore lancé"
   - { sujet: "Mise en service des alertes", point: P4, raison: "après les essais des équipes" }

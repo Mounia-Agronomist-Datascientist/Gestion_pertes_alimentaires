@@ -18,6 +18,8 @@ export interface WeekMaterial {
   name: string;
   /** Catégorie Melba (bons de commande), qui donne le lieu de stockage. */
   categoryId: string | null;
+  /** Lieu de stockage propre au produit (à la place de celui de sa catégorie), ou null. */
+  storageSubzoneId: string | null;
   /** Commandée dans un bon de la semaine. */
   ordered: boolean;
   /** Ingrédient du tome de la semaine. */
@@ -52,7 +54,7 @@ export async function materialsOfWeek(db: Db, weekId: string): Promise<WeekMater
   ]);
   const externalIds = tomeKeys.map((k) => melbaExternalId(k.key)).filter((id) => id !== melbaExternalId(""));
   const orderedIds = new Set(ordered.map((o) => o.productId));
-  const columns = { id: s.products.id, name: s.products.name, categoryId: s.products.materialCategoryId, externalId: s.products.externalId };
+  const columns = { id: s.products.id, name: s.products.name, categoryId: s.products.materialCategoryId, storageSubzoneId: s.products.storageSubzoneId, externalId: s.products.externalId };
   const [fromTome, fromOrders] = await Promise.all([
     externalIds.length ? db.select(columns).from(s.products).where(and(inArray(s.products.externalId, externalIds), eq(s.products.active, true))) : Promise.resolve([]),
     orderedIds.size ? db.select(columns).from(s.products).where(and(inArray(s.products.id, [...orderedIds]), eq(s.products.active, true))) : Promise.resolve([]),
@@ -60,7 +62,7 @@ export async function materialsOfWeek(db: Db, weekId: string): Promise<WeekMater
   const inTome = new Set(fromTome.map((p) => p.id));
   const byId = new Map([...fromTome, ...fromOrders].map((p) => [p.id, p]));
   return [...byId.values()]
-    .map((p) => ({ productId: p.id, name: p.name, categoryId: p.categoryId, ordered: orderedIds.has(p.id), inTome: inTome.has(p.id) }))
+    .map((p) => ({ productId: p.id, name: p.name, categoryId: p.categoryId, storageSubzoneId: p.storageSubzoneId, ordered: orderedIds.has(p.id), inTome: inTome.has(p.id) }))
     .sort((a, b) => a.name.localeCompare(b.name, "fr"));
 }
 

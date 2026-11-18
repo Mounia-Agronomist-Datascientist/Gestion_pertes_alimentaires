@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { type ProductActionState, productAction } from "../actions";
@@ -21,6 +22,12 @@ interface Product {
   active: boolean;
   /** Matière tirée des tomes Melba (référentiel des matières premières). */
   melba: boolean;
+  materialCategoryId?: string | null;
+  /** Catégorie Melba (bons de commande). */
+  materialCategory?: string | null;
+  /** Lieu de stockage effectif : propre au produit (own) ou celui de sa catégorie. */
+  storage?: { name: string | null; own: boolean } | null;
+  supplierIds?: string[];
   price: { perKgEur: number | null; perUnitEur: number | null; unit: string | null; source: string; validFrom: string; versions: number } | null;
 }
 
@@ -40,6 +47,10 @@ interface Props {
   products: Product[];
   groups: Group[];
   units: { code: string; label: string }[];
+  materialCategories: { id: string; name: string }[];
+  suppliers: { id: string; name: string }[];
+  /** Fournisseur choisi depuis Administration → Fournisseurs. */
+  initialSupplier?: string;
 }
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
@@ -48,18 +59,22 @@ const fmtNumber = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigi
 /** Comparaison sans accents ni majuscules, comme pour les doublons côté serveur. */
 const fold = (text: string) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
-export function ProductsAdmin({ products, groups, units }: Props) {
+export function ProductsAdmin({ products, groups, units, materialCategories, suppliers, initialSupplier }: Props) {
   const [state, action, pending] = useActionState<ProductActionState, FormData>(productAction, {});
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category | "toutes">("toutes");
   const [editing, setEditing] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [creatingFrom, setCreatingFrom] = useState<string | null>(null);
+  const [melbaCategory, setMelbaCategory] = useState("");
+  const [supplier, setSupplier] = useState(initialSupplier ?? "");
 
   const active = products.filter((p) => p.active);
   const listed = products.filter(
     (p) =>
       (category === "toutes" || p.category === category) &&
+      (!melbaCategory || (melbaCategory === "aucune" ? !p.materialCategoryId : p.materialCategoryId === melbaCategory)) &&
+      (!supplier || (p.supplierIds ?? []).includes(supplier)) &&
       fold(`${p.name} ${p.variant ?? ""} ${p.code ?? ""}`).includes(fold(search.trim())),
   );
 
@@ -193,6 +208,27 @@ export function ProductsAdmin({ products, groups, units }: Props) {
             </button>
           ))}
         </nav>
+        {(materialCategories.length > 0 || suppliers.length > 0) && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            <select value={melbaCategory} onChange={(e) => setMelbaCategory(e.target.value)} className="field min-w-0" aria-label="Catégorie Melba">
+              <option value="">Toutes les catégories Melba</option>
+              <option value="aucune">Sans catégorie Melba</option>
+              {materialCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <select value={supplier} onChange={(e) => setSupplier(e.target.value)} className="field min-w-0" aria-label="Fournisseur">
+              <option value="">Tous les fournisseurs</option>
+              {suppliers.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         {listed.length === 0 && <p className="text-slate-600">Aucun produit.</p>}
         <ul className="flex flex-col gap-2">
           {listed.map((p) => (
@@ -225,6 +261,12 @@ export function ProductsAdmin({ products, groups, units }: Props) {
                     {p.densityKgPerL != null && ` · densité ${fmtNumber(p.densityKgPerL)} kg/L${p.densityReference ? ` (référence : ${p.densityReference})` : ""}`}
                     {p.melba && " · tome Melba"}
                   </span>
+                  {(p.materialCategory || p.storage) && (
+                    <span className="text-sm text-slate-600">
+                      {p.materialCategory ?? "Sans catégorie Melba"}
+                      {p.storage?.name && ` · rangé en ${p.storage.name}${p.storage.own ? " (lieu propre)" : ""}`}
+                    </span>
+                  )}
                   {p.price ? (
                     <span className="text-sm text-slate-700">
                       Prix :{" "}
@@ -239,8 +281,11 @@ export function ProductsAdmin({ products, groups, units }: Props) {
                   ) : (
                     p.melba && <span className="text-sm text-amber-800">Pas de prix dans les tomes</span>
                   )}
-                  <form action={action} className="flex gap-4">
+                  <form action={action} className="flex flex-wrap gap-4">
                     <input type="hidden" name="productId" value={p.id} />
+                    <Link href={`/admin/produits/${p.id}`} className="text-sm font-medium text-teal-800 underline">
+                      Fiche : prix, colis, lieu
+                    </Link>
                     <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(p.id)}>
                       Modifier
                     </button>
@@ -263,7 +308,7 @@ export function ProductsAdmin({ products, groups, units }: Props) {
   );
 }
 
-function ProductFields({ units, defaults }: { units: Props["units"]; defaults?: Partial<Product> }) {
+export function ProductFields({ units, defaults }: { units: { code: string; label: string }[]; defaults?: Partial<Product> }) {
   return (
     <>
       <label className="flex flex-col gap-1">

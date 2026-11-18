@@ -31,6 +31,7 @@ import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { DeclarationError } from "@/modules/declarations/service";
+import { addManualPrice, ProductSheetError, removeManualPrice, renameSupplier, setProductPlacement } from "@/modules/matieres/fiche";
 import { buildMaterialsFromTomes } from "@/modules/matieres/referentiel";
 import { setCategoriesStorage, StorageSettingError } from "@/modules/matieres/semaine";
 
@@ -212,6 +213,7 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
     throw e;
   }
   revalidatePath("/admin/produits");
+  if (productId) revalidatePath(`/admin/produits/${productId}`);
   return { message };
 }
 
@@ -444,4 +446,64 @@ export async function categoryStorageAction(_prev: CategoryStorageState, formDat
     if (e instanceof StorageSettingError || e instanceof ForbiddenError) return { error: e.message };
     throw e;
   }
+}
+
+// ─── Fiche d'un produit et fournisseurs (étape 6.11) ─────────────────────────
+
+export interface ProductSheetState {
+  error?: string;
+  message?: string;
+}
+
+export async function productSheetAction(_prev: ProductSheetState, formData: FormData): Promise<ProductSheetState> {
+  const admin = await requireUser();
+  const productId = String(formData.get("productId") ?? "");
+  const intent = String(formData.get("intent"));
+  let message: string;
+  try {
+    switch (intent) {
+      case "placement": {
+        const changed = await setProductPlacement(db, admin, productId, {
+          materialCategoryId: String(formData.get("materialCategoryId") ?? "") || null,
+          storageSubzoneId: String(formData.get("storageSubzoneId") ?? "") || null,
+        });
+        message = changed ? "Catégorie et lieu de stockage enregistrés." : "Aucun changement.";
+        break;
+      }
+      case "add_price": {
+        const p = await addManualPrice(db, admin, productId, {
+          validFrom: String(formData.get("validFrom") ?? ""),
+          perKgEur: String(formData.get("perKgEur") ?? ""),
+          perUnitEur: String(formData.get("perUnitEur") ?? ""),
+          unit: String(formData.get("unit") ?? ""),
+        });
+        message = `Prix enregistré à partir du ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${p.validFrom}T12:00:00Z`))}. Les pertes déjà enregistrées gardent leur coût.`;
+        break;
+      }
+      case "remove_price":
+        await removeManualPrice(db, admin, productId, String(formData.get("priceId") ?? ""));
+        message = "Prix saisi à la main retiré. Les pertes déjà enregistrées gardent leur coût.";
+        break;
+      default:
+        return { error: "Action inconnue" };
+    }
+  } catch (e) {
+    if (e instanceof ProductSheetError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath(`/admin/produits/${productId}`);
+  revalidatePath("/admin/produits");
+  return { message };
+}
+
+export async function supplierAction(_prev: ProductSheetState, formData: FormData): Promise<ProductSheetState> {
+  const admin = await requireUser();
+  try {
+    await renameSupplier(db, admin, String(formData.get("supplierId") ?? ""), formData.get("name"));
+  } catch (e) {
+    if (e instanceof ProductSheetError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/admin/fournisseurs");
+  return { message: "Fournisseur renommé." };
 }

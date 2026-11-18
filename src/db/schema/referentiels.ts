@@ -87,6 +87,8 @@ export const products = pgTable(
     source: text("source").notNull().default("manuel"),
     /** Catégorie Melba (bons de commande) ; jamais changée par un import une fois renseignée. */
     materialCategoryId: uuid("material_category_id").references(() => materialCategories.id),
+    /** Lieu de stockage propre au produit, à la place de celui de sa catégorie (étape 6.11) ; null = celui de la catégorie. */
+    storageSubzoneId: uuid("storage_subzone_id").references(() => subzones.id),
     active: boolean("active").notNull().default(true),
     ...timestamps,
   },

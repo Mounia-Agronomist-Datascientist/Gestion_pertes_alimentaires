@@ -5,14 +5,13 @@
 > La même information, lisible par un programme : [progress.yaml](progress.yaml).
 > **Mettre à jour les deux fichiers à chaque commit d'étape.**
 
-Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.10 : saisie en Réception et en Stockage (matières de la semaine d'abord)`
+Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.11 : Administration → Produits (fiche, prix saisis, lieu propre, fournisseurs)`
 
 ## En ce moment
 
 - **Phase en cours** : Phase 6 — Optimisation et automatisation ([docs/PHASE6.md](docs/PHASE6.md))
-- **Dernière étape faite** : 6.10 — Saisie en Réception et en Stockage (18/11/2026)
-- **Prochaine étape** : 6.11 — Administration → Produits (fournisseurs, matières, colis, prix et versions, lieu
-  propre à un produit) — *proposée, à valider avant de coder*
+- **Dernière étape faite** : 6.11 — Administration → Produits (18/11/2026) : les 11 étapes proposées sont faites
+- **Prochaine étape** : à définir ensemble (Phase 6 complète au regard des étapes proposées)
 
 ## Phases
 
@@ -24,7 +23,7 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.10 : sais
 | 3 | Calcul des coûts | ✅ Terminée (10/11) |
 | 4 | Statistiques et exports | ✅ Terminée (12/11) |
 | 5 | Valorisation, Alchimistes, environnement, rapports PDF | ✅ Terminée (13–16/11) |
-| 6 | Optimisation et automatisation | 🔄 En cours (10 étapes sur 11) |
+| 6 | Optimisation et automatisation | 🔄 En cours (11 étapes sur 11) |
 
 ## Phase 6 — étapes
 
@@ -40,15 +39,15 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.10 : sais
 | 6.8 | Import des bons de commande | ✅ 18/11 |
 | 6.9 | Recoupement de la semaine (tome / BC) | ✅ 18/11 |
 | 6.10 | Saisie en Réception et en Stockage | ✅ 18/11 |
-| 6.11 | Administration → Produits (fournisseurs, matières, prix) | ⏳ Proposée |
+| 6.11 | Administration → Produits (fournisseurs, matières, prix) | ✅ 18/11 |
 
 ## Bloquants et en attente
 
 - **Mise en ligne en attente** : crédits Netlify épuisés jusqu'au **08/12/2026**. Ensuite, dans l'ordre et après
-  une sauvegarde : migrations 0014 à 0026 → « Compléter depuis les tomes importés » (Administration → Produits)
+  une sauvegarde : migrations 0014 à 0027 → « Compléter depuis les tomes importés » (Administration → Produits)
   → dépôt du ZIP des bons de commande ([docs/pilote/PLAN_PILOTE.md](docs/pilote/PLAN_PILOTE.md)).
-- **Lieux de stockage des matières** : régler une fois chaque catégorie Melba (Administration → Lieux de stockage
-  des matières), sinon la saisie en Stockage ne filtre pas.
+- **Lieux de stockage des matières** : les 20 catégories Melba sont rangées en local (18/11) ; à refaire en ligne
+  après la mise en ligne et le dépôt des bons (Administration → Lieux de stockage des matières).
 - **Essai pilote** avec les équipes : préparé (docs/pilote/), pas encore lancé.
 - **Mise en service des alertes** (P4) : après les essais des équipes.
 - **Facteurs carbone** (10) : valider les facteurs proposés et les rattachements « À revoir ».

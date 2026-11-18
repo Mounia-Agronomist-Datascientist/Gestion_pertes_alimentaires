@@ -83,4 +83,12 @@ describe("matières de la semaine par lieu de saisie", () => {
     expect(r.here.map((x) => x.name)).toEqual(["ail pelé"]);
     expect(r.unplaced.map((x) => x.name)).toEqual(["sel", "épices"]);
   });
+
+  it("Stockage : le lieu propre au produit passe avant celui de sa catégorie", () => {
+    const withOwn = [...materials, { name: "beurre", categoryId: "viande", storageSubzoneId: "LEGUMERIE" }, { name: "sel de Guérande", categoryId: null, storageSubzoneId: "BOF" }];
+    const r = materialsForPlace(withOwn, storageOf, { zoneCode: "STOCKAGE", subzoneId: "LEGUMERIE" });
+    expect(r.here.map((x) => x.name)).toEqual(["ail pelé", "beurre"]);
+    expect(r.unplaced.map((x) => x.name)).toEqual(["sel", "épices"]);
+    expect(materialsForPlace(withOwn, storageOf, { zoneCode: "STOCKAGE", subzoneId: "BOF" }).here.map((x) => x.name)).toEqual(["bœuf", "sel de Guérande"]);
+  });
 });
