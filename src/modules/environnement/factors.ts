@@ -46,7 +46,10 @@ export async function loadAgribalyseProposal(db: Db, admin: AuthUser, now = new 
     for (const [i, p] of AGRIBALYSE_PROPOSAL.entries()) {
       let family = families.find((f) => f.code === p.code);
       if (!family) {
-        [family] = await tx.insert(s.foodFamilies).values({ code: p.code, name: p.name, category: p.category, displayOrder: i, createdAt: now }).returning();
+        [family] = await tx
+          .insert(s.foodFamilies)
+          .values({ code: p.code, name: p.name, category: p.category, displayOrder: i, createdAt: now })
+          .returning();
         createdFamilies++;
       }
       if (withFactor.has(family!.id)) continue;
@@ -66,7 +69,13 @@ export async function loadAgribalyseProposal(db: Db, admin: AuthUser, now = new 
       });
       proposed++;
     }
-    await writeAudit(tx, { userId: admin.id, action: "load_proposal", entity: "emission_factor", after: { source: `${AGRIBALYSE_SOURCE} ${AGRIBALYSE_VERSION}`, createdFamilies, proposed }, occurredAt: now });
+    await writeAudit(tx, {
+      userId: admin.id,
+      action: "load_proposal",
+      entity: "emission_factor",
+      after: { source: `${AGRIBALYSE_SOURCE} ${AGRIBALYSE_VERSION}`, createdFamilies, proposed },
+      occurredAt: now,
+    });
     return { createdFamilies, proposed };
   });
 }
@@ -80,7 +89,12 @@ export async function listFamiliesForAdmin(db: Db, admin: AuthUser) {
   ]);
   return families.map((f) => {
     const versions = factors.filter((x) => x.familyId === f.id);
-    return { ...f, current: versions.find((v) => v.status === "valide") ?? null, proposal: versions.find((v) => v.status === "propose") ?? null, versions };
+    return {
+      ...f,
+      current: versions.find((v) => v.status === "valide") ?? null,
+      proposal: versions.find((v) => v.status === "propose") ?? null,
+      versions,
+    };
   });
 }
 
@@ -89,15 +103,22 @@ export async function validateFactors(db: Db, admin: AuthUser, ids: readonly str
   requirePermission(admin, "referentiel.manage");
   if (!ids.length) return 0;
   return db.transaction(async (tx) => {
-    const proposals = await tx.select().from(s.emissionFactors).where(and(inArray(s.emissionFactors.id, [...ids]), eq(s.emissionFactors.status, "propose")));
-    if (proposals.length !== new Set(ids).size) throw new AdminError("Proposition introuvable ou déjà traitée : rechargez la page");
+    const proposals = await tx
+      .select()
+      .from(s.emissionFactors)
+      .where(and(inArray(s.emissionFactors.id, [...ids]), eq(s.emissionFactors.status, "propose")));
+    if (proposals.length !== new Set(ids).size)
+      throw new AdminError("Proposition introuvable ou déjà traitée : rechargez la page");
     for (const p of proposals) {
       const [previous] = await tx
         .update(s.emissionFactors)
         .set({ status: "remplace", closedAt: now })
         .where(and(eq(s.emissionFactors.familyId, p.familyId), eq(s.emissionFactors.status, "valide")))
         .returning();
-      await tx.update(s.emissionFactors).set({ status: "valide", validatedBy: admin.id, validatedAt: now }).where(eq(s.emissionFactors.id, p.id));
+      await tx
+        .update(s.emissionFactors)
+        .set({ status: "valide", validatedBy: admin.id, validatedAt: now })
+        .where(eq(s.emissionFactors.id, p.id));
       await writeAudit(tx, {
         userId: admin.id,
         action: "validate",
@@ -120,11 +141,22 @@ export async function rejectFactor(db: Db, admin: AuthUser, id: string, now = ne
     .where(and(eq(s.emissionFactors.id, id), eq(s.emissionFactors.status, "propose")))
     .returning();
   if (!rejected) throw new AdminError("Proposition introuvable ou déjà traitée : rechargez la page");
-  await writeAudit(db, { userId: admin.id, action: "reject", entity: "emission_factor", entityId: id, after: { version: rejected.version, kgCo2ePerKg: rejected.kgCo2ePerKg }, occurredAt: now });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "reject",
+    entity: "emission_factor",
+    entityId: id,
+    after: { version: rejected.version, kgCo2ePerKg: rejected.kgCo2ePerKg },
+    occurredAt: now,
+  });
 }
 
 const proposalSchema = z.object({
-  kgCo2ePerKg: z.number({ message: "Valeur invalide" }).finite().min(0, "La valeur ne peut pas être négative").max(1000),
+  kgCo2ePerKg: z
+    .number({ message: "Valeur invalide" })
+    .finite()
+    .min(0, "La valeur ne peut pas être négative")
+    .max(1000),
   source: z.string().trim().min(3, "Indiquez la source").max(200),
   sourceVersion: z.string().trim().max(40).nullable(),
   referenceName: z.string().trim().max(200).nullable(),
@@ -132,20 +164,41 @@ const proposalSchema = z.object({
 });
 
 /** Nouvelle version proposée (valeur saisie avec sa source) ; elle remplace une proposition en attente. */
-export async function proposeFactor(db: Db, admin: AuthUser, familyId: string, raw: z.input<typeof proposalSchema>, now = new Date()) {
+export async function proposeFactor(
+  db: Db,
+  admin: AuthUser,
+  familyId: string,
+  raw: z.input<typeof proposalSchema>,
+  now = new Date(),
+) {
   requirePermission(admin, "referentiel.manage");
   const parsed = proposalSchema.safeParse(raw);
   if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Saisie invalide");
   return db.transaction(async (tx) => {
     const [family] = await tx.select().from(s.foodFamilies).where(eq(s.foodFamilies.id, familyId));
     if (!family) throw new AdminError("Famille introuvable");
-    await tx.update(s.emissionFactors).set({ status: "refuse", closedAt: now }).where(and(eq(s.emissionFactors.familyId, familyId), eq(s.emissionFactors.status, "propose")));
-    const [last] = await tx.select({ version: s.emissionFactors.version }).from(s.emissionFactors).where(eq(s.emissionFactors.familyId, familyId)).orderBy(desc(s.emissionFactors.version)).limit(1);
+    await tx
+      .update(s.emissionFactors)
+      .set({ status: "refuse", closedAt: now })
+      .where(and(eq(s.emissionFactors.familyId, familyId), eq(s.emissionFactors.status, "propose")));
+    const [last] = await tx
+      .select({ version: s.emissionFactors.version })
+      .from(s.emissionFactors)
+      .where(eq(s.emissionFactors.familyId, familyId))
+      .orderBy(desc(s.emissionFactors.version))
+      .limit(1);
     const [created] = await tx
       .insert(s.emissionFactors)
       .values({ familyId, version: (last?.version ?? 0) + 1, ...parsed.data, createdBy: admin.id, createdAt: now })
       .returning();
-    await writeAudit(tx, { userId: admin.id, action: "propose", entity: "emission_factor", entityId: created!.id, after: { family: family.name, ...parsed.data }, occurredAt: now });
+    await writeAudit(tx, {
+      userId: admin.id,
+      action: "propose",
+      entity: "emission_factor",
+      entityId: created!.id,
+      after: { family: family.name, ...parsed.data },
+      occurredAt: now,
+    });
     return created!;
   });
 }
@@ -161,15 +214,33 @@ export async function createFamily(db: Db, admin: AuthUser, raw: z.input<typeof 
   const parsed = familySchema.safeParse(raw);
   if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Saisie invalide");
   const families = await db.select().from(s.foodFamilies);
-  const key = (n: string) => n.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const key = (n: string) =>
+    n
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
   if (families.some((f) => key(f.name) === key(parsed.data.name))) throw new AdminError("Cette famille existe déjà");
   let code = key(parsed.data.name).toUpperCase().replace(/ /g, "_").slice(0, 40) || "FAMILLE";
   if (families.some((f) => f.code === code)) code = `${code}_${families.length + 1}`;
   const [created] = await db
     .insert(s.foodFamilies)
-    .values({ code, ...parsed.data, displayOrder: Math.max(0, ...families.map((f) => f.displayOrder)) + 1, createdAt: now })
+    .values({
+      code,
+      ...parsed.data,
+      displayOrder: Math.max(0, ...families.map((f) => f.displayOrder)) + 1,
+      createdAt: now,
+    })
     .returning();
-  await writeAudit(db, { userId: admin.id, action: "create", entity: "food_family", entityId: created!.id, after: parsed.data, occurredAt: now });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "create",
+    entity: "food_family",
+    entityId: created!.id,
+    after: parsed.data,
+    occurredAt: now,
+  });
   return created!;
 }
 

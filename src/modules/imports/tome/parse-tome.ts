@@ -177,7 +177,11 @@ interface ValueRow {
   fragments: { y: number; text: string }[];
 }
 
-function readValues(items: readonly PdfItem[], nameMaxX: number, unitX: number): Omit<ValueRow, "page" | "y" | "fragments"> | null {
+function readValues(
+  items: readonly PdfItem[],
+  nameMaxX: number,
+  unitX: number,
+): Omit<ValueRow, "page" | "y" | "fragments"> | null {
   const values = items.filter((i) => i.x >= nameMaxX);
   if (values.length === 0) return null;
   // Le coût est aligné à droite et peut déborder vers la gauche (« 2,911.43 € ») : on le reconnaît à son « € ».
@@ -216,7 +220,10 @@ export function parseTome(items: readonly PdfItem[]): TomeParseResult {
   const flushTable = () => {
     const { values, names } = pending;
     if (names.length && values.length === 0 && section) {
-      anomalies.push({ page: section.page, message: `Texte sans quantité dans « ${section.title} » : ${names.map((n) => n.text).join(" ")}` });
+      anomalies.push({
+        page: section.page,
+        message: `Texte sans quantité dans « ${section.title} » : ${names.map((n) => n.text).join(" ")}`,
+      });
     }
     for (const name of names) {
       if (!values.length) break;
@@ -277,7 +284,12 @@ export function parseTome(items: readonly PdfItem[]): TomeParseResult {
         const values = readValues(line.items, nameMaxX, unitX);
         const nameText = joinItems(line.items.filter((i) => i.x < nameMaxX));
         if (values) {
-          const row: ValueRow = { page: line.page, y: line.y, ...values, fragments: nameText ? [{ y: line.y, text: nameText }] : [] };
+          const row: ValueRow = {
+            page: line.page,
+            y: line.y,
+            ...values,
+            fragments: nameText ? [{ y: line.y, text: nameText }] : [],
+          };
           pending.values.push(row);
           section.rows.push(row);
         } else if (nameText && line.items.every((i) => i.x < nameMaxX)) {
@@ -333,7 +345,8 @@ function assemble(sections: Section[], anomalies: TomeAnomaly[]): TomeParseResul
         lines.push(line);
       }
     }
-    if (lines.length === 0) anomalies.push({ page: section.page, message: `Aucun ingrédient lu pour « ${section.title} »` });
+    if (lines.length === 0)
+      anomalies.push({ page: section.page, message: `Aucun ingrédient lu pour « ${section.title} »` });
     if (!total) anomalies.push({ page: section.page, message: `« Recette totale » absente pour « ${section.title} »` });
 
     const recipe = section.title.match(RECIPE_TITLE);
@@ -342,13 +355,17 @@ function assemble(sections: Section[], anomalies: TomeAnomaly[]): TomeParseResul
       // semaine (« 2792 recette(s) (312.2 g) ») : quantités et coûts sont toujours ramenés à une portion.
       const count = recipeCount(section.yieldText);
       const perPortion = <T extends { quantity: number; cost: number | null }>(q: T): T =>
-        count === 1 ? q : { ...q, quantity: round4(q.quantity / count), cost: q.cost != null ? round4(q.cost / count) : null };
+        count === 1
+          ? q
+          : { ...q, quantity: round4(q.quantity / count), cost: q.cost != null ? round4(q.cost / count) : null };
       recipes.push({
         year: Number(recipe[1]),
         week: Number(recipe[2]),
         code: recipe[3]!,
         name: clean(recipe[4]!),
-        portionWeightG: section.yieldText?.match(/\((\d+(?:\.\d+)?)\s*g\)/)?.[1] ? Number(section.yieldText.match(/\((\d+(?:\.\d+)?)\s*g\)/)![1]) : null,
+        portionWeightG: section.yieldText?.match(/\((\d+(?:\.\d+)?)\s*g\)/)?.[1]
+          ? Number(section.yieldText.match(/\((\d+(?:\.\d+)?)\s*g\)/)![1])
+          : null,
         recipeCount: count,
         lines: lines.map(perPortion),
         total: total ? perPortion(total) : null,
@@ -371,8 +388,14 @@ function assemble(sections: Section[], anomalies: TomeAnomaly[]): TomeParseResul
     const existing = subRecipes.get(key);
     if (!existing) {
       subRecipes.set(key, subRecipe);
-    } else if (JSON.stringify([existing.lines, existing.total, existing.net]) !== JSON.stringify([subRecipe.lines, subRecipe.total, subRecipe.net])) {
-      anomalies.push({ page: section.page, message: `Sous-recette « ${subRecipe.name} » imprimée deux fois avec des contenus différents (pages ${existing.page} et ${section.page})` });
+    } else if (
+      JSON.stringify([existing.lines, existing.total, existing.net]) !==
+      JSON.stringify([subRecipe.lines, subRecipe.total, subRecipe.net])
+    ) {
+      anomalies.push({
+        page: section.page,
+        message: `Sous-recette « ${subRecipe.name} » imprimée deux fois avec des contenus différents (pages ${existing.page} et ${section.page})`,
+      });
     }
   }
 
@@ -380,7 +403,10 @@ function assemble(sections: Section[], anomalies: TomeAnomaly[]): TomeParseResul
   for (const owner of [...recipes, ...subRecipes.values()]) {
     for (const line of owner.lines) {
       if (line.isSubRecipe && !subRecipes.has(line.key)) {
-        anomalies.push({ page: owner.page, message: `Sous-recette « ${line.label} » utilisée mais non détaillée dans le tome` });
+        anomalies.push({
+          page: owner.page,
+          message: `Sous-recette « ${line.label} » utilisée mais non détaillée dans le tome`,
+        });
       }
     }
   }
@@ -390,7 +416,10 @@ function assemble(sections: Section[], anomalies: TomeAnomaly[]): TomeParseResul
     const sum = owner.lines.reduce((s, l) => s + l.cost!, 0);
     if (Math.abs(sum - owner.total.cost) > 0.02 + 0.006 * owner.lines.length) {
       const name = "code" in owner ? `${owner.code} – ${owner.name}` : owner.name;
-      anomalies.push({ page: owner.page, message: `Coûts incohérents pour « ${name} » : lignes ${sum.toFixed(2)} € / total ${owner.total.cost.toFixed(2)} €` });
+      anomalies.push({
+        page: owner.page,
+        message: `Coûts incohérents pour « ${name} » : lignes ${sum.toFixed(2)} € / total ${owner.total.cost.toFixed(2)} €`,
+      });
     }
   }
 

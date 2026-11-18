@@ -19,15 +19,36 @@ describe("enregistrement d'une semaine importée", () => {
   let teamD: string;
   let s45: string;
   const preview = buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid()));
-  const files = { tomeFileName: "Melba _ Imprimer les recettes.pdf", planFileName: "Plan de production.xlsx", planSheetName: "S45" };
+  const files = {
+    tomeFileName: "Melba _ Imprimer les recettes.pdf",
+    planFileName: "Plan de production.xlsx",
+    planSheetName: "S45",
+  };
 
   beforeAll(async () => {
     t = await createTestDb();
     await seed(t.db);
     teamD = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "D")))[0]!.id;
     s45 = (await t.db.select().from(s.productionWeeks).where(eq(s.productionWeeks.startDate, "2026-10-29")))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    teamUser = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-d", displayName: "Équipe D", roleCode: "equipe", teamId: teamD, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    teamUser = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-d",
+        displayName: "Équipe D",
+        roleCode: "equipe",
+        teamId: teamD,
+        password: "mot-de-passe-equipe",
+      }),
+    );
   });
 
   afterAll(async () => {
@@ -43,7 +64,12 @@ describe("enregistrement d'une semaine importée", () => {
 
     const dishes = await teamWeekRecipes(t.db, s45, teamD);
     expect(dishes.map((d) => d.code)).toEqual(["FB04", "PJ02", "PJ09", "QD01", "QD04", "VI01", "VI06", "VI12"]);
-    expect(dishes.find((d) => d.code === "VI01")).toMatchObject({ weekBarquettes: 2953, portionWeightG: 315.1, totalWeightG: 315.11, totalCostEur: 1.33 });
+    expect(dishes.find((d) => d.code === "VI01")).toMatchObject({
+      weekBarquettes: 2953,
+      portionWeightG: 315.1,
+      totalWeightG: 315.11,
+      totalCostEur: 1.33,
+    });
 
     // Chaque sous-recette d'un plat est reliée à son détail.
     const vi01 = dishes.find((d) => d.code === "VI01")!;

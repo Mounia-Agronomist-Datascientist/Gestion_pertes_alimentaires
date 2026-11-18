@@ -27,11 +27,11 @@ export default async function LossAlertsPage({ searchParams }: { searchParams: P
       </Link>
       <h1 className="text-2xl font-bold">Alertes d&apos;analyse</h1>
       <p className="text-slate-600">
-        Calculées chaque nuit pour la semaine de production terminée.{" "}
-        <strong>Perte inhabituelle</strong> : une équipe, une zone ou un plat perd au moins {pct.format(settings.unusualRate)} de plus que sa moyenne des 4
-        semaines précédentes (à volume égal quand la production est connue), à partir de {num.format(settings.minKg)} kg.{" "}
-        <strong>Cause récurrente</strong> : la même cause est la première cause de pertes d&apos;une équipe ou d&apos;un plat {settings.recurrenceWeeks}{" "}
-        semaines de suite.
+        Calculées chaque nuit pour la semaine de production terminée. <strong>Perte inhabituelle</strong> : une équipe,
+        une zone ou un plat perd au moins {pct.format(settings.unusualRate)} de plus que sa moyenne des 4 semaines
+        précédentes (à volume égal quand la production est connue), à partir de {num.format(settings.minKg)} kg.{" "}
+        <strong>Cause récurrente</strong> : la même cause est la première cause de pertes d&apos;une équipe ou d&apos;un
+        plat {settings.recurrenceWeeks} semaines de suite.
         {can(user, "referentiel.manage") && (
           <>
             {" "}
@@ -42,10 +42,16 @@ export default async function LossAlertsPage({ searchParams }: { searchParams: P
         )}
       </p>
       <nav className="flex flex-wrap items-center gap-2">
-        <Link href="/alertes/analyse" className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-teal-700 text-white"}`}>
+        <Link
+          href="/alertes/analyse"
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-teal-700 text-white"}`}
+        >
           À voir
         </Link>
-        <Link href="/alertes/analyse?toutes=1" className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-teal-700 text-white" : "bg-white shadow-sm"}`}>
+        <Link
+          href="/alertes/analyse?toutes=1"
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-teal-700 text-white" : "bg-white shadow-sm"}`}
+        >
           Toutes
         </Link>
         {unseen > 1 && (

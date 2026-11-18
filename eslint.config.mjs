@@ -12,10 +12,29 @@ const eslintConfig = defineConfig([
   {
     rules: {
       // Une variable préfixée par « _ » est volontairement ignorée (déstructuration pour retirer un champ).
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_", ignoreRestSiblings: true }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "public/pdf.worker.min.mjs", "playwright-report/**", "test-results/**", "coverage/**", "imports-local/**", ".netlify/**"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    "public/pdf.worker.min.mjs",
+    "playwright-report/**",
+    "test-results/**",
+    "coverage/**",
+    "imports-local/**",
+    ".netlify/**",
+  ]),
 ]);
 
 export default eslintConfig;

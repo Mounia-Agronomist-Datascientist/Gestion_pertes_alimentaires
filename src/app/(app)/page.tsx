@@ -16,7 +16,11 @@ function formatDay(date: string): string {
   return dayFormat.format(new Date(`${date}T12:00:00Z`));
 }
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const user = await requireUser();
   const params = await searchParams;
   const week = await findStoredProductionWeek(db, toProductionLocalDate(new Date()));
@@ -39,7 +43,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {activeAlerts.length > 0 &&
         (user.teamId ? (
           activeAlerts.map((a) => (
-            <div key={a.id} role="alert" className="flex flex-col gap-1 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-red-900">
+            <div
+              key={a.id}
+              role="alert"
+              className="flex flex-col gap-1 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-red-900"
+            >
               <p className="font-semibold">{alertTitle(a)}</p>
               <p>{a.estimatedKg} kg de pertes estimées sont attribués à votre équipe.</p>
               {a.missingDays.length > 0 && <p className="font-medium">{missingDaysLabel(a.missingDays)}</p>}
@@ -52,8 +60,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           ))
         ) : (
-          <Link href="/alertes" role="alert" className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 font-semibold text-red-900">
-            {activeAlerts.length} alerte{activeAlerts.length > 1 ? "s" : ""} « saisie incomplète » — {alertKg} kg estimés →
+          <Link
+            href="/alertes"
+            role="alert"
+            className="rounded-2xl border-2 border-red-300 bg-red-50 p-4 font-semibold text-red-900"
+          >
+            {activeAlerts.length} alerte{activeAlerts.length > 1 ? "s" : ""} « saisie incomplète » — {alertKg} kg
+            estimés →
           </Link>
         ))}
 
@@ -85,7 +98,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </p>
           </>
         ) : (
-          <p className="text-red-700">Aucune semaine paramétrée pour aujourd&apos;hui : prévenez l&apos;administrateur.</p>
+          <p className="text-red-700">
+            Aucune semaine paramétrée pour aujourd&apos;hui : prévenez l&apos;administrateur.
+          </p>
         )}
       </section>
 

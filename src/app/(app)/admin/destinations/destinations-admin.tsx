@@ -73,7 +73,9 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
               <div className="flex flex-col gap-1">
                 <span className="font-semibold">
                   {d.name}
-                  {!d.active && <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivée</span>}
+                  {!d.active && (
+                    <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivée</span>
+                  )}
                 </span>
                 <span className="text-sm text-slate-600">
                   {DESTINATION_KIND_LABELS[d.kind]}
@@ -83,7 +85,11 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
                 </span>
                 <form action={action} className="flex flex-wrap items-center gap-4">
                   <input type="hidden" name="id" value={d.id} />
-                  <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(d.id)}>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-teal-800 underline"
+                    onClick={() => setEditing(d.id)}
+                  >
                     Modifier
                   </button>
                   <button
@@ -95,7 +101,14 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
                     {d.active ? "Désactiver" : "Réactiver"}
                   </button>
                   <span className="ml-auto flex gap-1">
-                    <button type="submit" name="intent" value="up" disabled={pending || i === 0} aria-label={`Monter ${d.name}`} className="btn-order">
+                    <button
+                      type="submit"
+                      name="intent"
+                      value="up"
+                      disabled={pending || i === 0}
+                      aria-label={`Monter ${d.name}`}
+                      className="btn-order"
+                    >
                       ↑
                     </button>
                     <button
@@ -143,7 +156,13 @@ function DestinationFields({ destination }: { destination?: Destination }) {
       </label>
       <label className="flex items-center gap-2">
         {locked && destination!.financialRecovery && <input type="hidden" name="financialRecovery" value="on" />}
-        <input type="checkbox" name="financialRecovery" defaultChecked={destination?.financialRecovery} disabled={locked} className="size-5" />
+        <input
+          type="checkbox"
+          name="financialRecovery"
+          defaultChecked={destination?.financialRecovery}
+          disabled={locked}
+          className="size-5"
+        />
         Peut rapporter une recette (ventes uniquement)
       </label>
       <label className="flex items-center gap-2">

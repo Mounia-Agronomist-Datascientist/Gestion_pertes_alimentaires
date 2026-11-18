@@ -93,8 +93,12 @@ export const products = pgTable(
     ...timestamps,
   },
   (t) => [
-    uniqueIndex("products_external_id_key").on(t.externalId).where(sql`${t.externalId} is not null`),
-    uniqueIndex("products_category_code_key").on(t.category, t.code).where(sql`${t.code} is not null`),
+    uniqueIndex("products_external_id_key")
+      .on(t.externalId)
+      .where(sql`${t.externalId} is not null`),
+    uniqueIndex("products_category_code_key")
+      .on(t.category, t.code)
+      .where(sql`${t.code} is not null`),
     check("products_unit_weight_positive", sql`${t.unitWeightKg} is null or ${t.unitWeightKg} > 0`),
     check("products_density_positive", sql`${t.densityKgPerL} is null or ${t.densityKgPerL} > 0`),
   ],
@@ -121,7 +125,11 @@ export const causes = pgTable(
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     ...timestamps,
   },
-  (t) => [uniqueIndex("causes_code_key").on(t.code).where(sql`${t.code} is not null`)],
+  (t) => [
+    uniqueIndex("causes_code_key")
+      .on(t.code)
+      .where(sql`${t.code} is not null`),
+  ],
 );
 
 export const causeZones = pgTable(
@@ -195,10 +203,7 @@ export const destinations = pgTable(
   },
   (t) => [
     unique("destinations_code_key").on(t.code),
-    check(
-      "destinations_recovery_only_for_sales",
-      sql`not ${t.financialRecovery} or ${t.kind} = 'vente'`,
-    ),
+    check("destinations_recovery_only_for_sales", sql`not ${t.financialRecovery} or ${t.kind} = 'vente'`),
   ],
 );
 

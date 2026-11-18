@@ -37,7 +37,12 @@ export async function openLightWorkbook(data: Uint8Array): Promise<LightWorkbook
   const read = (path: string) => zip.file(path)?.async("string") ?? Promise.resolve(null);
   const [workbook, rels] = await Promise.all([read("xl/workbook.xml"), read("xl/_rels/workbook.xml.rels")]);
   if (!workbook || !rels) throw new Error("Classeur Excel illisible");
-  const targets = new Map([...rels.matchAll(/<Relationship\b[^>]*>/g)].map((m) => [m[0].match(/\bId="([^"]+)"/)?.[1], m[0].match(/\bTarget="([^"]+)"/)?.[1]]));
+  const targets = new Map(
+    [...rels.matchAll(/<Relationship\b[^>]*>/g)].map((m) => [
+      m[0].match(/\bId="([^"]+)"/)?.[1],
+      m[0].match(/\bTarget="([^"]+)"/)?.[1],
+    ]),
+  );
   const sheets = [...workbook.matchAll(/<sheet\b[^>]*>/g)].map((m) => {
     const name = decode(m[0].match(/\bname="([^"]*)"/)?.[1] ?? "");
     const target = targets.get(m[0].match(/\br:id="([^"]+)"/)?.[1]) ?? "";
@@ -51,7 +56,9 @@ export async function openLightWorkbook(data: Uint8Array): Promise<LightWorkbook
       const sheet = sheets.find((s) => s.name === name);
       const xml = sheet ? await read(sheet.path) : null;
       if (!xml) return null;
-      shared ??= [...((await read("xl/sharedStrings.xml")) ?? "").matchAll(/<si>([\s\S]*?)<\/si>/g)].map((m) => textOf(m[1]!));
+      shared ??= [...((await read("xl/sharedStrings.xml")) ?? "").matchAll(/<si>([\s\S]*?)<\/si>/g)].map((m) =>
+        textOf(m[1]!),
+      );
       const grid: string[][] = [];
       for (const row of xml.matchAll(/<row\b[^>]*?\br="(\d+)"[^>]*?(?:\/>|>([\s\S]*?)<\/row>)/g)) {
         const cells: string[] = [];
@@ -61,7 +68,8 @@ export async function openLightWorkbook(data: Uint8Array): Promise<LightWorkbook
           const type = c[1]!.match(/\bt="([^"]+)"/)?.[1];
           const body = c[2] ?? "";
           const v = body.match(/<v>([\s\S]*?)<\/v>/)?.[1];
-          const value = type === "s" ? (shared[Number(v)] ?? "") : type === "inlineStr" ? textOf(body) : v != null ? decode(v) : "";
+          const value =
+            type === "s" ? (shared[Number(v)] ?? "") : type === "inlineStr" ? textOf(body) : v != null ? decode(v) : "";
           cells[columnIndex(ref)] = value;
         }
         grid[Number(row[1]) - 1] = Array.from(cells, (v) => v ?? "");

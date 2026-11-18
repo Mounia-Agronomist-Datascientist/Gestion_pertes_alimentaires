@@ -32,7 +32,8 @@ export const isMelbaExternalId = (externalId: string | null | undefined) => !!ex
  */
 export function tomeMaterials(lines: readonly TomeIngredientLine[]): TomeMaterial[] {
   const best = new Map<string, TomeIngredientLine>();
-  const rank = (l: TomeIngredientLine) => [l.costEur != null && l.quantity > 0 ? 1 : 0, gramsOf(1, l.unit) != null ? 1 : 0, l.quantity] as const;
+  const rank = (l: TomeIngredientLine) =>
+    [l.costEur != null && l.quantity > 0 ? 1 : 0, gramsOf(1, l.unit) != null ? 1 : 0, l.quantity] as const;
   const better = (a: TomeIngredientLine, b: TomeIngredientLine) => {
     const [ra, rb] = [rank(a), rank(b)];
     for (let i = 0; i < ra.length; i++) if (ra[i] !== rb[i]) return ra[i]! > rb[i]!;
@@ -70,10 +71,15 @@ export interface PriceVersion {
 export const PRICE_TOLERANCE = 0.005;
 
 const close = (a: number | null | undefined, b: number | null | undefined) =>
-  a == null || b == null ? (a ?? null) === (b ?? null) : a === b || Math.abs(a - b) <= PRICE_TOLERANCE * Math.max(Math.abs(a), Math.abs(b));
+  a == null || b == null
+    ? (a ?? null) === (b ?? null)
+    : a === b || Math.abs(a - b) <= PRICE_TOLERANCE * Math.max(Math.abs(a), Math.abs(b));
 
 /** Même unité et même prix (à l'arrondi du tome près) : pas de nouvelle version. */
-export const samePrice = (a: Omit<PriceVersion, "source" | "validFrom">, b: Omit<PriceVersion, "source" | "validFrom">) =>
+export const samePrice = (
+  a: Omit<PriceVersion, "source" | "validFrom">,
+  b: Omit<PriceVersion, "source" | "validFrom">,
+) =>
   (a.unit ?? null) === (b.unit ?? null) &&
   (a.unitWeightG ?? null) === (b.unitWeightG ?? null) &&
   close(a.perKgEur, b.perKgEur) &&
@@ -85,7 +91,12 @@ export const samePrice = (a: Omit<PriceVersion, "source" | "validFrom">, b: Omit
  */
 export function priceInForce<V extends PriceVersion>(versions: readonly V[], on: string): V | null {
   const started = versions.filter((v) => v.validFrom <= on);
-  const latest = (list: V[]) => list.reduce<V | null>((acc, v) => (!acc || v.validFrom > acc.validFrom || (v.validFrom === acc.validFrom && v.source === "manuel") ? v : acc), null);
+  const latest = (list: V[]) =>
+    list.reduce<V | null>(
+      (acc, v) =>
+        !acc || v.validFrom > acc.validFrom || (v.validFrom === acc.validFrom && v.source === "manuel") ? v : acc,
+      null,
+    );
   return latest(started.filter((v) => v.source !== "tome")) ?? latest(started.filter((v) => v.source === "tome"));
 }
 

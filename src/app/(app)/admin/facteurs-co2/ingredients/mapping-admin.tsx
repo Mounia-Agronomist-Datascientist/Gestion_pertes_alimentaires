@@ -32,12 +32,10 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 const valueOf = (m: MappingRow["mapping"]) => (!m ? "" : m.status === "famille" ? `f:${m.familyId}` : m.status);
 const entryOf = (row: MappingRow, value: string) =>
-  value.startsWith("f:") ? { key: row.key, label: row.label, status: "famille" as const, familyId: value.slice(2) } : { key: row.key, label: row.label, status: value as Status, familyId: null };
-const normalize = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
+  value.startsWith("f:")
+    ? { key: row.key, label: row.label, status: "famille" as const, familyId: value.slice(2) }
+    : { key: row.key, label: row.label, status: value as Status, familyId: null };
+const normalize = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families: FamilyOption[] }) {
   const [state, action, pending] = useActionState<FactorActionState, FormData>(ingredientMappingAction, {});
@@ -46,7 +44,9 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
   const [choices, setChoices] = useState<Record<string, string>>({});
   const categories = [...new Set(families.map((f) => f.category))];
   const familyName = new Map(families.map((f) => [`f:${f.id}`, f.name]));
-  const label = (value: string) => familyName.get(value) ?? (value === "non_couvert" ? "Non couvert" : value === "non_alimentaire" ? "Non alimentaire" : "");
+  const label = (value: string) =>
+    familyName.get(value) ??
+    (value === "non_couvert" ? "Non couvert" : value === "non_alimentaire" ? "Non alimentaire" : "");
 
   // Rattachement validé qui diffère de la suggestion actuelle (suggestions corrigées depuis) : à vérifier.
   const toReview = (r: MappingRow) => r.mapping != null && r.suggestion != null && valueOf(r.mapping) !== r.suggestion;
@@ -54,13 +54,15 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
     () =>
       rows.filter(
         (r) =>
-          (filter === "tous" || (filter === "a_revoir" ? toReview(r) : (filter === "rattaches") === (r.mapping != null))) &&
+          (filter === "tous" ||
+            (filter === "a_revoir" ? toReview(r) : (filter === "rattaches") === (r.mapping != null))) &&
           (!search.trim() || normalize(r.label).includes(normalize(search.trim()))),
       ),
     [rows, filter, search],
   );
   const reviewCount = rows.filter(toReview).length;
-  const choiceOf = (r: MappingRow) => choices[r.key] ?? (filter === "a_revoir" && r.suggestion ? r.suggestion : valueOf(r.mapping) || r.suggestion || "");
+  const choiceOf = (r: MappingRow) =>
+    choices[r.key] ?? (filter === "a_revoir" && r.suggestion ? r.suggestion : valueOf(r.mapping) || r.suggestion || "");
   const pendingSuggestions = shown.filter((r) => !r.mapping && choiceOf(r));
   // « À revoir » : remplacer les rattachements affichés par la suggestion actuelle (ou le choix fait dans la liste).
   const reviewed = filter === "a_revoir" ? shown.filter((r) => choiceOf(r) && choiceOf(r) !== valueOf(r.mapping)) : [];
@@ -71,8 +73,8 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
   return (
     <>
       <p className="text-sm text-slate-700">
-        {done} ingrédient{done > 1 ? "s" : ""} rattaché{done > 1 ? "s" : ""} sur {rows.length}, soit {usesTotal ? Math.round((usesDone / usesTotal) * 100) : 0} % des lignes de
-        recette.
+        {done} ingrédient{done > 1 ? "s" : ""} rattaché{done > 1 ? "s" : ""} sur {rows.length}, soit{" "}
+        {usesTotal ? Math.round((usesDone / usesTotal) * 100) : 0} % des lignes de recette.
       </p>
       <Feedback state={state} />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -90,14 +92,26 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
             </button>
           ))}
         </nav>
-        <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un ingrédient" className="field sm:ml-auto sm:w-64" aria-label="Rechercher un ingrédient" />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher un ingrédient"
+          className="field sm:ml-auto sm:w-64"
+          aria-label="Rechercher un ingrédient"
+        />
       </div>
       {pendingSuggestions.length > 0 && (
         <form action={action} className="flex flex-col gap-2 rounded-2xl bg-amber-50 p-4 text-amber-950">
-          <input type="hidden" name="entries" value={JSON.stringify(pendingSuggestions.map((r) => entryOf(r, choiceOf(r))))} />
+          <input
+            type="hidden"
+            name="entries"
+            value={JSON.stringify(pendingSuggestions.map((r) => entryOf(r, choiceOf(r))))}
+          />
           <p>
-            {pendingSuggestions.length} ingrédient{pendingSuggestions.length > 1 ? "s" : ""} affiché{pendingSuggestions.length > 1 ? "s" : ""} avec une famille proposée. Vérifiez la
-            liste ci-dessous, corrigez si besoin, puis validez.
+            {pendingSuggestions.length} ingrédient{pendingSuggestions.length > 1 ? "s" : ""} affiché
+            {pendingSuggestions.length > 1 ? "s" : ""} avec une famille proposée. Vérifiez la liste ci-dessous, corrigez
+            si besoin, puis validez.
           </p>
           <button type="submit" disabled={pending} className="btn-secondary">
             Valider les {pendingSuggestions.length} rattachements affichés
@@ -108,8 +122,9 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
         <form action={action} className="flex flex-col gap-2 rounded-2xl bg-amber-50 p-4 text-amber-950">
           <input type="hidden" name="entries" value={JSON.stringify(reviewed.map((r) => entryOf(r, choiceOf(r))))} />
           <p>
-            {reviewed.length} rattachement{reviewed.length > 1 ? "s" : ""} diffère{reviewed.length > 1 ? "nt" : ""} de la suggestion actuelle (familles ajoutées ou
-            suggestions corrigées depuis). Chaque liste affiche la suggestion ; pour garder votre choix précédent (écrit sous le nom), remettez-le dans la liste.
+            {reviewed.length} rattachement{reviewed.length > 1 ? "s" : ""} diffère{reviewed.length > 1 ? "nt" : ""} de
+            la suggestion actuelle (familles ajoutées ou suggestions corrigées depuis). Chaque liste affiche la
+            suggestion ; pour garder votre choix précédent (écrit sous le nom), remettez-le dans la liste.
           </p>
           <button type="submit" disabled={pending} className="btn-secondary">
             Appliquer les {reviewed.length} suggestions affichées
@@ -123,14 +138,25 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
           const saved = valueOf(r.mapping);
           const changed = choice !== saved;
           return (
-            <li key={r.key} className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-sm sm:flex-row sm:items-center">
+            <li
+              key={r.key}
+              className="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-sm sm:flex-row sm:items-center"
+            >
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="font-medium">{r.label}</span>
                 <span className="text-xs text-slate-600">
                   {r.uses} ligne{r.uses > 1 ? "s" : ""} de recette
-                  {r.mapping ? ` · rattaché : ${label(saved)}` : r.suggestion ? ` · proposé : ${label(r.suggestion)}` : " · aucune proposition"}
+                  {r.mapping
+                    ? ` · rattaché : ${label(saved)}`
+                    : r.suggestion
+                      ? ` · proposé : ${label(r.suggestion)}`
+                      : " · aucune proposition"}
                 </span>
-                {toReview(r) && <span className="text-xs text-amber-800">Suggestion actuelle : {label(r.suggestion!)}. À vérifier.</span>}
+                {toReview(r) && (
+                  <span className="text-xs text-amber-800">
+                    Suggestion actuelle : {label(r.suggestion!)}. À vérifier.
+                  </span>
+                )}
               </div>
               <form action={action} className="flex gap-2">
                 <input type="hidden" name="entries" value={choice ? JSON.stringify([entryOf(r, choice)]) : "[]"} />

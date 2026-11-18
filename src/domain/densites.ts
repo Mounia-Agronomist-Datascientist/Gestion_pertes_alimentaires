@@ -74,7 +74,8 @@ const OILS: [RegExp, ReferenceLiquid][] = [
 ];
 
 const of = (liquids: ReferenceLiquid[], approximate: boolean): ReferenceDensity => ({
-  densityKgPerL: Math.round((liquids.reduce((n, l) => n + REFERENCE_DENSITIES[l], 0) / liquids.length) * 10_000) / 10_000,
+  densityKgPerL:
+    Math.round((liquids.reduce((n, l) => n + REFERENCE_DENSITIES[l], 0) / liquids.length) * 10_000) / 10_000,
   liquids,
   approximate,
 });

@@ -14,15 +14,21 @@ import { saveWeekImport } from "@/modules/imports/service";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
 import type { PdfItem } from "@/modules/imports/tome/pdf-items";
 import { savePurchaseOrders } from "@/modules/matieres/bons-commande";
-import { categoriesForSetting, materialsOfWeek, setCategoriesStorage, StorageSettingError, storageSubzones } from "@/modules/matieres/semaine";
+import {
+  categoriesForSetting,
+  materialsOfWeek,
+  setCategoriesStorage,
+  StorageSettingError,
+  storageSubzones,
+} from "@/modules/matieres/semaine";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
 
 const DIR = "tests/fixtures/bons-commande";
 const orders = readdirSync(DIR).map((f) => {
-  const items = (JSON.parse(readFileSync(`${DIR}/${f}`, "utf8")) as [number, number, number, number, number, string][]).map(
-    ([page, x, y, width, size, text]): PdfItem => ({ page, x, y, width, size, text }),
-  );
+  const items = (
+    JSON.parse(readFileSync(`${DIR}/${f}`, "utf8")) as [number, number, number, number, number, string][]
+  ).map(([page, x, y, width, size, text]): PdfItem => ({ page, x, y, width, size, text }));
   const r = parsePurchaseOrder(f.replace(/\.items\.json$/, ".pdf"), items);
   if (!r.ok) throw new Error(r.error);
   return r.order;
@@ -32,13 +38,31 @@ describe("matières de la semaine en Réception et en Stockage", () => {
   let t: Awaited<ReturnType<typeof createTestDb>>;
   let admin: AuthUser;
   const weekId = async (number: number) =>
-    (await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, number))))[0]!.id;
+    (
+      await t.db
+        .select()
+        .from(s.productionWeeks)
+        .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, number)))
+    )[0]!.id;
 
   beforeAll(async () => {
     t = await createTestDb();
     await seed(t.db);
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    await saveWeekImport(t.db, admin, { preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())), tomeFileName: "tome.pdf", planFileName: "plan.xlsx", planSheetName: "S45" });
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    await saveWeekImport(t.db, admin, {
+      preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())),
+      tomeFileName: "tome.pdf",
+      planFileName: "plan.xlsx",
+      planSheetName: "S45",
+    });
     await savePurchaseOrders(t.db, admin, orders);
   });
 
@@ -71,7 +95,9 @@ describe("matières de la semaine en Réception et en Stockage", () => {
     expect(await setCategoriesStorage(t.db, admin, [{ categoryId: legume.id, subzoneId: legumerie.id }])).toBe(1);
     expect(await setCategoriesStorage(t.db, admin, [{ categoryId: legume.id, subzoneId: legumerie.id }])).toBe(0);
     const reception = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!;
-    await expect(setCategoriesStorage(t.db, admin, [{ categoryId: legume.id, subzoneId: reception.id }])).rejects.toBeInstanceOf(StorageSettingError);
+    await expect(
+      setCategoriesStorage(t.db, admin, [{ categoryId: legume.id, subzoneId: reception.id }]),
+    ).rejects.toBeInstanceOf(StorageSettingError);
     const audit = await t.db.select().from(s.auditLog).where(eq(s.auditLog.action, "set_category_storage"));
     expect(audit).toHaveLength(1);
 

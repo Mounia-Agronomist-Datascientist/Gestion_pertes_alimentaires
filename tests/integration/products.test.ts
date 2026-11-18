@@ -33,8 +33,25 @@ describe("référentiel des produits", () => {
     cuisine = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE")))[0]!.id;
     cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION")))[0]!.id;
     compost = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    teamUser = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-c", displayName: "Équipe C", roleCode: "equipe", teamId: teamC, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    teamUser = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-c",
+        displayName: "Équipe C",
+        roleCode: "equipe",
+        teamId: teamC,
+        password: "mot-de-passe-equipe",
+      }),
+    );
   });
 
   afterAll(async () => {
@@ -59,12 +76,26 @@ describe("référentiel des produits", () => {
     );
 
   it("crée un produit ; refuse un doublon de nom (accents et majuscules ignorés) ou de code", async () => {
-    const p = await createProduct(t.db, admin, { name: "Purée de carottes", category: "sous_recette", code: "SR-01", defaultUnit: "kg", unitWeightKg: "" });
+    const p = await createProduct(t.db, admin, {
+      name: "Purée de carottes",
+      category: "sous_recette",
+      code: "SR-01",
+      defaultUnit: "kg",
+      unitWeightKg: "",
+    });
     expect(p).toMatchObject({ name: "Purée de carottes", unitWeightKg: null, source: "manuel", active: true });
-    await expect(createProduct(t.db, admin, { name: "puree de CAROTTES", category: "sous_recette", defaultUnit: "kg" })).rejects.toThrow(/existe déjà/);
-    await expect(createProduct(t.db, admin, { name: "Autre", category: "sous_recette", code: "sr-01", defaultUnit: "kg" })).rejects.toThrow(/code/);
-    await expect(createProduct(t.db, admin, { name: "Purée de carottes", category: "recette", defaultUnit: "kg" })).resolves.toBeTruthy();
-    await expect(createProduct(t.db, admin, { name: "Négatif", category: "recette", defaultUnit: "kg", unitWeightKg: "-1" })).rejects.toThrow(/positive/);
+    await expect(
+      createProduct(t.db, admin, { name: "puree de CAROTTES", category: "sous_recette", defaultUnit: "kg" }),
+    ).rejects.toThrow(/existe déjà/);
+    await expect(
+      createProduct(t.db, admin, { name: "Autre", category: "sous_recette", code: "sr-01", defaultUnit: "kg" }),
+    ).rejects.toThrow(/code/);
+    await expect(
+      createProduct(t.db, admin, { name: "Purée de carottes", category: "recette", defaultUnit: "kg" }),
+    ).resolves.toBeTruthy();
+    await expect(
+      createProduct(t.db, admin, { name: "Négatif", category: "recette", defaultUnit: "kg", unitWeightKg: "-1" }),
+    ).rejects.toThrow(/positive/);
   });
 
   it("regroupe les saisies hors liste par nom et les rattache à un produit en gardant l'historique", async () => {
@@ -75,12 +106,27 @@ describe("référentiel des produits", () => {
     expect(group.count).toBe(2);
     expect(group.declarationIds).toContain(b.id);
 
-    const product = await createProduct(t.db, admin, { name: "Purée de carottes S46", category: "sous_recette", defaultUnit: "kg" });
+    const product = await createProduct(t.db, admin, {
+      name: "Purée de carottes S46",
+      category: "sous_recette",
+      defaultUnit: "kg",
+    });
     expect(await linkUnlistedGroup(t.db, admin, group.key, product.id, NOW)).toBe(2);
 
     const [d] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, a.id));
-    expect(d).toMatchObject({ productId: product.id, productUnlisted: false, productName: "Purée de carottes S46", netKg: 2, kgStatus: "pese", status: "corrigee", revision: 2 });
-    const revisions = await t.db.select().from(s.declarationRevisions).where(eq(s.declarationRevisions.declarationId, a.id));
+    expect(d).toMatchObject({
+      productId: product.id,
+      productUnlisted: false,
+      productName: "Purée de carottes S46",
+      netKg: 2,
+      kgStatus: "pese",
+      status: "corrigee",
+      revision: 2,
+    });
+    const revisions = await t.db
+      .select()
+      .from(s.declarationRevisions)
+      .where(eq(s.declarationRevisions.declarationId, a.id));
     expect(revisions.map((r) => r.revision).sort()).toEqual([1, 2]);
     expect(revisions.find((r) => r.revision === 2)?.reason).toMatch(/Rattachement/);
     expect((await listUnlistedGroups(t.db, admin)).some((g) => g.key === group.key)).toBe(false);
@@ -90,12 +136,25 @@ describe("référentiel des produits", () => {
   it("un comptage en pièces est converti en kg si le produit a un poids unitaire", async () => {
     const d = await declareUnlisted("Galette maison", 10, "piece", "comptage");
     expect(d.kgStatus).toBe("non_converti");
-    const product = await createProduct(t.db, admin, { name: "Galette", category: "sous_recette", defaultUnit: "piece", unitWeightKg: "0,12" });
+    const product = await createProduct(t.db, admin, {
+      name: "Galette",
+      category: "sous_recette",
+      defaultUnit: "piece",
+      unitWeightKg: "0,12",
+    });
     const group = (await listUnlistedGroups(t.db, admin)).find((g) => g.declarationIds.includes(d.id))!;
     await linkUnlistedGroup(t.db, admin, group.key, product.id, NOW);
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
-    expect(row).toMatchObject({ netKg: 1.2, kgStatus: "converti", conversionFactorUsed: 0.12, measurementMethod: "conversion_reference" });
-    const [dest] = await t.db.select().from(s.declarationDestinations).where(and(eq(s.declarationDestinations.declarationId, d.id), eq(s.declarationDestinations.revision, 2)));
+    expect(row).toMatchObject({
+      netKg: 1.2,
+      kgStatus: "converti",
+      conversionFactorUsed: 0.12,
+      measurementMethod: "conversion_reference",
+    });
+    const [dest] = await t.db
+      .select()
+      .from(s.declarationDestinations)
+      .where(and(eq(s.declarationDestinations.declarationId, d.id), eq(s.declarationDestinations.revision, 2)));
     expect(dest?.netKg).toBe(1.2);
   });
 
@@ -115,11 +174,23 @@ describe("référentiel des produits", () => {
       },
       NOW,
     );
-    const product = await createProduct(t.db, admin, { name: "Riz pilaf", category: "sous_recette", defaultUnit: "kg" });
+    const product = await createProduct(t.db, admin, {
+      name: "Riz pilaf",
+      category: "sous_recette",
+      defaultUnit: "kg",
+    });
     const group = (await listUnlistedGroups(t.db, admin)).find((g) => g.declarationIds.includes(d.id))!;
     await linkUnlistedGroup(t.db, admin, group.key, product.id, NOW);
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
-    expect(row).toMatchObject({ productId: product.id, productUnlisted: false, productName: "Riz pilaf", tareTotalKg: 2.2, netKg: 10, kgStatus: "pese", revision: 2 });
+    expect(row).toMatchObject({
+      productId: product.id,
+      productUnlisted: false,
+      productName: "Riz pilaf",
+      tareTotalKg: 2.2,
+      netKg: 10,
+      kgStatus: "pese",
+      revision: 2,
+    });
     const containers = await t.db
       .select()
       .from(s.declarationContainers)
@@ -132,7 +203,11 @@ describe("référentiel des produits", () => {
     const d = await declareUnlisted("Taboulé", 1, "kg", "pesee");
     const group = (await listUnlistedGroups(t.db, admin)).find((g) => g.declarationIds.includes(d.id))!;
     await linkUnlistedGroup(t.db, admin, group.key, product.id, NOW);
-    await updateProduct(t.db, admin, product.id, { name: "Taboulé oriental", category: "sous_recette", defaultUnit: "kg" });
+    await updateProduct(t.db, admin, product.id, {
+      name: "Taboulé oriental",
+      category: "sous_recette",
+      defaultUnit: "kg",
+    });
     await setProductActive(t.db, admin, product.id, false);
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
     expect(row?.productName).toBe("Taboulé");
@@ -142,7 +217,9 @@ describe("référentiel des produits", () => {
   });
 
   it("réserve la gestion des produits à l'administration", async () => {
-    await expect(createProduct(t.db, teamUser, { name: "X produit", category: "recette", defaultUnit: "kg" })).rejects.toThrow(ForbiddenError);
+    await expect(
+      createProduct(t.db, teamUser, { name: "X produit", category: "recette", defaultUnit: "kg" }),
+    ).rejects.toThrow(ForbiddenError);
     await expect(listUnlistedGroups(t.db, teamUser)).rejects.toThrow(ForbiddenError);
     expect(await countUnlistedDeclarations(t.db)).toBeGreaterThan(0);
   });

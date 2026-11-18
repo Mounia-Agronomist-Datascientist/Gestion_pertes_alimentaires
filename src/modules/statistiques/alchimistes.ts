@@ -41,12 +41,25 @@ export async function alchimistesReconciliation(db: Db, user: AuthUser, anchor: 
   const to = [end, months.at(-1)!.to].sort().at(-1)!;
 
   const [[destination], facts, collections, imports] = await Promise.all([
-    db.select({ id: s.destinations.id, name: s.destinations.name }).from(s.destinations).where(eq(s.destinations.code, ALCHIMISTES_CODE)),
+    db
+      .select({ id: s.destinations.id, name: s.destinations.name })
+      .from(s.destinations)
+      .where(eq(s.destinations.code, ALCHIMISTES_CODE)),
     loadFacts(db, user, { kind: "periode", from, to }),
     db
-      .select({ date: s.alchimistesCollections.collectedOn, weekId: s.alchimistesCollections.productionWeekId, kg: s.alchimistesCollections.netKg })
+      .select({
+        date: s.alchimistesCollections.collectedOn,
+        weekId: s.alchimistesCollections.productionWeekId,
+        kg: s.alchimistesCollections.netKg,
+      })
       .from(s.alchimistesCollections)
-      .where(and(isNull(s.alchimistesCollections.replacedByImportId), gte(s.alchimistesCollections.collectedOn, from), lte(s.alchimistesCollections.collectedOn, to))),
+      .where(
+        and(
+          isNull(s.alchimistesCollections.replacedByImportId),
+          gte(s.alchimistesCollections.collectedOn, from),
+          lte(s.alchimistesCollections.collectedOn, to),
+        ),
+      ),
     db
       .select({ from: s.alchimistesImports.periodFrom, to: s.alchimistesImports.periodTo })
       .from(s.alchimistesImports)
@@ -57,7 +70,12 @@ export async function alchimistesReconciliation(db: Db, user: AuthUser, anchor: 
   const lines = facts.flatMap((f) =>
     f.destinations
       .filter((d) => d.destinationId === destination?.id)
-      .map((d) => ({ date: f.occurredOn, weekId: f.productionWeekId, kg: f.food ? d.netKg : null, notConverted: f.food && d.netKg == null })),
+      .map((d) => ({
+        date: f.occurredOn,
+        weekId: f.productionWeekId,
+        kg: f.food ? d.netKg : null,
+        notConverted: f.food && d.netKg == null,
+      })),
   );
   const row = (inPeriod: (x: { date: string; weekId: string }) => boolean, periodFrom: string, periodTo: string) => {
     const declared = lines.filter(inPeriod);
@@ -110,6 +128,11 @@ export async function weekCollections(db: Db, user: AuthUser, weekIds: readonly 
       incident: s.alchimistesCollections.incident,
     })
     .from(s.alchimistesCollections)
-    .where(and(isNull(s.alchimistesCollections.replacedByImportId), inArray(s.alchimistesCollections.productionWeekId, [...weekIds])))
+    .where(
+      and(
+        isNull(s.alchimistesCollections.replacedByImportId),
+        inArray(s.alchimistesCollections.productionWeekId, [...weekIds]),
+      ),
+    )
     .orderBy(s.alchimistesCollections.collectedOn);
 }

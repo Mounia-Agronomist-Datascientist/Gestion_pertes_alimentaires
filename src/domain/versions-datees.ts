@@ -5,18 +5,23 @@
  */
 import type { LocalDate } from "./semaine-production";
 
-export type DatedChange =
-  | { kind: "nouvelle" }
-  | { kind: "correction" }
-  | { kind: "refus"; message: string };
+export type DatedChange = { kind: "nouvelle" } | { kind: "correction" } | { kind: "refus"; message: string };
 
 const fr = (date: LocalDate) => date.split("-").reverse().join("/");
 
-export function datedChange(latest: { validFrom: LocalDate } | null | undefined, validFrom: LocalDate, today: LocalDate): DatedChange {
+export function datedChange(
+  latest: { validFrom: LocalDate } | null | undefined,
+  validFrom: LocalDate,
+  today: LocalDate,
+): DatedChange {
   if (!latest || validFrom > latest.validFrom) return { kind: "nouvelle" };
   if (validFrom < latest.validFrom) {
-    return { kind: "refus", message: `Une valeur plus récente existe déjà (à partir du ${fr(latest.validFrom)}) : choisissez une date ultérieure` };
+    return {
+      kind: "refus",
+      message: `Une valeur plus récente existe déjà (à partir du ${fr(latest.validFrom)}) : choisissez une date ultérieure`,
+    };
   }
-  if (latest.validFrom < today) return { kind: "refus", message: "Cette valeur est déjà appliquée : choisissez une date de début ultérieure" };
+  if (latest.validFrom < today)
+    return { kind: "refus", message: "Cette valeur est déjà appliquée : choisissez une date de début ultérieure" };
   return { kind: "correction" };
 }

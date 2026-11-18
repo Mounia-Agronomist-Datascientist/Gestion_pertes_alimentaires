@@ -30,7 +30,14 @@ export function LoginForm({ error, login }: { error?: string; login?: string }) 
       </label>
       <label className="flex flex-col gap-1">
         <span className="font-medium">Mot de passe</span>
-        <input name="password" type="password" autoComplete="current-password" required autoFocus={!!login} className="field" />
+        <input
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          autoFocus={!!login}
+          className="field"
+        />
       </label>
       {message && (
         <p role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">

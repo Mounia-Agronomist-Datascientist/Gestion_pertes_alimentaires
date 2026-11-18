@@ -58,10 +58,7 @@ export const users = pgTable(
   },
   (t) => [
     unique("users_login_key").on(t.login),
-    check(
-      "users_team_account_has_team",
-      sql`(${t.roleCode} = 'equipe') = (${t.teamId} is not null)`,
-    ),
+    check("users_team_account_has_team", sql`(${t.roleCode} = 'equipe') = (${t.teamId} is not null)`),
   ],
 );
 

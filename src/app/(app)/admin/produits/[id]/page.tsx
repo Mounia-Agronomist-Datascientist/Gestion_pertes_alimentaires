@@ -20,7 +20,11 @@ export default async function ProductSheetPage({ params }: { params: Promise<{ i
   const [sheet, choices, units, suppliers] = await Promise.all([
     productSheet(db, admin, id, today),
     placementChoices(db),
-    db.select({ code: s.units.code, label: s.units.label }).from(s.units).where(eq(s.units.active, true)).orderBy(asc(s.units.code)),
+    db
+      .select({ code: s.units.code, label: s.units.label })
+      .from(s.units)
+      .where(eq(s.units.active, true))
+      .orderBy(asc(s.units.code)),
     supplierChoices(db),
   ]);
   if (!sheet) notFound();
@@ -60,7 +64,10 @@ export default async function ProductSheetPage({ params }: { params: Promise<{ i
           storageSubzoneId: p.storageSubzoneId,
         }}
         packagings={sheet.packagings}
-        manualPackagings={sheet.manualPackagings.map(({ updatedAt, ...k }) => ({ ...k, updatedOn: toProductionLocalDate(updatedAt) }))}
+        manualPackagings={sheet.manualPackagings.map(({ updatedAt, ...k }) => ({
+          ...k,
+          updatedOn: toProductionLocalDate(updatedAt),
+        }))}
         suppliers={suppliers}
         contentUnits={[...PACKAGING_CONTENT_UNITS]}
         prices={sheet.prices}

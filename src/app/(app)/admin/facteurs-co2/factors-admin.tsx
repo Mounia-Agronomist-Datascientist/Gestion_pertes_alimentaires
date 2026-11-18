@@ -31,8 +31,14 @@ export interface FamilyView {
 }
 
 const value = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 3 });
-const date = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" }) : "");
-const STATUS: Record<FactorView["status"], string> = { propose: "Proposé", valide: "Validé", remplace: "Remplacé", refuse: "Refusé" };
+const date = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" }) : "";
+const STATUS: Record<FactorView["status"], string> = {
+  propose: "Proposé",
+  valide: "Validé",
+  remplace: "Remplacé",
+  refuse: "Refusé",
+};
 
 function FactorDetail({ f }: { f: FactorView }) {
   return (
@@ -48,11 +54,16 @@ function FactorDetail({ f }: { f: FactorView }) {
         {f.referenceDate && `, données du ${date(f.referenceDate)}`}
       </p>
       <details>
-        <summary className="cursor-pointer text-slate-700">{f.stages ? "Détail par étape et hypothèses" : "Hypothèses"}</summary>
+        <summary className="cursor-pointer text-slate-700">
+          {f.stages ? "Détail par étape et hypothèses" : "Hypothèses"}
+        </summary>
         {f.stages && (
           <ul className="mt-1 flex flex-col gap-0.5 pl-1">
             {f.stages.map((s) => (
-              <li key={s.label} className={`flex justify-between gap-3 tabular-nums ${s.retained ? "" : "text-slate-500"}`}>
+              <li
+                key={s.label}
+                className={`flex justify-between gap-3 tabular-nums ${s.retained ? "" : "text-slate-500"}`}
+              >
                 <span>
                   {s.label}
                   {!s.retained && " (non retenue)"}
@@ -81,9 +92,11 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
         <form action={action} className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
           <input type="hidden" name="intent" value="load" />
           <p>
-            {families.length === 0 ? "Aucune famille pour l'instant." : `${missing} famille${missing > 1 ? "s" : ""} de la proposition ${missing > 1 ? "manquent" : "manque"}.`} La
-            proposition compte des familles alimentaires et, pour chacune, un produit cru représentatif tiré d&apos;Agribalyse 3.2. Rien n&apos;est
-            utilisé avant votre validation.
+            {families.length === 0
+              ? "Aucune famille pour l'instant."
+              : `${missing} famille${missing > 1 ? "s" : ""} de la proposition ${missing > 1 ? "manquent" : "manque"}.`}{" "}
+            La proposition compte des familles alimentaires et, pour chacune, un produit cru représentatif tiré
+            d&apos;Agribalyse 3.2. Rien n&apos;est utilisé avant votre validation.
           </p>
           <button type="submit" disabled={pending} className="btn-primary">
             Charger la proposition Agribalyse
@@ -100,7 +113,8 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
             <strong>
               {proposals.length} facteur{proposals.length > 1 ? "s" : ""} à valider.
             </strong>{" "}
-            Vérifiez le produit retenu et la valeur de chaque famille ci-dessous. Vous pouvez valider une par une, refuser, ou proposer une autre valeur.
+            Vérifiez le produit retenu et la valeur de chaque famille ci-dessous. Vous pouvez valider une par une,
+            refuser, ou proposer une autre valeur.
           </p>
           <button type="submit" disabled={pending} className="btn-secondary">
             Valider les {proposals.length} propositions
@@ -113,8 +127,8 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
         <form action={action} className="mt-3 flex flex-col gap-2">
           <input type="hidden" name="intent" value="family" />
           <p className="text-sm text-slate-600">
-            Pour un produit qu&apos;aucune famille ne couvre. La famille est créée sans valeur : proposez ensuite sa valeur avec sa source (Agribalyse,
-            fiche fournisseur…), puis validez-la.
+            Pour un produit qu&apos;aucune famille ne couvre. La famille est créée sans valeur : proposez ensuite sa
+            valeur avec sa source (Agribalyse, fiche fournisseur…), puis validez-la.
           </p>
           <label className="flex flex-col gap-1">
             <span className="font-medium">Nom</span>
@@ -146,7 +160,9 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="font-semibold">{f.name}</span>
                     <span className={`text-sm ${f.current ? "text-emerald-800" : "text-slate-600"}`}>
-                      {f.current ? `${value.format(f.current.kgCo2ePerKg)} kg CO2e / kg · validé (v${f.current.version})` : "Pas de facteur validé"}
+                      {f.current
+                        ? `${value.format(f.current.kgCo2ePerKg)} kg CO2e / kg · validé (v${f.current.version})`
+                        : "Pas de facteur validé"}
                     </span>
                   </div>
                   {f.current && !f.proposal && <FactorDetail f={f.current} />}
@@ -182,7 +198,12 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
                       </label>
                       <label className="flex flex-col gap-1">
                         <span className="font-medium">Source</span>
-                        <input name="source" required className="field" placeholder="ex. AGRIBALYSE (ADEME), fiche fournisseur" />
+                        <input
+                          name="source"
+                          required
+                          className="field"
+                          placeholder="ex. AGRIBALYSE (ADEME), fiche fournisseur"
+                        />
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         <label className="flex flex-col gap-1">
@@ -206,16 +227,24 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
                           Annuler
                         </button>
                       </div>
-                      <p className="text-xs text-slate-500">La valeur devra ensuite être validée ; l&apos;ancienne version reste conservée.</p>
+                      <p className="text-xs text-slate-500">
+                        La valeur devra ensuite être validée ; l&apos;ancienne version reste conservée.
+                      </p>
                     </form>
                   ) : (
-                    <button type="button" className="self-start text-sm font-medium text-teal-800 underline" onClick={() => setEditing(f.id)}>
+                    <button
+                      type="button"
+                      className="self-start text-sm font-medium text-teal-800 underline"
+                      onClick={() => setEditing(f.id)}
+                    >
                       Proposer une autre valeur
                     </button>
                   )}
                   {f.versions.length > 1 && (
                     <details className="text-sm">
-                      <summary className="cursor-pointer text-slate-700">Historique ({f.versions.length} versions)</summary>
+                      <summary className="cursor-pointer text-slate-700">
+                        Historique ({f.versions.length} versions)
+                      </summary>
                       <ul className="mt-1 flex flex-col gap-1">
                         {f.versions.map((v) => (
                           <li key={v.id} className="text-slate-600">

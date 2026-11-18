@@ -29,7 +29,17 @@ describe("alertes : causes récurrentes", () => {
     cuisine = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE")))[0]!.id;
     for (const r of await t.db.select().from(s.causes)) if (r.code) cause[r.code] = r.id;
     compost = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
-    const mk = async (login: string, teamId: string) => loadAuthUser(t.db, await createAccount(t.db, { login, displayName: login, roleCode: "equipe", teamId, password: "mot-de-passe-test" }));
+    const mk = async (login: string, teamId: string) =>
+      loadAuthUser(
+        t.db,
+        await createAccount(t.db, {
+          login,
+          displayName: login,
+          roleCode: "equipe",
+          teamId,
+          password: "mot-de-passe-test",
+        }),
+      );
     teamC = await mk("equipe-c", team.C!);
     teamA = await mk("equipe-a", team.A!);
     // Pas de perte inhabituelle dans ces données : seules les causes récurrentes sont attendues.
@@ -71,7 +81,15 @@ describe("alertes : causes récurrentes", () => {
     expect(result).toMatchObject({ weeks: 3, created: 1 });
     const [alert, ...others] = await t.db.select().from(s.lossAlerts);
     expect(others).toEqual([]);
-    expect(alert).toMatchObject({ kind: "cause_recurrente", scope: "equipe", subjectKey: team.C, teamId: team.C, measure: "kg", value: 6, referenceWeeks: 3 });
+    expect(alert).toMatchObject({
+      kind: "cause_recurrente",
+      scope: "equipe",
+      subjectKey: team.C,
+      teamId: team.C,
+      measure: "kg",
+      value: 6,
+      referenceWeeks: 3,
+    });
     expect(alert!.details).toEqual({
       causeId: cause.ERREUR_PREPARATION,
       causeName: expect.any(String),
@@ -85,6 +103,8 @@ describe("alertes : causes récurrentes", () => {
 
   it("ne remonte pas avant la mise en service", async () => {
     await t.db.delete(s.lossAlerts);
-    expect(await evaluateLossAlerts(t.db, { startDate: "2026-10-22", now: THURSDAY_S46 })).toMatchObject({ created: 0 });
+    expect(await evaluateLossAlerts(t.db, { startDate: "2026-10-22", now: THURSDAY_S46 })).toMatchObject({
+      created: 0,
+    });
   });
 });

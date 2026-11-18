@@ -30,12 +30,31 @@ describe("recettes récupérées et coût net", () => {
     await seed(t.db);
     await allowDeclaredSales(t.db);
     const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
     teamD = await loadAuthUser(
       t.db,
-      await createAccount(t.db, { login: "equipe-d", displayName: "Équipe D", roleCode: "equipe", teamId: await id(t.db.select().from(s.teams).where(eq(s.teams.letter, "D"))), password: "mot-de-passe-equipe" }),
+      await createAccount(t.db, {
+        login: "equipe-d",
+        displayName: "Équipe D",
+        roleCode: "equipe",
+        teamId: await id(t.db.select().from(s.teams).where(eq(s.teams.letter, "D"))),
+        password: "mot-de-passe-equipe",
+      }),
     );
-    await saveWeekImport(t.db, admin, { preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())), tomeFileName: "t.pdf", planFileName: "p.xlsx", planSheetName: "S45" });
+    await saveWeekImport(t.db, admin, {
+      preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())),
+      tomeFileName: "t.pdf",
+      planFileName: "p.xlsx",
+      planSheetName: "S45",
+    });
     vi01 = (await weekCatalogs(t.db, teamD, "2026-11-02"))[0]!.dishes.find((d) => d.code === "VI01")!.id;
     ref = {
       cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE"))),
@@ -65,7 +84,8 @@ describe("recettes récupérées et coût net", () => {
       },
       NOW,
     );
-  const load = async (id: string) => (await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, id)))[0]!;
+  const load = async (id: string) =>
+    (await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, id)))[0]!;
 
   it("montant encaissé saisi à la déclaration : coût net = brut − recettes", async () => {
     const r = await declare([
@@ -76,7 +96,9 @@ describe("recettes récupérées et coût net", () => {
   });
 
   it("refuse un montant sur une destination qui n'est pas une vente", async () => {
-    await expect(declare([{ destinationId: ref.compost, quantity: 10, binNumber: "1", recoveredAmountEur: 2 }])).rejects.toThrow(/ne rapporte pas de recette/);
+    await expect(
+      declare([{ destinationId: ref.compost, quantity: 10, binNumber: "1", recoveredAmountEur: 2 }]),
+    ).rejects.toThrow(/ne rapporte pas de recette/);
   });
 
   it("recette complétée plus tard : nouvelle version, coût brut inchangé", async () => {
@@ -84,16 +106,29 @@ describe("recettes récupérées et coût net", () => {
     expect(await load(r.id)).toMatchObject({ recoveredEur: null, netCostEur: 13.3 });
     await setRecoveredAmounts(t.db, admin, r.id, { expectedRevision: 1, amounts: { [ref.tgtg!]: 7.99 } }, NOW);
     const after = await load(r.id);
-    expect(after).toMatchObject({ revision: 2, status: "corrigee", grossCostEur: 13.3, recoveredEur: 7.99, netCostEur: 5.31 });
+    expect(after).toMatchObject({
+      revision: 2,
+      status: "corrigee",
+      grossCostEur: 13.3,
+      recoveredEur: 7.99,
+      netCostEur: 5.31,
+    });
     const [line] = await t.db
       .select()
       .from(s.declarationDestinations)
       .where(and(eq(s.declarationDestinations.declarationId, r.id), eq(s.declarationDestinations.revision, 2)));
     expect(line?.recoveredAmount).toBe(7.99);
-    const [rev] = await t.db.select().from(s.declarationRevisions).where(and(eq(s.declarationRevisions.declarationId, r.id), eq(s.declarationRevisions.revision, 2)));
+    const [rev] = await t.db
+      .select()
+      .from(s.declarationRevisions)
+      .where(and(eq(s.declarationRevisions.declarationId, r.id), eq(s.declarationRevisions.revision, 2)));
     expect(rev?.reason).toBe("Recette encaissée");
-    await expect(setRecoveredAmounts(t.db, admin, r.id, { expectedRevision: 1, amounts: { [ref.tgtg!]: 1 } }, NOW)).rejects.toThrow();
-    await expect(setRecoveredAmounts(t.db, admin, r.id, { expectedRevision: 2, amounts: { [ref.compost!]: 1 } }, NOW)).rejects.toThrow(/introuvable|recette/);
+    await expect(
+      setRecoveredAmounts(t.db, admin, r.id, { expectedRevision: 1, amounts: { [ref.tgtg!]: 1 } }, NOW),
+    ).rejects.toThrow();
+    await expect(
+      setRecoveredAmounts(t.db, admin, r.id, { expectedRevision: 2, amounts: { [ref.compost!]: 1 } }, NOW),
+    ).rejects.toThrow(/introuvable|recette/);
   });
 
   it("valorisation : ventes avec recette (dernière version), compost sans recette, coût au prorata", async () => {

@@ -1,5 +1,18 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  date,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { weekRecipes } from "./imports";
 import { productionWeeks } from "./production-weeks";
@@ -30,7 +43,10 @@ export const surplusImports = pgTable(
     periodFrom: date("period_from", { mode: "string" }).notNull(),
     periodTo: date("period_to", { mode: "string" }).notNull(),
     entries: integer("entries").notNull(),
-    anomalies: jsonb("anomalies").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    anomalies: jsonb("anomalies")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id),

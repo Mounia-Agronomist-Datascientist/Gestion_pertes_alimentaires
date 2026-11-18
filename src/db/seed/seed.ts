@@ -25,8 +25,14 @@ import {
  */
 export async function seed(db: Db): Promise<void> {
   await db.transaction(async (tx) => {
-    await tx.insert(schema.roles).values([...ROLES]).onConflictDoNothing();
-    await tx.insert(schema.permissions).values([...PERMISSIONS]).onConflictDoNothing();
+    await tx
+      .insert(schema.roles)
+      .values([...ROLES])
+      .onConflictDoNothing();
+    await tx
+      .insert(schema.permissions)
+      .values([...PERMISSIONS])
+      .onConflictDoNothing();
     await tx
       .insert(schema.rolePermissions)
       .values(
@@ -55,7 +61,9 @@ export async function seed(db: Db): Promise<void> {
     const weekRows = await tx.select().from(schema.productionWeeks);
     await tx
       .insert(schema.productionDays)
-      .values(weekRows.flatMap((w) => defaultProductionDays(w.startDate).map((day) => ({ day, productionWeekId: w.id }))))
+      .values(
+        weekRows.flatMap((w) => defaultProductionDays(w.startDate).map((day) => ({ day, productionWeekId: w.id }))),
+      )
       .onConflictDoNothing();
 
     await tx
@@ -97,7 +105,12 @@ export async function seed(db: Db): Promise<void> {
     const causeRows = await tx
       .select({ id: schema.causes.id, code: schema.causes.code })
       .from(schema.causes)
-      .where(inArray(schema.causes.code, allCauses.map((c) => c.code)));
+      .where(
+        inArray(
+          schema.causes.code,
+          allCauses.map((c) => c.code),
+        ),
+      );
     const causeId = new Map(causeRows.map((c) => [c.code, c.id]));
     await tx
       .insert(schema.causeZones)

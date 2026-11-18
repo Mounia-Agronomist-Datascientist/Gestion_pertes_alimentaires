@@ -17,8 +17,9 @@ export default async function SuppliersPage() {
       </Link>
       <h1 className="text-2xl font-bold">Fournisseurs</h1>
       <p className="text-slate-600">
-        Les fournisseurs arrivent avec les bons de commande (Administration → Import). Seul leur nom est gardé, jamais leurs contacts. Un nom
-        modifié ici reste : un bon déposé ensuite retrouve le fournisseur par le nom de son fichier, sans le renommer.
+        Les fournisseurs arrivent avec les bons de commande (Administration → Import). Seul leur nom est gardé, jamais
+        leurs contacts. Un nom modifié ici reste : un bon déposé ensuite retrouve le fournisseur par le nom de son
+        fichier, sans le renommer.
       </p>
       {suppliers.length === 0 ? (
         <p className="rounded-2xl bg-white p-4 shadow-sm">Aucun fournisseur pour l&apos;instant.</p>

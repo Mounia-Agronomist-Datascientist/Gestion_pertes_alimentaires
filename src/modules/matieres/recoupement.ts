@@ -16,10 +16,18 @@ export async function reconciliationWeeks(db: Db, user: AuthUser) {
   requirePermission(user, "referentiel.manage");
   const [weeks, tomes, orders] = await Promise.all([
     db
-      .select({ id: s.productionWeeks.id, year: s.productionWeeks.year, number: s.productionWeeks.number, startDate: s.productionWeeks.startDate })
+      .select({
+        id: s.productionWeeks.id,
+        year: s.productionWeeks.year,
+        number: s.productionWeeks.number,
+        startDate: s.productionWeeks.startDate,
+      })
       .from(s.productionWeeks)
       .orderBy(desc(s.productionWeeks.startDate)),
-    db.select({ weekId: s.weeklyImports.productionWeekId }).from(s.weeklyImports).where(eq(s.weeklyImports.status, "validee")),
+    db
+      .select({ weekId: s.weeklyImports.productionWeekId })
+      .from(s.weeklyImports)
+      .where(eq(s.weeklyImports.status, "validee")),
     db
       .select({ weekId: s.purchaseOrders.productionWeekId, n: sql<number>`count(*)::int` })
       .from(s.purchaseOrders)
@@ -88,7 +96,11 @@ export async function weekReconciliation(db: Db, user: AuthUser, weekId: string)
   const tomeKeys = [...new Set(tomeLines.map((l) => l.key).filter(Boolean))];
   const lastOrders: LastOrder[] = tomeKeys.length
     ? await db
-        .selectDistinctOn([s.purchaseOrderLines.key], { key: s.purchaseOrderLines.key, supplier: s.suppliers.name, deliveryDate: s.purchaseOrders.deliveryDate })
+        .selectDistinctOn([s.purchaseOrderLines.key], {
+          key: s.purchaseOrderLines.key,
+          supplier: s.suppliers.name,
+          deliveryDate: s.purchaseOrders.deliveryDate,
+        })
         .from(s.purchaseOrderLines)
         .innerJoin(s.purchaseOrders, eq(s.purchaseOrderLines.orderId, s.purchaseOrders.id))
         .innerJoin(s.suppliers, eq(s.purchaseOrders.supplierId, s.suppliers.id))
@@ -101,11 +113,22 @@ export async function weekReconciliation(db: Db, user: AuthUser, weekId: string)
   const otherTomeKeys = new Map<string, string[]>();
   if (strayKeys.length) {
     const rows = await db
-      .selectDistinct({ key: s.weekRecipeLines.key, year: s.productionWeeks.year, number: s.productionWeeks.number, startDate: s.productionWeeks.startDate })
+      .selectDistinct({
+        key: s.weekRecipeLines.key,
+        year: s.productionWeeks.year,
+        number: s.productionWeeks.number,
+        startDate: s.productionWeeks.startDate,
+      })
       .from(s.weekRecipeLines)
       .innerJoin(s.weeklyImports, eq(s.weekRecipeLines.importId, s.weeklyImports.id))
       .innerJoin(s.productionWeeks, eq(s.weeklyImports.productionWeekId, s.productionWeeks.id))
-      .where(and(inArray(s.weekRecipeLines.key, strayKeys), eq(s.weeklyImports.status, "validee"), ne(s.productionWeeks.id, week.id)))
+      .where(
+        and(
+          inArray(s.weekRecipeLines.key, strayKeys),
+          eq(s.weeklyImports.status, "validee"),
+          ne(s.productionWeeks.id, week.id),
+        ),
+      )
       .orderBy(s.productionWeeks.startDate);
     for (const r of rows) otherTomeKeys.set(r.key, [...(otherTomeKeys.get(r.key) ?? []), formatProductionWeek(r)]);
   }

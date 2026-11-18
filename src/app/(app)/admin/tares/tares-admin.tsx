@@ -10,7 +10,14 @@ interface Container {
   maxCount: number | null;
   active: boolean;
   currentTareKg: number | null;
-  versions: { id: string; unitTareKg: number; validFrom: string; validTo: string | null; source: string | null; used: boolean }[];
+  versions: {
+    id: string;
+    unitTareKg: number;
+    validFrom: string;
+    validTo: string | null;
+    source: string | null;
+    used: boolean;
+  }[];
 }
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" });
@@ -44,15 +51,24 @@ export function TaresAdmin({ containers, today }: { containers: Container[]; tod
         {containers
           .filter((c) => c.kind === kind)
           .map((c) => (
-            <li key={c.id} className={`flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ${c.active ? "" : "opacity-60"}`}>
+            <li
+              key={c.id}
+              className={`flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ${c.active ? "" : "opacity-60"}`}
+            >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="font-semibold">
                   {c.name}
-                  {!c.active && <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>}
+                  {!c.active && (
+                    <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>
+                  )}
                 </span>
-                <span className="text-lg font-bold">{c.currentTareKg != null ? fmtKg(c.currentTareKg) : "Pas de tare en vigueur"}</span>
+                <span className="text-lg font-bold">
+                  {c.currentTareKg != null ? fmtKg(c.currentTareKg) : "Pas de tare en vigueur"}
+                </span>
               </div>
-              {c.kind === "gastro" && <span className="text-sm text-slate-600">Maximum {c.maxCount ?? "—"} par pesée</span>}
+              {c.kind === "gastro" && (
+                <span className="text-sm text-slate-600">Maximum {c.maxCount ?? "—"} par pesée</span>
+              )}
 
               {editing === c.id ? (
                 <div className="flex flex-col gap-3">
@@ -101,7 +117,11 @@ export function TaresAdmin({ containers, today }: { containers: Container[]; tod
                 <form action={action} className="flex gap-4">
                   <input type="hidden" name="containerTypeId" value={c.id} />
                   <input type="hidden" name="name" value={c.name} />
-                  <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(c.id)}>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-teal-800 underline"
+                    onClick={() => setEditing(c.id)}
+                  >
                     Modifier
                   </button>
                   <button
@@ -122,7 +142,9 @@ export function TaresAdmin({ containers, today }: { containers: Container[]; tod
                     <li key={v.id}>
                       {fmtKg(v.unitTareKg)} — du {fmtDay(v.validFrom)}
                       {v.validTo && ` au ${fmtDay(v.validTo)}`}
-                      {v.validFrom > today ? " (à venir)" : (v.validTo == null || v.validTo >= today) && " (en vigueur)"}
+                      {v.validFrom > today
+                        ? " (à venir)"
+                        : (v.validTo == null || v.validTo >= today) && " (en vigueur)"}
                       {v.source && ` · ${v.source}`}
                       {v.used && " · utilisée dans des pertes"}
                     </li>

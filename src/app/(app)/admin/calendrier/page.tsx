@@ -41,7 +41,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       </p>
       <ul className="flex flex-col gap-2">
         {days.map((d) => (
-          <li key={d.day} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm">
+          <li
+            key={d.day}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm"
+          >
             <span>
               <span className="font-semibold first-letter:uppercase">{fmtLongDay(d.day)}</span>
               <span className={`block text-sm ${d.isProductionDay ? "text-emerald-700" : "text-slate-500"}`}>
@@ -53,8 +56,17 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             <form action={productionDayAction} className="flex items-center gap-2">
               <input type="hidden" name="day" value={d.day} />
               <input type="hidden" name="production" value={d.isProductionDay ? "0" : "1"} />
-              <input name="note" placeholder={d.isProductionDay ? "Motif (ex. férié)" : "Motif (facultatif)"} className="field min-h-10 w-44 text-base" />
-              <button type="submit" className={d.isProductionDay ? "font-medium text-red-800 underline" : "font-medium text-teal-800 underline"}>
+              <input
+                name="note"
+                placeholder={d.isProductionDay ? "Motif (ex. férié)" : "Motif (facultatif)"}
+                className="field min-h-10 w-44 text-base"
+              />
+              <button
+                type="submit"
+                className={
+                  d.isProductionDay ? "font-medium text-red-800 underline" : "font-medium text-teal-800 underline"
+                }
+              >
                 {d.isProductionDay ? "Retirer" : "Ajouter"}
               </button>
             </form>

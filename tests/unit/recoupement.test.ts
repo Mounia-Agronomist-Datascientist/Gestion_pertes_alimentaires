@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { isPriceGap, type OrderedLine, reconcileWeek, type TomeUseLine } from "@/domain/recoupement";
 
-const tome = (over: Partial<TomeUseLine>): TomeUseLine => ({ label: "Ail pelé", key: "ail pele", quantity: 100, unit: "g", unitWeightG: null, costEur: 1, usedIn: "VI02 Bœuf", ...over });
+const tome = (over: Partial<TomeUseLine>): TomeUseLine => ({
+  label: "Ail pelé",
+  key: "ail pele",
+  quantity: 100,
+  unit: "g",
+  unitWeightG: null,
+  costEur: 1,
+  usedIn: "VI02 Bœuf",
+  ...over,
+});
 const order = (over: Partial<OrderedLine>): OrderedLine => ({
   key: "ail pele",
   designation: "ail pelé",
@@ -21,15 +30,28 @@ describe("recoupement de la semaine", () => {
   it("rapproche par la clé : commandé, sans commande, absent du tome", () => {
     const r = reconcileWeek({
       ...none,
-      tomeLines: [tome({}), tome({ usedIn: "Sous-recette : sauce" }), tome({ label: "Sel fin", key: "sel fin", costEur: 0.05 }), tome({ label: "Basilic", key: "basilic", usedIn: "QD01 Pâtes" })],
-      orderLines: [order({}), order({ key: "saumon keta", designation: "Saumon Keta", supplier: "Metro", perKgEur: 6.5 })],
+      tomeLines: [
+        tome({}),
+        tome({ usedIn: "Sous-recette : sauce" }),
+        tome({ label: "Sel fin", key: "sel fin", costEur: 0.05 }),
+        tome({ label: "Basilic", key: "basilic", usedIn: "QD01 Pâtes" }),
+      ],
+      orderLines: [
+        order({}),
+        order({ key: "saumon keta", designation: "Saumon Keta", supplier: "Metro", perKgEur: 6.5 }),
+      ],
       lastOrders: [{ key: "sel fin", supplier: "Pro à Pro", deliveryDate: "2026-11-03" }],
       otherTomeKeys: new Map([["saumon keta", ["S48-2026"]]]),
     });
     expect(r).toMatchObject({ tomeIngredients: 3, orderLines: 2, matched: 1, incomparable: 0, priceGaps: [] });
     expect(r.withoutOrder).toEqual([
       { key: "basilic", name: "Basilic", usedIn: ["QD01 Pâtes"], lastOrder: null },
-      { key: "sel fin", name: "Sel fin", usedIn: ["VI02 Bœuf"], lastOrder: { supplier: "Pro à Pro", deliveryDate: "2026-11-03" } },
+      {
+        key: "sel fin",
+        name: "Sel fin",
+        usedIn: ["VI02 Bœuf"],
+        lastOrder: { supplier: "Pro à Pro", deliveryDate: "2026-11-03" },
+      },
     ]);
     expect(r.notInTome).toHaveLength(1);
     expect(r.notInTome[0]).toMatchObject({ designation: "Saumon Keta", otherTomes: ["S48-2026"] });
@@ -60,7 +82,14 @@ describe("recoupement de la semaine", () => {
   });
 
   it("plusieurs livraisons de la même matière : la dernière fait foi", () => {
-    const r = reconcileWeek({ ...none, tomeLines: [tome({})], orderLines: [order({ deliveryDate: "2026-11-16", perKgEur: 12 }), order({ deliveryDate: "2026-11-12", perKgEur: 10 })] });
+    const r = reconcileWeek({
+      ...none,
+      tomeLines: [tome({})],
+      orderLines: [
+        order({ deliveryDate: "2026-11-16", perKgEur: 12 }),
+        order({ deliveryDate: "2026-11-12", perKgEur: 10 }),
+      ],
+    });
     expect(r.priceGaps).toMatchObject([{ deliveryDate: "2026-11-16", orderEur: 12 }]);
   });
 

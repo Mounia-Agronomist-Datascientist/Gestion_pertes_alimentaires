@@ -44,7 +44,9 @@ export const purchaseOrderSchema = z.object({
         supplierCode: text(60).nullable(),
         category: text(120).nullable(),
         quantity: amount,
-        packaging: z.object({ label: text(200), contentQuantity: amount.nullable(), contentUnit: text(80).nullable() }).nullable(),
+        packaging: z
+          .object({ label: text(200), contentQuantity: amount.nullable(), contentUnit: text(80).nullable() })
+          .nullable(),
         unitPriceEur: amount,
         priceUnit: text(120),
         totalEur: amount.nullable(),
@@ -71,17 +73,35 @@ export interface PurchaseOrdersResult {
 async function weekOf(db: Db, number: number | null, deliveryDate: string) {
   if (number == null) return null;
   const weeks = await db.select().from(s.productionWeeks).where(eq(s.productionWeeks.number, number));
-  const best = weeks.sort((a, b) => Math.abs(daysBetween(a.startDate, deliveryDate)) - Math.abs(daysBetween(b.startDate, deliveryDate)))[0];
+  const best = weeks.sort(
+    (a, b) => Math.abs(daysBetween(a.startDate, deliveryDate)) - Math.abs(daysBetween(b.startDate, deliveryDate)),
+  )[0];
   return best && Math.abs(daysBetween(best.startDate, deliveryDate)) <= 60 ? best : null;
 }
 
-export async function savePurchaseOrders(db: Db, admin: AuthUser, raw: unknown, now = new Date()): Promise<PurchaseOrdersResult> {
+export async function savePurchaseOrders(
+  db: Db,
+  admin: AuthUser,
+  raw: unknown,
+  now = new Date(),
+): Promise<PurchaseOrdersResult> {
   requirePermission(admin, "referentiel.manage");
   const parsed = purchaseOrdersPayloadSchema.safeParse(raw);
-  if (!parsed.success) throw new PurchaseOrderError("Données de bons de commande inattendues : déposez à nouveau les fichiers");
+  if (!parsed.success)
+    throw new PurchaseOrderError("Données de bons de commande inattendues : déposez à nouveau les fichiers");
   // Du plus ancien au plus récent : le dernier prix d'achat est celui du dernier bon livré.
-  const orders = [...parsed.data].sort((a, b) => a.deliveryDate.localeCompare(b.deliveryDate) || a.number.localeCompare(b.number));
-  const result: PurchaseOrdersResult = { orders: 0, replaced: 0, lines: 0, createdMaterials: 0, newPrices: 0, newSuppliers: 0, outsideCalendar: 0 };
+  const orders = [...parsed.data].sort(
+    (a, b) => a.deliveryDate.localeCompare(b.deliveryDate) || a.number.localeCompare(b.number),
+  );
+  const result: PurchaseOrdersResult = {
+    orders: 0,
+    replaced: 0,
+    lines: 0,
+    createdMaterials: 0,
+    newPrices: 0,
+    newSuppliers: 0,
+    outsideCalendar: 0,
+  };
 
   await db.transaction(async (tx) => {
     for (const order of orders) {
@@ -114,13 +134,22 @@ export async function savePurchaseOrders(db: Db, admin: AuthUser, raw: unknown, 
       let orderId: string;
       let previousPrices: (typeof s.productPrices.$inferSelect)[] = [];
       if (existing) {
-        previousPrices = await tx.delete(s.productPrices).where(eq(s.productPrices.purchaseOrderId, existing.id)).returning();
+        previousPrices = await tx
+          .delete(s.productPrices)
+          .where(eq(s.productPrices.purchaseOrderId, existing.id))
+          .returning();
         await tx.delete(s.purchaseOrderLines).where(eq(s.purchaseOrderLines.orderId, existing.id));
-        await tx.update(s.purchaseOrders).set({ ...values, version: existing.version + 1 }).where(eq(s.purchaseOrders.id, existing.id));
+        await tx
+          .update(s.purchaseOrders)
+          .set({ ...values, version: existing.version + 1 })
+          .where(eq(s.purchaseOrders.id, existing.id));
         orderId = existing.id;
         result.replaced++;
       } else {
-        const [created] = await tx.insert(s.purchaseOrders).values({ number: order.number, ...values }).returning({ id: s.purchaseOrders.id });
+        const [created] = await tx
+          .insert(s.purchaseOrders)
+          .values({ number: order.number, ...values })
+          .returning({ id: s.purchaseOrders.id });
         orderId = created!.id;
       }
       result.orders++;
@@ -131,7 +160,9 @@ export async function savePurchaseOrders(db: Db, admin: AuthUser, raw: unknown, 
         if (line.category) {
           const key = tomeKey(line.category);
           const [found] = await tx.select().from(s.materialCategories).where(eq(s.materialCategories.key, key));
-          categoryId = found?.id ?? (await tx.insert(s.materialCategories).values({ name: line.category, key }).returning())[0]!.id;
+          categoryId =
+            found?.id ??
+            (await tx.insert(s.materialCategories).values({ name: line.category, key }).returning())[0]!.id;
         }
 
         // ─── Matière : celle du tome de même libellé, sinon créée ─────────────
@@ -140,10 +171,23 @@ export async function savePurchaseOrders(db: Db, admin: AuthUser, raw: unknown, 
         let [product] = await tx.select().from(s.products).where(eq(s.products.externalId, externalId));
         if (!product) {
           // Produit saisi à la main avant, de même nom : rattaché plutôt que doublé.
-          const manual = (await tx.select().from(s.products).where(and(isNull(s.products.externalId), inArray(s.products.category, ["matiere_premiere", "produit_externe"])))).find(
-            (p) => tomeKey(`${p.name} ${p.variant ?? ""}`) === key,
-          );
-          if (manual) [product] = await tx.update(s.products).set({ externalId, updatedAt: now }).where(eq(s.products.id, manual.id)).returning();
+          const manual = (
+            await tx
+              .select()
+              .from(s.products)
+              .where(
+                and(
+                  isNull(s.products.externalId),
+                  inArray(s.products.category, ["matiere_premiere", "produit_externe"]),
+                ),
+              )
+          ).find((p) => tomeKey(`${p.name} ${p.variant ?? ""}`) === key);
+          if (manual)
+            [product] = await tx
+              .update(s.products)
+              .set({ externalId, updatedAt: now })
+              .where(eq(s.products.id, manual.id))
+              .returning();
         }
         if (!product) {
           [product] = await tx
@@ -160,7 +204,10 @@ export async function savePurchaseOrders(db: Db, admin: AuthUser, raw: unknown, 
             .returning();
           result.createdMaterials++;
         } else if (!product.materialCategoryId && categoryId) {
-          await tx.update(s.products).set({ materialCategoryId: categoryId, updatedAt: now }).where(eq(s.products.id, product.id));
+          await tx
+            .update(s.products)
+            .set({ materialCategoryId: categoryId, updatedAt: now })
+            .where(eq(s.products.id, product.id));
         }
 
         // Liquide : densité de référence si la matière n'en a pas, pour ramener un prix au litre au kg.
@@ -209,23 +256,47 @@ export async function savePurchaseOrders(db: Db, admin: AuthUser, raw: unknown, 
 
         // ─── Prix d'achat daté du jour de livraison ───────────────────────────
         if (price.perKgEur == null && price.perUnitEur == null) continue;
-        const version = { unit: line.priceUnit, unitWeightG: null, perKgEur: price.perKgEur, perUnitEur: price.perUnitEur };
+        const version = {
+          unit: line.priceUnit,
+          unitWeightG: null,
+          perKgEur: price.perKgEur,
+          perUnitEur: price.perUnitEur,
+        };
         const purchases = await tx
           .select()
           .from(s.productPrices)
-          .where(and(eq(s.productPrices.productId, product!.id), inArray(s.productPrices.source, ["bon_commande", "manuel"])));
+          .where(
+            and(
+              eq(s.productPrices.productId, product!.id),
+              inArray(s.productPrices.source, ["bon_commande", "manuel"]),
+            ),
+          );
         const sameDay = purchases.find((v) => v.source === "bon_commande" && v.validFrom === order.deliveryDate);
         if (sameDay) {
           // Deux bons livrés le même jour : le dernier lu fait foi.
           if (!samePrice(sameDay, version)) {
-            await tx.update(s.productPrices).set({ ...version, purchaseOrderId: orderId, createdBy: admin.id, createdAt: now }).where(eq(s.productPrices.id, sameDay.id));
+            await tx
+              .update(s.productPrices)
+              .set({ ...version, purchaseOrderId: orderId, createdBy: admin.id, createdAt: now })
+              .where(eq(s.productPrices.id, sameDay.id));
             result.newPrices++;
           }
           continue;
         }
-        const before = priceInForce(purchases.filter((v) => v.validFrom < order.deliveryDate), order.deliveryDate);
+        const before = priceInForce(
+          purchases.filter((v) => v.validFrom < order.deliveryDate),
+          order.deliveryDate,
+        );
         if (before && before.source === "bon_commande" && samePrice(before, version)) continue;
-        await tx.insert(s.productPrices).values({ productId: product!.id, source: "bon_commande", validFrom: order.deliveryDate, ...version, purchaseOrderId: orderId, createdBy: admin.id, createdAt: now });
+        await tx.insert(s.productPrices).values({
+          productId: product!.id,
+          source: "bon_commande",
+          validFrom: order.deliveryDate,
+          ...version,
+          purchaseOrderId: orderId,
+          createdBy: admin.id,
+          createdAt: now,
+        });
         // Bon redéposé : seul un prix qui a changé compte comme nouveau.
         const previous = previousPrices.find((v) => v.productId === product!.id && v.validFrom === order.deliveryDate);
         if (!previous || !samePrice(previous, version)) result.newPrices++;
@@ -283,7 +354,9 @@ export async function purchaseOrdersOverview(db: Db, admin: AuthUser, limit = 15
 /** Numéros déjà enregistrés parmi ceux donnés (aperçu : « déjà déposé, sera remplacé »). */
 export async function knownPurchaseOrderNumbers(db: Db, numbers: string[]) {
   if (!numbers.length) return [];
-  const rows = await db.select({ number: s.purchaseOrders.number }).from(s.purchaseOrders).where(inArray(s.purchaseOrders.number, numbers));
+  const rows = await db
+    .select({ number: s.purchaseOrders.number })
+    .from(s.purchaseOrders)
+    .where(inArray(s.purchaseOrders.number, numbers));
   return rows.map((r) => r.number);
 }
-

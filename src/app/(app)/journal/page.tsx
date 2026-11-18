@@ -117,7 +117,11 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
               )}
             </span>
             {e.reason && <span className="text-sm text-slate-700">Motif : {e.reason}</span>}
-            {e.changes && e.changes.length > 0 && <span className="text-sm text-slate-600">Champs modifiés : {[...new Set(e.changes.map(auditFieldLabel))].join(", ")}</span>}
+            {e.changes && e.changes.length > 0 && (
+              <span className="text-sm text-slate-600">
+                Champs modifiés : {[...new Set(e.changes.map(auditFieldLabel))].join(", ")}
+              </span>
+            )}
             {(e.before != null || e.after != null) && (
               <details className="text-sm">
                 <summary className="cursor-pointer text-slate-600">Détail enregistré</summary>
@@ -125,13 +129,17 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
                   {e.before != null && (
                     <div>
                       <p className="font-medium">Avant</p>
-                      <pre className="max-h-64 overflow-auto rounded-lg bg-slate-50 p-2 text-xs">{JSON.stringify(e.before, null, 2)}</pre>
+                      <pre className="max-h-64 overflow-auto rounded-lg bg-slate-50 p-2 text-xs">
+                        {JSON.stringify(e.before, null, 2)}
+                      </pre>
                     </div>
                   )}
                   {e.after != null && (
                     <div>
                       <p className="font-medium">Après</p>
-                      <pre className="max-h-64 overflow-auto rounded-lg bg-slate-50 p-2 text-xs">{JSON.stringify(e.after, null, 2)}</pre>
+                      <pre className="max-h-64 overflow-auto rounded-lg bg-slate-50 p-2 text-xs">
+                        {JSON.stringify(e.after, null, 2)}
+                      </pre>
                     </div>
                   )}
                 </div>

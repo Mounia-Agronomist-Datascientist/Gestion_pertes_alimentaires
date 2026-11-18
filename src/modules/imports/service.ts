@@ -46,7 +46,10 @@ export async function saveWeekImport(db: Db, admin: AuthUser, input: SaveWeekImp
       .orderBy(desc(s.weeklyImports.version))
       .limit(1);
     if (previous?.status === "validee") {
-      await tx.update(s.weeklyImports).set({ status: "remplacee", replacedAt: now }).where(eq(s.weeklyImports.id, previous.id));
+      await tx
+        .update(s.weeklyImports)
+        .set({ status: "remplacee", replacedAt: now })
+        .where(eq(s.weeklyImports.id, previous.id));
     }
     const [created] = await tx
       .insert(s.weeklyImports)

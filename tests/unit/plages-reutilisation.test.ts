@@ -12,7 +12,12 @@ describe("plages de réutilisation des surplus", () => {
   it("une semaine normale donne deux plages : jeudi-vendredi et lundi-mercredi", () => {
     expect(reuseWindows(S46, defaultProductionDays(S46))).toEqual([
       { key: "jeudi_vendredi", firstDay: "2026-11-05", lastDay: "2026-11-06", days: ["2026-11-05", "2026-11-06"] },
-      { key: "lundi_mercredi", firstDay: "2026-11-09", lastDay: "2026-11-11", days: ["2026-11-09", "2026-11-10", "2026-11-11"] },
+      {
+        key: "lundi_mercredi",
+        firstDay: "2026-11-09",
+        lastDay: "2026-11-11",
+        days: ["2026-11-09", "2026-11-10", "2026-11-11"],
+      },
     ]);
   });
 
@@ -23,7 +28,9 @@ describe("plages de réutilisation des surplus", () => {
 
   it("un jour férié raccourcit la plage ; une plage sans jour travaillé disparaît", () => {
     const windows = reuseWindows(S46, ["2026-11-09", "2026-11-10"]); // jeudi et vendredi non travaillés, mercredi férié
-    expect(windows).toEqual([{ key: "lundi_mercredi", firstDay: "2026-11-09", lastDay: "2026-11-10", days: ["2026-11-09", "2026-11-10"] }]);
+    expect(windows).toEqual([
+      { key: "lundi_mercredi", firstDay: "2026-11-09", lastDay: "2026-11-10", days: ["2026-11-09", "2026-11-10"] },
+    ]);
   });
 
   it("refuse un jour qui n'appartient pas à la semaine", () => {

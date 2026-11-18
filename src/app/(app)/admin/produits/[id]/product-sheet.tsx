@@ -61,9 +61,20 @@ interface Props {
 }
 
 const SOURCES = { tome: "Tome", bon_commande: "Bon de commande", manuel: "Saisi à la main" } as const;
-const fmtEur = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: n < 0.1 ? 4 : 2 });
+const fmtEur = (n: number) =>
+  n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: n < 0.1 ? 4 : 2,
+  });
 const fmtNumber = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
-const dayFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const dayFormat = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
 const fmtDay = (date: string) => dayFormat.format(new Date(`${date}T12:00:00Z`));
 
 function Feedback({ state }: { state: { error?: string; message?: string } }) {
@@ -82,8 +93,22 @@ function Feedback({ state }: { state: { error?: string; message?: string } }) {
   return null;
 }
 
-export function ProductSheet({ today, units, categories, subzones, product: p, packagings, manualPackagings, suppliers, contentUnits, prices }: Props) {
-  const [productState, productFormAction, productPending] = useActionState<ProductActionState, FormData>(productAction, {});
+export function ProductSheet({
+  today,
+  units,
+  categories,
+  subzones,
+  product: p,
+  packagings,
+  manualPackagings,
+  suppliers,
+  contentUnits,
+  prices,
+}: Props) {
+  const [productState, productFormAction, productPending] = useActionState<ProductActionState, FormData>(
+    productAction,
+    {},
+  );
   const [sheetState, sheetAction, sheetPending] = useActionState<ProductSheetState, FormData>(productSheetAction, {});
   const [editing, setEditing] = useState(false);
   const [addingPackaging, setAddingPackaging] = useState(false);
@@ -127,18 +152,28 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
             <p className="text-sm text-slate-700">
               {p.code && `Code ${p.code} · `}Unité {unitLabel}
               {p.unitWeightKg != null && ` · ${fmtNumber(p.unitWeightKg)} kg par unité`}
-              {p.densityKgPerL != null && ` · densité ${fmtNumber(p.densityKgPerL)} kg/L${p.densityReference ? ` (référence : ${p.densityReference})` : ""}`}
+              {p.densityKgPerL != null &&
+                ` · densité ${fmtNumber(p.densityKgPerL)} kg/L${p.densityReference ? ` (référence : ${p.densityReference})` : ""}`}
             </p>
             <p className="text-sm text-slate-500">
-              Le nom, l&apos;unité, le poids et la densité ne sont jamais changés par un import ; les pertes passées gardent ce qui a été
-              enregistré à l&apos;époque.
+              Le nom, l&apos;unité, le poids et la densité ne sont jamais changés par un import ; les pertes passées
+              gardent ce qui a été enregistré à l&apos;époque.
             </p>
             <form action={productFormAction} className="flex gap-4">
               <input type="hidden" name="productId" value={p.id} />
-              <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(true)}>
+              <button
+                type="button"
+                className="text-sm font-medium text-teal-800 underline"
+                onClick={() => setEditing(true)}
+              >
                 Modifier
               </button>
-              <button type="submit" name="intent" value={p.active ? "deactivate" : "activate"} className={`text-sm font-medium underline ${p.active ? "text-red-800" : "text-teal-800"}`}>
+              <button
+                type="submit"
+                name="intent"
+                value={p.active ? "deactivate" : "activate"}
+                className={`text-sm font-medium underline ${p.active ? "text-red-800" : "text-teal-800"}`}
+              >
                 {p.active ? "Désactiver" : "Réactiver"}
               </button>
             </form>
@@ -152,15 +187,20 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="text-lg font-semibold">Catégorie et lieu de stockage</h2>
         <p className="text-sm text-slate-600">
-          En Stockage, la saisie propose d&apos;abord les matières de la semaine rangées dans le lieu choisi : le lieu propre au produit s&apos;il
-          en a un, sinon celui de sa catégorie Melba.
+          En Stockage, la saisie propose d&apos;abord les matières de la semaine rangées dans le lieu choisi : le lieu
+          propre au produit s&apos;il en a un, sinon celui de sa catégorie Melba.
         </p>
         <form action={sheetAction} className="flex flex-col gap-2">
           <input type="hidden" name="intent" value="placement" />
           <input type="hidden" name="productId" value={p.id} />
           <label className="flex flex-col gap-1">
             <span className="font-medium">Catégorie Melba</span>
-            <select name="materialCategoryId" className="field" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <select
+              name="materialCategoryId"
+              className="field"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
               <option value="">— Aucune —</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -172,7 +212,11 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
           <label className="flex flex-col gap-1">
             <span className="font-medium">Lieu de stockage</span>
             <select name="storageSubzoneId" className="field" defaultValue={p.storageSubzoneId ?? ""}>
-              <option value="">{category ? `Celui de la catégorie (${categoryPlace ?? "pas de lieu réglé"})` : "Celui de la catégorie (aucune catégorie)"}</option>
+              <option value="">
+                {category
+                  ? `Celui de la catégorie (${categoryPlace ?? "pas de lieu réglé"})`
+                  : "Celui de la catégorie (aucune catégorie)"}
+              </option>
               {subzones.map((z) => (
                 <option key={z.id} value={z.id}>
                   {z.name}
@@ -190,8 +234,9 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="text-lg font-semibold">Colis fournisseurs</h2>
         <p className="text-sm text-slate-600">
-          Lus dans les bons de commande (le dernier colis commandé chez chaque fournisseur), et saisis à la main. Les deux restent côte à côte :
-          un bon ne remplace jamais un colis saisi. Pour l&apos;information seulement, sans effet sur le coût des pertes.
+          Lus dans les bons de commande (le dernier colis commandé chez chaque fournisseur), et saisis à la main. Les
+          deux restent côte à côte : un bon ne remplace jamais un colis saisi. Pour l&apos;information seulement, sans
+          effet sur le coût des pertes.
         </p>
         {packagings.length === 0 && manualPackagings.length === 0 ? (
           <p className="text-sm text-slate-600">Aucun colis connu.</p>
@@ -202,7 +247,8 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
                 <span className="font-medium">{k.supplier}</span>
                 <span className="text-sm text-slate-600">
                   {k.packagingLabel ?? "Colis non précisé"}
-                  {k.supplierCode && ` · code ${k.supplierCode}`} · bon de commande, dernier livré le {fmtDay(k.lastDeliveryDate)}
+                  {k.supplierCode && ` · code ${k.supplierCode}`} · bon de commande, dernier livré le{" "}
+                  {fmtDay(k.lastDeliveryDate)}
                 </span>
               </li>
             ))}
@@ -239,7 +285,12 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
             <h3 className="font-semibold">Saisir un colis</h3>
             <label className="flex flex-col gap-1">
               <span className="font-medium">Fournisseur</span>
-              <select name="supplierId" className="field" value={packagingSupplier} onChange={(e) => setPackagingSupplier(e.target.value)}>
+              <select
+                name="supplierId"
+                className="field"
+                value={packagingSupplier}
+                onChange={(e) => setPackagingSupplier(e.target.value)}
+              >
                 <option value="">— Nouveau fournisseur —</option>
                 {suppliers.map((x) => (
                   <option key={x.id} value={x.id}>
@@ -251,13 +302,25 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
             {!packagingSupplier && (
               <label className="flex flex-col gap-1">
                 <span className="font-medium">Nom du nouveau fournisseur</span>
-                <input name="newSupplier" className="field" required minLength={2} placeholder="Nom seulement, sans contact" />
+                <input
+                  name="newSupplier"
+                  className="field"
+                  required
+                  minLength={2}
+                  placeholder="Nom seulement, sans contact"
+                />
               </label>
             )}
             <div className="grid gap-2 sm:grid-cols-2">
               <label className="flex flex-col gap-1">
                 <span className="font-medium">Colis</span>
-                <input name="packagingLabel" className="field" required minLength={2} placeholder="ex. carton de 6, sac 10 kg" />
+                <input
+                  name="packagingLabel"
+                  className="field"
+                  required
+                  minLength={2}
+                  placeholder="ex. carton de 6, sac 10 kg"
+                />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="font-medium">Code fournisseur (facultatif)</span>
@@ -294,10 +357,12 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
 
       {/* ─── Prix ────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold">Prix ({prices.length} version{prices.length > 1 ? "s" : ""})</h2>
+        <h2 className="text-lg font-semibold">
+          Prix ({prices.length} version{prices.length > 1 ? "s" : ""})
+        </h2>
         <p className="text-sm text-slate-600">
-          Une perte prend le prix en vigueur à sa date : le dernier prix d&apos;achat ou saisi à la main, à défaut le coût du tome. Chaque
-          changement est une nouvelle version ; les pertes déjà enregistrées gardent leur coût.
+          Une perte prend le prix en vigueur à sa date : le dernier prix d&apos;achat ou saisi à la main, à défaut le
+          coût du tome. Chaque changement est une nouvelle version ; les pertes déjà enregistrées gardent leur coût.
         </p>
         {prices.length === 0 ? (
           <p className="text-sm text-amber-800">Aucun prix connu : le coût des pertes de ce produit reste vide.</p>
@@ -307,8 +372,17 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
               <li key={v.id} className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 flex-col">
                   <span className="font-medium">
-                    {[v.perKgEur != null && `${fmtEur(v.perKgEur)} / kg`, v.perUnitEur != null && `${fmtEur(v.perUnitEur)} / ${v.unit ?? "unité"}`].filter(Boolean).join(" · ")}
-                    {v.inForce && <span className="ml-2 rounded-full bg-teal-100 px-2 text-sm font-normal text-teal-900">En vigueur</span>}
+                    {[
+                      v.perKgEur != null && `${fmtEur(v.perKgEur)} / kg`,
+                      v.perUnitEur != null && `${fmtEur(v.perUnitEur)} / ${v.unit ?? "unité"}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    {v.inForce && (
+                      <span className="ml-2 rounded-full bg-teal-100 px-2 text-sm font-normal text-teal-900">
+                        En vigueur
+                      </span>
+                    )}
                   </span>
                   <span className="text-sm text-slate-600">
                     Depuis le {fmtDay(v.validFrom)} · {SOURCES[v.source]}
@@ -321,7 +395,11 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
                     <input type="hidden" name="intent" value="remove_price" />
                     <input type="hidden" name="productId" value={p.id} />
                     <input type="hidden" name="priceId" value={v.id} />
-                    <button type="submit" disabled={sheetPending} className="text-sm font-medium text-red-800 underline">
+                    <button
+                      type="submit"
+                      disabled={sheetPending}
+                      className="text-sm font-medium text-red-800 underline"
+                    >
                       Retirer
                     </button>
                   </form>

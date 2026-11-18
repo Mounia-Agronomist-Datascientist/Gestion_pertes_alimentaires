@@ -15,7 +15,13 @@ import { SurplusWizard } from "./surplus-wizard";
 export const metadata = { title: "Import de la semaine — Administration" };
 
 const shortDate = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
-const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
+const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/Paris",
+});
 
 export default async function ImportPage() {
   const admin = await requireUser();
@@ -49,13 +55,14 @@ export default async function ImportPage() {
       {purchases.bySupplier.length > 0 && (
         <details className="rounded-2xl bg-white p-4 shadow-sm">
           <summary className="cursor-pointer font-semibold">
-            Bons de commande enregistrés : {purchases.bySupplier.reduce((n, x) => n + x.orders, 0)} bons, {purchases.bySupplier.length} fournisseurs,{" "}
-            {purchases.orderedMaterials} matières commandées
+            Bons de commande enregistrés : {purchases.bySupplier.reduce((n, x) => n + x.orders, 0)} bons,{" "}
+            {purchases.bySupplier.length} fournisseurs, {purchases.orderedMaterials} matières commandées
           </summary>
           <ul className="mt-2 flex flex-col gap-1 text-sm">
             {purchases.bySupplier.map((x) => (
               <li key={x.supplier}>
-                <span className="font-medium">{x.supplier}</span> · {x.orders} bon{x.orders > 1 && "s"} · livraisons du {shortDate(x.from)} au {shortDate(x.to)}
+                <span className="font-medium">{x.supplier}</span> · {x.orders} bon{x.orders > 1 && "s"} · livraisons du{" "}
+                {shortDate(x.from)} au {shortDate(x.to)}
               </li>
             ))}
           </ul>
@@ -63,7 +70,8 @@ export default async function ImportPage() {
           <ul className="mt-1 flex flex-col gap-1 text-sm">
             {purchases.recent.map((o) => (
               <li key={o.id}>
-                {o.supplier} · n° {o.number} · {o.subject ?? (o.weekNumber ? `S${o.weekNumber}` : "")} · livraison {shortDate(o.deliveryDate)} · {o.lines} ligne
+                {o.supplier} · n° {o.number} · {o.subject ?? (o.weekNumber ? `S${o.weekNumber}` : "")} · livraison{" "}
+                {shortDate(o.deliveryDate)} · {o.lines} ligne
                 {o.lines > 1 && "s"}
                 {o.version > 1 && ` · version ${o.version}`}
                 {o.warnings.length > 0 && ` · ${o.warnings.length} point${o.warnings.length > 1 ? "s" : ""} à vérifier`}
@@ -74,7 +82,9 @@ export default async function ImportPage() {
       )}
 
       <DecompteWizard
-        existing={counts.filter((c) => c.status === "validee").map((c) => ({ year: c.weekYear, week: c.weekNumber, version: c.version }))}
+        existing={counts
+          .filter((c) => c.status === "validee")
+          .map((c) => ({ year: c.weekYear, week: c.weekNumber, version: c.version }))}
       />
 
       <AlchimistesWizard coverage={coverage} />
@@ -86,16 +96,22 @@ export default async function ImportPage() {
         {imports.length === 0 && <p className="text-slate-600">Aucun import pour l&apos;instant.</p>}
         <ul className="flex flex-col gap-2">
           {imports.map((i) => (
-            <li key={i.id} className={`rounded-2xl bg-white p-4 shadow-sm ${i.status === "remplacee" ? "opacity-60" : ""}`}>
+            <li
+              key={i.id}
+              className={`rounded-2xl bg-white p-4 shadow-sm ${i.status === "remplacee" ? "opacity-60" : ""}`}
+            >
               <span className="font-semibold">
                 S{i.weekNumber}-{i.weekYear} · version {i.version}
               </span>
-              <span className={`ml-2 rounded-full px-2 text-sm ${i.status === "validee" ? "bg-emerald-100 text-emerald-900" : "bg-slate-200"}`}>
+              <span
+                className={`ml-2 rounded-full px-2 text-sm ${i.status === "validee" ? "bg-emerald-100 text-emerald-900" : "bg-slate-200"}`}
+              >
                 {i.status === "validee" ? "En vigueur" : "Remplacée"}
               </span>
               <span className="block text-sm text-slate-600">
                 {dateTimeFormat.format(i.createdAt)} par {i.createdByName} · {i.tomeFileName} · onglet {i.planSheetName}
-                {i.anomalies.length > 0 && ` · ${i.anomalies.length} point${i.anomalies.length > 1 ? "s" : ""} à vérifier`}
+                {i.anomalies.length > 0 &&
+                  ` · ${i.anomalies.length} point${i.anomalies.length > 1 ? "s" : ""} à vérifier`}
               </span>
             </li>
           ))}
@@ -107,16 +123,22 @@ export default async function ImportPage() {
         {counts.length === 0 && <p className="text-slate-600">Aucun décompte pour l&apos;instant.</p>}
         <ul className="flex flex-col gap-2">
           {counts.map((c) => (
-            <li key={c.id} className={`rounded-2xl bg-white p-4 shadow-sm ${c.status === "remplacee" ? "opacity-60" : ""}`}>
+            <li
+              key={c.id}
+              className={`rounded-2xl bg-white p-4 shadow-sm ${c.status === "remplacee" ? "opacity-60" : ""}`}
+            >
               <span className="font-semibold">
                 S{c.weekNumber}-{c.weekYear} · version {c.version}
               </span>
-              <span className={`ml-2 rounded-full px-2 text-sm ${c.status === "validee" ? "bg-emerald-100 text-emerald-900" : "bg-slate-200"}`}>
+              <span
+                className={`ml-2 rounded-full px-2 text-sm ${c.status === "validee" ? "bg-emerald-100 text-emerald-900" : "bg-slate-200"}`}
+              >
                 {c.status === "validee" ? "En vigueur" : "Remplacé"}
               </span>
               <span className="block text-sm text-slate-600">
                 {dateTimeFormat.format(c.createdAt)} par {c.createdByName} · {c.fileName} · onglet {c.sheetName}
-                {c.anomalies.length > 0 && ` · ${c.anomalies.length} point${c.anomalies.length > 1 ? "s" : ""} à vérifier`}
+                {c.anomalies.length > 0 &&
+                  ` · ${c.anomalies.length} point${c.anomalies.length > 1 ? "s" : ""} à vérifier`}
               </span>
             </li>
           ))}
@@ -130,16 +152,20 @@ export default async function ImportPage() {
           {alchimistes.map((a) => (
             <li key={a.id} className="rounded-2xl bg-white p-4 shadow-sm">
               <span className="font-semibold">
-                Du {shortDate(a.periodFrom)} au {shortDate(a.periodTo)} · {a.collections} collectes · {a.totalKg.toLocaleString("fr-FR")} kg
+                Du {shortDate(a.periodFrom)} au {shortDate(a.periodTo)} · {a.collections} collectes ·{" "}
+                {a.totalKg.toLocaleString("fr-FR")} kg
               </span>
               <span className="block text-sm text-slate-600">
                 {dateTimeFormat.format(a.createdAt)} par {a.createdByName} · {a.fileName}
-                {a.anomalies.length > 0 && ` · ${a.anomalies.length} point${a.anomalies.length > 1 ? "s" : ""} à vérifier`}
+                {a.anomalies.length > 0 &&
+                  ` · ${a.anomalies.length} point${a.anomalies.length > 1 ? "s" : ""} à vérifier`}
               </span>
             </li>
           ))}
         </ul>
-        <p className="text-xs text-slate-500">Un fichier plus récent remplace les collectes de sa période ; les anciennes restent conservées.</p>
+        <p className="text-xs text-slate-500">
+          Un fichier plus récent remplace les collectes de sa période ; les anciennes restent conservées.
+        </p>
       </section>
 
       <section className="flex flex-col gap-2">
@@ -149,16 +175,20 @@ export default async function ImportPage() {
           {surplus.map((f) => (
             <li key={f.id} className="rounded-2xl bg-white p-4 shadow-sm">
               <span className="font-semibold">
-                {SURPLUS_SOURCE_LABELS[f.source]} · du {shortDate(f.periodFrom)} au {shortDate(f.periodTo)} · {f.entries} lignes
+                {SURPLUS_SOURCE_LABELS[f.source]} · du {shortDate(f.periodFrom)} au {shortDate(f.periodTo)} ·{" "}
+                {f.entries} lignes
               </span>
               <span className="block text-sm text-slate-600">
                 {dateTimeFormat.format(f.createdAt)} par {f.createdByName} · {f.fileName} · {f.sheets}
-                {f.anomalies.length > 0 && ` · ${f.anomalies.length} point${f.anomalies.length > 1 ? "s" : ""} à vérifier`}
+                {f.anomalies.length > 0 &&
+                  ` · ${f.anomalies.length} point${f.anomalies.length > 1 ? "s" : ""} à vérifier`}
               </span>
             </li>
           ))}
         </ul>
-        <p className="text-xs text-slate-500">Un fichier plus récent remplace les lignes de sa source sur sa période ; les anciennes restent conservées.</p>
+        <p className="text-xs text-slate-500">
+          Un fichier plus récent remplace les lignes de sa source sur sa période ; les anciennes restent conservées.
+        </p>
       </section>
     </>
   );

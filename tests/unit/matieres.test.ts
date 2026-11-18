@@ -17,10 +17,23 @@ describe("matières tirées d'un tome", () => {
       line({ unit: "pincée (1 g)", quantity: 3, unitWeightG: 1, costEur: 0.01 }),
       line({ quantity: 200, costEur: 0.1 }),
       line({ quantity: 50, costEur: 0.03 }),
-      line({ label: "Pot de yaourt (sous-recette)", key: "pot de yaourt", unit: "pot (125 g)", quantity: 4, unitWeightG: 125, costEur: 2 }),
+      line({
+        label: "Pot de yaourt (sous-recette)",
+        key: "pot de yaourt",
+        unit: "pot (125 g)",
+        quantity: 4,
+        unitWeightG: 125,
+        costEur: 2,
+      }),
     ]);
     expect(materials).toEqual([
-      { key: "pot de yaourt", name: "Pot de yaourt", unit: "pot (125 g)", unitWeightG: 125, cost: { perKgEur: 4, perUnitEur: 0.5 } },
+      {
+        key: "pot de yaourt",
+        name: "Pot de yaourt",
+        unit: "pot (125 g)",
+        unitWeightG: 125,
+        cost: { perKgEur: 4, perUnitEur: 0.5 },
+      },
       { key: "sel fin", name: "Sel fin", unit: "g", unitWeightG: null, cost: { perKgEur: 0.5, perUnitEur: null } },
     ]);
   });
@@ -44,7 +57,14 @@ describe("matières tirées d'un tome", () => {
 });
 
 describe("prix en vigueur", () => {
-  const v = (source: PriceVersion["source"], validFrom: string, perKgEur: number): PriceVersion => ({ source, validFrom, unit: "g", unitWeightG: null, perKgEur, perUnitEur: null });
+  const v = (source: PriceVersion["source"], validFrom: string, perKgEur: number): PriceVersion => ({
+    source,
+    validFrom,
+    unit: "g",
+    unitWeightG: null,
+    perKgEur,
+    perUnitEur: null,
+  });
   const versions = [v("tome", "2026-10-29", 2), v("tome", "2026-11-05", 2.5), v("bon_commande", "2026-11-03", 2.2)];
 
   it("aucun prix avant la première version", () => {
@@ -75,7 +95,10 @@ describe("matières de la semaine par lieu de saisie", () => {
   ]);
 
   it("Réception : toutes les matières", () => {
-    expect(materialsForPlace(materials, storageOf, { zoneCode: "RECEPTION", subzoneId: "REC" })).toEqual({ here: materials, unplaced: [] });
+    expect(materialsForPlace(materials, storageOf, { zoneCode: "RECEPTION", subzoneId: "REC" })).toEqual({
+      here: materials,
+      unplaced: [],
+    });
   });
 
   it("Stockage : celles du lieu, et à part celles sans lieu réglé", () => {
@@ -85,10 +108,16 @@ describe("matières de la semaine par lieu de saisie", () => {
   });
 
   it("Stockage : le lieu propre au produit passe avant celui de sa catégorie", () => {
-    const withOwn = [...materials, { name: "beurre", categoryId: "viande", storageSubzoneId: "LEGUMERIE" }, { name: "sel de Guérande", categoryId: null, storageSubzoneId: "BOF" }];
+    const withOwn = [
+      ...materials,
+      { name: "beurre", categoryId: "viande", storageSubzoneId: "LEGUMERIE" },
+      { name: "sel de Guérande", categoryId: null, storageSubzoneId: "BOF" },
+    ];
     const r = materialsForPlace(withOwn, storageOf, { zoneCode: "STOCKAGE", subzoneId: "LEGUMERIE" });
     expect(r.here.map((x) => x.name)).toEqual(["ail pelé", "beurre"]);
     expect(r.unplaced.map((x) => x.name)).toEqual(["sel", "épices"]);
-    expect(materialsForPlace(withOwn, storageOf, { zoneCode: "STOCKAGE", subzoneId: "BOF" }).here.map((x) => x.name)).toEqual(["bœuf", "sel de Guérande"]);
+    expect(
+      materialsForPlace(withOwn, storageOf, { zoneCode: "STOCKAGE", subzoneId: "BOF" }).here.map((x) => x.name),
+    ).toEqual(["bœuf", "sel de Guérande"]);
   });
 });

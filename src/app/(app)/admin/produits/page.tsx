@@ -25,7 +25,11 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const [products, groups, units, prices, choices, suppliers, supplierIdsOf] = await Promise.all([
     listProductsForAdmin(db, admin),
     listUnlistedGroups(db, admin),
-    db.select({ code: s.units.code, label: s.units.label }).from(s.units).where(eq(s.units.active, true)).orderBy(asc(s.units.code)),
+    db
+      .select({ code: s.units.code, label: s.units.label })
+      .from(s.units)
+      .where(eq(s.units.active, true))
+      .orderBy(asc(s.units.code)),
     pricesInForce(db, today),
     placementChoices(db),
     listSuppliers(db, admin),

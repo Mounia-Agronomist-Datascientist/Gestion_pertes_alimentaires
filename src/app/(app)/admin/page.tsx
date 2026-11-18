@@ -6,19 +6,47 @@ const SECTIONS = [
   { href: "/admin/comptes", title: "Comptes", text: "Créer un compte, réinitialiser un mot de passe, désactiver" },
   { href: "/admin/equipes", title: "Équipes par semaine", text: "Désactiver une équipe pendant une semaine creuse" },
   { href: "/admin/import", title: "Import de la semaine", text: "Tome Melba + plan de production, chaque mardi" },
-  { href: "/admin/recoupement", title: "Recoupement de la semaine", text: "Ingrédients du tome face aux bons de commande, écarts de prix" },
-  { href: "/admin/stockage-matieres", title: "Lieux de stockage des matières", text: "Catégorie Melba → lieu de Stockage, pour la saisie" },
-  { href: "/admin/produits", title: "Produits", text: "Matières, prix et leurs versions, lieu de stockage, saisies « hors liste »" },
+  {
+    href: "/admin/recoupement",
+    title: "Recoupement de la semaine",
+    text: "Ingrédients du tome face aux bons de commande, écarts de prix",
+  },
+  {
+    href: "/admin/stockage-matieres",
+    title: "Lieux de stockage des matières",
+    text: "Catégorie Melba → lieu de Stockage, pour la saisie",
+  },
+  {
+    href: "/admin/produits",
+    title: "Produits",
+    text: "Matières, prix et leurs versions, lieu de stockage, saisies « hors liste »",
+  },
   { href: "/admin/fournisseurs", title: "Fournisseurs", text: "Fournisseurs des bons de commande, colis et matières" },
-  { href: "/admin/emballages", title: "Emballages et consommables", text: "Coûts unitaires datés, emballages par portion" },
+  {
+    href: "/admin/emballages",
+    title: "Emballages et consommables",
+    text: "Coûts unitaires datés, emballages par portion",
+  },
   { href: "/admin/main-oeuvre", title: "Main-d'œuvre", text: "Coût horaire moyen par zone (non imputé aux pertes)" },
   { href: "/admin/tares", title: "Gastros et tares", text: "Poids des gastros et des échelles, à partir d'une date" },
-  { href: "/admin/calendrier", title: "Jours de production", text: "Retirer un jour férié, ajouter un samedi travaillé" },
+  {
+    href: "/admin/calendrier",
+    title: "Jours de production",
+    text: "Retirer un jour férié, ajouter un samedi travaillé",
+  },
   { href: "/admin/destinations", title: "Destinations", text: "Où partent les pertes : compost, don, vente…" },
-  { href: "/admin/facteurs-co2", title: "Facteurs d'émission (CO2e)", text: "Familles alimentaires et facteurs Agribalyse, à valider" },
+  {
+    href: "/admin/facteurs-co2",
+    title: "Facteurs d'émission (CO2e)",
+    text: "Familles alimentaires et facteurs Agribalyse, à valider",
+  },
   { href: "/admin/zones", title: "Zones et postes", text: "Renommer, ajouter ou désactiver un poste" },
   { href: "/admin/causes", title: "Causes", text: "Gérer les causes par zone et valider les propositions" },
-  { href: "/admin/alertes", title: "Seuils des alertes", text: "Pertes inhabituelles, causes récurrentes, tendance stable" },
+  {
+    href: "/admin/alertes",
+    title: "Seuils des alertes",
+    text: "Pertes inhabituelles, causes récurrentes, tendance stable",
+  },
 ];
 
 export default function AdminPage() {

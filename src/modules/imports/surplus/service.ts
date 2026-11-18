@@ -53,8 +53,12 @@ export const surplusPayloadSchema = z
       .max(20_000),
     warnings: z.array(z.string().max(400)).max(1000),
   })
-  .refine((p) => p.periodFrom <= p.periodTo && p.entries.every((e) => p.periodFrom <= e.date && e.date <= p.periodTo), { message: "Période incohérente" })
-  .refine((p) => p.entries.every((e) => (p.source === "linkee" ? e.kind === "don" : e.kind !== "don")), { message: "Lignes incohérentes avec la source" });
+  .refine((p) => p.periodFrom <= p.periodTo && p.entries.every((e) => p.periodFrom <= e.date && e.date <= p.periodTo), {
+    message: "Période incohérente",
+  })
+  .refine((p) => p.entries.every((e) => (p.source === "linkee" ? e.kind === "don" : e.kind !== "don")), {
+    message: "Lignes incohérentes avec la source",
+  });
 export type SurplusPayload = z.infer<typeof surplusPayloadSchema>;
 
 const round = (n: number, digits: number) => Math.round(n * 10 ** digits) / 10 ** digits;
@@ -64,7 +68,13 @@ export async function saveSurplusImport(db: Db, admin: AuthUser, input: SurplusP
   const producedDates = input.entries.map((e) => e.producedOn).filter((d): d is string => d != null);
   const from = [input.periodFrom, ...producedDates].sort()[0]!;
   const weeks = await db
-    .select({ id: s.productionWeeks.id, year: s.productionWeeks.year, number: s.productionWeeks.number, startDate: s.productionWeeks.startDate, endDate: s.productionWeeks.endDate })
+    .select({
+      id: s.productionWeeks.id,
+      year: s.productionWeeks.year,
+      number: s.productionWeeks.number,
+      startDate: s.productionWeeks.startDate,
+      endDate: s.productionWeeks.endDate,
+    })
     .from(s.productionWeeks)
     .where(and(lte(s.productionWeeks.startDate, input.periodTo), gte(s.productionWeeks.endDate, from)));
   const weekOf = (date: string) => weeks.find((w) => w.startDate <= date && date <= w.endDate);
@@ -79,10 +89,15 @@ export async function saveSurplusImport(db: Db, admin: AuthUser, input: SurplusP
       if (!lotWeek) return undefined;
       const collected = weekOf(e.date);
       // Un lot de fin d'année collecté en janvier appartient à l'année précédente.
-      const year = collected && lotWeek > collected.number ? collected.year - 1 : (collected?.year ?? Number(e.date.slice(0, 4)));
+      const year =
+        collected && lotWeek > collected.number ? collected.year - 1 : (collected?.year ?? Number(e.date.slice(0, 4)));
       return weeks.find((w) => w.year === year && w.number === lotWeek);
     };
-    const wanted = input.entries.map((e, i) => ({ i, code: e.dishCode, week: e.dishCode ? productionWeekOf(e) : undefined }));
+    const wanted = input.entries.map((e, i) => ({
+      i,
+      code: e.dishCode,
+      week: e.dishCode ? productionWeekOf(e) : undefined,
+    }));
     const weekIds = [...new Set(wanted.map((w) => w.week?.id).filter((id): id is string => id != null))];
     const recipes = weekIds.length
       ? await db
@@ -177,8 +192,16 @@ export async function saveSurplusImport(db: Db, admin: AuthUser, input: SurplusP
       action: "import_surplus",
       entity: "surplus_import",
       entityId: created!.id,
-      after: { source: input.source, period: `${input.periodFrom} → ${input.periodTo}`, entries: input.entries.length, file: input.fileName, sheets: input.sheets },
-      reason: replaced.length ? `Remplace ${replaced.length} ligne${replaced.length > 1 ? "s" : ""} de la période` : null,
+      after: {
+        source: input.source,
+        period: `${input.periodFrom} → ${input.periodTo}`,
+        entries: input.entries.length,
+        file: input.fileName,
+        sheets: input.sheets,
+      },
+      reason: replaced.length
+        ? `Remplace ${replaced.length} ligne${replaced.length > 1 ? "s" : ""} de la période`
+        : null,
       occurredAt: now,
     });
     return { ...created!, replaced: replaced.length, matched: recipeOf.size, unmatched, outside };
@@ -208,7 +231,10 @@ export async function listSurplusImports(db: Db, admin: AuthUser, limit = 20) {
 }
 
 /** Période déjà couverte par source (lignes en vigueur), pour prévenir d'un remplacement dans l'aperçu. */
-export async function surplusCoverage(db: Db, admin: AuthUser): Promise<Partial<Record<SurplusSource, { from: string; to: string; entries: number }>>> {
+export async function surplusCoverage(
+  db: Db,
+  admin: AuthUser,
+): Promise<Partial<Record<SurplusSource, { from: string; to: string; entries: number }>>> {
   requirePermission(admin, "referentiel.manage");
   const rows = await db
     .select({ source: s.surplusEntries.source, occurredOn: s.surplusEntries.occurredOn })

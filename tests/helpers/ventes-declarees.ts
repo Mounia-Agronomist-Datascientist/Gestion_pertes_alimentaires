@@ -8,5 +8,8 @@ import type { Db } from "@/db/types";
  * de leurs recettes (historique) en ont besoin.
  */
 export async function allowDeclaredSales(db: Db) {
-  await db.update(s.destinations).set({ declarable: true }).where(inArray(s.destinations.code, ["TGTG", "VENTE_FLASH"]));
+  await db
+    .update(s.destinations)
+    .set({ declarable: true })
+    .where(inArray(s.destinations.code, ["TGTG", "VENTE_FLASH"]));
 }

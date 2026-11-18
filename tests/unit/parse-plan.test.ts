@@ -9,12 +9,26 @@ describe("lecture du plan de production S45", () => {
     expect(plan.week).toBe(45);
     expect(plan.groups.filter((g) => g.block === "plats")).toHaveLength(18);
     expect(plan.groups.filter((g) => g.block === "petits_dejeuners")).toHaveLength(12);
-    expect(plan.groups[0]).toEqual({ codes: ["VI02", "VI08", "QD02", "QD08"], team: "A", barquettes: 677, block: "plats", row: 29 });
-    expect(plan.groups.find((g) => g.codes.includes("PJ12"))).toMatchObject({ team: "G", barquettes: 141, block: "petits_dejeuners" });
+    expect(plan.groups[0]).toEqual({
+      codes: ["VI02", "VI08", "QD02", "QD08"],
+      team: "A",
+      barquettes: 677,
+      block: "plats",
+      row: 29,
+    });
+    expect(plan.groups.find((g) => g.codes.includes("PJ12"))).toMatchObject({
+      team: "G",
+      barquettes: 141,
+      block: "petits_dejeuners",
+    });
   });
 
   it("lit les barquettes par code (semaine et premier jour)", () => {
-    expect(plan.volumes.find((v) => v.code === "VI01")).toMatchObject({ weekBarquettes: 2953, firstDayBarquettes: 605, row: 104 });
+    expect(plan.volumes.find((v) => v.code === "VI01")).toMatchObject({
+      weekBarquettes: 2953,
+      firstDayBarquettes: 605,
+      row: 104,
+    });
     expect(plan.volumes).toHaveLength(60);
   });
 

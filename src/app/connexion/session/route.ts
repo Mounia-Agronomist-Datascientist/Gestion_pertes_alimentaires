@@ -26,7 +26,10 @@ export async function POST(request: NextRequest) {
   const result = await login(
     db,
     { login: loginName, password },
-    { ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null, userAgent: request.headers.get("user-agent") },
+    {
+      ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+      userAgent: request.headers.get("user-agent"),
+    },
   );
   if (!result.ok) return retry(result.reason === "locked" ? "bloque" : "incorrect");
 

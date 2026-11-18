@@ -34,7 +34,12 @@ export async function listWeekDays(db: Db, admin: AuthUser, productionWeekId: st
   return Array.from({ length: 7 }, (_, i) => {
     const day = addDays(week.startDate, i);
     const row = rows.find((r) => r.day === day);
-    return { day, isProductionDay: row?.isProductionDay ?? false, isDefault: defaults.has(day), note: row?.note ?? null };
+    return {
+      day,
+      isProductionDay: row?.isProductionDay ?? false,
+      isDefault: defaults.has(day),
+      note: row?.note ?? null,
+    };
   });
 }
 
@@ -53,7 +58,12 @@ export async function setProductionDay(
   if (!week) throw new AdminError("Ce jour n'appartient à aucune semaine du calendrier");
 
   const [before] = await db.select().from(s.productionDays).where(eq(s.productionDays.day, input.day));
-  const values = { isProductionDay: input.isProductionDay, source: "admin", note: input.note?.trim() || null, updatedAt: new Date() };
+  const values = {
+    isProductionDay: input.isProductionDay,
+    source: "admin",
+    note: input.note?.trim() || null,
+    updatedAt: new Date(),
+  };
   await db
     .insert(s.productionDays)
     .values({ day: input.day, productionWeekId: week.id, ...values })

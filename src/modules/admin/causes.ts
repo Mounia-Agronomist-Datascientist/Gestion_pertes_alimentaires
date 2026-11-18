@@ -49,7 +49,11 @@ async function setZones(db: Db, causeId: string, zoneIds: readonly string[]) {
  * Un utilisateur propose une cause manquante (§9.3) : elle n'apparaît dans les listes
  * qu'après validation par l'administrateur.
  */
-export async function proposeCause(db: Db, user: AuthUser, raw: { name: unknown; description?: unknown; zoneId: unknown }) {
+export async function proposeCause(
+  db: Db,
+  user: AuthUser,
+  raw: { name: unknown; description?: unknown; zoneId: unknown },
+) {
   requirePermission(user, "cause.propose");
   const parsed = causeSchema.safeParse({ name: raw.name, description: raw.description ?? null, zoneIds: [raw.zoneId] });
   if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Proposition invalide");
@@ -67,7 +71,13 @@ export async function proposeCause(db: Db, user: AuthUser, raw: { name: unknown;
       })
       .returning();
     await setZones(tx, cause!.id, parsed.data.zoneIds);
-    await writeAudit(tx, { userId: user.id, action: "propose", entity: "cause", entityId: cause!.id, after: { ...cause, zoneIds: parsed.data.zoneIds } });
+    await writeAudit(tx, {
+      userId: user.id,
+      action: "propose",
+      entity: "cause",
+      entityId: cause!.id,
+      after: { ...cause, zoneIds: parsed.data.zoneIds },
+    });
     return cause!;
   });
 }
@@ -102,10 +112,21 @@ export async function createCause(db: Db, admin: AuthUser, raw: unknown) {
   return db.transaction(async (tx) => {
     const [cause] = await tx
       .insert(s.causes)
-      .values({ name: parsed.data.name, description: parsed.data.description || null, status: "active", displayOrder: 500 })
+      .values({
+        name: parsed.data.name,
+        description: parsed.data.description || null,
+        status: "active",
+        displayOrder: 500,
+      })
       .returning();
     await setZones(tx, cause!.id, parsed.data.zoneIds);
-    await writeAudit(tx, { userId: admin.id, action: "create", entity: "cause", entityId: cause!.id, after: { ...cause, zoneIds: parsed.data.zoneIds } });
+    await writeAudit(tx, {
+      userId: admin.id,
+      action: "create",
+      entity: "cause",
+      entityId: cause!.id,
+      after: { ...cause, zoneIds: parsed.data.zoneIds },
+    });
     return cause!;
   });
 }
@@ -116,11 +137,16 @@ export async function updateCause(db: Db, admin: AuthUser, causeId: string, raw:
   const [before] = await db.select().from(s.causes).where(eq(s.causes.id, causeId));
   if (!before) throw new AdminError("Cause introuvable");
   const parsed = before.isOther
-    ? causeSchema.omit({ zoneIds: true }).extend({ zoneIds: z.array(z.uuid()).default([]) }).safeParse(raw)
+    ? causeSchema
+        .omit({ zoneIds: true })
+        .extend({ zoneIds: z.array(z.uuid()).default([]) })
+        .safeParse(raw)
     : causeSchema.safeParse(raw);
   if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Saisie invalide");
   await assertUniqueName(db, parsed.data.name, causeId);
-  const beforeZones = (await db.select().from(s.causeZones).where(eq(s.causeZones.causeId, causeId))).map((l) => l.zoneId);
+  const beforeZones = (await db.select().from(s.causeZones).where(eq(s.causeZones.causeId, causeId))).map(
+    (l) => l.zoneId,
+  );
   await db.transaction(async (tx) => {
     await tx
       .update(s.causes)
@@ -143,20 +169,28 @@ export async function reviewCause(
   db: Db,
   admin: AuthUser,
   causeId: string,
-  decision: { accept: true; name: string; description?: string | null; zoneIds: string[] } | { accept: false; reason?: string },
+  decision:
+    { accept: true; name: string; description?: string | null; zoneIds: string[] } | { accept: false; reason?: string },
 ) {
   requirePermission(admin, "cause.review");
   const [before] = await db.select().from(s.causes).where(eq(s.causes.id, causeId));
   if (!before || before.status !== "proposee") throw new AdminError("Cette proposition n'est plus en attente");
   const now = new Date();
   if (decision.accept) {
-    await updateCause(db, admin, causeId, { name: decision.name, description: decision.description, zoneIds: decision.zoneIds });
+    await updateCause(db, admin, causeId, {
+      name: decision.name,
+      description: decision.description,
+      zoneIds: decision.zoneIds,
+    });
     await db
       .update(s.causes)
       .set({ status: "active", reviewedBy: admin.id, reviewedAt: now, displayOrder: 500 })
       .where(eq(s.causes.id, causeId));
   } else {
-    await db.update(s.causes).set({ status: "rejetee", reviewedBy: admin.id, reviewedAt: now }).where(eq(s.causes.id, causeId));
+    await db
+      .update(s.causes)
+      .set({ status: "rejetee", reviewedBy: admin.id, reviewedAt: now })
+      .where(eq(s.causes.id, causeId));
   }
   await writeAudit(db, {
     userId: admin.id,
@@ -174,8 +208,16 @@ export async function setCauseActive(db: Db, admin: AuthUser, causeId: string, a
   if (!cause) throw new AdminError("Cause introuvable");
   if (cause.isOther && !active) throw new AdminError("« Autres pertes » doit toujours rester disponible");
   if (!["active", "inactive"].includes(cause.status)) throw new AdminError("Traitez d'abord la proposition");
-  await db.update(s.causes).set({ status: active ? "active" : "inactive", updatedAt: new Date() }).where(eq(s.causes.id, causeId));
-  await writeAudit(db, { userId: admin.id, action: active ? "activate" : "deactivate", entity: "cause", entityId: causeId });
+  await db
+    .update(s.causes)
+    .set({ status: active ? "active" : "inactive", updatedAt: new Date() })
+    .where(eq(s.causes.id, causeId));
+  await writeAudit(db, {
+    userId: admin.id,
+    action: active ? "activate" : "deactivate",
+    entity: "cause",
+    entityId: causeId,
+  });
 }
 
 /** Nombre de propositions en attente (pour signaler l'administration). */

@@ -48,7 +48,11 @@ export function CausesAdmin({ causes, zones }: Props) {
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">Propositions en attente ({pendingProposals.length})</h2>
           {pendingProposals.map((c) => (
-            <form key={c.id} action={action} className="flex flex-col gap-2 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
+            <form
+              key={c.id}
+              action={action}
+              className="flex flex-col gap-2 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4"
+            >
               <input type="hidden" name="causeId" value={c.id} />
               <p className="text-sm text-amber-900">
                 Proposée par {c.proposedByName ?? "?"}
@@ -59,12 +63,24 @@ export function CausesAdmin({ causes, zones }: Props) {
                 <button type="submit" name="intent" value="accept" disabled={pending} className="btn-primary flex-1">
                   Valider
                 </button>
-                <input name="reason" placeholder="Motif du rejet (facultatif)" className="field min-h-12 flex-1 text-base" />
-                <button type="submit" name="intent" value="reject" disabled={pending} className="font-medium text-red-800 underline">
+                <input
+                  name="reason"
+                  placeholder="Motif du rejet (facultatif)"
+                  className="field min-h-12 flex-1 text-base"
+                />
+                <button
+                  type="submit"
+                  name="intent"
+                  value="reject"
+                  disabled={pending}
+                  className="font-medium text-red-800 underline"
+                >
                   Rejeter
                 </button>
               </div>
-              <p className="text-sm text-amber-900">Vous pouvez reformuler le nom et choisir les zones avant de valider.</p>
+              <p className="text-sm text-amber-900">
+                Vous pouvez reformuler le nom et choisir les zones avant de valider.
+              </p>
             </form>
           ))}
         </section>
@@ -105,7 +121,10 @@ export function CausesAdmin({ causes, zones }: Props) {
 
       <ul className="flex flex-col gap-2">
         {listed.map((c) => (
-          <li key={c.id} className={`rounded-2xl bg-white p-4 shadow-sm ${c.status === "inactive" ? "opacity-60" : ""}`}>
+          <li
+            key={c.id}
+            className={`rounded-2xl bg-white p-4 shadow-sm ${c.status === "inactive" ? "opacity-60" : ""}`}
+          >
             {editing === c.id ? (
               <form action={action} className="flex flex-col gap-2">
                 <input type="hidden" name="intent" value="update" />
@@ -124,7 +143,9 @@ export function CausesAdmin({ causes, zones }: Props) {
               <div className="flex flex-col gap-1">
                 <span className="font-semibold">
                   {c.name}
-                  {c.status === "inactive" && <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivée</span>}
+                  {c.status === "inactive" && (
+                    <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivée</span>
+                  )}
                 </span>
                 {c.description && <span className="text-sm text-slate-600">{c.description}</span>}
                 <span className="text-sm text-slate-500">
@@ -138,7 +159,11 @@ export function CausesAdmin({ causes, zones }: Props) {
                 </span>
                 <form action={action} className="flex gap-4">
                   <input type="hidden" name="causeId" value={c.id} />
-                  <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(c.id)}>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-teal-800 underline"
+                    onClick={() => setEditing(c.id)}
+                  >
                     Modifier
                   </button>
                   {!c.isOther && (
@@ -188,7 +213,14 @@ function CauseFields({
           <legend className="mb-1 font-medium">Zones</legend>
           {zones.map((z) => (
             <label key={z.id} className="flex items-center gap-2">
-              <input type="checkbox" name="zoneIds" value={z.id} defaultChecked={checked.includes(z.id)} className="size-5" /> {z.name}
+              <input
+                type="checkbox"
+                name="zoneIds"
+                value={z.id}
+                defaultChecked={checked.includes(z.id)}
+                className="size-5"
+              />{" "}
+              {z.name}
             </label>
           ))}
         </fieldset>

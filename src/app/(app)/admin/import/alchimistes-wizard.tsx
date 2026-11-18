@@ -2,12 +2,20 @@
 
 import { useActionState, useState } from "react";
 import { computeProductionWeek, formatProductionWeek } from "@/domain/semaine-production";
-import { type AlchimistesParseResult, csvToGrid, parseAlchimistes } from "@/modules/imports/alchimistes/parse-alchimistes";
+import {
+  type AlchimistesParseResult,
+  csvToGrid,
+  parseAlchimistes,
+} from "@/modules/imports/alchimistes/parse-alchimistes";
 import type { Grid } from "@/modules/imports/plan/parse-plan";
 import { Feedback } from "../feedback";
 import { type ImportActionState, importAlchimistesAction } from "./actions";
 
-type FileState = { status: "idle" } | { status: "reading"; fileName: string } | { status: "error"; message: string } | { status: "ready"; fileName: string; result: AlchimistesParseResult };
+type FileState =
+  | { status: "idle" }
+  | { status: "reading"; fileName: string }
+  | { status: "error"; message: string }
+  | { status: "ready"; fileName: string; result: AlchimistesParseResult };
 
 const kg = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
 const shortDate = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
@@ -47,7 +55,10 @@ export function AlchimistesWizard({ coverage }: { coverage: string[] }) {
     w.bins++;
     w.kg += c.netKg;
   }
-  const replaced = result?.periodFrom && result.periodTo ? coverage.filter((d) => d >= result.periodFrom! && d <= result.periodTo!) : [];
+  const replaced =
+    result?.periodFrom && result.periodTo
+      ? coverage.filter((d) => d >= result.periodFrom! && d <= result.periodTo!)
+      : [];
   const withNumber = result?.collections.filter((c) => c.containerNumber).length ?? 0;
   const payload =
     file.status === "ready" && result && !result.errors.length && result.periodFrom && result.periodTo
@@ -65,9 +76,10 @@ export function AlchimistesWizard({ coverage }: { coverage: string[] }) {
     <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold">Pesées des Alchimistes</h2>
       <p className="text-sm text-slate-600">
-        Export CSV ou Excel des rendez-vous des Alchimistes. Seules les collectes sont gardées (date, poids, bac, qualité, incident) ; le nom du client et de
-        l&apos;établissement ne sont pas lus. La semaine de production est calculée à partir de la date. Ces poids servent au contrôle : ils ne
-        s&apos;ajoutent jamais aux pertes déclarées.
+        Export CSV ou Excel des rendez-vous des Alchimistes. Seules les collectes sont gardées (date, poids, bac,
+        qualité, incident) ; le nom du client et de l&apos;établissement ne sont pas lus. La semaine de production est
+        calculée à partir de la date. Ces poids servent au contrôle : ils ne s&apos;ajoutent jamais aux pertes
+        déclarées.
       </p>
       <input
         type="file"
@@ -100,12 +112,15 @@ export function AlchimistesWizard({ coverage }: { coverage: string[] }) {
           {result.collections.length > 0 && result.periodFrom && result.periodTo && (
             <>
               <p className="text-slate-700">
-                Du {shortDate(result.periodFrom)} au {shortDate(result.periodTo)} : {result.collections.length} bacs collectés ·{" "}
-                <span className="font-semibold">{kg.format(total)} kg</span>
-                {result.deliveries > 0 && ` · ${result.deliveries} livraison${result.deliveries > 1 ? "s" : ""} de bacs vides ignorée${result.deliveries > 1 ? "s" : ""}`}
+                Du {shortDate(result.periodFrom)} au {shortDate(result.periodTo)} : {result.collections.length} bacs
+                collectés · <span className="font-semibold">{kg.format(total)} kg</span>
+                {result.deliveries > 0 &&
+                  ` · ${result.deliveries} livraison${result.deliveries > 1 ? "s" : ""} de bacs vides ignorée${result.deliveries > 1 ? "s" : ""}`}
               </p>
               <p className="text-sm text-slate-600">
-                {withNumber > 0 ? `N° de bac présent sur ${withNumber} collecte${withNumber > 1 ? "s" : ""}.` : "Pas de n° de bac dans ce fichier."}
+                {withNumber > 0
+                  ? `N° de bac présent sur ${withNumber} collecte${withNumber > 1 ? "s" : ""}.`
+                  : "Pas de n° de bac dans ce fichier."}
               </p>
               <table className="w-full text-sm">
                 <caption className="sr-only">Collectes par semaine de production</caption>
@@ -131,9 +146,10 @@ export function AlchimistesWizard({ coverage }: { coverage: string[] }) {
           {replaced.length > 0 && (
             <p className="rounded-xl bg-amber-50 p-3 text-amber-950">
               Des collectes sont déjà enregistrées sur cette période (
-              {replaced.length === 1 ? `le ${shortDate(replaced[0]!)}` : `${replaced.length} jours, du ${shortDate(replaced[0]!)} au ${shortDate(replaced.at(-1)!)}`}) : ce fichier
-              les remplacera.
-              Les anciennes restent conservées.
+              {replaced.length === 1
+                ? `le ${shortDate(replaced[0]!)}`
+                : `${replaced.length} jours, du ${shortDate(replaced[0]!)} au ${shortDate(replaced.at(-1)!)}`}
+              ) : ce fichier les remplacera. Les anciennes restent conservées.
             </p>
           )}
           <form action={action}>

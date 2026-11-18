@@ -5,7 +5,19 @@ import { periodLabel } from "@/domain/periodes";
 import { requireUser } from "@/modules/auth/next-session";
 import { generalDashboard } from "@/modules/statistiques/dashboard";
 import { canReadStats } from "@/modules/statistiques/facts";
-import { Card, DestinationBars, ExportLinks, FilterForm, type Params, PeriodNav, scopeNote, StatsTabs, statsContext, SummaryNotes, SummaryTiles } from "./shared";
+import {
+  Card,
+  DestinationBars,
+  ExportLinks,
+  FilterForm,
+  type Params,
+  PeriodNav,
+  scopeNote,
+  StatsTabs,
+  statsContext,
+  SummaryNotes,
+  SummaryTiles,
+} from "./shared";
 
 export const metadata = { title: "Statistiques — Pertes" };
 

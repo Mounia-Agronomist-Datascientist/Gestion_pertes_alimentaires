@@ -26,16 +26,29 @@ const accounts = [
     roleCode: "equipe",
     teamId: t.id,
   })),
-  { login: "resp-reception", displayName: "Responsable Réception", roleCode: "resp_zone", zoneIds: [zoneId("RECEPTION")] },
+  {
+    login: "resp-reception",
+    displayName: "Responsable Réception",
+    roleCode: "resp_zone",
+    zoneIds: [zoneId("RECEPTION")],
+  },
   { login: "resp-stockage", displayName: "Responsable Stockage", roleCode: "resp_zone", zoneIds: [zoneId("STOCKAGE")] },
-  { login: "resp-conditionnement", displayName: "Responsable Conditionnement", roleCode: "resp_zone", zoneIds: [zoneId("CONDITIONNEMENT")] },
+  {
+    login: "resp-conditionnement",
+    displayName: "Responsable Conditionnement",
+    roleCode: "resp_zone",
+    zoneIds: [zoneId("CONDITIONNEMENT")],
+  },
   { login: "resp-plonge", displayName: "Responsable Plonge", roleCode: "resp_zone", zoneIds: [zoneId("PLONGE")] },
   { login: "admin", displayName: "Administration", roleCode: "admin" },
 ];
 
 const file = "comptes-dev.local.md";
 if (!existsSync(file)) {
-  writeFileSync(file, "# Comptes de développement (fichier local, ne pas partager)\n\n| Identifiant | Mot de passe |\n|---|---|\n");
+  writeFileSync(
+    file,
+    "# Comptes de développement (fichier local, ne pas partager)\n\n| Identifiant | Mot de passe |\n|---|---|\n",
+  );
 }
 let created = 0;
 for (const account of accounts) {

@@ -17,8 +17,25 @@ describe("coûts horaires de main-d'œuvre par zone", () => {
     t = await createTestDb();
     await seed(t.db);
     const teamC = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "C")))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    teamUser = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-c", displayName: "Équipe C", roleCode: "equipe", teamId: teamC, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    teamUser = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-c",
+        displayName: "Équipe C",
+        roleCode: "equipe",
+        teamId: teamC,
+        password: "mot-de-passe-equipe",
+      }),
+    );
   });
 
   afterAll(async () => {
@@ -28,11 +45,19 @@ describe("coûts horaires de main-d'œuvre par zone", () => {
   it("enregistre un taux daté par zone, clôture le précédent la veille, garde l'historique", async () => {
     const cuisine = await zoneIdByCode(t.db, "CUISINE");
     await setLabourRate(t.db, admin, cuisine, { hourlyCostEur: "28,50", validFrom: "2026-11-01" }, "2026-11-01");
-    await setLabourRate(t.db, admin, cuisine, { hourlyCostEur: "29", validFrom: "2027-01-01", note: "Revalorisation" }, "2026-11-10");
+    await setLabourRate(
+      t.db,
+      admin,
+      cuisine,
+      { hourlyCostEur: "29", validFrom: "2027-01-01", note: "Revalorisation" },
+      "2026-11-10",
+    );
     const zone = (await listLabourRates(t.db, admin, "2026-11-10")).find((z) => z.id === cuisine)!;
     expect(zone.current).toMatchObject({ hourlyCostEur: 28.5, unit: "heure", validTo: "2026-12-31" });
     expect(zone.versions.map((v) => v.hourlyCostEur)).toEqual([29, 28.5]);
-    await expect(setLabourRate(t.db, admin, cuisine, { hourlyCostEur: "30", validFrom: "2026-11-01" }, "2026-11-10")).rejects.toThrow(/plus récente/);
+    await expect(
+      setLabourRate(t.db, admin, cuisine, { hourlyCostEur: "30", validFrom: "2026-11-01" }, "2026-11-10"),
+    ).rejects.toThrow(/plus récente/);
   });
 
   it("réserve la saisie à l'administration", async () => {

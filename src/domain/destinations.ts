@@ -63,10 +63,10 @@ export function validateDestinationSplit(
   const cleaned = justification?.trim() ?? "";
   if (cleaned === "") {
     const detail =
-      check.remaining > 0
-        ? `il reste ${check.remaining} à affecter`
-        : `${-check.remaining} de trop ont été affectés`;
-    throw new DestinationError(`La répartition ne correspond pas à la quantité déclarée (${detail}) : corrigez ou justifiez`);
+      check.remaining > 0 ? `il reste ${check.remaining} à affecter` : `${-check.remaining} de trop ont été affectés`;
+    throw new DestinationError(
+      `La répartition ne correspond pas à la quantité déclarée (${detail}) : corrigez ou justifiez`,
+    );
   }
   return { check, justification: cleaned };
 }

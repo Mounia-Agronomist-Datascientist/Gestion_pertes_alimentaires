@@ -32,7 +32,10 @@ export async function listAccounts(db: Db, admin: AuthUser) {
       .from(s.users)
       .leftJoin(s.teams, eq(s.users.teamId, s.teams.id))
       .orderBy(asc(s.users.roleCode), asc(s.users.login)),
-    db.select({ userId: s.userZones.userId, zoneName: s.zones.name }).from(s.userZones).innerJoin(s.zones, eq(s.userZones.zoneId, s.zones.id)),
+    db
+      .select({ userId: s.userZones.userId, zoneName: s.zones.name })
+      .from(s.userZones)
+      .innerJoin(s.zones, eq(s.userZones.zoneId, s.zones.id)),
     db.select().from(s.roles),
   ]);
   const roleLabel = new Map(roles.map((r) => [r.code, r.label]));
@@ -56,15 +59,21 @@ export const newAccountSchema = z
     zoneIds: z.array(z.uuid()).default([]),
   })
   .superRefine((v, ctx) => {
-    if (v.roleCode === "equipe" && !v.teamId) ctx.addIssue({ code: "custom", message: "Choisissez l'équipe du compte" });
-    if (v.roleCode !== "equipe" && v.teamId) ctx.addIssue({ code: "custom", message: "Seul un compte équipe est rattaché à une équipe" });
+    if (v.roleCode === "equipe" && !v.teamId)
+      ctx.addIssue({ code: "custom", message: "Choisissez l'équipe du compte" });
+    if (v.roleCode !== "equipe" && v.teamId)
+      ctx.addIssue({ code: "custom", message: "Seul un compte équipe est rattaché à une équipe" });
     if (v.roleCode === "resp_zone" && v.zoneIds.length === 0) {
       ctx.addIssue({ code: "custom", message: "Choisissez au moins une zone pour un responsable de zone" });
     }
   });
 
 /** Crée un compte avec un mot de passe provisoire, à changer à la première connexion. */
-export async function createAccountByAdmin(db: Db, admin: AuthUser, raw: unknown): Promise<{ id: string; password: string }> {
+export async function createAccountByAdmin(
+  db: Db,
+  admin: AuthUser,
+  raw: unknown,
+): Promise<{ id: string; password: string }> {
   requirePermission(admin, "user.manage");
   const parsed = newAccountSchema.safeParse(raw);
   if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Saisie invalide");
@@ -111,5 +120,12 @@ export async function setAccountActive(db: Db, admin: AuthUser, userId: string, 
   if (!before) throw new AdminError("Compte introuvable");
   await db.update(s.users).set({ active, updatedAt: new Date() }).where(eq(s.users.id, userId));
   if (!active) await revokeAllSessions(db, userId, admin.id, "Compte désactivé");
-  await writeAudit(db, { userId: admin.id, action: active ? "activate" : "deactivate", entity: "user", entityId: userId, before, after: { active } });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: active ? "activate" : "deactivate",
+    entity: "user",
+    entityId: userId,
+    before,
+    after: { active },
+  });
 }

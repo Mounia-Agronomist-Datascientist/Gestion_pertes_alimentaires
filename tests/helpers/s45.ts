@@ -4,7 +4,14 @@ import type { PdfItem } from "@/modules/imports/tome/pdf-items";
 
 /** Texte positionné du tome S45 (tableaux seulement, sans commentaires). */
 export function s45TomeItems(): PdfItem[] {
-  const rows = JSON.parse(readFileSync("tests/fixtures/s45/tome-S45.items.json", "utf8")) as [number, number, number, number, number, string][];
+  const rows = JSON.parse(readFileSync("tests/fixtures/s45/tome-S45.items.json", "utf8")) as [
+    number,
+    number,
+    number,
+    number,
+    number,
+    string,
+  ][];
   return rows.map(([page, x, y, width, size, text]) => ({ page, x, y, width, size, text }));
 }
 

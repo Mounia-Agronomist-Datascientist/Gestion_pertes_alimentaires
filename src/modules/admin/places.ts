@@ -64,8 +64,12 @@ export async function listDestinationsForAdmin(db: Db, admin: AuthUser) {
 }
 
 async function assertUniqueDestinationName(db: Db, label: string, excludeId?: string) {
-  const others = await db.select().from(s.destinations).where(excludeId ? ne(s.destinations.id, excludeId) : undefined);
-  if (others.some((d) => normalizeLabel(d.name) === normalizeLabel(label))) throw new AdminError("Cette destination existe déjà");
+  const others = await db
+    .select()
+    .from(s.destinations)
+    .where(excludeId ? ne(s.destinations.id, excludeId) : undefined);
+  if (others.some((d) => normalizeLabel(d.name) === normalizeLabel(label)))
+    throw new AdminError("Cette destination existe déjà");
   return others;
 }
 
@@ -78,11 +82,20 @@ export async function createDestination(db: Db, admin: AuthUser, raw: z.input<ty
     .insert(s.destinations)
     .values({
       ...parsed.data,
-      code: codeFrom(parsed.data.name, others.map((d) => d.code)),
+      code: codeFrom(
+        parsed.data.name,
+        others.map((d) => d.code),
+      ),
       displayOrder: Math.max(-1, ...others.map((d) => d.displayOrder)) + 1,
     })
     .returning();
-  await writeAudit(db, { userId: admin.id, action: "create", entity: "destination", entityId: created!.id, after: created });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "create",
+    entity: "destination",
+    entityId: created!.id,
+    after: created,
+  });
   return created!;
 }
 
@@ -98,8 +111,13 @@ export async function updateDestination(db: Db, admin: AuthUser, id: string, raw
     .select({ n: sql<number>`count(*)::int` })
     .from(s.declarationDestinations)
     .where(eq(s.declarationDestinations.destinationId, id));
-  if ((use?.n ?? 0) > 0 && (parsed.data.kind !== before.kind || parsed.data.financialRecovery !== before.financialRecovery)) {
-    throw new AdminError("Destination déjà utilisée : son type ne peut plus changer. Créez une nouvelle destination et désactivez celle-ci.");
+  if (
+    (use?.n ?? 0) > 0 &&
+    (parsed.data.kind !== before.kind || parsed.data.financialRecovery !== before.financialRecovery)
+  ) {
+    throw new AdminError(
+      "Destination déjà utilisée : son type ne peut plus changer. Créez une nouvelle destination et désactivez celle-ci.",
+    );
   }
   const [after] = await db
     .update(s.destinations)
@@ -121,12 +139,21 @@ export async function setDestinationActive(db: Db, admin: AuthUser, id: string, 
     if ((others?.n ?? 0) === 0) throw new AdminError("Il faut au moins une destination active");
   }
   await db.update(s.destinations).set({ active, updatedAt: new Date() }).where(eq(s.destinations.id, id));
-  await writeAudit(db, { userId: admin.id, action: active ? "activate" : "deactivate", entity: "destination", entityId: id, before });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: active ? "activate" : "deactivate",
+    entity: "destination",
+    entityId: id,
+    before,
+  });
 }
 
 export async function moveDestination(db: Db, admin: AuthUser, id: string, direction: "up" | "down") {
   requirePermission(admin, "referentiel.manage");
-  const rows = await db.select().from(s.destinations).orderBy(asc(s.destinations.displayOrder), asc(s.destinations.name));
+  const rows = await db
+    .select()
+    .from(s.destinations)
+    .orderBy(asc(s.destinations.displayOrder), asc(s.destinations.name));
   await move(rows, id, direction, (rowId, displayOrder) =>
     db.update(s.destinations).set({ displayOrder }).where(eq(s.destinations.id, rowId)),
   );
@@ -150,9 +177,17 @@ export async function renameZone(db: Db, admin: AuthUser, id: string, rawName: u
   const [before] = await db.select().from(s.zones).where(eq(s.zones.id, id));
   if (!before) throw new AdminError("Zone introuvable");
   const others = await db.select().from(s.zones).where(ne(s.zones.id, id));
-  if (others.some((z) => normalizeLabel(z.name) === normalizeLabel(parsed.data))) throw new AdminError("Cette zone existe déjà");
+  if (others.some((z) => normalizeLabel(z.name) === normalizeLabel(parsed.data)))
+    throw new AdminError("Cette zone existe déjà");
   await db.update(s.zones).set({ name: parsed.data, updatedAt: new Date() }).where(eq(s.zones.id, id));
-  await writeAudit(db, { userId: admin.id, action: "update", entity: "zone", entityId: id, before, after: { ...before, name: parsed.data } });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "update",
+    entity: "zone",
+    entityId: id,
+    before,
+    after: { ...before, name: parsed.data },
+  });
 }
 
 const subzoneSchema = z.object({
@@ -171,7 +206,8 @@ async function assertUniqueSubzoneName(db: Db, zoneId: string, label: string, ex
     .select()
     .from(s.subzones)
     .where(and(eq(s.subzones.zoneId, zoneId), excludeId ? ne(s.subzones.id, excludeId) : undefined));
-  if (siblings.some((sz) => normalizeLabel(sz.name) === normalizeLabel(label))) throw new AdminError("Ce poste existe déjà dans cette zone");
+  if (siblings.some((sz) => normalizeLabel(sz.name) === normalizeLabel(label)))
+    throw new AdminError("Ce poste existe déjà dans cette zone");
   return siblings;
 }
 
@@ -195,7 +231,13 @@ export async function createSubzone(db: Db, admin: AuthUser, zoneId: string, raw
       displayOrder: Math.max(-1, ...siblings.map((sz) => sz.displayOrder)) + 1,
     })
     .returning();
-  await writeAudit(db, { userId: admin.id, action: "create", entity: "subzone", entityId: created!.id, after: created });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "create",
+    entity: "subzone",
+    entityId: created!.id,
+    after: created,
+  });
   return created!;
 }
 
@@ -226,7 +268,13 @@ export async function setSubzoneActive(db: Db, admin: AuthUser, id: string, acti
     if ((others?.n ?? 0) === 0) throw new AdminError("Chaque zone doit garder au moins un poste actif");
   }
   await db.update(s.subzones).set({ active, updatedAt: new Date() }).where(eq(s.subzones.id, id));
-  await writeAudit(db, { userId: admin.id, action: active ? "activate" : "deactivate", entity: "subzone", entityId: id, before });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: active ? "activate" : "deactivate",
+    entity: "subzone",
+    entityId: id,
+    before,
+  });
 }
 
 export async function moveSubzone(db: Db, admin: AuthUser, id: string, direction: "up" | "down") {
@@ -238,5 +286,7 @@ export async function moveSubzone(db: Db, admin: AuthUser, id: string, direction
     .from(s.subzones)
     .where(eq(s.subzones.zoneId, row.zoneId))
     .orderBy(asc(s.subzones.displayOrder), asc(s.subzones.name));
-  await move(siblings, id, direction, (rowId, displayOrder) => db.update(s.subzones).set({ displayOrder }).where(eq(s.subzones.id, rowId)));
+  await move(siblings, id, direction, (rowId, displayOrder) =>
+    db.update(s.subzones).set({ displayOrder }).where(eq(s.subzones.id, rowId)),
+  );
 }

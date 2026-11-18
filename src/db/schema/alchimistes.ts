@@ -1,5 +1,17 @@
 import { sql } from "drizzle-orm";
-import { check, date, index, integer, jsonb, numeric, pgTable, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  check,
+  date,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { productionWeeks } from "./production-weeks";
 
@@ -22,7 +34,10 @@ export const alchimistesImports = pgTable(
     totalKg: numeric("total_kg", { precision: 12, scale: 3, mode: "number" }).notNull(),
     /** Livraisons de bacs vides ignorées. */
     deliveries: integer("deliveries").notNull().default(0),
-    anomalies: jsonb("anomalies").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    anomalies: jsonb("anomalies")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id),

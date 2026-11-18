@@ -108,7 +108,12 @@ export const CAUSES: readonly CauseSeed[] = [
   // Réception
   { code: "REC_ARRIVE_CASSE", name: "Produit arrivé cassé / ouvert", zones: ["RECEPTION"] },
   { code: "REC_CASSE_MANIP", name: "Cassé / ouvert pendant la manipulation", zones: ["RECEPTION"] },
-  { code: "REC_DESSOUVIDE", name: "Produit arrivé dessouvidé", description: "Perte du sous-vide à la livraison", zones: ["RECEPTION"] },
+  {
+    code: "REC_DESSOUVIDE",
+    name: "Produit arrivé dessouvidé",
+    description: "Perte du sous-vide à la livraison",
+    zones: ["RECEPTION"],
+  },
 
   // Stockage
   { code: "STO_FIN_PROD", name: "Fin de production non utilisable", zones: ["STOCKAGE"] },
@@ -162,7 +167,12 @@ export const CAUSES: readonly CauseSeed[] = [
 
   // Conditionnement (réponses du 06/11/2026 + §9.4 du cahier des charges)
   { code: "CON_SURPRODUCTION", name: "Surplus de production", zones: ["CONDITIONNEMENT"] },
-  { code: "CON_CHUTE", name: "Chute de produit", description: "Barquette ou produit tombé", zones: ["CONDITIONNEMENT"] },
+  {
+    code: "CON_CHUTE",
+    name: "Chute de produit",
+    description: "Barquette ou produit tombé",
+    zones: ["CONDITIONNEMENT"],
+  },
   { code: "CON_DOSEUSE", name: "Pertes liées à la doseuse", zones: ["CONDITIONNEMENT"] },
   { code: "CON_SCELLAGE", name: "Défaut de scellage", zones: ["CONDITIONNEMENT"] },
   { code: "CON_TEST_OXYGENE", name: "Barquettes de test d'oxygène", zones: ["CONDITIONNEMENT"] },
@@ -187,14 +197,25 @@ export const CAUSES: readonly CauseSeed[] = [
 ];
 
 export const DESTINATIONS = [
-  { code: "ALCHIMISTES", name: "Les Alchimistes – compost", kind: "compost", financialRecovery: false, binNumberMode: "facultatif" },
+  {
+    code: "ALCHIMISTES",
+    name: "Les Alchimistes – compost",
+    kind: "compost",
+    financialRecovery: false,
+    binNumberMode: "facultatif",
+  },
   { code: "ORDURES", name: "Ordures ménagères", kind: "destruction", financialRecovery: false },
   { code: "PERSONNEL", name: "Personnel", kind: "personnel", financialRecovery: false },
   { code: "DON", name: "Association / don", kind: "don", financialRecovery: false },
   { code: "LINKEE", name: "Linkee", kind: "don", financialRecovery: false, declarable: false },
   { code: "TGTG", name: "Too Good To Go", kind: "vente", financialRecovery: true, declarable: false },
   { code: "VENTE_FLASH", name: "Vente flash", kind: "vente", financialRecovery: true, declarable: false },
-  { code: "REUTILISATION", name: "Réutilisation dans une autre préparation", kind: "reutilisation", financialRecovery: false },
+  {
+    code: "REUTILISATION",
+    name: "Réutilisation dans une autre préparation",
+    kind: "reutilisation",
+    financialRecovery: false,
+  },
   { code: "RETOUR_FOURNISSEUR", name: "Retour fournisseur", kind: "retour_fournisseur", financialRecovery: false },
   { code: "AUTRE", name: "Autre destination", kind: "autre", financialRecovery: false },
 ] as const;
@@ -248,7 +269,13 @@ type RoleCode = (typeof ROLES)[number]["code"];
 /** Matrice d'autorisation (docs/SECURITE.md §1). */
 export const ROLE_PERMISSIONS: Record<RoleCode, readonly PermissionCode[]> = {
   equipe: ["declaration.create", "declaration.read.team", "declaration.correct.team", "cause.propose", "stats.global"],
-  resp_zone: ["declaration.create", "declaration.read.zone", "declaration.correct.zone", "cause.propose", "stats.global"],
+  resp_zone: [
+    "declaration.create",
+    "declaration.read.zone",
+    "declaration.correct.zone",
+    "cause.propose",
+    "stats.global",
+  ],
   resp_production: [
     "declaration.create",
     "declaration.read.all",

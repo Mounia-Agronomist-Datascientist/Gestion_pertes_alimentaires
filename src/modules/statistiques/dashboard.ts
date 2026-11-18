@@ -24,7 +24,11 @@ export const DESTINATION_KIND_STATS = [
 
 export async function generalDashboard(db: Db, user: AuthUser, period: Period, filters: StatsFilters) {
   const withCosts = can(user, "indicators.read");
-  const [facts, previous, next] = await Promise.all([loadFacts(db, user, period, filters), adjacentOf(db, period, -1), adjacentOf(db, period, 1)]);
+  const [facts, previous, next] = await Promise.all([
+    loadFacts(db, user, period, filters),
+    adjacentOf(db, period, -1),
+    adjacentOf(db, period, 1),
+  ]);
   const previousFacts = previous ? await loadFacts(db, user, previous, filters) : null;
   return {
     withCosts,
@@ -39,7 +43,10 @@ export async function generalDashboard(db: Db, user: AuthUser, period: Period, f
 export async function dashboardFilterOptions(db: Db) {
   const [zones, teams] = await Promise.all([
     db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones).orderBy(asc(s.zones.displayOrder)),
-    db.select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName }).from(s.teams).orderBy(asc(s.teams.displayOrder)),
+    db
+      .select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName })
+      .from(s.teams)
+      .orderBy(asc(s.teams.displayOrder)),
   ]);
   return { zones, teams };
 }

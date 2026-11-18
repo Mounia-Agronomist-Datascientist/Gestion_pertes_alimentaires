@@ -70,7 +70,8 @@ export interface WeekReconciliation {
 const byName = <T extends { name: string }>(a: T, b: T) => a.name.localeCompare(b.name, "fr");
 
 /** Écart de prix lisible : au-delà de l'arrondi du tome seulement. */
-export const isPriceGap = (tomeEur: number, orderEur: number) => tomeEur > 0 && Math.abs(orderEur - tomeEur) > PRICE_TOLERANCE * Math.max(tomeEur, orderEur);
+export const isPriceGap = (tomeEur: number, orderEur: number) =>
+  tomeEur > 0 && Math.abs(orderEur - tomeEur) > PRICE_TOLERANCE * Math.max(tomeEur, orderEur);
 
 export function reconcileWeek(input: {
   tomeLines: readonly TomeUseLine[];
@@ -105,7 +106,12 @@ export function reconcileWeek(input: {
     }
     // Plusieurs livraisons de la même matière : la dernière fait foi, comme pour le prix en vigueur.
     const line = lines.reduce((a, b) => (b.deliveryDate > a.deliveryDate ? b : a));
-    const basis = m.cost.perKgEur != null && line.perKgEur != null ? "kg" : m.cost.perUnitEur != null && line.perUnitEur != null ? "unit" : null;
+    const basis =
+      m.cost.perKgEur != null && line.perKgEur != null
+        ? "kg"
+        : m.cost.perUnitEur != null && line.perUnitEur != null
+          ? "unit"
+          : null;
     if (!basis) {
       incomparable++;
       continue;
@@ -113,7 +119,16 @@ export function reconcileWeek(input: {
     const tomeEur = basis === "kg" ? m.cost.perKgEur! : m.cost.perUnitEur!;
     const orderEur = basis === "kg" ? line.perKgEur! : line.perUnitEur!;
     if (isPriceGap(tomeEur, orderEur)) {
-      priceGaps.push({ key: m.key, name: m.name, supplier: line.supplier, deliveryDate: line.deliveryDate, basis, tomeEur, orderEur, gap: (orderEur - tomeEur) / tomeEur });
+      priceGaps.push({
+        key: m.key,
+        name: m.name,
+        supplier: line.supplier,
+        deliveryDate: line.deliveryDate,
+        basis,
+        tomeEur,
+        orderEur,
+        gap: (orderEur - tomeEur) / tomeEur,
+      });
     }
   }
 

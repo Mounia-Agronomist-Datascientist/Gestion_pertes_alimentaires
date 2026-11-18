@@ -10,6 +10,8 @@ if (process.env.NODE_ENV === "production" || !dbName.endsWith("_dev")) {
 }
 
 const { sqlClient } = await import("../src/db/client");
-await sqlClient.unsafe("drop schema if exists public cascade; drop schema if exists drizzle cascade; create schema public;");
+await sqlClient.unsafe(
+  "drop schema if exists public cascade; drop schema if exists drizzle cascade; create schema public;",
+);
 console.log(`Base ${dbName} vidée.`);
 await sqlClient.end();

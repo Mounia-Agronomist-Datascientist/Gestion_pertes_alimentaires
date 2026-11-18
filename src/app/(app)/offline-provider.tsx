@@ -137,8 +137,15 @@ function OfflineBanner() {
   if (!offline && !pending && !refused && !authRequired) return null;
   const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
   return (
-    <div role="status" className="mb-4 flex flex-col gap-1 rounded-2xl border-2 border-amber-300 bg-amber-50 p-3 text-amber-950 print:hidden">
-      {offline && <p className="font-semibold">Hors ligne : les pertes validées sont gardées sur cet appareil et envoyées au retour du réseau.</p>}
+    <div
+      role="status"
+      className="mb-4 flex flex-col gap-1 rounded-2xl border-2 border-amber-300 bg-amber-50 p-3 text-amber-950 print:hidden"
+    >
+      {offline && (
+        <p className="font-semibold">
+          Hors ligne : les pertes validées sont gardées sur cet appareil et envoyées au retour du réseau.
+        </p>
+      )}
       {pending > 0 && (
         <p className="flex flex-wrap items-center gap-2">
           {plural(pending, "envoi")} en attente sur cet appareil.
@@ -151,7 +158,11 @@ function OfflineBanner() {
       )}
       {authRequired && (
         <p>
-          Session expirée : <Link href="/connexion" className="font-medium underline">reconnectez-vous</Link> pour envoyer les pertes gardées (rien n&apos;est perdu).
+          Session expirée :{" "}
+          <Link href="/connexion" className="font-medium underline">
+            reconnectez-vous
+          </Link>{" "}
+          pour envoyer les pertes gardées (rien n&apos;est perdu).
         </p>
       )}
       {refused > 0 && (

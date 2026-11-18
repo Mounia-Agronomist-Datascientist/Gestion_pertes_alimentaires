@@ -44,11 +44,19 @@ export function purchaseLinePrice(line: PurchaseLinePriceInput, densityKgPerL: n
   if (/^kgs?$/.test(unit)) return { perKgEur: round(line.unitPriceEur), perUnitEur: null };
   if (/^(g|gr)$/.test(unit)) return { perKgEur: round(line.unitPriceEur * 1000), perUnitEur: null };
   // Prix au litre (ou au cL) : au kg avec la densité, sinon pas de prix.
-  if (Object.hasOwn(LITRES, unit)) return densityKgPerL ? { perKgEur: round(line.unitPriceEur / (LITRES[unit]! * densityKgPerL)), perUnitEur: null } : none;
+  if (Object.hasOwn(LITRES, unit))
+    return densityKgPerL
+      ? { perKgEur: round(line.unitPriceEur / (LITRES[unit]! * densityKgPerL)), perUnitEur: null }
+      : none;
   const p = line.packaging;
   if (!p) return none;
   // Prix d'une pièce du colis (« 10.28 € / poche 3l » pour un carton de 4 poches) : prix à la pièce.
-  if (p.contentUnit && unit === fold(p.contentUnit) && !isVolume(p.contentUnit) && contentGrams(1, p.contentUnit) == null) {
+  if (
+    p.contentUnit &&
+    unit === fold(p.contentUnit) &&
+    !isVolume(p.contentUnit) &&
+    contentGrams(1, p.contentUnit) == null
+  ) {
     return { perKgEur: null, perUnitEur: round(line.unitPriceEur) };
   }
   // Prix du colis (« 32.50 € / Carton » pour un carton de 5 kg).
@@ -56,8 +64,10 @@ export function purchaseLinePrice(line: PurchaseLinePriceInput, densityKgPerL: n
     const grams = contentGrams(p.contentQuantity, p.contentUnit);
     if (grams) return { perKgEur: round((line.unitPriceEur / grams) * 1000), perUnitEur: null };
     const litres = contentLitres(p.contentQuantity, p.contentUnit);
-    if (litres) return densityKgPerL ? { perKgEur: round(line.unitPriceEur / (litres * densityKgPerL)), perUnitEur: null } : none;
-    if (p.contentQuantity && p.contentUnit && !isVolume(p.contentUnit)) return { perKgEur: null, perUnitEur: round(line.unitPriceEur / p.contentQuantity) };
+    if (litres)
+      return densityKgPerL ? { perKgEur: round(line.unitPriceEur / (litres * densityKgPerL)), perUnitEur: null } : none;
+    if (p.contentQuantity && p.contentUnit && !isVolume(p.contentUnit))
+      return { perKgEur: null, perUnitEur: round(line.unitPriceEur / p.contentQuantity) };
   }
   return none;
 }

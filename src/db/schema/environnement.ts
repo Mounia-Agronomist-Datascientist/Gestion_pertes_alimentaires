@@ -1,5 +1,19 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, jsonb, numeric, pgEnum, pgTable, smallint, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  date,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./auth";
 
 /**
@@ -64,13 +78,21 @@ export const emissionFactors = pgTable(
   },
   (t) => [
     unique("emission_factors_family_version_key").on(t.familyId, t.version),
-    uniqueIndex("emission_factors_one_valid_per_family").on(t.familyId).where(sql`${t.status} = 'valide'`),
-    uniqueIndex("emission_factors_one_proposal_per_family").on(t.familyId).where(sql`${t.status} = 'propose'`),
+    uniqueIndex("emission_factors_one_valid_per_family")
+      .on(t.familyId)
+      .where(sql`${t.status} = 'valide'`),
+    uniqueIndex("emission_factors_one_proposal_per_family")
+      .on(t.familyId)
+      .where(sql`${t.status} = 'propose'`),
     check("emission_factors_positive", sql`${t.kgCo2ePerKg} >= 0`),
   ],
 );
 
-export const ingredientMappingStatusEnum = pgEnum("ingredient_mapping_status", ["famille", "non_couvert", "non_alimentaire"]);
+export const ingredientMappingStatusEnum = pgEnum("ingredient_mapping_status", [
+  "famille",
+  "non_couvert",
+  "non_alimentaire",
+]);
 
 /**
  * Rattachement d'un ingrédient du tome Melba (libellé normalisé, `tomeKey`) à une famille alimentaire (étape

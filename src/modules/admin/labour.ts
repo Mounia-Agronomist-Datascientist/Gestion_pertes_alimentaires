@@ -16,7 +16,9 @@ import { AdminError } from "./accounts";
 const rateSchema = z.object({
   hourlyCostEur: z.preprocess(
     (v) => (typeof v === "string" ? (v.trim() === "" ? undefined : Number(v.replace(",", "."))) : v),
-    z.number({ message: "Indiquez un coût horaire" }).refine((n) => Number.isFinite(n) && n >= 0 && n < 1000, "Coût horaire invalide"),
+    z
+      .number({ message: "Indiquez un coût horaire" })
+      .refine((n) => Number.isFinite(n) && n >= 0 && n < 1000, "Coût horaire invalide"),
   ),
   unit: z.string().trim().min(1).max(40).default("heure"),
   validFrom: z.iso.date({ message: "Date de début invalide" }),
@@ -31,11 +33,23 @@ export async function listLabourRates(db: Db, admin: AuthUser, today: LocalDate)
   ]);
   return zones.map((z) => {
     const versions = rates.filter((r) => r.zoneId === z.id);
-    return { id: z.id, name: z.name, active: z.active, versions, current: versions.find((v) => v.validFrom <= today && (v.validTo == null || v.validTo >= today)) ?? null };
+    return {
+      id: z.id,
+      name: z.name,
+      active: z.active,
+      versions,
+      current: versions.find((v) => v.validFrom <= today && (v.validTo == null || v.validTo >= today)) ?? null,
+    };
   });
 }
 
-export async function setLabourRate(db: Db, admin: AuthUser, zoneId: string, raw: z.input<typeof rateSchema>, today: LocalDate) {
+export async function setLabourRate(
+  db: Db,
+  admin: AuthUser,
+  zoneId: string,
+  raw: z.input<typeof rateSchema>,
+  today: LocalDate,
+) {
   requirePermission(admin, "referentiel.manage");
   const parsed = rateSchema.safeParse(raw);
   if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Saisie invalide");
@@ -43,18 +57,51 @@ export async function setLabourRate(db: Db, admin: AuthUser, zoneId: string, raw
   return db.transaction(async (tx) => {
     const [zone] = await tx.select().from(s.zones).where(eq(s.zones.id, zoneId));
     if (!zone) throw new AdminError("Zone introuvable");
-    const [latest] = await tx.select().from(s.labourRates).where(eq(s.labourRates.zoneId, zoneId)).orderBy(desc(s.labourRates.validFrom)).limit(1);
+    const [latest] = await tx
+      .select()
+      .from(s.labourRates)
+      .where(eq(s.labourRates.zoneId, zoneId))
+      .orderBy(desc(s.labourRates.validFrom))
+      .limit(1);
     const change = datedChange(latest, input.validFrom, today);
     if (change.kind === "refus") throw new AdminError(change.message);
-    const values = { hourlyCostEur: input.hourlyCostEur, unit: input.unit, source: input.note || null, createdBy: admin.id };
+    const values = {
+      hourlyCostEur: input.hourlyCostEur,
+      unit: input.unit,
+      source: input.note || null,
+      createdBy: admin.id,
+    };
     if (latest && change.kind === "correction") {
       const [after] = await tx.update(s.labourRates).set(values).where(eq(s.labourRates.id, latest.id)).returning();
-      await writeAudit(tx, { userId: admin.id, action: "cost_corrected", entity: "labour_rate", entityId: latest.id, before: latest, after, reason: input.note || null });
+      await writeAudit(tx, {
+        userId: admin.id,
+        action: "cost_corrected",
+        entity: "labour_rate",
+        entityId: latest.id,
+        before: latest,
+        after,
+        reason: input.note || null,
+      });
       return after!;
     }
-    if (latest) await tx.update(s.labourRates).set({ validTo: addDays(input.validFrom, -1) }).where(eq(s.labourRates.id, latest.id));
-    const [created] = await tx.insert(s.labourRates).values({ zoneId, validFrom: input.validFrom, ...values }).returning();
-    await writeAudit(tx, { userId: admin.id, action: "cost_new_version", entity: "labour_rate", entityId: created!.id, before: latest ?? null, after: created, reason: input.note || null });
+    if (latest)
+      await tx
+        .update(s.labourRates)
+        .set({ validTo: addDays(input.validFrom, -1) })
+        .where(eq(s.labourRates.id, latest.id));
+    const [created] = await tx
+      .insert(s.labourRates)
+      .values({ zoneId, validFrom: input.validFrom, ...values })
+      .returning();
+    await writeAudit(tx, {
+      userId: admin.id,
+      action: "cost_new_version",
+      entity: "labour_rate",
+      entityId: created!.id,
+      before: latest ?? null,
+      after: created,
+      reason: input.note || null,
+    });
     return created!;
   });
 }

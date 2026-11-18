@@ -74,7 +74,13 @@ export interface WizardInitial {
 export interface BatchLine {
   payload: Record<string, unknown>;
   initial: WizardInitial;
-  summary: { productName: string; quantityLabel: string; causeName: string; placeLabel: string; destinationLabel: string };
+  summary: {
+    productName: string;
+    quantityLabel: string;
+    causeName: string;
+    placeLabel: string;
+    destinationLabel: string;
+  };
 }
 
 interface Props {
@@ -213,7 +219,13 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     const gross = parseNumber(grossKg);
     const lines = gastros
       .filter((g) => (gastroCounts[g.id] ?? 0) > 0)
-      .map((g) => ({ containerTypeId: g.id, tareId: g.id, unitTareKg: g.unitTareKg, count: gastroCounts[g.id]!, maxCount: g.maxCount }));
+      .map((g) => ({
+        containerTypeId: g.id,
+        tareId: g.id,
+        unitTareKg: g.unitTareKg,
+        count: gastroCounts[g.id]!,
+        maxCount: g.maxCount,
+      }));
     const support = supports.find((sp) => sp.id === supportId);
     if (gross == null) return { error: null, result: null };
     try {
@@ -270,7 +282,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const causes = options.causes.filter(
     (c) =>
       c.isOther ||
-      (zone && c.zoneIds.includes(zone.id) && (c.subzoneIds.length === 0 || (subzone && c.subzoneIds.includes(subzone.id)))),
+      (zone &&
+        c.zoneIds.includes(zone.id) &&
+        (c.subzoneIds.length === 0 || (subzone && c.subzoneIds.includes(subzone.id)))),
   );
 
   const isLate =
@@ -280,23 +294,36 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
   // Coût matière estimé d'après le tome de la semaine (le serveur refait le calcul et le fige).
   const costPreview =
-    product?.kind === "week" && net ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost) : null;
+    product?.kind === "week" && net
+      ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost)
+      : null;
 
-  const isSale = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.financialRecovery ?? false;
+  const isSale = (destinationId: string) =>
+    options.destinations.find((d) => d.id === destinationId)?.financialRecovery ?? false;
   // N° de poubelle (Les Alchimistes) : facultatif ou obligatoire selon la destination, prérempli avec le dernier n° noté dans la zone.
-  const binMode = (destinationId: string) => options.destinations.find((d) => d.id === destinationId)?.binNumberMode ?? "aucun";
+  const binMode = (destinationId: string) =>
+    options.destinations.find((d) => d.id === destinationId)?.binNumberMode ?? "aucun";
   const needsBin = (destinationId: string) => binMode(destinationId) !== "aucun";
-  const binOf = (destinationId: string) => binNumbers[destinationId] ?? (zone ? options.lastBinNumbers[zone.id]?.[destinationId] : undefined) ?? "";
+  const binOf = (destinationId: string) =>
+    binNumbers[destinationId] ?? (zone ? options.lastBinNumbers[zone.id]?.[destinationId] : undefined) ?? "";
   const binLines = destinationLines.filter((l) => needsBin(l.destinationId) && (parseNumber(l.quantity) ?? 0) > 0);
   const missingBin = binLines.some((l) => binMode(l.destinationId) === "obligatoire" && !binOf(l.destinationId).trim());
   const saleLines = destinationLines.filter((l) => isSale(l.destinationId));
-  const recoveredTotal = saleLines.reduce((sum, l) => sum + (parseNumber(recoveredAmounts[l.destinationId] ?? "") ?? 0), 0);
+  const recoveredTotal = saleLines.reduce(
+    (sum, l) => sum + (parseNumber(recoveredAmounts[l.destinationId] ?? "") ?? 0),
+    0,
+  );
 
   // Un produit de la semaine n'est valable que pour une perte de cette semaine de production.
   const occurredWeek = occurredOn ? computeProductionWeek(occurredOn) : null;
   const productWeekMismatch =
-    product?.kind === "week" && occurredWeek != null && (product.week.year !== occurredWeek.year || product.week.number !== occurredWeek.number);
-  const catalogForDate = options.weekCatalogs.find((c) => occurredWeek && c.year === occurredWeek.year && c.number === occurredWeek.number) ?? null;
+    product?.kind === "week" &&
+    occurredWeek != null &&
+    (product.week.year !== occurredWeek.year || product.week.number !== occurredWeek.number);
+  const catalogForDate =
+    options.weekCatalogs.find(
+      (c) => occurredWeek && c.year === occurredWeek.year && c.number === occurredWeek.number,
+    ) ?? null;
 
   // ─── Actions ────────────────────────────────────────────────────────────────
   function chooseZone(id: string) {
@@ -441,13 +468,21 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     startTransition(async () => {
       if (correction) {
         try {
-          const r = await submitCorrection({ id: correction.id, expectedRevision: correction.revision, reason, payload });
+          const r = await submitCorrection({
+            id: correction.id,
+            expectedRevision: correction.revision,
+            reason,
+            payload,
+          });
           setResult(r);
           if (r.ok) setStep("done");
         } catch (e) {
           if (!isNetworkError(e)) throw e;
           offlineQueue.markOffline();
-          setResult({ ok: false, error: "Pas de réseau : la correction n'a pas été envoyée. Réessayez au retour du réseau." });
+          setResult({
+            ok: false,
+            error: "Pas de réseau : la correction n'a pas été envoyée. Réessayez au retour du réseau.",
+          });
         }
         return;
       }
@@ -459,7 +494,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           id: sent.clientId,
           kind: "une",
           payloads: [sent],
-          summary: [netLabel, product?.name, options.causes.find((c) => c.id === causeId)?.name].filter(Boolean).join(" — "),
+          summary: [netLabel, product?.name, options.causes.find((c) => c.id === causeId)?.name]
+            .filter(Boolean)
+            .join(" — "),
           enteredAt: sent.enteredAt,
         });
         offlineQueue.markOffline();
@@ -483,15 +520,24 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   if (step === "done" && queued) {
     return (
       <div className="flex flex-col gap-6">
-        <div role="status" className="flex flex-col items-center gap-2 rounded-2xl bg-amber-50 p-6 text-center text-amber-950">
-          <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-amber-500 text-4xl text-white">
+        <div
+          role="status"
+          className="flex flex-col items-center gap-2 rounded-2xl bg-amber-50 p-6 text-center text-amber-950"
+        >
+          <span
+            aria-hidden
+            className="flex size-16 items-center justify-center rounded-full bg-amber-500 text-4xl text-white"
+          >
             ⏳
           </span>
           <p className="text-xl font-semibold">Perte gardée sur cet appareil</p>
           <p>
             {netLabel} — {product?.name}
           </p>
-          <p className="text-sm">Pas de réseau : elle sera envoyée toute seule au retour du réseau. Ne videz pas les données du navigateur d&apos;ici là.</p>
+          <p className="text-sm">
+            Pas de réseau : elle sera envoyée toute seule au retour du réseau. Ne videz pas les données du navigateur
+            d&apos;ici là.
+          </p>
         </div>
         <button type="button" className="btn-primary" onClick={() => resetForNext(true)}>
           Nouvelle perte — même endroit
@@ -511,8 +557,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     const cause = options.causes.find((c) => c.id === causeId);
     return (
       <div className="flex flex-col gap-6">
-        <div role="status" className="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50 p-6 text-center text-emerald-900">
-          <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-emerald-600 text-4xl text-white">
+        <div
+          role="status"
+          className="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50 p-6 text-center text-emerald-900"
+        >
+          <span
+            aria-hidden
+            className="flex size-16 items-center justify-center rounded-full bg-emerald-600 text-4xl text-white"
+          >
             ✓
           </span>
           <p className="text-xl font-semibold">{correction ? "Correction enregistrée" : "Perte enregistrée"}</p>
@@ -548,8 +600,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     <div className="flex flex-col gap-4">
       {today !== options.today && (
         <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-950">
-          Listes gardées sur cet appareil le {new Date(`${options.today}T12:00:00Z`).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} :
-          sans réseau, les plats proposés peuvent dater d&apos;une autre semaine. La perte sera vérifiée à l&apos;envoi.
+          Listes gardées sur cet appareil le{" "}
+          {new Date(`${options.today}T12:00:00Z`).toLocaleDateString("fr-FR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })}{" "}
+          : sans réseau, les plats proposés peuvent dater d&apos;une autre semaine. La perte sera vérifiée à
+          l&apos;envoi.
         </p>
       )}
       <div className="flex items-center justify-between">
@@ -562,7 +620,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             ← Retour
           </button>
         ) : (
-          <Link href={correction ? `/historique/${correction.id}` : "/"} className="rounded-xl px-2 py-2 font-medium text-slate-700">
+          <Link
+            href={correction ? `/historique/${correction.id}` : "/"}
+            className="rounded-xl px-2 py-2 font-medium text-slate-700"
+          >
             {correction ? "← Annuler la correction" : "← Accueil"}
           </Link>
         )}
@@ -642,7 +703,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           catalogs={options.weekCatalogs}
           weekMaterials={options.weekMaterials}
           materialCategories={options.materialCategories}
-          materialPlace={zone && subzone && MATERIAL_ZONE_CODES.includes(zone.code) ? { zoneCode: zone.code, subzoneId: subzone.id, subzoneName: subzone.name } : null}
+          materialPlace={
+            zone && subzone && MATERIAL_ZONE_CODES.includes(zone.code)
+              ? { zoneCode: zone.code, subzoneId: subzone.id, subzoneName: subzone.name }
+              : null
+          }
           initialWeek={occurredWeek}
           initialCatalog={catalogForDate}
           packagingPerPortion={options.packagingPerPortion}
@@ -669,7 +734,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
           {method === "pesee" && !isConsumable && (
             <label className="flex items-center gap-3 rounded-xl bg-white p-3 text-lg">
-              <input type="checkbox" className="size-6" checked={useTare} onChange={(e) => setUseTare(e.target.checked)} />
+              <input
+                type="checkbox"
+                className="size-6"
+                checked={useTare}
+                onChange={(e) => setUseTare(e.target.checked)}
+              />
               Pesé dans des gastros (déduire la tare)
             </label>
           )}
@@ -731,12 +801,18 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               </fieldset>
               <label className="flex flex-col gap-1">
                 <span className="font-medium">Poids brut affiché par la balance (kg)</span>
-                <input className="field" inputMode="decimal" value={grossKg} onChange={(e) => setGrossKg(e.target.value)} />
+                <input
+                  className="field"
+                  inputMode="decimal"
+                  value={grossKg}
+                  onChange={(e) => setGrossKg(e.target.value)}
+                />
               </label>
               {tarePreview?.error && <p className="rounded-xl bg-red-50 p-3 text-red-800">{tarePreview.error}</p>}
               {tarePreview?.result && (
                 <p className="rounded-xl bg-white p-3 text-lg">
-                  Tare {fmt(tarePreview.result.tareTotalKg)} kg — <strong>Net {fmt(tarePreview.result.netKg)} kg</strong>
+                  Tare {fmt(tarePreview.result.tareTotalKg)} kg —{" "}
+                  <strong>Net {fmt(tarePreview.result.netKg)} kg</strong>
                 </p>
               )}
             </div>
@@ -745,9 +821,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           {net && !useTare && (
             <p className="rounded-xl bg-white p-3">
               {net.kg != null && net.unitCode !== "kg" ? (
-                <>Soit <strong>{fmt(net.kg)} kg</strong></>
+                <>
+                  Soit <strong>{fmt(net.kg)} kg</strong>
+                </>
               ) : (
-                net.note ?? (isConsumable ? "Consommable : compté en unités, pas en kg alimentaires." : null)
+                (net.note ?? (isConsumable ? "Consommable : compté en unités, pas en kg alimentaires." : null))
               )}
             </p>
           )}
@@ -759,7 +837,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             onClick={() => {
               // Une seule destination : elle suit la nouvelle quantité (cas d'une correction).
               if (net && destinationLines.length === 1) {
-                setDestinationLines([{ destinationId: destinationLines[0]!.destinationId, quantity: String(net.quantity) }]);
+                setDestinationLines([
+                  { destinationId: destinationLines[0]!.destinationId, quantity: String(net.quantity) },
+                ]);
               }
               goNext("quantity");
             }}
@@ -839,7 +919,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 );
               })}
               {split && (
-                <p className={`rounded-xl p-3 ${split.status === "ok" ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900"}`}>
+                <p
+                  className={`rounded-xl p-3 ${split.status === "ok" ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900"}`}
+                >
                   {split.status === "ok"
                     ? "Répartition complète."
                     : split.remaining > 0
@@ -897,7 +979,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             <dt className="text-slate-500">Quantité</dt>
             <dd>
               {netLabel}
-              {useTare && tarePreview?.result && ` (brut ${fmt(tarePreview.result.grossKg)} kg − tare ${fmt(tarePreview.result.tareTotalKg)} kg)`}
+              {useTare &&
+                tarePreview?.result &&
+                ` (brut ${fmt(tarePreview.result.grossKg)} kg − tare ${fmt(tarePreview.result.tareTotalKg)} kg)`}
               {!useTare && net.kg != null && net.unitCode !== "kg" && ` = ${fmt(net.kg)} kg`}
             </dd>
             <EditLink onClick={() => setStep("quantity")} />
@@ -922,7 +1006,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                   )}
                   {costPreview?.packagingEur != null && occurredOn !== today && (
                     <span className="block text-sm text-slate-500">
-                      Emballages estimés aux prix d&apos;aujourd&apos;hui : l&apos;enregistrement prend ceux de la date de la perte.
+                      Emballages estimés aux prix d&apos;aujourd&apos;hui : l&apos;enregistrement prend ceux de la date
+                      de la perte.
                     </span>
                   )}
                 </dd>
@@ -948,7 +1033,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               <div key={l.destinationId} className="col-span-3">
                 <label className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-50 p-3">
                   <span className="text-sm font-medium">
-                    Montant encaissé – {options.destinations.find((d) => d.id === l.destinationId)?.name} (€, facultatif)
+                    Montant encaissé – {options.destinations.find((d) => d.id === l.destinationId)?.name} (€,
+                    facultatif)
                   </span>
                   <input
                     className="field w-32 text-right"
@@ -966,7 +1052,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                   <span className="text-sm font-medium">
                     N° de poubelle – {options.destinations.find((d) => d.id === l.destinationId)?.name}
                     {binMode(l.destinationId) === "facultatif" && " (facultatif)"}
-                    <span className="block text-xs font-normal text-slate-600">À changer seulement si la poubelle a changé.</span>
+                    <span className="block text-xs font-normal text-slate-600">
+                      À changer seulement si la poubelle a changé.
+                    </span>
                   </span>
                   <input
                     className="field w-32 text-right"
@@ -977,7 +1065,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                     required={binMode(l.destinationId) === "obligatoire"}
                   />
                 </label>
-                {binMode(l.destinationId) === "obligatoire" && !binOf(l.destinationId).trim() && <p className="mt-1 text-sm text-amber-800">Indiquez le n° de la poubelle.</p>}
+                {binMode(l.destinationId) === "obligatoire" && !binOf(l.destinationId).trim() && (
+                  <p className="mt-1 text-sm text-amber-800">Indiquez le n° de la poubelle.</p>
+                )}
               </div>
             ))}
           </dl>
@@ -995,12 +1085,18 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             </label>
             <label className="flex flex-col gap-1">
               <span className="font-medium">Heure (facultatif)</span>
-              <input type="time" className="field" value={occurredTime} onChange={(e) => setOccurredTime(e.target.value)} />
+              <input
+                type="time"
+                className="field"
+                value={occurredTime}
+                onChange={(e) => setOccurredTime(e.target.value)}
+              />
             </label>
           </div>
           {productWeekMismatch && (
             <p role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">
-              Le produit choisi est un produit de S{product.week.number} : indiquez une date de cette semaine, ou changez de produit.{" "}
+              Le produit choisi est un produit de S{product.week.number} : indiquez une date de cette semaine, ou
+              changez de produit.{" "}
               <button type="button" className="font-medium underline" onClick={() => setStep("product")}>
                 Changer le produit
               </button>
@@ -1019,7 +1115,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           {correction && (
             <label className="flex flex-col gap-1">
               <span className="font-medium">Motif de la correction (obligatoire)</span>
-              <input className="field" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="ex. erreur de pesée" />
+              <input
+                className="field"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="ex. erreur de pesée"
+              />
             </label>
           )}
           {result && !result.ok && (
@@ -1030,7 +1131,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           <button
             type="button"
             className="btn-primary"
-            disabled={pending || !occurredOn || productWeekMismatch || missingBin || (!!correction && reason.trim().length < 3)}
+            disabled={
+              pending || !occurredOn || productWeekMismatch || missingBin || (!!correction && reason.trim().length < 3)
+            }
             onClick={submit}
           >
             {pending
@@ -1106,7 +1209,11 @@ function ProposeCause({ zoneId, zoneName }: { zoneId: string; zoneName: string }
   }
   if (!open) {
     return (
-      <button type="button" className="self-start text-sm font-medium text-teal-800 underline" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="self-start text-sm font-medium text-teal-800 underline"
+        onClick={() => setOpen(true)}
+      >
         Proposer une nouvelle cause
       </button>
     );
@@ -1131,7 +1238,11 @@ function ProposeCause({ zoneId, zoneName }: { zoneId: string; zoneName: string }
             const r = await proposeCauseAction({ name, description, zoneId });
             setStatus(
               r.ok
-                ? { ok: true, message: "Merci : proposition envoyée à l'administrateur. En attendant, choisissez « Autres pertes »." }
+                ? {
+                    ok: true,
+                    message:
+                      "Merci : proposition envoyée à l'administrateur. En attendant, choisissez « Autres pertes ».",
+                  }
                 : { ok: false, message: r.error ?? "Proposition impossible" },
             );
           })
@@ -1249,8 +1360,11 @@ function ProductStep({
   const [path, setPath] = useState<{ kind: "plat" | "sous_recette"; id: string }[]>([]);
   const [catalogId, setCatalogId] = useState(initialCatalog?.weekId ?? catalogs[0]?.weekId ?? null);
   const catalog = catalogs.find((c) => c.weekId === catalogId) ?? null;
-  const initialMaterialsWeek = weekMaterials.find((w) => initialWeek && w.year === initialWeek.year && w.number === initialWeek.number) ?? null;
-  const [materialsWeekId, setMaterialsWeekId] = useState(initialMaterialsWeek?.weekId ?? weekMaterials[0]?.weekId ?? null);
+  const initialMaterialsWeek =
+    weekMaterials.find((w) => initialWeek && w.year === initialWeek.year && w.number === initialWeek.number) ?? null;
+  const [materialsWeekId, setMaterialsWeekId] = useState(
+    initialMaterialsWeek?.weekId ?? weekMaterials[0]?.weekId ?? null,
+  );
   const materialsWeek = materialPlace ? (weekMaterials.find((w) => w.weekId === materialsWeekId) ?? null) : null;
   const placed = useMemo(() => {
     if (!materialsWeek || !materialPlace) return null;
@@ -1352,7 +1466,11 @@ function ProductStep({
     const lines = dish?.lines ?? sub?.lines ?? [];
     return (
       <Section title={dish ? productLabel(dish.name, dish.code) : (sub?.name ?? "")}>
-        <button type="button" className="self-start text-slate-700 underline" onClick={() => setPath(path.slice(0, -1))}>
+        <button
+          type="button"
+          className="self-start text-slate-700 underline"
+          onClick={() => setPath(path.slice(0, -1))}
+        >
           {path.length > 1 ? "← Revenir au niveau précédent" : "← Tous les plats"}
         </button>
         <Tile onClick={() => (dish ? chooseDish(dish) : chooseSubRecipe(current.id))}>
@@ -1380,7 +1498,9 @@ function ProductStep({
 
   // ─── Accueil de l'étape : produits de la semaine, recherche, hors liste ───
   const term = search.trim().toLowerCase();
-  const listedMatches = term ? products.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term))) : [];
+  const listedMatches = term
+    ? products.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term)))
+    : [];
   const weekMatches = term.length >= 2 && catalog ? searchWeek(catalog, dishes, term) : [];
 
   return (
@@ -1400,17 +1520,29 @@ function ProductStep({
               key={`${m.kind}:${m.id}`}
               compact
               onClick={() =>
-                m.kind === "plat" ? chooseDish(m.dish!) : m.kind === "sous_recette" ? chooseSubRecipe(m.id) : chooseIngredient(m.line!)
+                m.kind === "plat"
+                  ? chooseDish(m.dish!)
+                  : m.kind === "sous_recette"
+                    ? chooseSubRecipe(m.id)
+                    : chooseIngredient(m.line!)
               }
             >
               {m.label}
               <small className="font-normal opacity-70">
-                {m.kind === "plat" ? "Plat de la semaine" : m.kind === "sous_recette" ? "Sous-recette de la semaine" : "Ingrédient de la semaine"}
+                {m.kind === "plat"
+                  ? "Plat de la semaine"
+                  : m.kind === "sous_recette"
+                    ? "Sous-recette de la semaine"
+                    : "Ingrédient de la semaine"}
               </small>
             </Tile>
           ))}
           {listedMatches.slice(0, 20).map((p) => (
-            <Tile key={p.id} compact onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}>
+            <Tile
+              key={p.id}
+              compact
+              onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}
+            >
               {p.name}
               {p.variant && ` – ${p.variant}`}
               <small className="font-normal opacity-70">
@@ -1419,7 +1551,9 @@ function ProductStep({
               </small>
             </Tile>
           ))}
-          {weekMatches.length === 0 && listedMatches.length === 0 && <p className="text-slate-500">Aucun produit trouvé.</p>}
+          {weekMatches.length === 0 && listedMatches.length === 0 && (
+            <p className="text-slate-500">Aucun produit trouvé.</p>
+          )}
         </div>
       ) : placed && materialsWeek ? (
         <>
@@ -1470,7 +1604,9 @@ function ProductStep({
                 {dishes.map((d) => (
                   <Tile key={d.id} compact onClick={() => setPath([{ kind: "plat", id: d.id }])}>
                     <span>{productLabel(d.name, d.code)}</span>
-                    <small className="font-normal opacity-70">{d.lines.length} composant{d.lines.length > 1 ? "s" : ""} →</small>
+                    <small className="font-normal opacity-70">
+                      {d.lines.length} composant{d.lines.length > 1 ? "s" : ""} →
+                    </small>
                   </Tile>
                 ))}
               </div>
@@ -1501,13 +1637,16 @@ function ProductStep({
             </p>
           )}
           <p className="font-medium text-slate-700">
-            {showSnacks && !dishScope ? "Encas" : showSnacks ? "Plats et encas" : "Plats"} de la semaine S{catalog!.number}
+            {showSnacks && !dishScope ? "Encas" : showSnacks ? "Plats et encas" : "Plats"} de la semaine S
+            {catalog!.number}
           </p>
           <div className="flex flex-col gap-2">
             {dishes.map((d) => (
               <Tile key={d.id} compact onClick={() => setPath([{ kind: "plat", id: d.id }])}>
                 <span>{productLabel(d.name, d.code)}</span>
-                <small className="font-normal opacity-70">{d.lines.length} composant{d.lines.length > 1 ? "s" : ""} →</small>
+                <small className="font-normal opacity-70">
+                  {d.lines.length} composant{d.lines.length > 1 ? "s" : ""} →
+                </small>
               </Tile>
             ))}
           </div>
@@ -1515,7 +1654,11 @@ function ProductStep({
       ) : (
         <div className="flex flex-col gap-2">
           {products.slice(0, 30).map((p) => (
-            <Tile key={p.id} compact onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}>
+            <Tile
+              key={p.id}
+              compact
+              onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}
+            >
               {p.name}
               {p.variant && ` – ${p.variant}`}
               <small className="font-normal opacity-70">
@@ -1526,7 +1669,8 @@ function ProductStep({
           ))}
           {products.length === 0 && (
             <p className="text-slate-500">
-              {dishScope && !catalog ? "Les plats de la semaine ne sont pas encore importés : " : ""}recherchez le produit ou saisissez son nom.
+              {dishScope && !catalog ? "Les plats de la semaine ne sont pas encore importés : " : ""}recherchez le
+              produit ou saisissez son nom.
             </p>
           )}
         </div>
@@ -1564,11 +1708,15 @@ function MaterialGroups({
       {materials.length === 0 && empty && <p className="text-slate-500">{empty}</p>}
       {ordered.map(([name, list]) => (
         <div key={name || "-"} className="flex flex-col gap-2">
-          {ordered.length > 1 && <p className="text-sm font-semibold text-slate-600">{name || "Sans catégorie Melba"}</p>}
+          {ordered.length > 1 && (
+            <p className="text-sm font-semibold text-slate-600">{name || "Sans catégorie Melba"}</p>
+          )}
           {list.map((m) => (
             <Tile key={m.productId} compact onClick={() => onChoose(m)}>
               {m.name}
-              <small className="font-normal opacity-70">{m.ordered ? "Commandée cette semaine" : "Ingrédient du tome"}</small>
+              <small className="font-normal opacity-70">
+                {m.ordered ? "Commandée cette semaine" : "Ingrédient du tome"}
+              </small>
             </Tile>
           ))}
         </div>
@@ -1580,7 +1728,12 @@ function MaterialGroups({
 /** Coûts d'une sous-recette ou d'un ingrédient : matières, ou emballage s'il s'agit d'un moule. */
 function itemCostInputs(cost: UnitCost, mould: boolean): CostInputs {
   return mould
-    ? { food: { perKgEur: null, perUnitEur: null }, packagingPerPortionEur: null, portionWeightKg: null, packagingItself: cost }
+    ? {
+        food: { perKgEur: null, perUnitEur: null },
+        packagingPerPortionEur: null,
+        portionWeightKg: null,
+        packagingItself: cost,
+      }
     : { food: cost, packagingPerPortionEur: null, portionWeightKg: null };
 }
 
@@ -1594,10 +1747,16 @@ interface WeekMatch {
 
 /** Recherche dans les produits de la semaine proposés au poste (un ingrédient présent plusieurs fois n'apparaît qu'une fois). */
 function searchWeek(catalog: WeekCatalog, dishes: WeekCatalog["dishes"], term: string): WeekMatch[] {
-  const fold = (t: string) => t.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  const fold = (t: string) =>
+    t
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase();
   const wanted = fold(term);
   const matches: WeekMatch[] = [];
-  for (const d of dishes) if (fold(`${d.code} ${d.name}`).includes(wanted)) matches.push({ kind: "plat", id: d.id, label: productLabel(d.name, d.code), dish: d });
+  for (const d of dishes)
+    if (fold(`${d.code} ${d.name}`).includes(wanted))
+      matches.push({ kind: "plat", id: d.id, label: productLabel(d.name, d.code), dish: d });
   // Sous-recettes et ingrédients accessibles depuis les plats proposés.
   const seenSubs = new Set<string>();
   const seenIngredients = new Set<string>();

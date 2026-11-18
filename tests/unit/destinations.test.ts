@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  checkDestinationSplit,
-  DestinationError,
-  validateDestinationSplit,
-} from "@/domain/destinations";
+import { checkDestinationSplit, DestinationError, validateDestinationSplit } from "@/domain/destinations";
 
 describe("répartition entre destinations", () => {
   it("une seule destination reçoit 100 %", () => {

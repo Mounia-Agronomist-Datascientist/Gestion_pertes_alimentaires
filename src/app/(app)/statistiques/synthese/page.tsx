@@ -89,7 +89,12 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         <FilterForm path={path} ctx={ctx} />
       </div>
 
-      <SummaryTiles current={data.summary} previous={comparison.previous?.summary ?? null} previousLabel={previousLabel} withCosts={withCosts} />
+      <SummaryTiles
+        current={data.summary}
+        previous={comparison.previous?.summary ?? null}
+        previousLabel={previousLabel}
+        withCosts={withCosts}
+      />
       {comparison.average && (
         <p className="text-sm text-slate-600">
           Moyenne des {comparison.average.weeks} semaines d&apos;avant : {num.format(comparison.average.foodKg ?? 0)} kg
@@ -108,17 +113,20 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
           <ul className="flex flex-col gap-2 text-sm">
             {data.byZone[0] && (
               <li>
-                <strong>Zone</strong> : {data.byZone[0].label} — {fmtValue(data.byZone[0].value)} ({pct.format(data.byZone[0].share)} de la semaine)
+                <strong>Zone</strong> : {data.byZone[0].label} — {fmtValue(data.byZone[0].value)} (
+                {pct.format(data.byZone[0].share)} de la semaine)
               </li>
             )}
             {data.byCause[0] && (
               <li>
-                <strong>Cause</strong> : {data.byCause[0].label} — {fmtValue(data.byCause[0].value)} ({pct.format(data.byCause[0].share)})
+                <strong>Cause</strong> : {data.byCause[0].label} — {fmtValue(data.byCause[0].value)} (
+                {pct.format(data.byCause[0].share)})
               </li>
             )}
             {data.byProduct[0] && (
               <li>
-                <strong>Produit</strong> : {data.byProduct[0].label} — {fmtValue(data.byProduct[0].value)} ({pct.format(data.byProduct[0].share)})
+                <strong>Produit</strong> : {data.byProduct[0].label} — {fmtValue(data.byProduct[0].value)} (
+                {pct.format(data.byProduct[0].share)})
               </li>
             )}
             {data.rises.length > 0 && (
@@ -135,7 +143,9 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
             )}
           </ul>
         )}
-        <p className="text-xs text-slate-500">Classement {inEuros ? "en coût brut (euros)" : "en kg de pertes alimentaires"}.</p>
+        <p className="text-xs text-slate-500">
+          Classement {inEuros ? "en coût brut (euros)" : "en kg de pertes alimentaires"}.
+        </p>
       </Card>
 
       {data.byZone.length > 0 && (
@@ -184,7 +194,11 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
             text: `${num.format(p.summary.foodKg)} kg`,
             highlight: p.id === comparison.current.id,
           }))}
-            average={{ label: "Moyenne sur 4 semaines", values: comparison.trends.find((x) => x.key === "kg")!.average, text: (n) => `${num.format(n)} kg` }}
+          average={{
+            label: "Moyenne sur 4 semaines",
+            values: comparison.trends.find((x) => x.key === "kg")!.average,
+            text: (n) => `${num.format(n)} kg`,
+          }}
         />
         <h3 className="font-medium">Kg pour 1 000 barquettes produites</h3>
         <ColumnChart
@@ -196,9 +210,15 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
             text: p.perThousandActual == null ? "—" : `${num.format(p.perThousandActual)} kg`,
             highlight: p.id === comparison.current.id,
           }))}
-            average={{ label: "Moyenne sur 4 semaines", values: comparison.trends.find((x) => x.key === "reel")!.average, text: (n) => `${num.format(n)} kg` }}
+          average={{
+            label: "Moyenne sur 4 semaines",
+            values: comparison.trends.find((x) => x.key === "reel")!.average,
+            text: (n) => `${num.format(n)} kg`,
+          }}
         />
-        <p className="text-xs text-slate-500">12 dernières semaines de production ; un tiret : pas de « Décompte barquettes » déposé.</p>
+        <p className="text-xs text-slate-500">
+          12 dernières semaines de production ; un tiret : pas de « Décompte barquettes » déposé.
+        </p>
       </Card>
 
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm print:hidden">

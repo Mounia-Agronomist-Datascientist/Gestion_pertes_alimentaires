@@ -7,7 +7,13 @@ import type { AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
 import { createDeclaration } from "@/modules/declarations/service";
 import { AGRIBALYSE_PROPOSAL } from "@/modules/environnement/agribalyse-proposal";
-import { listFamiliesForAdmin, loadAgribalyseProposal, proposeFactor, retainedValue, validateFactors } from "@/modules/environnement/factors";
+import {
+  listFamiliesForAdmin,
+  loadAgribalyseProposal,
+  proposeFactor,
+  retainedValue,
+  validateFactors,
+} from "@/modules/environnement/factors";
 import { listIngredientsForMapping, saveIngredientMappings } from "@/modules/environnement/ingredients";
 import { weekCatalogs } from "@/modules/imports/catalog";
 import { buildWeekImport } from "@/modules/imports/merge";
@@ -32,12 +38,31 @@ describe("CO2e des pertes", () => {
     t = await createTestDb();
     await seed(t.db);
     const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
     teamD = await loadAuthUser(
       t.db,
-      await createAccount(t.db, { login: "equipe-d", displayName: "Équipe D", roleCode: "equipe", teamId: await id(t.db.select().from(s.teams).where(eq(s.teams.letter, "D"))), password: "mot-de-passe-equipe" }),
+      await createAccount(t.db, {
+        login: "equipe-d",
+        displayName: "Équipe D",
+        roleCode: "equipe",
+        teamId: await id(t.db.select().from(s.teams).where(eq(s.teams.letter, "D"))),
+        password: "mot-de-passe-equipe",
+      }),
     );
-    await saveWeekImport(t.db, admin, { preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())), tomeFileName: "t.pdf", planFileName: "p.xlsx", planSheetName: "S45" });
+    await saveWeekImport(t.db, admin, {
+      preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())),
+      tomeFileName: "t.pdf",
+      planFileName: "p.xlsx",
+      planSheetName: "S45",
+    });
     ref = {
       vi01: (await weekCatalogs(t.db, teamD, "2026-11-02"))[0]!.dishes.find((d) => d.code === "VI01")!.id,
       cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE"))),
@@ -46,13 +71,29 @@ describe("CO2e des pertes", () => {
       don: await id(t.db.select().from(s.destinations).where(eq(s.destinations.code, "DON"))),
     };
     const declare = (product: object, method: string, quantity: number, unitCode: string, destinations: object[]) =>
-      createDeclaration(t.db, teamD, { occurredOn: "2026-11-02", subzoneId: ref.cuisine, product, method, quantity, unitCode, causeId: ref.cause, destinations }, NOW);
+      createDeclaration(
+        t.db,
+        teamD,
+        {
+          occurredOn: "2026-11-02",
+          subzoneId: ref.cuisine,
+          product,
+          method,
+          quantity,
+          unitCode,
+          causeId: ref.cause,
+          destinations,
+        },
+        NOW,
+      );
     // 10 barquettes de VI01 (6 compostées, 4 données) et 2 kg de carottes hors liste.
     await declare({ weekItem: { kind: "plat", id: ref.vi01 } }, "comptage", 10, "barquette", [
       { destinationId: ref.compost, quantity: 6 },
       { destinationId: ref.don, quantity: 4 },
     ]);
-    await declare({ freeLabel: "Carottes", category: "matiere_premiere" }, "pesee", 2, "kg", [{ destinationId: ref.compost, quantity: 2 }]);
+    await declare({ freeLabel: "Carottes", category: "matiere_premiere" }, "pesee", 2, "kg", [
+      { destinationId: ref.compost, quantity: 2 },
+    ]);
   });
 
   afterAll(async () => {
@@ -69,12 +110,23 @@ describe("CO2e des pertes", () => {
   it("une fois les facteurs validés et les ingrédients rattachés : plat mesuré, perte hors liste estimée", async () => {
     await loadAgribalyseProposal(t.db, admin, new Date("2026-11-13T10:00:00Z"));
     const families = await listFamiliesForAdmin(t.db, admin);
-    await validateFactors(t.db, admin, families.map((f) => f.proposal!.id), new Date("2026-11-13T10:00:00Z"));
+    await validateFactors(
+      t.db,
+      admin,
+      families.map((f) => f.proposal!.id),
+      new Date("2026-11-13T10:00:00Z"),
+    );
     const ingredients = await listIngredientsForMapping(t.db, admin);
     await saveIngredientMappings(
       t.db,
       admin,
-      ingredients.filter((i) => i.suggestion).map((i) => (i.suggestion!.kind === "famille" ? { key: i.key, label: i.label, status: "famille" as const, familyId: i.suggestion!.familyId! } : { key: i.key, label: i.label, status: "non_alimentaire" as const, familyId: null })),
+      ingredients
+        .filter((i) => i.suggestion)
+        .map((i) =>
+          i.suggestion!.kind === "famille"
+            ? { key: i.key, label: i.label, status: "famille" as const, familyId: i.suggestion!.familyId! }
+            : { key: i.key, label: i.label, status: "non_alimentaire" as const, familyId: null },
+        ),
     );
 
     const { facts } = await loadCo2Facts(t.db, admin, WEEK);
@@ -84,7 +136,11 @@ describe("CO2e des pertes", () => {
     expect(dish.co2.co2eKg).toBeGreaterThan(0);
     expect(dish.co2.kgMeasured + dish.co2.kgUncovered).toBeCloseTo(dish.fact.netKg!, 3);
     const carrot = retainedValue(AGRIBALYSE_PROPOSAL.find((p) => p.code === "CAROTTE")!.stages);
-    expect(carrots.co2).toMatchObject({ method: "estime", co2eKg: Math.round(2 * carrot * 10_000) / 10_000, kgEstimated: 2 });
+    expect(carrots.co2).toMatchObject({
+      method: "estime",
+      co2eKg: Math.round(2 * carrot * 10_000) / 10_000,
+      kgEstimated: 2,
+    });
 
     const dashboard = await environmentDashboard(t.db, admin, WEEK, WEEK, {}, labels);
     expect(dashboard.summary.co2eKg).toBeCloseTo(dish.co2.co2eKg + carrots.co2.co2eKg, 2);
@@ -98,11 +154,26 @@ describe("CO2e des pertes", () => {
   });
 
   it("une nouvelle version de facteur ne réécrit pas le CO2e d'une perte passée", async () => {
-    const before = (await loadCo2Facts(t.db, admin, WEEK)).facts.find((f) => f.fact.productName === "Carottes")!.co2.co2eKg;
+    const before = (await loadCo2Facts(t.db, admin, WEEK)).facts.find((f) => f.fact.productName === "Carottes")!.co2
+      .co2eKg;
     const carrot = (await listFamiliesForAdmin(t.db, admin)).find((f) => f.code === "CAROTTE")!;
     const later = new Date("2026-12-01T10:00:00Z");
-    const v2 = await proposeFactor(t.db, admin, carrot.id, { kgCo2ePerKg: 10, source: "Test", sourceVersion: null, referenceName: null, hypotheses: "Valeur de test très différente." }, later);
+    const v2 = await proposeFactor(
+      t.db,
+      admin,
+      carrot.id,
+      {
+        kgCo2ePerKg: 10,
+        source: "Test",
+        sourceVersion: null,
+        referenceName: null,
+        hypotheses: "Valeur de test très différente.",
+      },
+      later,
+    );
     await validateFactors(t.db, admin, [v2.id], later);
-    expect((await loadCo2Facts(t.db, admin, WEEK)).facts.find((f) => f.fact.productName === "Carottes")!.co2.co2eKg).toBe(before);
+    expect(
+      (await loadCo2Facts(t.db, admin, WEEK)).facts.find((f) => f.fact.productName === "Carottes")!.co2.co2eKg,
+    ).toBe(before);
   });
 });

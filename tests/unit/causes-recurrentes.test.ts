@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { type CauseWeight, recurringCause, topCause } from "@/domain/causes-recurrentes";
 
-const c = (causeId: string, kg: number, events = 1): CauseWeight => ({ causeId, causeName: `Cause ${causeId}`, kg, events });
+const c = (causeId: string, kg: number, events = 1): CauseWeight => ({
+  causeId,
+  causeName: `Cause ${causeId}`,
+  kg,
+  events,
+});
 
 describe("causes récurrentes", () => {
   it("cause en tête : la plus lourde, puis la plus fréquente ; pas de cause en cas d'égalité parfaite", () => {

@@ -28,12 +28,29 @@ interface Product {
   /** Lieu de stockage effectif : propre au produit (own) ou celui de sa catégorie. */
   storage?: { name: string | null; own: boolean } | null;
   supplierIds?: string[];
-  price: { perKgEur: number | null; perUnitEur: number | null; unit: string | null; source: string; validFrom: string; versions: number } | null;
+  price: {
+    perKgEur: number | null;
+    perUnitEur: number | null;
+    unit: string | null;
+    source: string;
+    validFrom: string;
+    versions: number;
+  } | null;
 }
 
-const PRICE_SOURCES: Record<string, string> = { tome: "tome", bon_commande: "bon de commande", manuel: "saisi à la main" };
+const PRICE_SOURCES: Record<string, string> = {
+  tome: "tome",
+  bon_commande: "bon de commande",
+  manuel: "saisi à la main",
+};
 /** Au centime ; jusqu'à 4 décimales pour un petit montant (prix d'un gramme, d'une pincée). */
-const fmtEur = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: n < 0.1 ? 4 : 2 });
+const fmtEur = (n: number) =>
+  n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: n < 0.1 ? 4 : 2,
+  });
 
 interface Group {
   key: string;
@@ -57,7 +74,11 @@ const dayFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "sho
 const fmtDay = (date: string) => dayFormat.format(new Date(`${date}T12:00:00Z`));
 const fmtNumber = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
 /** Comparaison sans accents ni majuscules, comme pour les doublons côté serveur. */
-const fold = (text: string) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const fold = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 export function ProductsAdmin({ products, groups, units, materialCategories, suppliers, initialSupplier }: Props) {
   const [state, action, pending] = useActionState<ProductActionState, FormData>(productAction, {});
@@ -73,7 +94,8 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
   const listed = products.filter(
     (p) =>
       (category === "toutes" || p.category === category) &&
-      (!melbaCategory || (melbaCategory === "aucune" ? !p.materialCategoryId : p.materialCategoryId === melbaCategory)) &&
+      (!melbaCategory ||
+        (melbaCategory === "aucune" ? !p.materialCategoryId : p.materialCategoryId === melbaCategory)) &&
       (!supplier || (p.supplierIds ?? []).includes(supplier)) &&
       fold(`${p.name} ${p.variant ?? ""} ${p.code ?? ""}`).includes(fold(search.trim())),
   );
@@ -103,7 +125,8 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
               <p>
                 <span className="font-semibold">« {g.label} »</span>{" "}
                 <span className="text-sm text-amber-900">
-                  {PRODUCT_CATEGORY_LABELS[g.category]} · {g.count} saisie{g.count > 1 && "s"} · dernière le {fmtDay(g.lastOccurredOn)}
+                  {PRODUCT_CATEGORY_LABELS[g.category]} · {g.count} saisie{g.count > 1 && "s"} · dernière le{" "}
+                  {fmtDay(g.lastOccurredOn)}
                 </span>
               </p>
               {creatingFrom === g.key ? (
@@ -124,7 +147,12 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                 <form action={action} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="intent" value="link" />
                   <input type="hidden" name="groupKey" value={g.key} />
-                  <select name="productId" className="field min-h-12 flex-1 text-base" defaultValue="" aria-label="Produit de la liste">
+                  <select
+                    name="productId"
+                    className="field min-h-12 flex-1 text-base"
+                    defaultValue=""
+                    aria-label="Produit de la liste"
+                  >
                     <option value="" disabled>
                       {active.length ? "Choisir le produit…" : "Aucun produit dans la liste"}
                     </option>
@@ -140,7 +168,11 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                   <button type="submit" disabled={pending || active.length === 0} className="btn-secondary">
                     Rattacher
                   </button>
-                  <button type="button" className="font-medium text-teal-800 underline" onClick={() => setCreatingFrom(g.key)}>
+                  <button
+                    type="button"
+                    className="font-medium text-teal-800 underline"
+                    onClick={() => setCreatingFrom(g.key)}
+                  >
                     Créer ce produit
                   </button>
                 </form>
@@ -151,12 +183,14 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
       )}
 
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
-        <h2 className="text-lg font-semibold">Matières premières des tomes ({products.filter((p) => p.melba).length})</h2>
+        <h2 className="text-lg font-semibold">
+          Matières premières des tomes ({products.filter((p) => p.melba).length})
+        </h2>
         <p className="text-sm text-slate-600">
           Chaque nouvel import de la semaine ajoute les nouveaux ingrédients et enregistre les prix qui changent, sans
-          toucher aux pertes passées ni aux noms modifiés ici. Les liquides (huiles, lait, crème, vinaigres, sauce soja…)
-          reçoivent la densité du tableau de référence s&apos;ils n&apos;en ont pas. Ce bouton reprend les tomes déjà importés ; il peut être
-          relancé sans risque.
+          toucher aux pertes passées ni aux noms modifiés ici. Les liquides (huiles, lait, crème, vinaigres, sauce
+          soja…) reçoivent la densité du tableau de référence s&apos;ils n&apos;en ont pas. Ce bouton reprend les tomes
+          déjà importés ; il peut être relancé sans risque.
         </p>
         <form action={action}>
           <input type="hidden" name="intent" value="build_materials" />
@@ -187,7 +221,9 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">Liste des produits ({active.length} actif{active.length > 1 && "s"})</h2>
+        <h2 className="text-lg font-semibold">
+          Liste des produits ({active.length} actif{active.length > 1 && "s"})
+        </h2>
         <input
           type="search"
           value={search}
@@ -210,7 +246,12 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
         </nav>
         {(materialCategories.length > 0 || suppliers.length > 0) && (
           <div className="grid gap-2 sm:grid-cols-2">
-            <select value={melbaCategory} onChange={(e) => setMelbaCategory(e.target.value)} className="field min-w-0" aria-label="Catégorie Melba">
+            <select
+              value={melbaCategory}
+              onChange={(e) => setMelbaCategory(e.target.value)}
+              className="field min-w-0"
+              aria-label="Catégorie Melba"
+            >
               <option value="">Toutes les catégories Melba</option>
               <option value="aucune">Sans catégorie Melba</option>
               {materialCategories.map((c) => (
@@ -219,7 +260,12 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                 </option>
               ))}
             </select>
-            <select value={supplier} onChange={(e) => setSupplier(e.target.value)} className="field min-w-0" aria-label="Fournisseur">
+            <select
+              value={supplier}
+              onChange={(e) => setSupplier(e.target.value)}
+              className="field min-w-0"
+              aria-label="Fournisseur"
+            >
               <option value="">Tous les fournisseurs</option>
               {suppliers.map((x) => (
                 <option key={x.id} value={x.id}>
@@ -252,13 +298,17 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                   <span className="font-semibold">
                     {p.name}
                     {p.variant && <span className="font-normal text-slate-600"> ({p.variant})</span>}
-                    {!p.active && <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>}
+                    {!p.active && (
+                      <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>
+                    )}
                   </span>
                   <span className="text-sm text-slate-600">
                     {PRODUCT_CATEGORY_LABELS[p.category]}
-                    {p.code && ` · code ${p.code}`} · unité {units.find((u) => u.code === p.defaultUnit)?.label ?? p.defaultUnit}
+                    {p.code && ` · code ${p.code}`} · unité{" "}
+                    {units.find((u) => u.code === p.defaultUnit)?.label ?? p.defaultUnit}
                     {p.unitWeightKg != null && ` · ${fmtNumber(p.unitWeightKg)} kg par unité`}
-                    {p.densityKgPerL != null && ` · densité ${fmtNumber(p.densityKgPerL)} kg/L${p.densityReference ? ` (référence : ${p.densityReference})` : ""}`}
+                    {p.densityKgPerL != null &&
+                      ` · densité ${fmtNumber(p.densityKgPerL)} kg/L${p.densityReference ? ` (référence : ${p.densityReference})` : ""}`}
                     {p.melba && " · tome Melba"}
                   </span>
                   {(p.materialCategory || p.storage) && (
@@ -270,7 +320,10 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                   {p.price ? (
                     <span className="text-sm text-slate-700">
                       Prix :{" "}
-                      {[p.price.perKgEur != null && `${fmtEur(p.price.perKgEur)} / kg`, p.price.perUnitEur != null && `${fmtEur(p.price.perUnitEur)} / ${p.price.unit ?? "unité"}`]
+                      {[
+                        p.price.perKgEur != null && `${fmtEur(p.price.perKgEur)} / kg`,
+                        p.price.perUnitEur != null && `${fmtEur(p.price.perUnitEur)} / ${p.price.unit ?? "unité"}`,
+                      ]
                         .filter(Boolean)
                         .join(" · ")}{" "}
                       <span className="text-slate-500">
@@ -286,7 +339,11 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                     <Link href={`/admin/produits/${p.id}`} className="text-sm font-medium text-teal-800 underline">
                       Fiche : prix, colis, lieu
                     </Link>
-                    <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(p.id)}>
+                    <button
+                      type="button"
+                      className="text-sm font-medium text-teal-800 underline"
+                      onClick={() => setEditing(p.id)}
+                    >
                       Modifier
                     </button>
                     <button
@@ -308,7 +365,13 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
   );
 }
 
-export function ProductFields({ units, defaults }: { units: { code: string; label: string }[]; defaults?: Partial<Product> }) {
+export function ProductFields({
+  units,
+  defaults,
+}: {
+  units: { code: string; label: string }[];
+  defaults?: Partial<Product>;
+}) {
   return (
     <>
       <label className="flex flex-col gap-1">
@@ -335,7 +398,12 @@ export function ProductFields({ units, defaults }: { units: { code: string; labe
         </label>
         <label className="flex flex-col gap-1">
           <span className="font-medium">Variante (facultatif)</span>
-          <input name="variant" className="field" defaultValue={defaults?.variant ?? ""} placeholder="ex. sans gluten" />
+          <input
+            name="variant"
+            className="field"
+            defaultValue={defaults?.variant ?? ""}
+            placeholder="ex. sans gluten"
+          />
         </label>
       </div>
       <label className="flex flex-col gap-1">
@@ -351,11 +419,21 @@ export function ProductFields({ units, defaults }: { units: { code: string; labe
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className="font-medium">Poids d&apos;une pièce ou barquette (kg)</span>
-          <input name="unitWeightKg" inputMode="decimal" className="field" defaultValue={defaults?.unitWeightKg ?? ""} />
+          <input
+            name="unitWeightKg"
+            inputMode="decimal"
+            className="field"
+            defaultValue={defaults?.unitWeightKg ?? ""}
+          />
         </label>
         <label className="flex flex-col gap-1">
           <span className="font-medium">Densité (kg/L)</span>
-          <input name="densityKgPerL" inputMode="decimal" className="field" defaultValue={defaults?.densityKgPerL ?? ""} />
+          <input
+            name="densityKgPerL"
+            inputMode="decimal"
+            className="field"
+            defaultValue={defaults?.densityKgPerL ?? ""}
+          />
         </label>
       </div>
       <p className="text-sm text-slate-500">

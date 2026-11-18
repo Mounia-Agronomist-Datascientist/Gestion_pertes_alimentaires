@@ -31,12 +31,31 @@ describe("rapports PDF", () => {
     await seed(t.db);
     await allowDeclaredSales(t.db);
     const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
     teamD = await loadAuthUser(
       t.db,
-      await createAccount(t.db, { login: "equipe-d", displayName: "Équipe D", roleCode: "equipe", teamId: await id(t.db.select().from(s.teams).where(eq(s.teams.letter, "D"))), password: "mot-de-passe-equipe" }),
+      await createAccount(t.db, {
+        login: "equipe-d",
+        displayName: "Équipe D",
+        roleCode: "equipe",
+        teamId: await id(t.db.select().from(s.teams).where(eq(s.teams.letter, "D"))),
+        password: "mot-de-passe-equipe",
+      }),
     );
-    await saveWeekImport(t.db, admin, { preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())), tomeFileName: "t.pdf", planFileName: "p.xlsx", planSheetName: "S45" });
+    await saveWeekImport(t.db, admin, {
+      preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())),
+      tomeFileName: "t.pdf",
+      planFileName: "p.xlsx",
+      planSheetName: "S45",
+    });
     const vi01 = (await weekCatalogs(t.db, teamD, "2026-11-02"))[0]!.dishes.find((d) => d.code === "VI01")!.id;
     const ref = {
       cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE"))),
@@ -91,7 +110,9 @@ describe("rapports PDF", () => {
     expect((await buildReport(t.db, admin, "mensuel", ctx))!.name).toBe("rapport-mensuel-novembre-2026");
     expect((await buildReport(t.db, admin, "annuel", ctx))!.name).toBe("rapport-annuel-2026");
     expect(await textOf((await buildReport(t.db, admin, "valorisation", ctx))!.bytes)).toContain("Too Good To Go");
-    expect(await textOf((await buildReport(t.db, admin, "environnemental", ctx))!.bytes)).toContain("Rapprochement avec Les Alchimistes");
+    expect(await textOf((await buildReport(t.db, admin, "environnemental", ctx))!.bytes)).toContain(
+      "Rapprochement avec Les Alchimistes",
+    );
   });
 
   it("une équipe n'a ni euros ni rapprochement des Alchimistes", async () => {

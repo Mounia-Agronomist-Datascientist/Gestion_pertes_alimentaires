@@ -86,9 +86,7 @@ export function computeNetWeight(input: TareInput): TareResult {
   const tareTotalKg = roundQuantity(lines.reduce((sum, l) => sum + l.tareKg, 0));
   const netKg = roundQuantity(grossKg - tareTotalKg);
   if (netKg <= 0) {
-    throw new TareError(
-      `Le poids brut (${grossKg} kg) doit être supérieur à la tare totale (${tareTotalKg} kg)`,
-    );
+    throw new TareError(`Le poids brut (${grossKg} kg) doit être supérieur à la tare totale (${tareTotalKg} kg)`);
   }
 
   return { grossKg: roundQuantity(grossKg), tareTotalKg, netKg, lines };

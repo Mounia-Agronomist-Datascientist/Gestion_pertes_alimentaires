@@ -8,7 +8,14 @@ interface Zone {
   id: string;
   name: string;
   current: { hourlyCostEur: number; unit: string } | null;
-  versions: { id: string; hourlyCostEur: number; unit: string; validFrom: string; validTo: string | null; source: string | null }[];
+  versions: {
+    id: string;
+    hourlyCostEur: number;
+    unit: string;
+    validFrom: string;
+    validTo: string | null;
+    source: string | null;
+  }[];
 }
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" });
@@ -27,7 +34,9 @@ export function LabourAdmin({ zones, today }: { zones: Zone[]; today: string }) 
           <li key={z.id} className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="font-semibold">{z.name}</span>
-              <span className="text-lg font-bold">{z.current ? `${fmtEur(z.current.hourlyCostEur)} / ${z.current.unit}` : "Non renseigné"}</span>
+              <span className="text-lg font-bold">
+                {z.current ? `${fmtEur(z.current.hourlyCostEur)} / ${z.current.unit}` : "Non renseigné"}
+              </span>
             </div>
             {editing === z.id ? (
               <form action={action} className="flex flex-col gap-2">
@@ -43,7 +52,12 @@ export function LabourAdmin({ zones, today }: { zones: Zone[]; today: string }) 
                     <input name="validFrom" type="date" required defaultValue={today} className="field" />
                   </label>
                 </div>
-                <input name="note" className="field" placeholder="Source ou motif (facultatif)" aria-label="Source ou motif" />
+                <input
+                  name="note"
+                  className="field"
+                  placeholder="Source ou motif (facultatif)"
+                  aria-label="Source ou motif"
+                />
                 <div className="flex gap-2">
                   <button type="submit" disabled={pending} className="btn-primary flex-1">
                     Enregistrer
@@ -54,7 +68,11 @@ export function LabourAdmin({ zones, today }: { zones: Zone[]; today: string }) 
                 </div>
               </form>
             ) : (
-              <button type="button" className="self-start text-sm font-medium text-teal-800 underline" onClick={() => setEditing(z.id)}>
+              <button
+                type="button"
+                className="self-start text-sm font-medium text-teal-800 underline"
+                onClick={() => setEditing(z.id)}
+              >
                 {z.current ? "Nouveau coût horaire" : "Saisir le coût horaire"}
               </button>
             )}
@@ -66,7 +84,9 @@ export function LabourAdmin({ zones, today }: { zones: Zone[]; today: string }) 
                     <li key={v.id}>
                       {fmtEur(v.hourlyCostEur)} / {v.unit} — du {fmtDay(v.validFrom)}
                       {v.validTo && ` au ${fmtDay(v.validTo)}`}
-                      {v.validFrom > today ? " (à venir)" : (v.validTo == null || v.validTo >= today) && " (en vigueur)"}
+                      {v.validFrom > today
+                        ? " (à venir)"
+                        : (v.validTo == null || v.validTo >= today) && " (en vigueur)"}
                       {v.source && ` · ${v.source}`}
                     </li>
                   ))}

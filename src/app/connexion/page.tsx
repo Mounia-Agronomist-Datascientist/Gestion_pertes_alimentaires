@@ -5,7 +5,11 @@ import { LoginForm } from "./login-form";
 
 export const metadata = { title: "Connexion — Pertes" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erreur?: string; login?: string }> }) {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ erreur?: string; login?: string }>;
+}) {
   if (await getCurrentUser()) redirect("/");
   const { erreur, login } = await searchParams;
 

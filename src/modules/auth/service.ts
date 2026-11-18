@@ -30,8 +30,7 @@ function hashToken(token: string): string {
 }
 
 export type LoginResult =
-  | { ok: true; token: string; expiresAt: Date; user: AuthUser }
-  | { ok: false; reason: "invalid" | "locked" };
+  { ok: true; token: string; expiresAt: Date; user: AuthUser } | { ok: false; reason: "invalid" | "locked" };
 
 export interface RequestMeta {
   ip?: string | null;
@@ -63,12 +62,20 @@ export async function login(
       ),
     );
   if ((failures?.n ?? 0) >= LOGIN_MAX_FAILURES) {
-    await writeAudit(db, { action: "login_blocked", entity: "user", entityId: loginName, ip: meta.ip, occurredAt: now });
+    await writeAudit(db, {
+      action: "login_blocked",
+      entity: "user",
+      entityId: loginName,
+      ip: meta.ip,
+      occurredAt: now,
+    });
     return { ok: false, reason: "locked" };
   }
 
   const valid =
-    user && user.active ? await verifyPassword(user.passwordHash, input.password) : await verifyAgainstDummy(input.password);
+    user && user.active
+      ? await verifyPassword(user.passwordHash, input.password)
+      : await verifyAgainstDummy(input.password);
   if (!user || !user.active || !valid) {
     await writeAudit(db, {
       userId: user?.id ?? null,
@@ -83,9 +90,18 @@ export async function login(
 
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(now.getTime() + sessionDurationMs(user.roleCode));
-  await db.insert(sessions).values({ id: hashToken(token), userId: user.id, expiresAt, userAgent: meta.userAgent ?? null });
+  await db
+    .insert(sessions)
+    .values({ id: hashToken(token), userId: user.id, expiresAt, userAgent: meta.userAgent ?? null });
   await db.update(users).set({ lastLoginAt: now }).where(eq(users.id, user.id));
-  await writeAudit(db, { userId: user.id, action: "login", entity: "user", entityId: loginName, ip: meta.ip, occurredAt: now });
+  await writeAudit(db, {
+    userId: user.id,
+    action: "login",
+    entity: "user",
+    entityId: loginName,
+    ip: meta.ip,
+    occurredAt: now,
+  });
 
   return { ok: true, token, expiresAt, user: await loadAuthUser(db, user.id) };
 }
@@ -110,7 +126,10 @@ export async function loadAuthUser(db: Db, userId: string): Promise<AuthUser> {
   if (!row) throw new Error(`Utilisateur introuvable : ${userId}`);
 
   const [perms, zones] = await Promise.all([
-    db.select({ code: rolePermissions.permissionCode }).from(rolePermissions).where(eq(rolePermissions.roleCode, row.roleCode)),
+    db
+      .select({ code: rolePermissions.permissionCode })
+      .from(rolePermissions)
+      .where(eq(rolePermissions.roleCode, row.roleCode)),
     db.select({ zoneId: userZones.zoneId }).from(userZones).where(eq(userZones.userId, userId)),
   ]);
 
@@ -175,7 +194,12 @@ export async function logout(db: Db, token: string): Promise<void> {
 }
 
 /** Déconnecte tous les appareils d'un compte (ex. après un départ ou un changement de mot de passe). */
-export async function revokeAllSessions(db: Db, userId: string, actorId: string | null, reason?: string): Promise<void> {
+export async function revokeAllSessions(
+  db: Db,
+  userId: string,
+  actorId: string | null,
+  reason?: string,
+): Promise<void> {
   await db.delete(sessions).where(eq(sessions.userId, userId));
   await writeAudit(db, { userId: actorId, action: "sessions_revoked", entity: "user", entityId: userId, reason });
 }

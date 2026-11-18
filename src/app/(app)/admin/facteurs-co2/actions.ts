@@ -5,7 +5,13 @@ import { db } from "@/db/client";
 import { AdminError } from "@/modules/admin/accounts";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
-import { createFamily, loadAgribalyseProposal, proposeFactor, rejectFactor, validateFactors } from "@/modules/environnement/factors";
+import {
+  createFamily,
+  loadAgribalyseProposal,
+  proposeFactor,
+  rejectFactor,
+  validateFactors,
+} from "@/modules/environnement/factors";
 import { type IngredientMappingInput, saveIngredientMappings } from "@/modules/environnement/ingredients";
 
 export interface FactorActionState {
@@ -37,7 +43,11 @@ export async function factorAction(_prev: FactorActionState, formData: FormData)
         message = "Proposition refusée.";
         break;
       case "propose": {
-        const value = Number(String(formData.get("kgCo2ePerKg") ?? "").replace(/\s/g, "").replace(",", "."));
+        const value = Number(
+          String(formData.get("kgCo2ePerKg") ?? "")
+            .replace(/\s/g, "")
+            .replace(",", "."),
+        );
         const text = (name: string) => String(formData.get(name) ?? "").trim() || null;
         await proposeFactor(db, admin, String(formData.get("familyId") ?? ""), {
           kgCo2ePerKg: Number.isFinite(value) && String(formData.get("kgCo2ePerKg") ?? "").trim() ? value : Number.NaN,
@@ -50,7 +60,10 @@ export async function factorAction(_prev: FactorActionState, formData: FormData)
         break;
       }
       case "family": {
-        const family = await createFamily(db, admin, { name: String(formData.get("name") ?? ""), category: String(formData.get("category") ?? "") });
+        const family = await createFamily(db, admin, {
+          name: String(formData.get("name") ?? ""),
+          category: String(formData.get("category") ?? ""),
+        });
         message = `Famille « ${family.name} » créée : proposez sa valeur avec sa source, puis validez-la.`;
         break;
       }
@@ -66,7 +79,10 @@ export async function factorAction(_prev: FactorActionState, formData: FormData)
 }
 
 /** Enregistre des rattachements d'ingrédients (une ligne ou toutes les suggestions affichées). */
-export async function ingredientMappingAction(_prev: FactorActionState, formData: FormData): Promise<FactorActionState> {
+export async function ingredientMappingAction(
+  _prev: FactorActionState,
+  formData: FormData,
+): Promise<FactorActionState> {
   const admin = await requireUser();
   let entries: IngredientMappingInput[];
   try {

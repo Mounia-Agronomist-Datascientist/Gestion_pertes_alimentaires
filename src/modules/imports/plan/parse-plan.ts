@@ -81,7 +81,10 @@ export function parsePlan(sheetName: string, grid: Grid): PlanParseResult {
     for (let r = header + 1; r < end; r++) {
       const first = cell(grid, r, 0);
       if (!first) continue;
-      const codes = first.split("/").map((c) => c.trim().toUpperCase()).filter(Boolean);
+      const codes = first
+        .split("/")
+        .map((c) => c.trim().toUpperCase())
+        .filter(Boolean);
       if (!codes.every((c) => CODE.test(c))) {
         // Fin du bloc (autre tableau de l'onglet) : on s'arrête à la première ligne qui n'est pas un groupe.
         if (groups.some((g) => g.block === block)) break;
@@ -89,7 +92,10 @@ export function parsePlan(sheetName: string, grid: Grid): PlanParseResult {
       }
       const teamText = cell(grid, r, teamCol).toUpperCase();
       const team = TEAM.test(teamText) ? teamText : null;
-      if (!team) anomalies.push(`Ligne ${r + 1} (${first}) : ${teamText ? `équipe « ${teamText} » inconnue` : "équipe non renseignée"}`);
+      if (!team)
+        anomalies.push(
+          `Ligne ${r + 1} (${first}) : ${teamText ? `équipe « ${teamText} » inconnue` : "équipe non renseignée"}`,
+        );
       groups.push({ codes, team, barquettes: parsePlanNumber(cell(grid, r, barquettesCol)), block, row: r + 1 });
       lastBlockRow = Math.max(lastBlockRow, r);
     }

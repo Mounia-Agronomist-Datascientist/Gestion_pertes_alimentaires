@@ -67,7 +67,9 @@ export default async function HistoryPage({ searchParams }: { searchParams: Para
                     {productLabel(d.productName, d.productCode)}
                     {d.productUnlisted && <span className="text-sm font-normal text-amber-700"> (hors liste)</span>}
                   </span>
-                  <span className="whitespace-nowrap font-semibold">{fmtQuantity(d.netQuantity, d.netUnitCode, d.netKg)}</span>
+                  <span className="whitespace-nowrap font-semibold">
+                    {fmtQuantity(d.netQuantity, d.netUnitCode, d.netKg)}
+                  </span>
                 </span>
                 <span className="text-sm text-slate-600">{d.causeName}</span>
                 <span className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
@@ -77,11 +79,16 @@ export default async function HistoryPage({ searchParams }: { searchParams: Para
                     {d.zoneName} › {d.subzoneName}
                   </span>
                   {d.teamLetter && (
-                    <span className="rounded-full px-2 text-white" style={{ backgroundColor: d.teamColorHex ?? undefined }}>
+                    <span
+                      className="rounded-full px-2 text-white"
+                      style={{ backgroundColor: d.teamColorHex ?? undefined }}
+                    >
                       Équipe {d.teamLetter}
                     </span>
                   )}
-                  {d.status !== "validee" && <span className={`rounded-full px-2 ${STATUS_STYLES[d.status]}`}>{STATUS_LABELS[d.status]}</span>}
+                  {d.status !== "validee" && (
+                    <span className={`rounded-full px-2 ${STATUS_STYLES[d.status]}`}>{STATUS_LABELS[d.status]}</span>
+                  )}
                   {d.isLate && <span className="rounded-full bg-amber-50 px-2 text-amber-800">Tardive</span>}
                 </span>
               </Link>

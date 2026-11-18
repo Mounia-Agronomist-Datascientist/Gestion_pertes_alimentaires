@@ -23,21 +23,58 @@ const fact = (over: Partial<LossFact>): LossFact => ({
   destinations: [],
   ...over,
 });
-const cost = (gross: number, recovered = 0) => ({ materialEur: gross, packagingEur: 0, labourEur: 0, indirectEur: 0, grossEur: gross, recoveredEur: recovered });
+const cost = (gross: number, recovered = 0) => ({
+  materialEur: gross,
+  packagingEur: 0,
+  labourEur: 0,
+  indirectEur: 0,
+  grossEur: gross,
+  recoveredEur: recovered,
+});
 
 describe("agrégats des statistiques", () => {
   const facts = [
-    fact({ netKg: 3.3, netQuantity: 10, netUnitCode: "barquette", cost: cost(13.3, 6), destinations: [{ destinationId: "tgtg", kind: "vente", quantity: 10, netKg: 3.3, recoveredEur: 6 }] }),
-    fact({ teamId: "C", causeId: "c2", netKg: 1.5, cost: cost(2), destinations: [{ destinationId: "a", kind: "compost", quantity: 1, netKg: 1, recoveredEur: null }, { destinationId: "d", kind: "don", quantity: 0.5, netKg: 0.5, recoveredEur: null }] }),
+    fact({
+      netKg: 3.3,
+      netQuantity: 10,
+      netUnitCode: "barquette",
+      cost: cost(13.3, 6),
+      destinations: [{ destinationId: "tgtg", kind: "vente", quantity: 10, netKg: 3.3, recoveredEur: 6 }],
+    }),
+    fact({
+      teamId: "C",
+      causeId: "c2",
+      netKg: 1.5,
+      cost: cost(2),
+      destinations: [
+        { destinationId: "a", kind: "compost", quantity: 1, netKg: 1, recoveredEur: null },
+        { destinationId: "d", kind: "don", quantity: 0.5, netKg: 0.5, recoveredEur: null },
+      ],
+    }),
     fact({ netKg: null, netQuantity: 3, netUnitCode: "barquette" }),
     fact({ food: false, category: "consommable", netKg: null, netQuantity: 40, netUnitCode: "piece" }),
   ];
 
   it("sépare kg alimentaires, pertes non converties et emballages", () => {
     const s = summarize(facts, true);
-    expect(s).toMatchObject({ events: 4, foodKg: 4.8, foodNotConverted: 1, barquettes: 13, nonFood: { events: 1, quantities: { piece: 40 } } });
+    expect(s).toMatchObject({
+      events: 4,
+      foodKg: 4.8,
+      foodNotConverted: 1,
+      barquettes: 13,
+      nonFood: { events: 1, quantities: { piece: 40 } },
+    });
     expect(s.kgByDestinationKind).toEqual({ vente: 3.3, compost: 1, don: 0.5 });
-    expect(s.cost).toEqual({ materialEur: 15.3, packagingEur: 0, labourEur: 0, indirectEur: 0, grossEur: 15.3, recoveredEur: 6, netEur: 9.3, valued: 2 });
+    expect(s.cost).toEqual({
+      materialEur: 15.3,
+      packagingEur: 0,
+      labourEur: 0,
+      indirectEur: 0,
+      grossEur: 15.3,
+      recoveredEur: 6,
+      netEur: 9.3,
+      valued: 2,
+    });
   });
 
   it("ne donne aucun euro sans le droit", () => {
@@ -45,13 +82,28 @@ describe("agrégats des statistiques", () => {
   });
 
   it("classe les groupes et ignore les pertes sans clé", () => {
-    expect(rankGroups(facts, (f) => f.teamId, true, "kg").map((g) => [g.key, g.summary.foodKg])).toEqual([["D", 3.3], ["C", 1.5]]);
+    expect(rankGroups(facts, (f) => f.teamId, true, "kg").map((g) => [g.key, g.summary.foodKg])).toEqual([
+      ["D", 3.3],
+      ["C", 1.5],
+    ]);
     expect(rankGroups(facts, (f) => f.teamId, true, "evenements").map((g) => g.key)).toEqual(["D", "C"]);
-    expect(rankGroups(facts, (f) => (f.teamId === "C" ? null : f.causeId), true, "cout").map((g) => [g.key, g.summary.events])).toEqual([["c1", 3]]);
+    expect(
+      rankGroups(facts, (f) => (f.teamId === "C" ? null : f.causeId), true, "cout").map((g) => [
+        g.key,
+        g.summary.events,
+      ]),
+    ).toEqual([["c1", 3]]);
   });
 
   it("totalise les destinations, sans les kg des emballages", () => {
-    const totals = destinationTotals([...facts, fact({ food: false, netKg: null, destinations: [{ destinationId: "a", kind: "compost", quantity: 5, netKg: 9, recoveredEur: null }] })]);
+    const totals = destinationTotals([
+      ...facts,
+      fact({
+        food: false,
+        netKg: null,
+        destinations: [{ destinationId: "a", kind: "compost", quantity: 5, netKg: 9, recoveredEur: null }],
+      }),
+    ]);
     expect(Object.fromEntries(totals)).toEqual({
       tgtg: { kind: "vente", foodKg: 3.3, events: 1 },
       a: { kind: "compost", foodKg: 1, events: 2 },

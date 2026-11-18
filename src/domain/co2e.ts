@@ -58,7 +58,12 @@ function subRecipeGrams(sub: SubRecipeData): number | null {
 }
 
 /** CO2e et couverture d'une liste de lignes (ingrédients et sous-recettes), sous-recettes déroulées. */
-export function composition(lines: readonly RecipeLine[], subRecipes: ReadonlyMap<string, SubRecipeData>, factorOf: (key: string) => IngredientFactor, depth = 0): Composition {
+export function composition(
+  lines: readonly RecipeLine[],
+  subRecipes: ReadonlyMap<string, SubRecipeData>,
+  factorOf: (key: string) => IngredientFactor,
+  depth = 0,
+): Composition {
   const total = empty();
   for (const line of lines) {
     const grams = lineGrams(line);
@@ -131,7 +136,8 @@ export function measuredLoss(
         ? loss.netKg * product.perKg
         : null;
   const kg = loss.netKg ?? 0;
-  if (co2 == null || product.coverage === 0) return { method: "non_couvert", co2eKg: 0, kgMeasured: 0, kgEstimated: 0, kgUncovered: kg, factorIds: [] };
+  if (co2 == null || product.coverage === 0)
+    return { method: "non_couvert", co2eKg: 0, kgMeasured: 0, kgEstimated: 0, kgUncovered: kg, factorIds: [] };
   return {
     method: "mesure",
     co2eKg: roundQuantity(co2),
@@ -145,8 +151,16 @@ export function measuredLoss(
 /** Perte hors tome : estimation par la famille de son libellé (poids net × facteur), signalée comme telle. */
 export function estimatedLoss(netKg: number | null, factor: IngredientFactor | null): LossCo2 {
   const kg = netKg ?? 0;
-  if (netKg == null || factor == null || typeof factor === "string") return { method: "non_couvert", co2eKg: 0, kgMeasured: 0, kgEstimated: 0, kgUncovered: kg, factorIds: [] };
-  return { method: "estime", co2eKg: roundQuantity(netKg * factor.kgCo2ePerKg), kgMeasured: 0, kgEstimated: kg, kgUncovered: 0, factorIds: [factor.factorId] };
+  if (netKg == null || factor == null || typeof factor === "string")
+    return { method: "non_couvert", co2eKg: 0, kgMeasured: 0, kgEstimated: 0, kgUncovered: kg, factorIds: [] };
+  return {
+    method: "estime",
+    co2eKg: roundQuantity(netKg * factor.kgCo2ePerKg),
+    kgMeasured: 0,
+    kgEstimated: kg,
+    kgUncovered: 0,
+    factorIds: [factor.factorId],
+  };
 }
 
 export interface FactorVersion {

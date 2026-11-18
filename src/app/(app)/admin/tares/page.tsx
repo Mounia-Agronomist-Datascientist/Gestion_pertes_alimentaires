@@ -30,7 +30,14 @@ export default async function TaresPage() {
           maxCount: c.maxCount,
           active: c.active,
           currentTareKg: c.current?.unitTareKg ?? null,
-          versions: c.versions.map((v) => ({ id: v.id, unitTareKg: v.unitTareKg, validFrom: v.validFrom, validTo: v.validTo, source: v.source, used: v.used })),
+          versions: c.versions.map((v) => ({
+            id: v.id,
+            unitTareKg: v.unitTareKg,
+            validFrom: v.validFrom,
+            validTo: v.validTo,
+            source: v.source,
+            used: v.used,
+          })),
         }))}
       />
     </>

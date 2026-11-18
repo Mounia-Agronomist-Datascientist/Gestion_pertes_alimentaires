@@ -71,7 +71,12 @@ export interface SurplusWeek {
   totals: SurplusTotals;
 }
 
-export async function surplusDashboard(db: Db, user: AuthUser, period: Period, anchor: { year: number; number: number } | null) {
+export async function surplusDashboard(
+  db: Db,
+  user: AuthUser,
+  period: Period,
+  anchor: { year: number; number: number } | null,
+) {
   if (!canReadSurplus(user)) throw new ForbiddenError();
   const withCosts = can(user, "indicators.read");
   const [dates, weeks, anyFile] = await Promise.all([
@@ -93,5 +98,12 @@ export async function surplusDashboard(db: Db, user: AuthUser, period: Period, a
       ),
     }));
   }
-  return { withCosts, hasFiles: anyFile.length > 0, dates, lines: facts.length, totals: summarizeSurplus(facts, withCosts), series };
+  return {
+    withCosts,
+    hasFiles: anyFile.length > 0,
+    dates,
+    lines: facts.length,
+    totals: summarizeSurplus(facts, withCosts),
+    series,
+  };
 }

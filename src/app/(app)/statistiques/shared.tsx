@@ -18,20 +18,47 @@ export { isUuid, type Params, type StatsContext } from "@/modules/statistiques/c
 export const statsContext = (user: AuthUser, params: Params) => parseStatsContext(db, user, params);
 
 /** Adresse d'une page de statistiques avec la période et les filtres (et des paramètres en plus). */
-export function statsHref(path: string, ctx: StatsContext, period: Period = ctx.period, extra: Record<string, string> = {}) {
+export function statsHref(
+  path: string,
+  ctx: StatsContext,
+  period: Period = ctx.period,
+  extra: Record<string, string> = {},
+) {
   return `${path}?${new URLSearchParams({ ...periodParams(period), ...ctx.filterParams, ...extra })}`;
 }
 
 export function scopeNote(user: AuthUser, compareTeams: boolean): string | null {
   if (compareTeams) return null;
-  return user.team ? `Équipe ${user.team.letter} – ${user.team.colorName} : vos pertes uniquement.` : "Vos zones uniquement.";
+  return user.team
+    ? `Équipe ${user.team.letter} – ${user.team.colorName} : vos pertes uniquement.`
+    : "Vos zones uniquement.";
 }
 
 const chip = (active: boolean) =>
   `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
 
 /** Onglets des statistiques (vue générale, par zone, par équipe). */
-export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsContext; active: "general" | "zones" | "equipes" | "produits" | "causes" | "evolution" | "ratios" | "synthese" | "valorisation" | "environnement" | "alchimistes" | "rapports" }) {
+export function StatsTabs({
+  user,
+  ctx,
+  active,
+}: {
+  user: AuthUser;
+  ctx: StatsContext;
+  active:
+    | "general"
+    | "zones"
+    | "equipes"
+    | "produits"
+    | "causes"
+    | "evolution"
+    | "ratios"
+    | "synthese"
+    | "valorisation"
+    | "environnement"
+    | "alchimistes"
+    | "rapports";
+}) {
   return (
     <nav className="flex flex-wrap gap-2" aria-label="Analyses">
       <Link className={chip(active === "general")} href={statsHref("/statistiques", ctx)}>
@@ -49,7 +76,10 @@ export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsCon
         </Link>
       ) : (
         user.teamId && (
-          <Link className={chip(active === "equipes")} href={statsHref("/statistiques/equipes", ctx, ctx.period, { id: user.teamId })}>
+          <Link
+            className={chip(active === "equipes")}
+            href={statsHref("/statistiques/equipes", ctx, ctx.period, { id: user.teamId })}
+          >
             Mon équipe
           </Link>
         )
@@ -85,12 +115,33 @@ export function StatsTabs({ user, ctx, active }: { user: AuthUser; ctx: StatsCon
 }
 
 /** Choix d'une option dans l'adresse (pastilles), en gardant période et filtres. */
-export function OptionChips<T extends string>({ label, path, ctx, name, value, options, keep = {} }: { label: string; path: string; ctx: StatsContext; name: string; value: T; options: { value: T; label: string }[]; keep?: Record<string, string> }) {
+export function OptionChips<T extends string>({
+  label,
+  path,
+  ctx,
+  name,
+  value,
+  options,
+  keep = {},
+}: {
+  label: string;
+  path: string;
+  ctx: StatsContext;
+  name: string;
+  value: T;
+  options: { value: T; label: string }[];
+  keep?: Record<string, string>;
+}) {
   return (
     <nav className="flex flex-wrap items-center gap-2" aria-label={label}>
       <span className="text-sm text-slate-600">{label} :</span>
       {options.map((o) => (
-        <Link key={o.value} className={chip(o.value === value)} aria-current={o.value === value ? "true" : undefined} href={statsHref(path, ctx, ctx.period, { ...keep, [name]: o.value })}>
+        <Link
+          key={o.value}
+          className={chip(o.value === value)}
+          aria-current={o.value === value ? "true" : undefined}
+          href={statsHref(path, ctx, ctx.period, { ...keep, [name]: o.value })}
+        >
           {o.label}
         </Link>
       ))}
@@ -99,7 +150,19 @@ export function OptionChips<T extends string>({ label, path, ctx, name, value, o
 }
 
 /** Périodes précédente et suivante. */
-export function PeriodNav({ path, ctx, previous, next, extra }: { path: string; ctx: StatsContext; previous: Period | null; next: Period | null; extra?: Record<string, string> }) {
+export function PeriodNav({
+  path,
+  ctx,
+  previous,
+  next,
+  extra,
+}: {
+  path: string;
+  ctx: StatsContext;
+  previous: Period | null;
+  next: Period | null;
+  extra?: Record<string, string>;
+}) {
   const c = "rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm";
   return (
     <nav className="flex flex-wrap gap-2" aria-label="Période voisine">
@@ -118,7 +181,19 @@ export function PeriodNav({ path, ctx, previous, next, extra }: { path: string; 
 }
 
 /** Barre de filtres (formulaire GET) : période, zone, équipe (profils qui comparent), type de produit. */
-export async function FilterForm({ path, ctx, keep = {}, hideZone = false, hideTeam = false }: { path: string; ctx: StatsContext; keep?: Record<string, string>; hideZone?: boolean; hideTeam?: boolean }) {
+export async function FilterForm({
+  path,
+  ctx,
+  keep = {},
+  hideZone = false,
+  hideTeam = false,
+}: {
+  path: string;
+  ctx: StatsContext;
+  keep?: Record<string, string>;
+  hideZone?: boolean;
+  hideTeam?: boolean;
+}) {
   const options = await dashboardFilterOptions(db);
   const { filters, filterParams } = ctx;
   const active = Object.keys(filterParams).length;
@@ -174,7 +249,10 @@ export async function FilterForm({ path, ctx, keep = {}, hideZone = false, hideT
           <button type="submit" className="btn-primary flex-1">
             Afficher
           </button>
-          <Link href={`${path}${Object.keys(keep).length ? `?${new URLSearchParams(keep)}` : ""}`} className="btn-secondary flex flex-1 items-center justify-center">
+          <Link
+            href={`${path}${Object.keys(keep).length ? `?${new URLSearchParams(keep)}` : ""}`}
+            className="btn-secondary flex flex-1 items-center justify-center"
+          >
             Réinitialiser
           </Link>
         </div>
@@ -184,12 +262,18 @@ export async function FilterForm({ path, ctx, keep = {}, hideZone = false, hideT
 }
 
 /** Évolution par rapport à la période précédente, en mots et en flèche (jamais par la seule couleur). */
-export function trend(value: number, previous: number | null | undefined, previousLabel: string | null, unit: "kg" | "€" | ""): string | null {
+export function trend(
+  value: number,
+  previous: number | null | undefined,
+  previousLabel: string | null,
+  unit: "kg" | "€" | "",
+): string | null {
   const e = evolution(value, previous);
   if (!e || !previousLabel) return null;
   if (e.delta === 0) return `= stable par rapport à ${previousLabel}`;
   const arrow = e.delta > 0 ? "▲" : "▼";
-  const amount = unit === "€" ? euro.format(Math.abs(e.delta)) : `${num.format(Math.abs(e.delta))}${unit ? ` ${unit}` : ""}`;
+  const amount =
+    unit === "€" ? euro.format(Math.abs(e.delta)) : `${num.format(Math.abs(e.delta))}${unit ? ` ${unit}` : ""}`;
   return `${arrow} ${e.delta > 0 ? "+" : "−"}${amount}${e.percent != null ? ` (${e.percent > 0 ? "+" : "−"}${num.format(Math.abs(e.percent))} %)` : ""} par rapport à ${previousLabel}`;
 }
 
@@ -213,14 +297,48 @@ export function Stat({ label, value, change }: { label: string; value: string; c
 }
 
 /** Indicateurs principaux d'un agrégat, avec l'évolution si la période précédente est connue. */
-export function SummaryTiles({ current, previous, previousLabel, withCosts }: { current: StatsSummary; previous: StatsSummary | null; previousLabel: string | null; withCosts: boolean }) {
+export function SummaryTiles({
+  current,
+  previous,
+  previousLabel,
+  withCosts,
+}: {
+  current: StatsSummary;
+  previous: StatsSummary | null;
+  previousLabel: string | null;
+  withCosts: boolean;
+}) {
   return (
     <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Indicateurs principaux">
-      <Stat label="Pertes alimentaires" value={`${num.format(current.foodKg)} kg`} change={trend(current.foodKg, previous?.foodKg, previousLabel, "kg")} />
-      {withCosts && current.cost && <Stat label="Coût brut" value={euro.format(current.cost.grossEur)} change={trend(current.cost.grossEur, previous?.cost?.grossEur, previousLabel, "€")} />}
-      {withCosts && current.cost && <Stat label="Coût net" value={euro.format(current.cost.netEur)} change={trend(current.cost.netEur, previous?.cost?.netEur, previousLabel, "€")} />}
-      <Stat label="Barquettes perdues" value={num.format(current.barquettes)} change={trend(current.barquettes, previous?.barquettes, previousLabel, "")} />
-      <Stat label="Déclarations" value={String(current.events)} change={trend(current.events, previous?.events, previousLabel, "")} />
+      <Stat
+        label="Pertes alimentaires"
+        value={`${num.format(current.foodKg)} kg`}
+        change={trend(current.foodKg, previous?.foodKg, previousLabel, "kg")}
+      />
+      {withCosts && current.cost && (
+        <Stat
+          label="Coût brut"
+          value={euro.format(current.cost.grossEur)}
+          change={trend(current.cost.grossEur, previous?.cost?.grossEur, previousLabel, "€")}
+        />
+      )}
+      {withCosts && current.cost && (
+        <Stat
+          label="Coût net"
+          value={euro.format(current.cost.netEur)}
+          change={trend(current.cost.netEur, previous?.cost?.netEur, previousLabel, "€")}
+        />
+      )}
+      <Stat
+        label="Barquettes perdues"
+        value={num.format(current.barquettes)}
+        change={trend(current.barquettes, previous?.barquettes, previousLabel, "")}
+      />
+      <Stat
+        label="Déclarations"
+        value={String(current.events)}
+        change={trend(current.events, previous?.events, previousLabel, "")}
+      />
     </section>
   );
 }
@@ -232,15 +350,23 @@ const plural = (n: number, word: string) => `${word}${n > 1 ? "s" : ""}`;
 export function SummaryNotes({ summary, withCosts }: { summary: StatsSummary; withCosts: boolean }) {
   const notes: string[] = [];
   const n = summary.foodNotConverted;
-  if (n > 0) notes.push(`${n} ${plural(n, "perte")} ${plural(n, "alimentaire")} sans poids en kg : non ${plural(n, "comptée")} dans les kg, jamais ${plural(n, "estimée")}.`);
+  if (n > 0)
+    notes.push(
+      `${n} ${plural(n, "perte")} ${plural(n, "alimentaire")} sans poids en kg : non ${plural(n, "comptée")} dans les kg, jamais ${plural(n, "estimée")}.`,
+    );
   if (summary.nonFood.events > 0)
     notes.push(
-      `Emballages et moules perdus (comptés à part, jamais en kg alimentaires) : ${Object.entries(summary.nonFood.quantities)
+      `Emballages et moules perdus (comptés à part, jamais en kg alimentaires) : ${Object.entries(
+        summary.nonFood.quantities,
+      )
         .map(([unit, q]) => `${num.format(q)} ${UNIT_NAMES[unit] ?? unit}`)
         .join(", ")}.`,
     );
   const noCost = summary.cost ? summary.events - summary.cost.valued : 0;
-  if (withCosts && noCost > 0) notes.push(`${noCost} ${plural(noCost, "perte")} sans coût connu (hors liste ou référentiel sans coût) : non ${plural(noCost, "comptée")} dans les euros.`);
+  if (withCosts && noCost > 0)
+    notes.push(
+      `${noCost} ${plural(noCost, "perte")} sans coût connu (hors liste ou référentiel sans coût) : non ${plural(noCost, "comptée")} dans les euros.`,
+    );
   if (!notes.length) return null;
   return (
     <ul className="flex flex-col gap-1 text-sm text-slate-600">
@@ -267,7 +393,15 @@ export interface BarRow {
  * Barres horizontales d'une seule couleur (une grandeur, pas d'identité de série) ; valeur et part écrites, la
  * barre ne porte jamais seule l'information. Sur téléphone, la barre occupe toute la largeur sous le libellé.
  */
-export function BarTable({ rows, caption, showShare = true }: { rows: BarRow[]; caption: string; showShare?: boolean }) {
+export function BarTable({
+  rows,
+  caption,
+  showShare = true,
+}: {
+  rows: BarRow[];
+  caption: string;
+  showShare?: boolean;
+}) {
   const total = rows.reduce((a, r) => a + r.value, 0);
   const max = Math.max(0, ...rows.map((r) => r.value));
   return (
@@ -286,11 +420,17 @@ export function BarTable({ rows, caption, showShare = true }: { rows: BarRow[]; 
             </span>
             <span className="shrink-0 tabular-nums whitespace-nowrap">
               {r.text}
-              {showShare && <span className="ml-2 inline-block w-10 text-right text-slate-600">{total > 0 ? pct.format(r.value / total) : "—"}</span>}
+              {showShare && (
+                <span className="ml-2 inline-block w-10 text-right text-slate-600">
+                  {total > 0 ? pct.format(r.value / total) : "—"}
+                </span>
+              )}
             </span>
           </div>
           <div className="h-2.5 rounded-r bg-slate-100" aria-hidden>
-            {r.value > 0 && <div className="h-2.5 rounded-r bg-teal-700" style={{ width: `${(r.value / max) * 100}%` }} />}
+            {r.value > 0 && (
+              <div className="h-2.5 rounded-r bg-teal-700" style={{ width: `${(r.value / max) * 100}%` }} />
+            )}
           </div>
           {r.detail && <span className="text-xs text-slate-500">{r.detail}</span>}
         </li>
@@ -301,9 +441,16 @@ export function BarTable({ rows, caption, showShare = true }: { rows: BarRow[]; 
 
 /** Devenir des pertes alimentaires (kg par type de destination, §19.1). */
 export function DestinationBars({ summary }: { summary: StatsSummary }) {
-  const rows = DESTINATION_KIND_STATS.map((d) => ({ ...d, kg: summary.kgByDestinationKind[d.kind] ?? 0 })).filter((d, i) => i < 5 || d.kg > 0);
+  const rows = DESTINATION_KIND_STATS.map((d) => ({ ...d, kg: summary.kgByDestinationKind[d.kind] ?? 0 })).filter(
+    (d, i) => i < 5 || d.kg > 0,
+  );
   if (rows.every((r) => r.kg === 0)) return <p className="text-slate-600">Aucune quantité en kg sur cette période.</p>;
-  return <BarTable caption="Kg par destination" rows={rows.map((r) => ({ key: r.kind, label: r.label, value: r.kg, text: `${num.format(r.kg)} kg` }))} />;
+  return (
+    <BarTable
+      caption="Kg par destination"
+      rows={rows.map((r) => ({ key: r.kind, label: r.label, value: r.kg, text: `${num.format(r.kg)} kg` }))}
+    />
+  );
 }
 
 /** Précision d'une ligne de classement : nombre de pertes et coût brut si visible. */
@@ -321,8 +468,19 @@ export function Card({ title, children }: { title: string; children: React.React
 }
 
 /** Boutons d'export de l'onglet (CSV et Excel), avec la période, les filtres et les choix de l'écran. */
-export function ExportLinks({ tab, ctx, keep = {}, note }: { tab: string; ctx: StatsContext; keep?: Record<string, string>; note?: string }) {
-  const href = (format: "csv" | "xlsx") => statsHref("/statistiques/export", ctx, ctx.period, { ...keep, onglet: tab, format });
+export function ExportLinks({
+  tab,
+  ctx,
+  keep = {},
+  note,
+}: {
+  tab: string;
+  ctx: StatsContext;
+  keep?: Record<string, string>;
+  note?: string;
+}) {
+  const href = (format: "csv" | "xlsx") =>
+    statsHref("/statistiques/export", ctx, ctx.period, { ...keep, onglet: tab, format });
   return (
     <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm print:hidden">
       <h2 className="text-lg font-semibold">Exporter</h2>
@@ -334,7 +492,9 @@ export function ExportLinks({ tab, ctx, keep = {}, note }: { tab: string; ctx: S
           CSV
         </a>
       </div>
-      <p className="text-xs text-slate-500">{note ?? "Les tableaux de cet onglet, avec la même période et les mêmes filtres."}</p>
+      <p className="text-xs text-slate-500">
+        {note ?? "Les tableaux de cet onglet, avec la même période et les mêmes filtres."}
+      </p>
     </section>
   );
 }

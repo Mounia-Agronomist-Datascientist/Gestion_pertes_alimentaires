@@ -66,7 +66,11 @@ export function ZonesAdmin({ zones }: { zones: Zone[] }) {
               <span className="text-sm text-slate-600">
                 Pertes attribuées {zone.subzones[0]?.teamMode === "equipe" ? "à l'équipe" : "à la zone"}
               </span>
-              <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(zone.id)}>
+              <button
+                type="button"
+                className="text-sm font-medium text-teal-800 underline"
+                onClick={() => setEditing(zone.id)}
+              >
                 Renommer la zone
               </button>
             </p>
@@ -93,12 +97,18 @@ export function ZonesAdmin({ zones }: { zones: Zone[] }) {
                   <div className="flex flex-col gap-1">
                     <span className="font-semibold">
                       {sz.name}
-                      {!sz.active && <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>}
+                      {!sz.active && (
+                        <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>
+                      )}
                     </span>
                     {sz.description && <span className="text-sm text-slate-600">{sz.description}</span>}
                     <form action={action} className="flex flex-wrap items-center gap-4">
                       <input type="hidden" name="id" value={sz.id} />
-                      <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(sz.id)}>
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-teal-800 underline"
+                        onClick={() => setEditing(sz.id)}
+                      >
                         Modifier
                       </button>
                       <button
@@ -110,7 +120,14 @@ export function ZonesAdmin({ zones }: { zones: Zone[] }) {
                         {sz.active ? "Désactiver" : "Réactiver"}
                       </button>
                       <span className="ml-auto flex gap-1">
-                        <button type="submit" name="intent" value="up" disabled={pending || i === 0} aria-label={`Monter ${sz.name}`} className="btn-order">
+                        <button
+                          type="submit"
+                          name="intent"
+                          value="up"
+                          disabled={pending || i === 0}
+                          aria-label={`Monter ${sz.name}`}
+                          className="btn-order"
+                        >
                           ↑
                         </button>
                         <button

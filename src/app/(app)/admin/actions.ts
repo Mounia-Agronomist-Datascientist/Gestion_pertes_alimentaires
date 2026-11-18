@@ -31,7 +31,15 @@ import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { DeclarationError } from "@/modules/declarations/service";
-import { addManualPrice, ProductSheetError, removeManualPackaging, removeManualPrice, renameSupplier, saveManualPackaging, setProductPlacement } from "@/modules/matieres/fiche";
+import {
+  addManualPrice,
+  ProductSheetError,
+  removeManualPackaging,
+  removeManualPrice,
+  renameSupplier,
+  saveManualPackaging,
+  setProductPlacement,
+} from "@/modules/matieres/fiche";
 import { buildMaterialsFromTomes } from "@/modules/matieres/referentiel";
 import { setCategoriesStorage, StorageSettingError } from "@/modules/matieres/semaine";
 
@@ -48,7 +56,9 @@ export async function accountAction(_prev: AccountActionState, formData: FormDat
   const intent = String(formData.get("intent"));
   try {
     if (intent === "create") {
-      const login = String(formData.get("login") ?? "").trim().toLowerCase();
+      const login = String(formData.get("login") ?? "")
+        .trim()
+        .toLowerCase();
       const { password } = await createAccountByAdmin(db, admin, {
         login,
         displayName: formData.get("displayName"),
@@ -64,7 +74,11 @@ export async function accountAction(_prev: AccountActionState, formData: FormDat
     if (intent === "reset") {
       const password = await resetPassword(db, admin, userId);
       revalidatePath("/admin/comptes");
-      return { message: `Mot de passe de « ${login} » réinitialisé ; ses appareils ont été déconnectés.`, password, login };
+      return {
+        message: `Mot de passe de « ${login} » réinitialisé ; ses appareils ont été déconnectés.`,
+        password,
+        login,
+      };
     }
     if (intent === "activate" || intent === "deactivate") {
       await setAccountActive(db, admin, userId, intent === "activate");
@@ -209,7 +223,8 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
         return { error: "Action inconnue" };
     }
   } catch (e) {
-    if (e instanceof AdminError || e instanceof ForbiddenError || e instanceof DeclarationError) return { error: e.message };
+    if (e instanceof AdminError || e instanceof ForbiddenError || e instanceof DeclarationError)
+      return { error: e.message };
     throw e;
   }
   revalidatePath("/admin/produits");
@@ -249,7 +264,8 @@ export async function tareAction(_prev: TareActionState, formData: FormData): Pr
       case "activate":
       case "deactivate":
         await setContainerActive(db, admin, containerTypeId, intent === "activate");
-        message = intent === "activate" ? `${name} réactivé.` : `${name} désactivé : il n'est plus proposé à la saisie.`;
+        message =
+          intent === "activate" ? `${name} réactivé.` : `${name} désactivé : il n'est plus proposé à la saisie.`;
         break;
       default:
         return { error: "Action inconnue" };
@@ -293,7 +309,8 @@ export async function destinationAction(_prev: PlaceActionState, formData: FormD
       case "activate":
       case "deactivate":
         await setDestinationActive(db, admin, id, intent === "activate");
-        message = intent === "activate" ? "Destination réactivée." : "Destination désactivée : elle n'est plus proposée.";
+        message =
+          intent === "activate" ? "Destination réactivée." : "Destination désactivée : elle n'est plus proposée.";
         break;
       case "up":
       case "down":
@@ -314,7 +331,10 @@ export async function zoneAction(_prev: PlaceActionState, formData: FormData): P
   const admin = await requireUser();
   const intent = String(formData.get("intent"));
   const id = String(formData.get("id") ?? "");
-  const fields = () => ({ name: String(formData.get("name") ?? ""), description: String(formData.get("description") ?? "") });
+  const fields = () => ({
+    name: String(formData.get("name") ?? ""),
+    description: String(formData.get("description") ?? ""),
+  });
   let message: string | undefined;
   try {
     switch (intent) {
@@ -371,7 +391,12 @@ export async function packagingAction(_prev: PlaceActionState, formData: FormDat
         break;
       }
       case "update":
-        await updatePackagingItem(db, admin, id, { name: field("name"), kind: field("kind") as never, unit: field("unit"), supplier: field("supplier") });
+        await updatePackagingItem(db, admin, id, {
+          name: field("name"),
+          kind: field("kind") as never,
+          unit: field("unit"),
+          supplier: field("supplier"),
+        });
         message = "Emballage modifié.";
         break;
       case "cost": {
@@ -387,7 +412,11 @@ export async function packagingAction(_prev: PlaceActionState, formData: FormDat
       }
       case "portion":
         for (const kind of ["plat", "petit_dejeuner"] as const) {
-          await setPackagingPerPortion(db, admin, { portionKind: kind, itemId: id, quantity: formData.get(`portion_${kind}`) });
+          await setPackagingPerPortion(db, admin, {
+            portionKind: kind,
+            itemId: id,
+            quantity: formData.get(`portion_${kind}`),
+          });
         }
         message = "Quantités par portion enregistrées.";
         break;
@@ -416,11 +445,17 @@ export async function labourAction(_prev: PlaceActionState, formData: FormData):
       db,
       admin,
       String(formData.get("zoneId") ?? ""),
-      { hourlyCostEur: String(formData.get("hourlyCostEur") ?? ""), validFrom: String(formData.get("validFrom") ?? ""), note: String(formData.get("note") ?? "") },
+      {
+        hourlyCostEur: String(formData.get("hourlyCostEur") ?? ""),
+        validFrom: String(formData.get("validFrom") ?? ""),
+        note: String(formData.get("note") ?? ""),
+      },
       toProductionLocalDate(new Date()),
     );
     revalidatePath("/admin/main-oeuvre");
-    return { message: `${rate.hourlyCostEur.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € de l'heure à partir du ${rate.validFrom.split("-").reverse().join("/")}.` };
+    return {
+      message: `${rate.hourlyCostEur.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € de l'heure à partir du ${rate.validFrom.split("-").reverse().join("/")}.`,
+    };
   } catch (e) {
     if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
     throw e;
@@ -433,7 +468,10 @@ export interface CategoryStorageState {
 }
 
 /** Lieu de stockage de chaque catégorie Melba (champs « cat:<id> » = sous-zone, vide = pas de lieu). */
-export async function categoryStorageAction(_prev: CategoryStorageState, formData: FormData): Promise<CategoryStorageState> {
+export async function categoryStorageAction(
+  _prev: CategoryStorageState,
+  formData: FormData,
+): Promise<CategoryStorageState> {
   const admin = await requireUser();
   const assignments = [...formData.entries()]
     .filter(([k]) => k.startsWith("cat:"))

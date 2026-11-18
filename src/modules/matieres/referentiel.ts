@@ -32,12 +32,21 @@ export async function applyReferenceDensities(db: Db, productIds?: readonly stri
   const rows = await db
     .select({ id: s.products.id, name: s.products.name })
     .from(s.products)
-    .where(and(isNull(s.products.densityKgPerL), inArray(s.products.category, ["matiere_premiere"]), productIds ? inArray(s.products.id, [...productIds]) : undefined));
+    .where(
+      and(
+        isNull(s.products.densityKgPerL),
+        inArray(s.products.category, ["matiere_premiere"]),
+        productIds ? inArray(s.products.id, [...productIds]) : undefined,
+      ),
+    );
   let n = 0;
   for (const p of rows) {
     const ref = referenceDensity(p.name);
     if (!ref) continue;
-    await db.update(s.products).set({ densityKgPerL: ref.densityKgPerL, updatedAt: new Date() }).where(eq(s.products.id, p.id));
+    await db
+      .update(s.products)
+      .set({ densityKgPerL: ref.densityKgPerL, updatedAt: new Date() })
+      .where(eq(s.products.id, p.id));
     n++;
   }
   return n;
@@ -49,7 +58,12 @@ const gramsToKg = (g: number | null) => (g == null ? null : Math.round((g / 1000
  * Complète le référentiel avec les ingrédients d'un import de semaine (appelé à l'enregistrement de l'import,
  * dans la même transaction, et par la reprise des tomes déjà importés).
  */
-export async function syncMaterialsFromImport(db: Db, importId: string, validFrom: string, userId: string | null): Promise<MaterialSyncResult> {
+export async function syncMaterialsFromImport(
+  db: Db,
+  importId: string,
+  validFrom: string,
+  userId: string | null,
+): Promise<MaterialSyncResult> {
   const lines = await db
     .select({
       label: s.weekRecipeLines.label,
@@ -66,12 +80,20 @@ export async function syncMaterialsFromImport(db: Db, importId: string, validFro
   if (!materials.length) return result;
 
   const categories = ["matiere_premiere", "moule_plat_gratin"] as const;
-  const existing = await db.select().from(s.products).where(inArray(s.products.category, [...categories]));
+  const existing = await db
+    .select()
+    .from(s.products)
+    .where(inArray(s.products.category, [...categories]));
   // Matières déjà connues (tomes ou bons de commande), quelle que soit leur catégorie.
-  const melba = await db.select().from(s.products).where(like(s.products.externalId, melbaExternalId("%")));
+  const melba = await db
+    .select()
+    .from(s.products)
+    .where(like(s.products.externalId, melbaExternalId("%")));
   const byExternalId = new Map(melba.filter((p) => isMelbaExternalId(p.externalId)).map((p) => [p.externalId!, p]));
   // Produit saisi à la main avant le référentiel : rattaché à la matière Melba de même nom plutôt que doublé.
-  const manualByKey = new Map(existing.filter((p) => !p.externalId).map((p) => [`${p.category}|${tomeKey(`${p.name} ${p.variant ?? ""}`)}`, p]));
+  const manualByKey = new Map(
+    existing.filter((p) => !p.externalId).map((p) => [`${p.category}|${tomeKey(`${p.name} ${p.variant ?? ""}`)}`, p]),
+  );
 
   const productIds = new Map<string, string>();
   for (const m of materials) {
@@ -118,20 +140,33 @@ export async function syncMaterialsFromImport(db: Db, importId: string, validFro
   for (const m of materials) {
     if (m.cost.perKgEur == null && m.cost.perUnitEur == null) continue;
     const productId = productIds.get(m.key)!;
-    const price = { unit: m.unit, unitWeightG: m.unitWeightG, perKgEur: m.cost.perKgEur, perUnitEur: m.cost.perUnitEur };
+    const price = {
+      unit: m.unit,
+      unitWeightG: m.unitWeightG,
+      perKgEur: m.cost.perKgEur,
+      perUnitEur: m.cost.perUnitEur,
+    };
     const own = versionsOf.get(productId) ?? [];
     const sameWeek = own.find((v) => v.validFrom === validFrom);
     if (sameWeek) {
       // Nouvelle version de l'import de la même semaine : le tome corrigé remplace le prix de cette semaine.
       if (!samePrice(sameWeek, price)) {
-        await db.update(s.productPrices).set({ ...price, weeklyImportId: importId, createdBy: userId, createdAt: new Date() }).where(eq(s.productPrices.id, sameWeek.id));
+        await db
+          .update(s.productPrices)
+          .set({ ...price, weeklyImportId: importId, createdBy: userId, createdAt: new Date() })
+          .where(eq(s.productPrices.id, sameWeek.id));
         result.newPrices++;
       }
       continue;
     }
-    const before = priceInForce(own.filter((v) => v.validFrom < validFrom), validFrom);
+    const before = priceInForce(
+      own.filter((v) => v.validFrom < validFrom),
+      validFrom,
+    );
     if (before && samePrice(before, price)) continue;
-    await db.insert(s.productPrices).values({ productId, source: "tome", validFrom, ...price, weeklyImportId: importId, createdBy: userId });
+    await db
+      .insert(s.productPrices)
+      .values({ productId, source: "tome", validFrom, ...price, weeklyImportId: importId, createdBy: userId });
     result.newPrices++;
   }
   return result;
@@ -144,13 +179,25 @@ export async function syncMaterialsFromImport(db: Db, importId: string, validFro
 export async function buildMaterialsFromTomes(db: Db, admin: AuthUser) {
   requirePermission(admin, "referentiel.manage");
   const imports = await db
-    .select({ id: s.weeklyImports.id, startDate: s.productionWeeks.startDate, year: s.productionWeeks.year, number: s.productionWeeks.number })
+    .select({
+      id: s.weeklyImports.id,
+      startDate: s.productionWeeks.startDate,
+      year: s.productionWeeks.year,
+      number: s.productionWeeks.number,
+    })
     .from(s.weeklyImports)
     .innerJoin(s.productionWeeks, eq(s.weeklyImports.productionWeekId, s.productionWeeks.id))
     .where(eq(s.weeklyImports.status, "validee"))
     .orderBy(asc(s.productionWeeks.startDate));
   return db.transaction(async (tx) => {
-    const total: MaterialSyncResult & { weeks: string[] } = { materials: 0, created: 0, linked: 0, newPrices: 0, densities: 0, weeks: [] };
+    const total: MaterialSyncResult & { weeks: string[] } = {
+      materials: 0,
+      created: 0,
+      linked: 0,
+      newPrices: 0,
+      densities: 0,
+      weeks: [],
+    };
     for (const imp of imports) {
       const r = await syncMaterialsFromImport(tx, imp.id, imp.startDate, admin.id);
       total.created += r.created;
@@ -161,7 +208,12 @@ export async function buildMaterialsFromTomes(db: Db, admin: AuthUser) {
     }
     // Matières venues des seuls bons de commande.
     total.densities += await applyReferenceDensities(tx);
-    total.materials = (await tx.select({ id: s.products.id }).from(s.products).where(like(s.products.externalId, melbaExternalId("%")))).length;
+    total.materials = (
+      await tx
+        .select({ id: s.products.id })
+        .from(s.products)
+        .where(like(s.products.externalId, melbaExternalId("%")))
+    ).length;
     await writeAudit(tx, { userId: admin.id, action: "build_materials", entity: "product", after: total });
     return total;
   });
@@ -187,5 +239,7 @@ export async function pricesInForce(db: Db, on: string) {
   const rows = await db.select().from(s.productPrices).where(lte(s.productPrices.validFrom, on));
   const byProduct = new Map<string, typeof rows>();
   for (const r of rows) byProduct.set(r.productId, [...(byProduct.get(r.productId) ?? []), r]);
-  return new Map([...byProduct].map(([id, versions]) => [id, { current: priceInForce(versions, on)!, versions: versions.length }]));
+  return new Map(
+    [...byProduct].map(([id, versions]) => [id, { current: priceInForce(versions, on)!, versions: versions.length }]),
+  );
 }

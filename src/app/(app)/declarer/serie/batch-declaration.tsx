@@ -16,7 +16,13 @@ interface Props {
 
 type View =
   | { kind: "list" }
-  | { kind: "wizard"; key: number; initial?: Partial<WizardInitial>; startStep: "zone" | "product" | "recap"; editIndex: number | null };
+  | {
+      kind: "wizard";
+      key: number;
+      initial?: Partial<WizardInitial>;
+      startStep: "zone" | "product" | "recap";
+      editIndex: number | null;
+    };
 
 /** Les lignes en cours sont gardées sur l'appareil (par compte) jusqu'à la validation du lot. */
 const storageKey = (userId: string) => `pertes:serie:${userId}`;
@@ -63,7 +69,11 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
     if (loaded) saveLines(userId, lines);
   }, [loaded, userId, lines]);
 
-  function openWizard(initial: Partial<WizardInitial> | undefined, startStep: "zone" | "product" | "recap", editIndex: number | null) {
+  function openWizard(
+    initial: Partial<WizardInitial> | undefined,
+    startStep: "zone" | "product" | "recap",
+    editIndex: number | null,
+  ) {
     setResult(null);
     setView({ kind: "wizard", key: nextKey, initial, startStep, editIndex });
     setNextKey((k) => k + 1);
@@ -74,7 +84,13 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
     const last = lines.at(-1)?.initial;
     if (!last) return openWizard(undefined, "zone", null);
     openWizard(
-      { zoneId: last.zoneId, subzoneId: last.subzoneId, teamId: last.teamId, occurredOn: last.occurredOn, occurredTime: last.occurredTime },
+      {
+        zoneId: last.zoneId,
+        subzoneId: last.subzoneId,
+        teamId: last.teamId,
+        occurredOn: last.occurredOn,
+        occurredTime: last.occurredTime,
+      },
       "product",
       null,
     );
@@ -123,7 +139,9 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
           startStep: view.startStep,
           editing: editIndex !== null,
           onAdd: (line) => {
-            setLines((prev) => (editIndex !== null ? prev.map((l, i) => (i === editIndex ? line : l)) : [...prev, line]));
+            setLines((prev) =>
+              editIndex !== null ? prev.map((l, i) => (i === editIndex ? line : l)) : [...prev, line],
+            );
             setResult(null);
             setView({ kind: "list" });
           },
@@ -136,14 +154,23 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
   if (queued > 0) {
     return (
       <div className="flex flex-col gap-6">
-        <div role="status" className="flex flex-col items-center gap-2 rounded-2xl bg-amber-50 p-6 text-center text-amber-950">
-          <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-amber-500 text-4xl text-white">
+        <div
+          role="status"
+          className="flex flex-col items-center gap-2 rounded-2xl bg-amber-50 p-6 text-center text-amber-950"
+        >
+          <span
+            aria-hidden
+            className="flex size-16 items-center justify-center rounded-full bg-amber-500 text-4xl text-white"
+          >
             ⏳
           </span>
           <p className="text-xl font-semibold">
             {queued} perte{queued > 1 ? "s" : ""} gardée{queued > 1 ? "s" : ""} sur cet appareil
           </p>
-          <p className="text-sm">Pas de réseau : elles seront envoyées toutes seules au retour du réseau. Ne videz pas les données du navigateur d&apos;ici là.</p>
+          <p className="text-sm">
+            Pas de réseau : elles seront envoyées toutes seules au retour du réseau. Ne videz pas les données du
+            navigateur d&apos;ici là.
+          </p>
         </div>
         <button
           type="button"
@@ -165,8 +192,14 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
   if (result?.ok) {
     return (
       <div className="flex flex-col gap-6">
-        <div role="status" className="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50 p-6 text-center text-emerald-900">
-          <span aria-hidden className="flex size-16 items-center justify-center rounded-full bg-emerald-600 text-4xl text-white">
+        <div
+          role="status"
+          className="flex flex-col items-center gap-2 rounded-2xl bg-emerald-50 p-6 text-center text-emerald-900"
+        >
+          <span
+            aria-hidden
+            className="flex size-16 items-center justify-center rounded-full bg-emerald-600 text-4xl text-white"
+          >
             ✓
           </span>
           <p className="text-xl font-semibold">

@@ -1,5 +1,20 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, jsonb, numeric, pgEnum, pgTable, primaryKey, smallint, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  date,
+  index,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  smallint,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { teams } from "./organisation";
 import { productionWeeks } from "./production-weeks";
@@ -43,7 +58,10 @@ export const missingDeclarationAlerts = pgTable(
     firstDay: date("first_day", { mode: "string" }).notNull(),
     lastDay: date("last_day", { mode: "string" }).notNull(),
     /** Jours de production de la plage sans déclaration (mis à jour jusqu'à régularisation). */
-    missingDays: date("missing_days", { mode: "string" }).array().notNull().default(sql`'{}'::date[]`),
+    missingDays: date("missing_days", { mode: "string" })
+      .array()
+      .notNull()
+      .default(sql`'{}'::date[]`),
     /** Perte estimée (instantané de la valeur forfaitaire au moment de la détection). */
     estimatedKg: numeric("estimated_kg", { precision: 10, scale: 3, mode: "number" }).notNull(),
     status: alertStatusEnum("status").notNull().default("active"),
@@ -78,7 +96,10 @@ export const alertSettings = pgTable(
   },
   (t) => [
     check("alert_settings_single_row", sql`${t.id} = 1`),
-    check("alert_settings_values", sql`${t.unusualRate} > 0 and ${t.minKg} >= 0 and ${t.recurrenceWeeks} >= 2 and ${t.trendStableRate} >= 0`),
+    check(
+      "alert_settings_values",
+      sql`${t.unusualRate} > 0 and ${t.minKg} >= 0 and ${t.recurrenceWeeks} >= 2 and ${t.trendStableRate} >= 0`,
+    ),
   ],
 );
 
@@ -111,7 +132,10 @@ export const lossAlerts = pgTable(
     rate: numeric("rate", { precision: 8, scale: 3, mode: "number" }),
     referenceWeeks: smallint("reference_weeks"),
     /** Contexte affiché (causes et produits principaux, ou cause récurrente et ses semaines). */
-    details: jsonb("details").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    details: jsonb("details")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     detectedAt: timestamp("detected_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     seenAt: timestamp("seen_at", { withTimezone: true }),

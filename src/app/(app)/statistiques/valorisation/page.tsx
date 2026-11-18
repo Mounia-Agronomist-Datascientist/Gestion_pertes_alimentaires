@@ -2,7 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/db/client";
 import { periodLabel } from "@/domain/periodes";
-import { RECOVERY_GROUPS, type RecoveryGroup, type RecoveryTotals, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
+import {
+  RECOVERY_GROUPS,
+  type RecoveryGroup,
+  type RecoveryTotals,
+  recoveredShare,
+  recoveryPerKg,
+} from "@/domain/valorisation";
 import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
 import { anchorWeek } from "@/modules/statistiques/context";
@@ -12,17 +18,36 @@ import { recoveryDashboard } from "@/modules/statistiques/valorisation";
 import { ColumnChart } from "../evolution/column-chart";
 import { StackedColumnChart } from "../evolution/stacked-chart";
 import { SurplusSection } from "./surplus-section";
-import { BarTable, Card, euro, ExportLinks, FilterForm, num, type Params, PeriodNav, pct, scopeNote, Stat, StatsTabs, statsContext } from "../shared";
+import {
+  BarTable,
+  Card,
+  euro,
+  ExportLinks,
+  FilterForm,
+  num,
+  type Params,
+  PeriodNav,
+  pct,
+  scopeNote,
+  Stat,
+  StatsTabs,
+  statsContext,
+} from "../shared";
 
 export const metadata = { title: "Valorisation — Statistiques — Pertes" };
 
 /** Couleurs fixes des trois groupes (palette catégorielle validée, dans l'ordre : jamais réattribuées). */
-const GROUP_COLORS: Record<RecoveryGroup, string> = { avec_recette: "#2a78d6", sans_recette: "#eb6834", a_part: "#1baf7a" };
+const GROUP_COLORS: Record<RecoveryGroup, string> = {
+  avec_recette: "#2a78d6",
+  sans_recette: "#eb6834",
+  a_part: "#1baf7a",
+};
 
 const GROUP_NOTES: Record<RecoveryGroup, string> = {
   avec_recette:
     "Ventes déclarées par les équipes (Too Good To Go, vente flash) : seules destinations qui rapportent une recette. Depuis le 13/11/2026, ces ventes viennent des fichiers de l'entreprise (section ci-dessus).",
-  sans_recette: "Ordures ménagères, compost (Les Alchimistes), don, personnel et autres : aucune recette. Les dons à Linkee viennent de leur fichier (section ci-dessus).",
+  sans_recette:
+    "Ordures ménagères, compost (Les Alchimistes), don, personnel et autres : aucune recette. Les dons à Linkee viennent de leur fichier (section ci-dessus).",
   a_part: "Réutilisation dans une autre préparation et retours fournisseurs : ni vente, ni perte sans valeur.",
 };
 
@@ -34,7 +59,9 @@ function notesOf(t: RecoveryTotals): string[] {
     t.notConverted > 0 ? `${plural(t.notConverted, "ligne")} sans poids en kg (non comptées dans les kg).` : null,
     t.nonFood > 0 ? `${plural(t.nonFood, "ligne")} d'emballages ou de moules (jamais en kg alimentaires).` : null,
     t.cost && t.cost.unvalued > 0 ? `${plural(t.cost.unvalued, "ligne")} sans coût connu.` : null,
-    t.cost && t.cost.recoveryMissing > 0 ? `${plural(t.cost.recoveryMissing, "vente")} dont la recette reste à saisir (dans l'historique).` : null,
+    t.cost && t.cost.recoveryMissing > 0
+      ? `${plural(t.cost.recoveryMissing, "vente")} dont la recette reste à saisir (dans l'historique).`
+      : null,
   ].filter((n): n is string => n != null);
 }
 
@@ -57,7 +84,8 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
   const share = recoveredShare(sales);
   const perKg = recoveryPerKg(sales);
   const weekLabel = (n: number) => `S${String(n).padStart(2, "0")}`;
-  const totalKg = (g: Record<RecoveryGroup, RecoveryTotals>) => RECOVERY_GROUPS.reduce((a, x) => a + g[x.key].foodKg, 0);
+  const totalKg = (g: Record<RecoveryGroup, RecoveryTotals>) =>
+    RECOVERY_GROUPS.reduce((a, x) => a + g[x.key].foodKg, 0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,7 +98,8 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
       <PeriodNav path={path} ctx={ctx} previous={previous} next={next} />
       <FilterForm path={path} ctx={ctx} />
       <p className="text-sm text-slate-600">
-        La valorisation ne retire rien des pertes : un plat vendu, donné ou composté reste une perte. Cet onglet dit seulement ce qu&apos;il est devenu.
+        La valorisation ne retire rien des pertes : un plat vendu, donné ou composté reste une perte. Cet onglet dit
+        seulement ce qu&apos;il est devenu.
       </p>
 
       {surplus && <SurplusSection data={surplus} anchor={anchor} isAdmin={can(user, "referentiel.manage")} />}
@@ -78,10 +107,19 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
       <h2 className="text-lg font-semibold">Pertes déclarées par les équipes</h2>
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Indicateurs principaux">
         {RECOVERY_GROUPS.map((g) => (
-          <Stat key={g.key} label={g.key === "a_part" ? "À part" : g.label} value={`${num.format(groups[g.key].foodKg)} kg`} change={plural(groups[g.key].lines, "ligne")} />
+          <Stat
+            key={g.key}
+            label={g.key === "a_part" ? "À part" : g.label}
+            value={`${num.format(groups[g.key].foodKg)} kg`}
+            change={plural(groups[g.key].lines, "ligne")}
+          />
         ))}
         {withCosts && sales.cost && (
-          <Stat label="Recettes déclarées" value={euro.format(sales.cost.recoveredEur)} change={share != null ? `${pct.format(share)} du coût des produits vendus` : null} />
+          <Stat
+            label="Recettes déclarées"
+            value={euro.format(sales.cost.recoveredEur)}
+            change={share != null ? `${pct.format(share)} du coût des produits vendus` : null}
+          />
         )}
       </section>
 
@@ -107,7 +145,9 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
                     detail: [
                       plural(d.lines, g.key === "avec_recette" ? "vente" : "perte"),
                       d.cost ? `produits : ${euro.format(d.cost.grossEur)}` : null,
-                      d.cost && g.key === "avec_recette" ? `recette : ${euro.format(d.cost.recoveredEur)}${s != null ? ` (${pct.format(s)} récupérés)` : ""}` : null,
+                      d.cost && g.key === "avec_recette"
+                        ? `recette : ${euro.format(d.cost.recoveredEur)}${s != null ? ` (${pct.format(s)} récupérés)` : ""}`
+                        : null,
                     ]
                       .filter(Boolean)
                       .join(" · "),
@@ -156,7 +196,11 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
           <StackedColumnChart
             caption="Kg de pertes alimentaires par semaine, répartis par devenir"
             format={(n) => `${num.format(n)} kg`}
-            segments={RECOVERY_GROUPS.map((g) => ({ key: g.key, label: g.key === "a_part" ? "À part (réutilisation, retours)" : g.label, color: GROUP_COLORS[g.key] }))}
+            segments={RECOVERY_GROUPS.map((g) => ({
+              key: g.key,
+              label: g.key === "a_part" ? "À part (réutilisation, retours)" : g.label,
+              color: GROUP_COLORS[g.key],
+            }))}
             columns={data.series.map((w) => ({
               key: `k-${w.id}`,
               label: weekLabel(w.number),
@@ -181,13 +225,17 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
               />
             </>
           )}
-          <p className="text-xs text-slate-500">12 dernières semaines de production jusqu&apos;à {anchor ? weekLabel(anchor.number) : "la semaine en cours"}, avec les mêmes filtres.</p>
+          <p className="text-xs text-slate-500">
+            12 dernières semaines de production jusqu&apos;à {anchor ? weekLabel(anchor.number) : "la semaine en cours"}
+            , avec les mêmes filtres.
+          </p>
         </Card>
       )}
 
       {withCosts && (
         <p className="text-xs text-slate-500">
-          Coût des produits : coût brut figé de chaque perte, réparti entre ses destinations au prorata des quantités. Recettes : montants réellement encaissés.
+          Coût des produits : coût brut figé de chaque perte, réparti entre ses destinations au prorata des quantités.
+          Recettes : montants réellement encaissés.
         </p>
       )}
       <ExportLinks tab="valorisation" ctx={ctx} />

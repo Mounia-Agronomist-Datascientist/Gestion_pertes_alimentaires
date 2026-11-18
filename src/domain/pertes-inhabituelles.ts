@@ -23,7 +23,12 @@ export interface AlertSettings {
   trendStableRate: number;
 }
 
-export const DEFAULT_ALERT_SETTINGS: AlertSettings = { unusualRate: 0.5, minKg: 5, recurrenceWeeks: 3, trendStableRate: 0.1 };
+export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
+  unusualRate: 0.5,
+  minKg: 5,
+  recurrenceWeeks: 3,
+  trendStableRate: 0.1,
+};
 
 /** Semaines de référence avant la semaine analysée. */
 export const REFERENCE_WEEKS = 4;
@@ -53,7 +58,11 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length;
 
 /** Contrôle d'une unité : `history` = ses semaines précédentes (4 au plus, de la plus ancienne à la plus récente). */
-export function checkUnusual(current: UnitWeek, history: readonly UnitWeek[], settings: Pick<AlertSettings, "unusualRate" | "minKg">): UnusualResult | null {
+export function checkUnusual(
+  current: UnitWeek,
+  history: readonly UnitWeek[],
+  settings: Pick<AlertSettings, "unusualRate" | "minKg">,
+): UnusualResult | null {
   if (current.kg < settings.minKg) return null;
   const refs = history.slice(-REFERENCE_WEEKS).filter((h) => h.active);
   if (refs.length < MIN_REFERENCE_WEEKS) return null;
@@ -63,7 +72,12 @@ export function checkUnusual(current: UnitWeek, history: readonly UnitWeek[], se
   const used = useVolume ? withVolume : refs;
   const value = round2(useVolume ? perThousand(current) : current.kg);
   const reference = round2(mean(used.map((w) => (useVolume ? perThousand(w) : w.kg))));
-  const result = { measure: useVolume ? ("kg_1000" as const) : ("kg" as const), value, reference, referenceWeeks: used.length };
+  const result = {
+    measure: useVolume ? ("kg_1000" as const) : ("kg" as const),
+    value,
+    reference,
+    referenceWeeks: used.length,
+  };
   if (reference === 0) return { ...result, rate: null };
   const rate = Math.round((value / reference - 1) * 1000) / 1000;
   return rate >= settings.unusualRate ? { ...result, rate } : null;

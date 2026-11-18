@@ -20,7 +20,17 @@ export interface StackedColumn {
   highlight?: boolean;
 }
 
-export function StackedColumnChart({ columns, segments, caption, format }: { columns: StackedColumn[]; segments: Segment[]; caption: string; format: (n: number) => string }) {
+export function StackedColumnChart({
+  columns,
+  segments,
+  caption,
+  format,
+}: {
+  columns: StackedColumn[];
+  segments: Segment[];
+  caption: string;
+  format: (n: number) => string;
+}) {
   const width = 360;
   const height = 170;
   const top = 18;
@@ -57,18 +67,46 @@ export function StackedColumnChart({ columns, segments, caption, format }: { col
           const topY = parts.at(-1)?.y ?? height - bottom;
           return (
             <g key={c.key}>
-              <title>{[`${c.label} : ${c.text}`, ...shown.filter((s) => (c.values[s.key] ?? 0) > 0).map((s) => `${s.label} : ${format(c.values[s.key]!)}`)].join("\n")}</title>
+              <title>
+                {[
+                  `${c.label} : ${c.text}`,
+                  ...shown
+                    .filter((s) => (c.values[s.key] ?? 0) > 0)
+                    .map((s) => `${s.label} : ${format(c.values[s.key]!)}`),
+                ].join("\n")}
+              </title>
               <rect x={i * slot} y={0} width={slot} height={height - bottom} fill="transparent" />
               {parts.map((p, j) => (
                 // Écart de 2 px entre deux composantes (couleur du fond), sauf sous la première.
-                <rect key={p.s.key} x={x} y={p.y} width={bar} height={Math.max(p.h - (j > 0 ? gap : 0), 1)} fill={p.s.color} opacity={c.highlight || !columns.some((o) => o.highlight) ? 1 : 0.8} />
+                <rect
+                  key={p.s.key}
+                  x={x}
+                  y={p.y}
+                  width={bar}
+                  height={Math.max(p.h - (j > 0 ? gap : 0), 1)}
+                  fill={p.s.color}
+                  opacity={c.highlight || !columns.some((o) => o.highlight) ? 1 : 0.8}
+                />
               ))}
               {c.highlight && c.total > 0 && (
-                <text {...valueAnchor(i, columns.length, x, bar)} y={Math.max(topY - 4, 10)} fontSize={10} fontWeight={600} fill="#0f172a">
+                <text
+                  {...valueAnchor(i, columns.length, x, bar)}
+                  y={Math.max(topY - 4, 10)}
+                  fontSize={10}
+                  fontWeight={600}
+                  fill="#0f172a"
+                >
                   {c.text}
                 </text>
               )}
-              <text x={x + bar / 2} y={height - 6} textAnchor="middle" fontSize={9} fill="#475569" fontWeight={c.highlight ? 700 : 400}>
+              <text
+                x={x + bar / 2}
+                y={height - 6}
+                textAnchor="middle"
+                fontSize={9}
+                fill="#475569"
+                fontWeight={c.highlight ? 700 : 400}
+              >
                 {c.label}
               </text>
             </g>

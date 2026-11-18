@@ -31,15 +31,33 @@ describe("destinations, zones et postes", () => {
     t = await createTestDb();
     await seed(t.db);
     const teamC = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "C")))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    teamUser = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-c", displayName: "Équipe C", roleCode: "equipe", teamId: teamC, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    teamUser = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-c",
+        displayName: "Équipe C",
+        roleCode: "equipe",
+        teamId: teamC,
+        password: "mot-de-passe-equipe",
+      }),
+    );
   });
 
   afterAll(async () => {
     await t.close();
   });
 
-  const idOf = async (code: string) => (await t.db.select().from(s.destinations).where(eq(s.destinations.code, code)))[0]!.id;
+  const idOf = async (code: string) =>
+    (await t.db.select().from(s.destinations).where(eq(s.destinations.code, code)))[0]!.id;
 
   describe("destinations", () => {
     it("crée une destination à la fin de la liste ; refuse un doublon et une recette hors vente", async () => {
@@ -47,8 +65,12 @@ describe("destinations, zones et postes", () => {
       expect(d).toMatchObject({ code: "ADM_BANQUE_ALIMENTAIRE", financialRecovery: false, active: true });
       const list = await listDestinationsForAdmin(t.db, admin);
       expect(list.at(-1)?.id).toBe(d.id);
-      await expect(createDestination(t.db, admin, { name: "banque ALIMENTAIRE", kind: "don" })).rejects.toThrow(/existe déjà/);
-      await expect(createDestination(t.db, admin, { name: "Don payant", kind: "don", financialRecovery: true })).rejects.toThrow(/vente/);
+      await expect(createDestination(t.db, admin, { name: "banque ALIMENTAIRE", kind: "don" })).rejects.toThrow(
+        /existe déjà/,
+      );
+      await expect(
+        createDestination(t.db, admin, { name: "Don payant", kind: "don", financialRecovery: true }),
+      ).rejects.toThrow(/vente/);
     });
 
     it("le type d'une destination déjà utilisée ne change plus, son nom peut être reformulé", async () => {
@@ -70,9 +92,14 @@ describe("destinations, zones et postes", () => {
         },
         new Date("2026-11-09T10:00:00Z"),
       );
-      await expect(updateDestination(t.db, admin, personnel, { name: "Personnel", kind: "vente" })).rejects.toThrow(/déjà utilisée/);
+      await expect(updateDestination(t.db, admin, personnel, { name: "Personnel", kind: "vente" })).rejects.toThrow(
+        /déjà utilisée/,
+      );
       await updateDestination(t.db, admin, personnel, { name: "Repas du personnel", kind: "personnel" });
-      expect((await listDestinationsForAdmin(t.db, admin)).find((d) => d.id === personnel)).toMatchObject({ name: "Repas du personnel", used: true });
+      expect((await listDestinationsForAdmin(t.db, admin)).find((d) => d.id === personnel)).toMatchObject({
+        name: "Repas du personnel",
+        used: true,
+      });
     });
 
     it("désactive (plus proposée à la saisie) et réordonne", async () => {
@@ -123,7 +150,9 @@ describe("destinations, zones et postes", () => {
     });
 
     it("réserve ces réglages à l'administration", async () => {
-      await expect(createDestination(t.db, teamUser, { name: "X dest", kind: "autre" })).rejects.toThrow(ForbiddenError);
+      await expect(createDestination(t.db, teamUser, { name: "X dest", kind: "autre" })).rejects.toThrow(
+        ForbiddenError,
+      );
       await expect(listZonesForAdmin(t.db, teamUser)).rejects.toThrow(ForbiddenError);
     });
   });

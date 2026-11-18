@@ -19,8 +19,8 @@ export default async function PackagingPage() {
       <h1 className="text-2xl font-bold">Emballages et consommables</h1>
       <p className="text-sm text-slate-600">
         Coût unitaire daté de chaque emballage, et quantité consommée par portion : ces emballages sont ajoutés au coût
-        de tout plat perdu (décision du 10/11/2026). Les moules et plats à gratin déjà comptés dans le coût Melba d&apos;un
-        plat ne sont pas ajoutés une seconde fois. Sans coût saisi, rien n&apos;est compté.
+        de tout plat perdu (décision du 10/11/2026). Les moules et plats à gratin déjà comptés dans le coût Melba
+        d&apos;un plat ne sont pas ajoutés une seconde fois. Sans coût saisi, rien n&apos;est compté.
       </p>
       <PackagingAdmin
         today={today}
@@ -33,8 +33,16 @@ export default async function PackagingPage() {
           supplier: i.supplier,
           active: i.active,
           currentCostEur: i.current?.unitCostEur ?? null,
-          versions: i.versions.map((v) => ({ id: v.id, unitCostEur: v.unitCostEur, validFrom: v.validFrom, validTo: v.validTo, source: v.source })),
-          perPortion: Object.fromEntries(perPortion.filter((p) => p.itemId === i.id).map((p) => [p.portionKind, p.quantity])),
+          versions: i.versions.map((v) => ({
+            id: v.id,
+            unitCostEur: v.unitCostEur,
+            validFrom: v.validFrom,
+            validTo: v.validTo,
+            source: v.source,
+          })),
+          perPortion: Object.fromEntries(
+            perPortion.filter((p) => p.itemId === i.id).map((p) => [p.portionKind, p.quantity]),
+          ),
         }))}
       />
     </>

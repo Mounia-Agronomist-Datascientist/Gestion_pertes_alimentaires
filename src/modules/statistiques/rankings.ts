@@ -26,7 +26,11 @@ export const PRODUCT_TYPES = {
 } as const;
 export type ProductType = keyof typeof PRODUCT_TYPES;
 
-export const RANK_BY_LABELS: Record<RankBy, string> = { kg: "En kg", cout: "En coût", evenements: "En nombre de pertes" };
+export const RANK_BY_LABELS: Record<RankBy, string> = {
+  kg: "En kg",
+  cout: "En coût",
+  evenements: "En nombre de pertes",
+};
 
 /** Cause qui pèse le plus (en kg, puis en nombre de pertes) dans un groupe de pertes. */
 function mainCause(facts: readonly LossFact[]): { name: string; share: number } | null {
@@ -50,10 +54,19 @@ export interface ProductRow {
   usedIn: string[] | null;
 }
 
-export async function productRanking(db: Db, user: AuthUser, period: Period, filters: StatsFilters, type: ProductType, by: RankBy) {
+export async function productRanking(
+  db: Db,
+  user: AuthUser,
+  period: Period,
+  filters: StatsFilters,
+  type: ProductType,
+  by: RankBy,
+) {
   const withCosts = can(user, "indicators.read");
   const categories = PRODUCT_TYPES[type].categories as readonly string[] | null;
-  const facts = (await loadFacts(db, user, period, filters)).filter((f) => !categories || categories.includes(f.category));
+  const facts = (await loadFacts(db, user, period, filters)).filter(
+    (f) => !categories || categories.includes(f.category),
+  );
   const groups = new Map<string, LossFact[]>();
   for (const f of facts) (groups.get(f.productKey) ?? groups.set(f.productKey, []).get(f.productKey)!).push(f);
 
@@ -66,7 +79,9 @@ export async function productRanking(db: Db, user: AuthUser, period: Period, fil
       .from(s.weekRecipeLines)
       .innerJoin(s.weekRecipes, eq(s.weekRecipes.id, s.weekRecipeLines.recipeId))
       .where(and(inArray(s.weekRecipeLines.componentSubRecipeId, subIds), isNotNull(s.weekRecipeLines.recipeId)));
-    for (const l of lines) if (l.subRecipeId) (usedBy.get(l.subRecipeId) ?? usedBy.set(l.subRecipeId, new Set()).get(l.subRecipeId)!).add(l.code);
+    for (const l of lines)
+      if (l.subRecipeId)
+        (usedBy.get(l.subRecipeId) ?? usedBy.set(l.subRecipeId, new Set()).get(l.subRecipeId)!).add(l.code);
   }
 
   const rows: ProductRow[] = rankGroups(facts, (f) => f.productKey, withCosts, by).map((g) => {
@@ -77,7 +92,10 @@ export async function productRanking(db: Db, user: AuthUser, period: Period, fil
     for (const f of list) if (f.weekSubRecipeId) for (const c of usedBy.get(f.weekSubRecipeId) ?? []) codes.add(c);
     return {
       key: g.key,
-      label: first.productCode && names.length > 1 ? `${first.productCode} (formule)` : productLabel(first.productName, first.productCode),
+      label:
+        first.productCode && names.length > 1
+          ? `${first.productCode} (formule)`
+          : productLabel(first.productName, first.productCode),
       category: first.category,
       names: names.length > 1 ? names.map((n) => productLabel(n, first.productCode)) : [],
       summary: g.summary,
@@ -89,7 +107,13 @@ export async function productRanking(db: Db, user: AuthUser, period: Period, fil
 }
 
 /** Classement des causes (§19.5) et totaux par destination. */
-export async function causeAndDestinationRanking(db: Db, user: AuthUser, period: Period, filters: StatsFilters, by: RankBy) {
+export async function causeAndDestinationRanking(
+  db: Db,
+  user: AuthUser,
+  period: Period,
+  filters: StatsFilters,
+  by: RankBy,
+) {
   const withCosts = can(user, "indicators.read");
   const facts = await loadFacts(db, user, period, filters);
   const causes = rankGroups(facts, (f) => f.causeId, withCosts, by).map((g) => {
@@ -99,13 +123,18 @@ export async function causeAndDestinationRanking(db: Db, user: AuthUser, period:
   });
   const totals = destinationTotals(facts);
   const names = totals.size
-    ? await db.select({ id: s.destinations.id, name: s.destinations.name }).from(s.destinations).where(inArray(s.destinations.id, [...totals.keys()]))
+    ? await db
+        .select({ id: s.destinations.id, name: s.destinations.name })
+        .from(s.destinations)
+        .where(inArray(s.destinations.id, [...totals.keys()]))
     : [];
   const nameOf = new Map(names.map((d) => [d.id, d.name]));
   const destinations = [...totals]
     .map(([id, t]) => ({ id, name: nameOf.get(id) ?? "—", ...t }))
     .sort((a, b) => b.foodKg - a.foodKg || b.events - a.events);
-  const zoneNames = new Map((await db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones)).map((z) => [z.id, z.name]));
+  const zoneNames = new Map(
+    (await db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones)).map((z) => [z.id, z.name]),
+  );
   return {
     withCosts,
     total: facts.length,

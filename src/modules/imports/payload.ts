@@ -50,15 +50,30 @@ const planSchema = z.object({
   groups: z
     .array(
       z.object({
-        codes: z.array(z.string().regex(/^[A-Z]{2}\d{2}$/)).min(1).max(20),
-        team: z.string().regex(/^[A-H]$/).nullable(),
+        codes: z
+          .array(z.string().regex(/^[A-Z]{2}\d{2}$/))
+          .min(1)
+          .max(20),
+        team: z
+          .string()
+          .regex(/^[A-H]$/)
+          .nullable(),
         barquettes: finite.nullable(),
         block: z.enum(["plats", "petits_dejeuners"]),
         row: z.number().int(),
       }),
     )
     .max(200),
-  volumes: z.array(z.object({ code: z.string().regex(/^[A-Z]{2}\d{2}$/), weekBarquettes: finite, firstDayBarquettes: finite, row: z.number().int() })).max(500),
+  volumes: z
+    .array(
+      z.object({
+        code: z.string().regex(/^[A-Z]{2}\d{2}$/),
+        weekBarquettes: finite,
+        firstDayBarquettes: finite,
+        row: z.number().int(),
+      }),
+    )
+    .max(500),
   anomalies: z.array(z.string().max(500)).max(1000),
 });
 

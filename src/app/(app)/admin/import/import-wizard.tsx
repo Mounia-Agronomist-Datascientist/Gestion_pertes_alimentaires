@@ -9,7 +9,11 @@ import { type TomeParseResult, parseTome } from "@/modules/imports/tome/parse-to
 import { Feedback } from "../feedback";
 import { type ImportActionState, importWeekAction } from "./actions";
 
-type Loading<T> = { status: "idle" } | { status: "reading"; fileName: string } | { status: "error"; message: string } | ({ status: "ready"; fileName: string } & T);
+type Loading<T> =
+  | { status: "idle" }
+  | { status: "reading"; fileName: string }
+  | { status: "error"; message: string }
+  | ({ status: "ready"; fileName: string } & T);
 
 const WEEK_SHEET = /^S\d{2}(\d{2})?$/;
 
@@ -62,7 +66,11 @@ export function ImportWizard({ existing }: { existing: { year: number; week: num
     try {
       const { openWorkbook } = await import("@/modules/imports/plan/read-workbook");
       opened.current = await openWorkbook(new Uint8Array(await file.arrayBuffer()));
-      setWorkbook({ status: "ready", fileName: file.name, sheetNames: opened.current.sheetNames.filter((n) => WEEK_SHEET.test(n)) });
+      setWorkbook({
+        status: "ready",
+        fileName: file.name,
+        sheetNames: opened.current.sheetNames.filter((n) => WEEK_SHEET.test(n)),
+      });
       await autoSelectSheet();
     } catch {
       opened.current = null;
@@ -70,7 +78,10 @@ export function ImportWizard({ existing }: { existing: { year: number; week: num
     }
   };
 
-  const preview = useMemo(() => (tome.status === "ready" && plan ? buildWeekImport(tome.result, plan) : null), [tome, plan]);
+  const preview = useMemo(
+    () => (tome.status === "ready" && plan ? buildWeekImport(tome.result, plan) : null),
+    [tome, plan],
+  );
   const replaces = preview && existing.find((e) => e.year === preview.year && e.week === preview.week);
   const byTeam = useMemo(() => {
     const teams = new Map<string, NonNullable<typeof preview>["recipes"]>();
@@ -80,15 +91,29 @@ export function ImportWizard({ existing }: { existing: { year: number; week: num
 
   const payload =
     preview && tome.status === "ready" && workbook.status === "ready" && plan
-      ? JSON.stringify({ tome: tome.result, plan, tomeFileName: tome.fileName, planFileName: workbook.fileName, planSheetName: sheet })
+      ? JSON.stringify({
+          tome: tome.result,
+          plan,
+          tomeFileName: tome.fileName,
+          planFileName: workbook.fileName,
+          planSheetName: sheet,
+        })
       : "";
 
   return (
     <div className="flex flex-col gap-4">
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="text-lg font-semibold">1. Tome Melba (PDF)</h2>
-        <input type="file" accept="application/pdf,.pdf" onChange={(e) => onTome(e.target.files?.[0])} className="text-base" aria-label="Tome Melba (PDF)" />
-        {tome.status === "reading" && <p className="text-slate-600">Lecture de « {tome.fileName} »… (quelques secondes)</p>}
+        <input
+          type="file"
+          accept="application/pdf,.pdf"
+          onChange={(e) => onTome(e.target.files?.[0])}
+          className="text-base"
+          aria-label="Tome Melba (PDF)"
+        />
+        {tome.status === "reading" && (
+          <p className="text-slate-600">Lecture de « {tome.fileName} »… (quelques secondes)</p>
+        )}
         {tome.status === "error" && <p className="text-red-800">{tome.message}</p>}
         {tome.status === "ready" && (
           <p className="text-slate-700">
@@ -127,7 +152,9 @@ export function ImportWizard({ existing }: { existing: { year: number; week: num
 
       {preview && (
         <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-          <h2 className="text-lg font-semibold">3. Aperçu {preview.week != null && `— S${preview.week}-${preview.year}`}</h2>
+          <h2 className="text-lg font-semibold">
+            3. Aperçu {preview.week != null && `— S${preview.week}-${preview.year}`}
+          </h2>
           {preview.errors.map((e) => (
             <p key={e} role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">
               {e}
@@ -136,7 +163,8 @@ export function ImportWizard({ existing }: { existing: { year: number; week: num
           {preview.warnings.length > 0 && (
             <details className="rounded-xl bg-amber-50 p-3 text-amber-950" open={preview.warnings.length <= 5}>
               <summary className="cursor-pointer font-medium">
-                {preview.warnings.length} point{preview.warnings.length > 1 ? "s" : ""} à vérifier (n&apos;empêche pas l&apos;import)
+                {preview.warnings.length} point{preview.warnings.length > 1 ? "s" : ""} à vérifier (n&apos;empêche pas
+                l&apos;import)
               </summary>
               <ul className="mt-2 list-disc pl-5 text-sm">
                 {preview.warnings.map((w) => (
@@ -167,8 +195,8 @@ export function ImportWizard({ existing }: { existing: { year: number; week: num
           </ul>
           {replaces && (
             <p className="rounded-xl bg-amber-50 p-3 text-amber-950">
-              Cette semaine est déjà importée (version {replaces.version}) : la nouvelle version la remplacera, l&apos;ancienne
-              reste conservée.
+              Cette semaine est déjà importée (version {replaces.version}) : la nouvelle version la remplacera,
+              l&apos;ancienne reste conservée.
             </p>
           )}
           <form action={action} className="flex flex-col gap-2">

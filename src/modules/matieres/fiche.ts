@@ -23,7 +23,11 @@ export async function productSheet(db: Db, admin: AuthUser, productId: string, t
   if (!product) return null;
   const [category, packagings, manualPackagings, prices, orderLines] = await Promise.all([
     product.materialCategoryId
-      ? db.select().from(s.materialCategories).where(eq(s.materialCategories.id, product.materialCategoryId)).then((r) => r[0] ?? null)
+      ? db
+          .select()
+          .from(s.materialCategories)
+          .where(eq(s.materialCategories.id, product.materialCategoryId))
+          .then((r) => r[0] ?? null)
       : Promise.resolve(null),
     db
       .select({
@@ -97,7 +101,14 @@ export async function productSheet(db: Db, admin: AuthUser, productId: string, t
 /** Catégories Melba et sous-zones de Stockage (choix de la fiche). */
 export async function placementChoices(db: Db) {
   const [categories, subzones] = await Promise.all([
-    db.select({ id: s.materialCategories.id, name: s.materialCategories.name, storageSubzoneId: s.materialCategories.storageSubzoneId }).from(s.materialCategories).orderBy(asc(s.materialCategories.name)),
+    db
+      .select({
+        id: s.materialCategories.id,
+        name: s.materialCategories.name,
+        storageSubzoneId: s.materialCategories.storageSubzoneId,
+      })
+      .from(s.materialCategories)
+      .orderBy(asc(s.materialCategories.name)),
     db
       .select({ id: s.subzones.id, name: s.subzones.name })
       .from(s.subzones)
@@ -122,14 +133,20 @@ export async function setProductPlacement(db: Db, admin: AuthUser, productId: st
   const [before] = await db.select().from(s.products).where(eq(s.products.id, productId));
   if (!before) throw new ProductSheetError("Produit introuvable.");
   if (materialCategoryId) {
-    const [c] = await db.select({ id: s.materialCategories.id }).from(s.materialCategories).where(eq(s.materialCategories.id, materialCategoryId));
+    const [c] = await db
+      .select({ id: s.materialCategories.id })
+      .from(s.materialCategories)
+      .where(eq(s.materialCategories.id, materialCategoryId));
     if (!c) throw new ProductSheetError("Catégorie inconnue.");
   }
   if (storageSubzoneId && !(await placementChoices(db)).subzones.some((z) => z.id === storageSubzoneId)) {
     throw new ProductSheetError("Lieu de stockage inconnu.");
   }
   if (before.materialCategoryId === materialCategoryId && before.storageSubzoneId === storageSubzoneId) return false;
-  await db.update(s.products).set({ materialCategoryId, storageSubzoneId, updatedAt: new Date() }).where(eq(s.products.id, productId));
+  await db
+    .update(s.products)
+    .set({ materialCategoryId, storageSubzoneId, updatedAt: new Date() })
+    .where(eq(s.products.id, productId));
   await writeAudit(db, {
     userId: admin.id,
     action: "set_product_placement",
@@ -143,7 +160,11 @@ export async function setProductPlacement(db: Db, admin: AuthUser, productId: st
 
 const euro = z.preprocess(
   (v) => (v === "" || v == null ? null : typeof v === "string" ? Number(v.replace(",", ".").replace(/\s/g, "")) : v),
-  z.number({ message: "Prix invalide" }).positive("Le prix doit être positif").max(100_000, "Prix trop élevé").nullable(),
+  z
+    .number({ message: "Prix invalide" })
+    .positive("Le prix doit être positif")
+    .max(100_000, "Prix trop élevé")
+    .nullable(),
 );
 
 const manualPriceSchema = z
@@ -175,7 +196,13 @@ export async function addManualPrice(db: Db, admin: AuthUser, productId: string,
   const [same] = await db
     .select({ id: s.productPrices.id })
     .from(s.productPrices)
-    .where(and(eq(s.productPrices.productId, productId), eq(s.productPrices.source, "manuel"), eq(s.productPrices.validFrom, p.validFrom)));
+    .where(
+      and(
+        eq(s.productPrices.productId, productId),
+        eq(s.productPrices.source, "manuel"),
+        eq(s.productPrices.validFrom, p.validFrom),
+      ),
+    );
   if (same) throw new ProductSheetError("Un prix saisi à la main existe déjà à cette date : retirez-le d'abord.");
   const [created] = await db
     .insert(s.productPrices)
@@ -189,7 +216,13 @@ export async function addManualPrice(db: Db, admin: AuthUser, productId: string,
       createdBy: admin.id,
     })
     .returning();
-  await writeAudit(db, { userId: admin.id, action: "add_manual_price", entity: "product_price", entityId: created!.id, after: created });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "add_manual_price",
+    entity: "product_price",
+    entityId: created!.id,
+    after: created,
+  });
   return created!;
 }
 
@@ -200,11 +233,20 @@ export async function addManualPrice(db: Db, admin: AuthUser, productId: string,
 export async function removeManualPrice(db: Db, admin: AuthUser, productId: string, priceId: string) {
   requirePermission(admin, "referentiel.manage");
   if (!z.uuid().safeParse(priceId).success) throw new ProductSheetError("Prix introuvable.");
-  const [price] = await db.select().from(s.productPrices).where(and(eq(s.productPrices.id, priceId), eq(s.productPrices.productId, productId)));
+  const [price] = await db
+    .select()
+    .from(s.productPrices)
+    .where(and(eq(s.productPrices.id, priceId), eq(s.productPrices.productId, productId)));
   if (!price) throw new ProductSheetError("Prix introuvable.");
   if (price.source !== "manuel") throw new ProductSheetError("Seul un prix saisi à la main peut être retiré.");
   await db.delete(s.productPrices).where(eq(s.productPrices.id, priceId));
-  await writeAudit(db, { userId: admin.id, action: "remove_manual_price", entity: "product_price", entityId: priceId, before: price });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "remove_manual_price",
+    entity: "product_price",
+    entityId: priceId,
+    before: price,
+  });
 }
 
 // ─── Fournisseurs ──────────────────────────────────────────────────────────────
@@ -215,16 +257,25 @@ export async function listSuppliers(db: Db, admin: AuthUser) {
   const [suppliers, orders, fromOrders, fromManual] = await Promise.all([
     db.select().from(s.suppliers).orderBy(asc(s.suppliers.name)),
     db
-      .select({ supplierId: s.purchaseOrders.supplierId, orders: count(), lastDelivery: max(s.purchaseOrders.deliveryDate) })
+      .select({
+        supplierId: s.purchaseOrders.supplierId,
+        orders: count(),
+        lastDelivery: max(s.purchaseOrders.deliveryDate),
+      })
       .from(s.purchaseOrders)
       .groupBy(s.purchaseOrders.supplierId),
-    db.select({ supplierId: s.supplierProducts.supplierId, productId: s.supplierProducts.productId }).from(s.supplierProducts),
-    db.select({ supplierId: s.manualPackagings.supplierId, productId: s.manualPackagings.productId }).from(s.manualPackagings),
+    db
+      .select({ supplierId: s.supplierProducts.supplierId, productId: s.supplierProducts.productId })
+      .from(s.supplierProducts),
+    db
+      .select({ supplierId: s.manualPackagings.supplierId, productId: s.manualPackagings.productId })
+      .from(s.manualPackagings),
   ]);
   const ordersOf = new Map(orders.map((o) => [o.supplierId, o]));
   // Matières d'un fournisseur : commandées dans ses bons ou avec un colis saisi à la main, une fois chacune.
   const productsOf = new Map<string, Set<string>>();
-  for (const r of [...fromOrders, ...fromManual]) productsOf.set(r.supplierId, (productsOf.get(r.supplierId) ?? new Set()).add(r.productId));
+  for (const r of [...fromOrders, ...fromManual])
+    productsOf.set(r.supplierId, (productsOf.get(r.supplierId) ?? new Set()).add(r.productId));
   const materialsOf = new Map([...productsOf].map(([id, set]) => [id, set.size]));
   return suppliers.map((x) => ({
     id: x.id,
@@ -244,17 +295,30 @@ export async function renameSupplier(db: Db, admin: AuthUser, supplierId: string
   if (!before) throw new ProductSheetError("Fournisseur introuvable.");
   if (before.name === name.data) return;
   await db.update(s.suppliers).set({ name: name.data, updatedAt: new Date() }).where(eq(s.suppliers.id, supplierId));
-  await writeAudit(db, { userId: admin.id, action: "rename_supplier", entity: "supplier", entityId: supplierId, before: { name: before.name }, after: { name: name.data } });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "rename_supplier",
+    entity: "supplier",
+    entityId: supplierId,
+    before: { name: before.name },
+    after: { name: name.data },
+  });
 }
 
 /** Fournisseurs de chaque produit (filtre de la liste des produits). */
 export async function suppliersByProduct(db: Db) {
   const rows = await Promise.all([
-    db.select({ productId: s.supplierProducts.productId, supplierId: s.supplierProducts.supplierId }).from(s.supplierProducts),
-    db.select({ productId: s.manualPackagings.productId, supplierId: s.manualPackagings.supplierId }).from(s.manualPackagings),
+    db
+      .select({ productId: s.supplierProducts.productId, supplierId: s.supplierProducts.supplierId })
+      .from(s.supplierProducts),
+    db
+      .select({ productId: s.manualPackagings.productId, supplierId: s.manualPackagings.supplierId })
+      .from(s.manualPackagings),
   ]);
   const map = new Map<string, string[]>();
-  for (const r of rows.flat()) if (!map.get(r.productId)?.includes(r.supplierId)) map.set(r.productId, [...(map.get(r.productId) ?? []), r.supplierId]);
+  for (const r of rows.flat())
+    if (!map.get(r.productId)?.includes(r.supplierId))
+      map.set(r.productId, [...(map.get(r.productId) ?? []), r.supplierId]);
   return map;
 }
 
@@ -280,13 +344,18 @@ const manualPackagingSchema = z
     supplierCode: optionalShortText(60),
     packagingLabel: z.string().trim().min(2, "Décrivez le colis (ex. carton de 6, sac de 10 kg).").max(120),
     contentQuantity: z.preprocess(
-      (v) => (v === "" || v == null ? null : typeof v === "string" ? Number(v.replace(",", ".").replace(/\s/g, "")) : v),
+      (v) =>
+        v === "" || v == null ? null : typeof v === "string" ? Number(v.replace(",", ".").replace(/\s/g, "")) : v,
       z.number({ message: "Contenu invalide" }).positive("Le contenu doit être positif").nullable(),
     ),
     contentUnit: z.enum(PACKAGING_CONTENT_UNITS).nullable().optional(),
   })
-  .refine((p) => p.supplierId || (p.newSupplier && p.newSupplier.length >= 2), { message: "Choisissez le fournisseur ou tapez son nom." })
-  .refine((p) => (p.contentQuantity == null) === (p.contentUnit == null), { message: "Indiquez le contenu et son unité, ou ni l'un ni l'autre." });
+  .refine((p) => p.supplierId || (p.newSupplier && p.newSupplier.length >= 2), {
+    message: "Choisissez le fournisseur ou tapez son nom.",
+  })
+  .refine((p) => (p.contentQuantity == null) === (p.contentUnit == null), {
+    message: "Indiquez le contenu et son unité, ou ni l'un ni l'autre.",
+  });
 
 /**
  * Colis saisi à la main pour un produit chez un fournisseur : ajouté, ou remplacé s'il existe déjà pour ce
@@ -312,7 +381,13 @@ export async function saveManualPackaging(db: Db, admin: AuthUser, productId: st
       if (existing) supplierId = existing.id;
       else {
         const [created] = await tx.insert(s.suppliers).values({ name: p.newSupplier!, key }).returning();
-        await writeAudit(tx, { userId: admin.id, action: "create", entity: "supplier", entityId: created!.id, after: { name: created!.name } });
+        await writeAudit(tx, {
+          userId: admin.id,
+          action: "create",
+          entity: "supplier",
+          entityId: created!.id,
+          after: { name: created!.name },
+        });
         supplierId = created!.id;
       }
     }
@@ -327,9 +402,23 @@ export async function saveManualPackaging(db: Db, admin: AuthUser, productId: st
       .from(s.manualPackagings)
       .where(and(eq(s.manualPackagings.productId, productId), eq(s.manualPackagings.supplierId, supplierId)));
     const [saved] = before
-      ? await tx.update(s.manualPackagings).set({ ...values, updatedAt: new Date() }).where(eq(s.manualPackagings.id, before.id)).returning()
-      : await tx.insert(s.manualPackagings).values({ productId, supplierId, ...values, createdBy: admin.id }).returning();
-    await writeAudit(tx, { userId: admin.id, action: before ? "update" : "create", entity: "manual_packaging", entityId: saved!.id, before: before ?? null, after: saved });
+      ? await tx
+          .update(s.manualPackagings)
+          .set({ ...values, updatedAt: new Date() })
+          .where(eq(s.manualPackagings.id, before.id))
+          .returning()
+      : await tx
+          .insert(s.manualPackagings)
+          .values({ productId, supplierId, ...values, createdBy: admin.id })
+          .returning();
+    await writeAudit(tx, {
+      userId: admin.id,
+      action: before ? "update" : "create",
+      entity: "manual_packaging",
+      entityId: saved!.id,
+      before: before ?? null,
+      after: saved,
+    });
     return { packaging: saved!, replaced: before != null };
   });
 }
@@ -344,7 +433,13 @@ export async function removeManualPackaging(db: Db, admin: AuthUser, productId: 
     .where(and(eq(s.manualPackagings.id, packagingId), eq(s.manualPackagings.productId, productId)));
   if (!before) throw new ProductSheetError("Colis introuvable.");
   await db.delete(s.manualPackagings).where(eq(s.manualPackagings.id, packagingId));
-  await writeAudit(db, { userId: admin.id, action: "delete", entity: "manual_packaging", entityId: packagingId, before });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "delete",
+    entity: "manual_packaging",
+    entityId: packagingId,
+    before,
+  });
 }
 
 /** Fournisseurs proposés pour un colis saisi. */

@@ -12,7 +12,11 @@ export default async function CausesPage() {
   const admin = await requireUser();
   const [causes, zones] = await Promise.all([
     listCausesForAdmin(db, admin),
-    db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones).where(eq(s.zones.active, true)).orderBy(asc(s.zones.displayOrder)),
+    db
+      .select({ id: s.zones.id, name: s.zones.name })
+      .from(s.zones)
+      .where(eq(s.zones.active, true))
+      .orderBy(asc(s.zones.displayOrder)),
   ]);
   return (
     <>

@@ -9,7 +9,11 @@ export function CancelForm({ id, revision }: { id: string; revision: number }) {
 
   if (!open) {
     return (
-      <button type="button" className="min-h-14 rounded-xl border-2 border-red-700 px-4 text-lg font-semibold text-red-800" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="min-h-14 rounded-xl border-2 border-red-700 px-4 text-lg font-semibold text-red-800"
+        onClick={() => setOpen(true)}
+      >
         Annuler cette déclaration
       </button>
     );
@@ -31,10 +35,18 @@ export function CancelForm({ id, revision }: { id: string; revision: number }) {
         </p>
       )}
       <div className="flex gap-2">
-        <button type="submit" disabled={pending} className="min-h-12 flex-1 rounded-xl bg-red-700 px-4 font-semibold text-white">
+        <button
+          type="submit"
+          disabled={pending}
+          className="min-h-12 flex-1 rounded-xl bg-red-700 px-4 font-semibold text-white"
+        >
           {pending ? "Annulation…" : "Confirmer l'annulation"}
         </button>
-        <button type="button" className="min-h-12 rounded-xl px-4 font-medium text-slate-700" onClick={() => setOpen(false)}>
+        <button
+          type="button"
+          className="min-h-12 rounded-xl px-4 font-medium text-slate-700"
+          onClick={() => setOpen(false)}
+        >
           Retour
         </button>
       </div>

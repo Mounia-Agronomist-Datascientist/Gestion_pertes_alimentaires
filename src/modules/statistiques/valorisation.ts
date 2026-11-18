@@ -19,11 +19,20 @@ export interface RecoveryWeek {
   groups: Record<(typeof RECOVERY_GROUPS)[number]["key"], RecoveryTotals>;
 }
 
-export async function recoveryDashboard(db: Db, user: AuthUser, period: Period, anchor: { year: number; number: number } | null, filters: StatsFilters) {
+export async function recoveryDashboard(
+  db: Db,
+  user: AuthUser,
+  period: Period,
+  anchor: { year: number; number: number } | null,
+  filters: StatsFilters,
+) {
   const withCosts = can(user, "indicators.read");
   const [facts, destinations, weeks] = await Promise.all([
     loadFacts(db, user, period, filters),
-    db.select({ id: s.destinations.id, name: s.destinations.name }).from(s.destinations).orderBy(asc(s.destinations.displayOrder)),
+    db
+      .select({ id: s.destinations.id, name: s.destinations.name })
+      .from(s.destinations)
+      .orderBy(asc(s.destinations.displayOrder)),
     anchor ? recentWeeks(db, anchor, 12) : Promise.resolve(null),
   ]);
   const nameOf = new Map(destinations.map((d) => [d.id, d.name]));
@@ -31,10 +40,21 @@ export async function recoveryDashboard(db: Db, user: AuthUser, period: Period, 
 
   let series: RecoveryWeek[] = [];
   if (weeks?.length) {
-    const weekFacts = await loadFacts(db, user, { kind: "periode", from: weeks[0]!.startDate, to: weeks.at(-1)!.endDate }, filters);
+    const weekFacts = await loadFacts(
+      db,
+      user,
+      { kind: "periode", from: weeks[0]!.startDate, to: weeks.at(-1)!.endDate },
+      filters,
+    );
     const byWeek = new Map<string, LossFact[]>();
-    for (const f of weekFacts) (byWeek.get(f.productionWeekId) ?? byWeek.set(f.productionWeekId, []).get(f.productionWeekId)!).push(f);
-    series = weeks.map((w) => ({ id: w.id, year: w.year, number: w.number, groups: recoverySummary(byWeek.get(w.id) ?? [], withCosts).groups }));
+    for (const f of weekFacts)
+      (byWeek.get(f.productionWeekId) ?? byWeek.set(f.productionWeekId, []).get(f.productionWeekId)!).push(f);
+    series = weeks.map((w) => ({
+      id: w.id,
+      year: w.year,
+      number: w.number,
+      groups: recoverySummary(byWeek.get(w.id) ?? [], withCosts).groups,
+    }));
   }
 
   return {

@@ -31,7 +31,11 @@ describe("lecture du tome Melba S45", () => {
   });
 
   it("recolle un nom écrit sur plusieurs lignes autour de sa quantité, et les ligatures (« fl »)", () => {
-    expect(recipe("VI02").lines[0]).toMatchObject({ label: "Cuisson longue 5h45: Sauté de porc au thym (sous recette)", quantity: 70, cost: 0.67 });
+    expect(recipe("VI02").lines[0]).toMatchObject({
+      label: "Cuisson longue 5h45: Sauté de porc au thym (sous recette)",
+      quantity: 70,
+      cost: 0.67,
+    });
     expect(recipe("VI03").name).toBe("Choutiflette");
     expect(recipe("VI03").lines[1]?.label).toBe("Appareil tartiflette Chou-fleur V2 (sous recette)");
   });
@@ -48,7 +52,12 @@ describe("lecture du tome Melba S45", () => {
   });
 
   it("garde le poids unitaire indiqué par Melba et ignore les consignes glissées dans les ingrédients", () => {
-    expect(recipe("EN02_EQ").lines[0]).toMatchObject({ quantity: 2, unit: "pot (125 g)", unitWeightG: 125, cost: 0.74 });
+    expect(recipe("EN02_EQ").lines[0]).toMatchObject({
+      quantity: 2,
+      unit: "pot (125 g)",
+      unitWeightG: 125,
+      cost: 0.74,
+    });
     expect(subRecipe("Grana padano poudre déco").lines.map((l) => l.label)).toEqual(["Grana Padano râpé AOP 28,4% MG"]);
   });
 
@@ -61,8 +70,19 @@ describe("lecture du tome Melba S45", () => {
 });
 
 describe("lecture du tome : anomalies et formats", () => {
-  const item = (page: number, x: number, y: number, size: number, text: string): PdfItem => ({ page, x, y, width: text.length * 4, size, text });
-  const table = (y: number) => [item(1, 40, y, 9, "Ingrédients"), item(1, 372, y, 9, "Unité"), item(1, 534, y, 9, "Coût")];
+  const item = (page: number, x: number, y: number, size: number, text: string): PdfItem => ({
+    page,
+    x,
+    y,
+    width: text.length * 4,
+    size,
+    text,
+  });
+  const table = (y: number) => [
+    item(1, 40, y, 9, "Ingrédients"),
+    item(1, 372, y, 9, "Unité"),
+    item(1, 534, y, 9, "Coût"),
+  ];
 
   it("signale une sous-recette non détaillée et des coûts incohérents, sans rien deviner", () => {
     const result = parseTome([
@@ -141,7 +161,12 @@ describe("lecture du tome : anomalies et formats", () => {
     ]);
     expect(result.anomalies).toEqual([]);
     const [r] = result.recipes;
-    expect(r).toMatchObject({ code: "VG02", recipeCount: 2792, portionWeightG: 312.2, total: { quantity: 0.3122, unit: "kg", cost: 0.3591 } });
+    expect(r).toMatchObject({
+      code: "VG02",
+      recipeCount: 2792,
+      portionWeightG: 312.2,
+      total: { quantity: 0.3122, unit: "kg", cost: 0.3591 },
+    });
     expect(r!.lines.map((l) => [l.quantity, l.cost])).toEqual([
       [0.125, 0.0329],
       [70, 0.3262],

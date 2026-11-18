@@ -27,13 +27,20 @@ export async function listIngredientsForMapping(db: Db, admin: AuthUser): Promis
   requirePermission(admin, "referentiel.manage");
   const [used, mappings, families] = await Promise.all([
     db
-      .select({ key: s.weekRecipeLines.key, label: sql<string>`max(${s.weekRecipeLines.label})`, uses: sql<number>`count(*)::int` })
+      .select({
+        key: s.weekRecipeLines.key,
+        label: sql<string>`max(${s.weekRecipeLines.label})`,
+        uses: sql<number>`count(*)::int`,
+      })
       .from(s.weekRecipeLines)
       .innerJoin(s.weeklyImports, eq(s.weeklyImports.id, s.weekRecipeLines.importId))
       .where(and(eq(s.weeklyImports.status, "validee"), eq(s.weekRecipeLines.isSubRecipe, false)))
       .groupBy(s.weekRecipeLines.key),
     db.select().from(s.ingredientFamilies),
-    db.select({ id: s.foodFamilies.id, code: s.foodFamilies.code }).from(s.foodFamilies).where(eq(s.foodFamilies.active, true)),
+    db
+      .select({ id: s.foodFamilies.id, code: s.foodFamilies.code })
+      .from(s.foodFamilies)
+      .where(eq(s.foodFamilies.active, true)),
   ]);
   const familyOf = new Map(families.map((f) => [f.code, f.id]));
   const mappingOf = new Map(mappings.map((m) => [m.ingredientKey, m]));
@@ -47,7 +54,12 @@ export async function listIngredientsForMapping(db: Db, admin: AuthUser): Promis
       uses,
       mapping: m ? { status: m.status, familyId: m.familyId, decidedAt: m.decidedAt } : null,
       // Une suggestion vers une famille absente (proposition non chargée) n'est pas proposée.
-      suggestion: suggestion?.kind === "famille" ? (familyOf.has(suggestion.code) ? { ...suggestion, familyId: familyOf.get(suggestion.code) } : null) : suggestion,
+      suggestion:
+        suggestion?.kind === "famille"
+          ? familyOf.has(suggestion.code)
+            ? { ...suggestion, familyId: familyOf.get(suggestion.code) }
+            : null
+          : suggestion,
     });
   };
   for (const u of used) add(u.key, u.label, u.uses);
@@ -67,7 +79,12 @@ const entrySchema = z
 export type IngredientMappingInput = z.input<typeof entrySchema>;
 
 /** Enregistre des rattachements (nouveaux ou modifiés), chacun tracé dans le journal. */
-export async function saveIngredientMappings(db: Db, admin: AuthUser, raw: readonly IngredientMappingInput[], now = new Date()) {
+export async function saveIngredientMappings(
+  db: Db,
+  admin: AuthUser,
+  raw: readonly IngredientMappingInput[],
+  now = new Date(),
+) {
   requirePermission(admin, "referentiel.manage");
   const parsed = z.array(entrySchema).max(1000).safeParse(raw);
   if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Saisie invalide");
@@ -75,12 +92,25 @@ export async function saveIngredientMappings(db: Db, admin: AuthUser, raw: reado
   if (!entries.length) return 0;
   const familyIds = [...new Set(entries.map((e) => e.familyId).filter((id): id is string => id != null))];
   if (familyIds.length) {
-    const found = await db.select({ id: s.foodFamilies.id }).from(s.foodFamilies).where(inArray(s.foodFamilies.id, familyIds));
+    const found = await db
+      .select({ id: s.foodFamilies.id })
+      .from(s.foodFamilies)
+      .where(inArray(s.foodFamilies.id, familyIds));
     if (found.length !== familyIds.length) throw new AdminError("Famille introuvable : rechargez la page");
   }
   return db.transaction(async (tx) => {
     const before = new Map(
-      (await tx.select().from(s.ingredientFamilies).where(inArray(s.ingredientFamilies.ingredientKey, entries.map((e) => e.key)))).map((m) => [m.ingredientKey, m]),
+      (
+        await tx
+          .select()
+          .from(s.ingredientFamilies)
+          .where(
+            inArray(
+              s.ingredientFamilies.ingredientKey,
+              entries.map((e) => e.key),
+            ),
+          )
+      ).map((m) => [m.ingredientKey, m]),
     );
     let changed = 0;
     for (const e of entries) {

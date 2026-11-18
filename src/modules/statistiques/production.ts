@@ -31,11 +31,20 @@ interface Recipe {
 }
 
 /** Additionne des lignes (semaine, barquettes, plat) en volumes par semaine. */
-function accumulate(lines: Iterable<{ weekId: string; barquettes: number; recipe: Recipe | undefined }>): Map<string, PlannedVolume> {
-  const acc = new Map<string, { barquettes: number; kg: number; weighed: number; noWeight: number; cost: number; costed: number; noCost: number }>();
+function accumulate(
+  lines: Iterable<{ weekId: string; barquettes: number; recipe: Recipe | undefined }>,
+): Map<string, PlannedVolume> {
+  const acc = new Map<
+    string,
+    { barquettes: number; kg: number; weighed: number; noWeight: number; cost: number; costed: number; noCost: number }
+  >();
   for (const l of lines) {
     if (!l.barquettes) continue;
-    const v = acc.get(l.weekId) ?? acc.set(l.weekId, { barquettes: 0, kg: 0, weighed: 0, noWeight: 0, cost: 0, costed: 0, noCost: 0 }).get(l.weekId)!;
+    const v =
+      acc.get(l.weekId) ??
+      acc
+        .set(l.weekId, { barquettes: 0, kg: 0, weighed: 0, noWeight: 0, cost: 0, costed: 0, noCost: 0 })
+        .get(l.weekId)!;
     v.barquettes += l.barquettes;
     const grams = l.recipe?.portionWeightG ?? l.recipe?.totalWeightG;
     if (grams) {
@@ -84,7 +93,11 @@ async function weekRecipes(db: Db, weekIds: readonly string[]) {
 }
 
 /** Volume prévu par semaine (clé : id de la semaine), éventuellement pour une seule équipe. */
-export async function plannedVolumes(db: Db, weekIds: readonly string[], teamId?: string | null): Promise<Map<string, PlannedVolume>> {
+export async function plannedVolumes(
+  db: Db,
+  weekIds: readonly string[],
+  teamId?: string | null,
+): Promise<Map<string, PlannedVolume>> {
   if (!weekIds.length) return new Map();
   const rows = (await weekRecipes(db, weekIds)).filter((r) => !teamId || r.teamId === teamId);
   return accumulate(rows.map((r) => ({ weekId: r.weekId, barquettes: r.barquettes ?? 0, recipe: r })));
@@ -95,11 +108,19 @@ export async function plannedVolumes(db: Db, weekIds: readonly string[], teamId?
  * d'une portion de chaque code viennent de l'import de la même semaine ; un code absent de l'import compte dans
  * le total toutes équipes, mais ni dans une équipe, ni dans les kg, ni dans le coût (signalé).
  */
-export async function actualVolumes(db: Db, weekIds: readonly string[], teamId?: string | null): Promise<Map<string, PlannedVolume>> {
+export async function actualVolumes(
+  db: Db,
+  weekIds: readonly string[],
+  teamId?: string | null,
+): Promise<Map<string, PlannedVolume>> {
   if (!weekIds.length) return new Map();
   const [lines, recipes] = await Promise.all([
     db
-      .select({ weekId: s.productionCounts.productionWeekId, code: s.productionCountLines.code, made: s.productionCountLines.madeBarquettes })
+      .select({
+        weekId: s.productionCounts.productionWeekId,
+        code: s.productionCountLines.code,
+        made: s.productionCountLines.madeBarquettes,
+      })
       .from(s.productionCountLines)
       .innerJoin(s.productionCounts, eq(s.productionCounts.id, s.productionCountLines.countId))
       .where(and(inArray(s.productionCounts.productionWeekId, [...weekIds]), eq(s.productionCounts.status, "validee"))),

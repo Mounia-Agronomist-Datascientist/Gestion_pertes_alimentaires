@@ -36,7 +36,10 @@ describe("alerte « rien de noté »", () => {
     condCause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "CON_SCELLAGE")))[0]!.id;
     compost = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
     const mk = async (login: string, roleCode: string, teamId?: string) =>
-      loadAuthUser(t.db, await createAccount(t.db, { login, displayName: login, roleCode, teamId, password: "mot-de-passe-test" }));
+      loadAuthUser(
+        t.db,
+        await createAccount(t.db, { login, displayName: login, roleCode, teamId, password: "mot-de-passe-test" }),
+      );
     teamC = await mk("equipe-c", "equipe", team.C);
     teamA = await mk("equipe-a", "equipe", team.A);
     admin = await mk("admin", "admin");
@@ -71,7 +74,10 @@ describe("alerte « rien de noté »", () => {
     t.db.select().from(s.missingDeclarationAlerts).where(eq(s.missingDeclarationAlerts.teamId, team[letter]!));
 
   it("n'évalue rien tant que la date de mise en service n'est pas fixée", async () => {
-    expect(await evaluateMissingDeclarations(t.db, { startDate: null, now: THURSDAY_S47 })).toEqual({ created: 0, regularized: 0 });
+    expect(await evaluateMissingDeclarations(t.db, { startDate: null, now: THURSDAY_S47 })).toEqual({
+      created: 0,
+      regularized: 0,
+    });
   });
 
   it("attribue 150 kg à chaque équipe sans déclaration sur une plage terminée, et seulement une fois", async () => {
@@ -80,7 +86,13 @@ describe("alerte « rien de noté »", () => {
     const again = await evaluateMissingDeclarations(t.db, { startDate: START, now: SATURDAY });
     expect(again.created).toBe(0);
     const [alert] = await alertsOf("C");
-    expect(alert).toMatchObject({ window: "jeudi_vendredi", firstDay: "2026-11-05", lastDay: "2026-11-06", estimatedKg: 150, status: "active" });
+    expect(alert).toMatchObject({
+      window: "jeudi_vendredi",
+      firstDay: "2026-11-05",
+      lastDay: "2026-11-06",
+      estimatedKg: 150,
+      status: "active",
+    });
   });
 
   it("ne contrôle pas une plage qui n'est pas terminée", async () => {
@@ -101,7 +113,11 @@ describe("alerte « rien de noté »", () => {
     const alerts = await alertsOf("E");
     expect(alerts.map((a) => a.window).sort()).toEqual(["jeudi_vendredi", "lundi_mercredi"]);
     expect(alerts.reduce((sum, a) => sum + a.estimatedKg, 0)).toBe(300);
-    expect(alerts.find((a) => a.window === "lundi_mercredi")?.missingDays).toEqual(["2026-11-09", "2026-11-10", "2026-11-11"]);
+    expect(alerts.find((a) => a.window === "lundi_mercredi")?.missingDays).toEqual([
+      "2026-11-09",
+      "2026-11-10",
+      "2026-11-11",
+    ]);
   });
 
   it("une perte saisie hors cuisine par le compte de l'équipe compte pour son jour", async () => {
@@ -115,7 +131,16 @@ describe("alerte « rien de noté »", () => {
     await evaluateMissingDeclarations(t.db, { startDate: START, now: SATURDAY });
     expect((await alertsOf("D"))[0]?.missingDays).toEqual(["2026-11-05", "2026-11-06"]);
 
-    const teamD = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-d", displayName: "equipe-d", roleCode: "equipe", teamId: team.D, password: "mot-de-passe-test" }));
+    const teamD = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-d",
+        displayName: "equipe-d",
+        roleCode: "equipe",
+        teamId: team.D,
+        password: "mot-de-passe-test",
+      }),
+    );
     await declare(teamD, "2026-11-05", new Date("2026-11-09T09:00:00Z"));
     await evaluateMissingDeclarations(t.db, { startDate: START, now: new Date("2026-11-09T10:00:00Z") });
     expect((await alertsOf("D"))[0]).toMatchObject({ status: "active", missingDays: ["2026-11-06"] });
@@ -127,8 +152,14 @@ describe("alerte « rien de noté »", () => {
   });
 
   it("ignore une équipe désactivée pour la semaine et les plages avant la mise en service", async () => {
-    const [s46] = await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 46)));
-    await t.db.insert(s.teamWeekStatus).values({ teamId: team.H!, productionWeekId: s46!.id, active: false }).onConflictDoNothing();
+    const [s46] = await t.db
+      .select()
+      .from(s.productionWeeks)
+      .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 46)));
+    await t.db
+      .insert(s.teamWeekStatus)
+      .values({ teamId: team.H!, productionWeekId: s46!.id, active: false })
+      .onConflictDoNothing();
     await evaluateMissingDeclarations(t.db, { startDate: START, now: SATURDAY });
     expect(await alertsOf("H")).toHaveLength(0);
     await t.db.delete(s.missingDeclarationAlerts);
@@ -146,7 +177,12 @@ describe("alerte « rien de noté »", () => {
     await evaluateMissingDeclarations(t.db, { startDate: START, now: new Date("2026-11-08T10:00:00Z") });
     await t.db.insert(s.missingDeclarationAlerts).values({
       teamId: team.C!,
-      productionWeekId: (await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45))))[0]!.id,
+      productionWeekId: (
+        await t.db
+          .select()
+          .from(s.productionWeeks)
+          .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)))
+      )[0]!.id,
       window: "lundi_mercredi",
       firstDay: "2026-11-02",
       lastDay: "2026-11-04",

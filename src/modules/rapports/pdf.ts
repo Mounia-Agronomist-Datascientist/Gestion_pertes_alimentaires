@@ -71,10 +71,27 @@ export class ReportPdf {
   private newPage() {
     this.page = this.doc.addPage([A4.width, A4.height]);
     const top = A4.height - MARGIN;
-    this.page.drawText("La Brigade de Véro — Suivi des pertes", { x: MARGIN, y: top, size: 8, font: this.font, color: MUTED });
+    this.page.drawText("La Brigade de Véro — Suivi des pertes", {
+      x: MARGIN,
+      y: top,
+      size: 8,
+      font: this.font,
+      color: MUTED,
+    });
     const right = pdfText(`${this.title} · ${this.subtitle}`);
-    this.page.drawText(right, { x: A4.width - MARGIN - this.font.widthOfTextAtSize(right, 8), y: top, size: 8, font: this.font, color: MUTED });
-    this.page.drawLine({ start: { x: MARGIN, y: top - 6 }, end: { x: A4.width - MARGIN, y: top - 6 }, thickness: 0.5, color: LINE });
+    this.page.drawText(right, {
+      x: A4.width - MARGIN - this.font.widthOfTextAtSize(right, 8),
+      y: top,
+      size: 8,
+      font: this.font,
+      color: MUTED,
+    });
+    this.page.drawLine({
+      start: { x: MARGIN, y: top - 6 },
+      end: { x: A4.width - MARGIN, y: top - 6 },
+      thickness: 0.5,
+      color: LINE,
+    });
     this.y = top - 24;
   }
 
@@ -160,10 +177,37 @@ export class ReportPdf {
       items.slice(i, i + perRow).forEach((item, j) => {
         const x = MARGIN + j * (width + gap);
         const top = this.y;
-        this.page.drawRectangle({ x, y: top - height, width, height, color: ZEBRA, borderColor: LINE, borderWidth: 0.5 });
-        this.page.drawText(this.fit(item.label, this.font, 8, width - 12), { x: x + 6, y: top - 13, size: 8, font: this.font, color: MUTED });
-        this.page.drawText(this.fit(item.value, this.bold, 13, width - 12), { x: x + 6, y: top - 31, size: 13, font: this.bold, color: INK });
-        if (item.note) this.page.drawText(this.fit(item.note, this.font, 7.5, width - 12), { x: x + 6, y: top - 45, size: 7.5, font: this.font, color: MUTED });
+        this.page.drawRectangle({
+          x,
+          y: top - height,
+          width,
+          height,
+          color: ZEBRA,
+          borderColor: LINE,
+          borderWidth: 0.5,
+        });
+        this.page.drawText(this.fit(item.label, this.font, 8, width - 12), {
+          x: x + 6,
+          y: top - 13,
+          size: 8,
+          font: this.font,
+          color: MUTED,
+        });
+        this.page.drawText(this.fit(item.value, this.bold, 13, width - 12), {
+          x: x + 6,
+          y: top - 31,
+          size: 13,
+          font: this.bold,
+          color: INK,
+        });
+        if (item.note)
+          this.page.drawText(this.fit(item.note, this.font, 7.5, width - 12), {
+            x: x + 6,
+            y: top - 45,
+            size: 7.5,
+            font: this.font,
+            color: MUTED,
+          });
       });
       this.y -= height + gap;
     }
@@ -177,7 +221,14 @@ export class ReportPdf {
     const rowHeight = ROW_HEIGHT;
     const drawRow = (cells: string[], font: PDFFont, background: ReturnType<typeof rgb> | null, color = INK) => {
       this.ensure(rowHeight);
-      if (background) this.page.drawRectangle({ x: MARGIN, y: this.y - rowHeight + 4, width: CONTENT_WIDTH, height: rowHeight, color: background });
+      if (background)
+        this.page.drawRectangle({
+          x: MARGIN,
+          y: this.y - rowHeight + 4,
+          width: CONTENT_WIDTH,
+          height: rowHeight,
+          color: background,
+        });
       let x = MARGIN;
       cells.forEach((cell, i) => {
         const w = widths[i]!;
@@ -195,7 +246,12 @@ export class ReportPdf {
         null,
         MUTED,
       );
-      this.page.drawLine({ start: { x: MARGIN, y: this.y + 4 }, end: { x: MARGIN + CONTENT_WIDTH, y: this.y + 4 }, thickness: 0.5, color: LINE });
+      this.page.drawLine({
+        start: { x: MARGIN, y: this.y + 4 },
+        end: { x: MARGIN + CONTENT_WIDTH, y: this.y + 4 },
+        thickness: 0.5,
+        color: LINE,
+      });
     };
     // Un tableau qui tient sur une page n'est pas coupé.
     const whole = (rows.length + (options.total ? 2 : 1)) * rowHeight + 8;
@@ -209,7 +265,12 @@ export class ReportPdf {
       drawRow(row, this.font, i % 2 ? ZEBRA : null);
     });
     if (options.total) {
-      this.page.drawLine({ start: { x: MARGIN, y: this.y + 4 }, end: { x: MARGIN + CONTENT_WIDTH, y: this.y + 4 }, thickness: 0.8, color: INK });
+      this.page.drawLine({
+        start: { x: MARGIN, y: this.y + 4 },
+        end: { x: MARGIN + CONTENT_WIDTH, y: this.y + 4 },
+        thickness: 0.8,
+        color: INK,
+      });
       drawRow(options.total, this.bold, null);
     }
     this.y -= 8;
@@ -224,13 +285,39 @@ export class ReportPdf {
     for (const r of rows) {
       const height = r.detail ? 24 : 16;
       this.ensure(height);
-      this.page.drawText(this.fit(r.label, this.font, 9, labelWidth - 6), { x: MARGIN, y: this.y - 8, size: 9, font: this.font, color: INK });
-      if (r.detail) this.page.drawText(this.fit(r.detail, this.font, 7.5, labelWidth - 6), { x: MARGIN, y: this.y - 18, size: 7.5, font: this.font, color: MUTED });
+      this.page.drawText(this.fit(r.label, this.font, 9, labelWidth - 6), {
+        x: MARGIN,
+        y: this.y - 8,
+        size: 9,
+        font: this.font,
+        color: INK,
+      });
+      if (r.detail)
+        this.page.drawText(this.fit(r.detail, this.font, 7.5, labelWidth - 6), {
+          x: MARGIN,
+          y: this.y - 18,
+          size: 7.5,
+          font: this.font,
+          color: MUTED,
+        });
       const bx = MARGIN + labelWidth;
       this.page.drawRectangle({ x: bx, y: this.y - 10, width: barWidth, height: 7, color: BAR_TRACK });
-      if (r.value > 0 && max > 0) this.page.drawRectangle({ x: bx, y: this.y - 10, width: Math.max(1, (r.value / max) * barWidth), height: 7, color: BAR });
+      if (r.value > 0 && max > 0)
+        this.page.drawRectangle({
+          x: bx,
+          y: this.y - 10,
+          width: Math.max(1, (r.value / max) * barWidth),
+          height: 7,
+          color: BAR,
+        });
       const text = pdfText(r.text);
-      this.page.drawText(text, { x: MARGIN + CONTENT_WIDTH - this.bold.widthOfTextAtSize(text, 9), y: this.y - 9, size: 9, font: this.bold, color: INK });
+      this.page.drawText(text, {
+        x: MARGIN + CONTENT_WIDTH - this.bold.widthOfTextAtSize(text, 9),
+        y: this.y - 9,
+        size: 9,
+        font: this.bold,
+        color: INK,
+      });
       this.y -= height;
     }
     this.y -= 6;
@@ -240,7 +327,13 @@ export class ReportPdf {
     const pages = this.doc.getPages();
     pages.forEach((page, i) => {
       const text = `Page ${i + 1} / ${pages.length}`;
-      page.drawText(text, { x: A4.width - MARGIN - this.font.widthOfTextAtSize(text, 8), y: MARGIN - 14, size: 8, font: this.font, color: MUTED });
+      page.drawText(text, {
+        x: A4.width - MARGIN - this.font.widthOfTextAtSize(text, 8),
+        y: MARGIN - 14,
+        size: 8,
+        font: this.font,
+        color: MUTED,
+      });
     });
     return this.doc.save();
   }

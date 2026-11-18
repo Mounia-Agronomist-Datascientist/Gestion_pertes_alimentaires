@@ -23,19 +23,25 @@ describe("table production_weeks", () => {
 
   it("refuse une semaine qui ne commence pas un jeudi", async () => {
     await expect(
-      testDb.db.insert(productionWeeks).values({ year: 2030, number: 10, startDate: "2030-03-04", endDate: "2030-03-10" }),
+      testDb.db
+        .insert(productionWeeks)
+        .values({ year: 2030, number: 10, startDate: "2030-03-04", endDate: "2030-03-10" }),
     ).rejects.toThrow();
   });
 
   it("refuse une semaine qui ne dure pas 7 jours", async () => {
     await expect(
-      testDb.db.insert(productionWeeks).values({ year: 2030, number: 10, startDate: "2030-03-07", endDate: "2030-03-14" }),
+      testDb.db
+        .insert(productionWeeks)
+        .values({ year: 2030, number: 10, startDate: "2030-03-07", endDate: "2030-03-14" }),
     ).rejects.toThrow();
   });
 
   it("refuse un doublon année/numéro", async () => {
     await expect(
-      testDb.db.insert(productionWeeks).values({ year: 2026, number: 46, startDate: "2030-03-07", endDate: "2030-03-13" }),
+      testDb.db
+        .insert(productionWeeks)
+        .values({ year: 2026, number: 46, startDate: "2030-03-07", endDate: "2030-03-13" }),
     ).rejects.toThrow();
   });
 });

@@ -51,9 +51,11 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
           week: { year: lossWeek.year, number: lossWeek.number },
           cost: {
             food: { perKgEur: d.costPerKgEur, perUnitEur: d.costPerUnitEur },
-            packagingPerPortionEur: (d.costDetails as { packagingPerPortionEur?: number | null } | null)?.packagingPerPortionEur ?? null,
+            packagingPerPortionEur:
+              (d.costDetails as { packagingPerPortionEur?: number | null } | null)?.packagingPerPortionEur ?? null,
             portionWeightKg: d.conversionFactorUsed,
-            packagingItself: (d.costDetails as { packagingItself?: UnitCost | null } | null)?.packagingItself ?? undefined,
+            packagingItself:
+              (d.costDetails as { packagingItself?: UnitCost | null } | null)?.packagingItself ?? undefined,
           },
         }
       : d.productId
@@ -64,14 +66,23 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     unitCode: useTare ? null : d.unitCode,
     useTare,
     grossKg: useTare ? String(d.quantity) : "",
-    gastroCounts: Object.fromEntries(detail.containers.filter((c) => c.kind === "gastro").map((c) => [c.containerTypeId, c.count])),
+    gastroCounts: Object.fromEntries(
+      detail.containers.filter((c) => c.kind === "gastro").map((c) => [c.containerTypeId, c.count]),
+    ),
     supportId: support?.containerTypeId ?? null,
     causeId: d.causeId,
-    destinationLines: detail.destinations.map((x) => ({ destinationId: x.destinationId, quantity: String(x.quantity) })),
+    destinationLines: detail.destinations.map((x) => ({
+      destinationId: x.destinationId,
+      quantity: String(x.quantity),
+    })),
     recoveredAmounts: Object.fromEntries(
-      detail.destinations.filter((x) => x.recoveredAmount != null).map((x) => [x.destinationId, String(x.recoveredAmount).replace(".", ",")]),
+      detail.destinations
+        .filter((x) => x.recoveredAmount != null)
+        .map((x) => [x.destinationId, String(x.recoveredAmount).replace(".", ",")]),
     ),
-    binNumbers: Object.fromEntries(detail.destinations.filter((x) => x.binNumber).map((x) => [x.destinationId, x.binNumber!])),
+    binNumbers: Object.fromEntries(
+      detail.destinations.filter((x) => x.binNumber).map((x) => [x.destinationId, x.binNumber!]),
+    ),
     justification: d.destinationGapJustification ?? "",
     occurredOn: d.occurredOn,
     occurredTime: d.occurredTime?.slice(0, 5) ?? "",
@@ -84,5 +95,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     toProductionLocalDate(new Date()),
     detail.destinations.map((x) => x.destinationId),
   );
-  return <DeclarationWizard options={options} userTeam={user.team} correction={{ id, revision: d.revision, initial }} />;
+  return (
+    <DeclarationWizard options={options} userTeam={user.team} correction={{ id, revision: d.revision, initial }} />
+  );
 }

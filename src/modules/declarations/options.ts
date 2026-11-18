@@ -13,10 +13,17 @@ import { type AuthUser, can } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
 /** Dernier n° de poubelle noté dans chaque zone, par destination (déclarations non annulées, plus récente d'abord). */
-export async function lastBinNumbers(db: Db, zoneIds: readonly string[]): Promise<Record<string, Record<string, string>>> {
+export async function lastBinNumbers(
+  db: Db,
+  zoneIds: readonly string[],
+): Promise<Record<string, Record<string, string>>> {
   if (!zoneIds.length) return {};
   const rows = await db
-    .select({ zoneId: s.lossDeclarations.zoneId, destinationId: s.declarationDestinations.destinationId, binNumber: s.declarationDestinations.binNumber })
+    .select({
+      zoneId: s.lossDeclarations.zoneId,
+      destinationId: s.declarationDestinations.destinationId,
+      binNumber: s.declarationDestinations.binNumber,
+    })
     .from(s.declarationDestinations)
     .innerJoin(s.lossDeclarations, eq(s.lossDeclarations.id, s.declarationDestinations.declarationId))
     .where(
@@ -41,37 +48,58 @@ export async function lastBinNumbers(db: Db, zoneIds: readonly string[]): Promis
  * `keepDestinationIds` : destinations déjà portées par la déclaration corrigée, gardées même si elles ne sont plus
  * proposées aux équipes.
  */
-export async function getDeclarationOptions(db: Db, user: AuthUser, today: LocalDate, keepDestinationIds: readonly string[] = []) {
+export async function getDeclarationOptions(
+  db: Db,
+  user: AuthUser,
+  today: LocalDate,
+  keepDestinationIds: readonly string[] = [],
+) {
   const limitedToOwnZones = can(user, "declaration.read.zone") && !can(user, "declaration.read.all");
 
-  const [zoneRows, subzoneRows, causeRows, causeZoneRows, causeSubzoneRows, destinationRows, unitRows, containerRows, productRows] =
-    await Promise.all([
-      db.select().from(s.zones).where(eq(s.zones.active, true)).orderBy(asc(s.zones.displayOrder)),
-      db.select().from(s.subzones).where(eq(s.subzones.active, true)).orderBy(asc(s.subzones.displayOrder)),
-      db.select().from(s.causes).where(eq(s.causes.status, "active")).orderBy(asc(s.causes.displayOrder)),
-      db.select().from(s.causeZones),
-      db.select().from(s.causeSubzones),
-      db
-        .select()
-        .from(s.destinations)
-        .where(and(eq(s.destinations.active, true), keepDestinationIds.length ? or(eq(s.destinations.declarable, true), inArray(s.destinations.id, [...keepDestinationIds])) : eq(s.destinations.declarable, true)))
-        .orderBy(asc(s.destinations.displayOrder)),
-      db.select().from(s.units).where(eq(s.units.active, true)).orderBy(asc(s.units.displayOrder)),
-      db
-        .select({ type: s.containerTypes, tare: s.containerTares })
-        .from(s.containerTypes)
-        .innerJoin(s.containerTares, eq(s.containerTares.containerTypeId, s.containerTypes.id))
-        .where(
-          and(
-            eq(s.containerTypes.active, true),
-            lte(s.containerTares.validFrom, today),
-            or(isNull(s.containerTares.validTo), gte(s.containerTares.validTo, today)),
-          ),
-        )
-        .orderBy(asc(s.containerTypes.displayOrder)),
-      // Référentiel saisi à la main ; les produits de la semaine viennent de `weekCatalogs`.
-      db.select().from(s.products).where(eq(s.products.active, true)).orderBy(asc(s.products.name)),
-    ]);
+  const [
+    zoneRows,
+    subzoneRows,
+    causeRows,
+    causeZoneRows,
+    causeSubzoneRows,
+    destinationRows,
+    unitRows,
+    containerRows,
+    productRows,
+  ] = await Promise.all([
+    db.select().from(s.zones).where(eq(s.zones.active, true)).orderBy(asc(s.zones.displayOrder)),
+    db.select().from(s.subzones).where(eq(s.subzones.active, true)).orderBy(asc(s.subzones.displayOrder)),
+    db.select().from(s.causes).where(eq(s.causes.status, "active")).orderBy(asc(s.causes.displayOrder)),
+    db.select().from(s.causeZones),
+    db.select().from(s.causeSubzones),
+    db
+      .select()
+      .from(s.destinations)
+      .where(
+        and(
+          eq(s.destinations.active, true),
+          keepDestinationIds.length
+            ? or(eq(s.destinations.declarable, true), inArray(s.destinations.id, [...keepDestinationIds]))
+            : eq(s.destinations.declarable, true),
+        ),
+      )
+      .orderBy(asc(s.destinations.displayOrder)),
+    db.select().from(s.units).where(eq(s.units.active, true)).orderBy(asc(s.units.displayOrder)),
+    db
+      .select({ type: s.containerTypes, tare: s.containerTares })
+      .from(s.containerTypes)
+      .innerJoin(s.containerTares, eq(s.containerTares.containerTypeId, s.containerTypes.id))
+      .where(
+        and(
+          eq(s.containerTypes.active, true),
+          lte(s.containerTares.validFrom, today),
+          or(isNull(s.containerTares.validTo), gte(s.containerTares.validTo, today)),
+        ),
+      )
+      .orderBy(asc(s.containerTypes.displayOrder)),
+    // Référentiel saisi à la main ; les produits de la semaine viennent de `weekCatalogs`.
+    db.select().from(s.products).where(eq(s.products.active, true)).orderBy(asc(s.products.name)),
+  ]);
 
   const zones = zoneRows
     .filter((z) => !limitedToOwnZones || user.zoneIds.includes(z.id))
@@ -129,9 +157,18 @@ export async function getDeclarationOptions(db: Db, user: AuthUser, today: Local
         subzoneIds: causeSubzoneRows.filter((cs) => cs.causeId === c.id).map((cs) => cs.subzoneId),
       }))
       .sort((a, b) => Number(a.isOther) - Number(b.isOther)),
-    destinations: destinationRows.map((d) => ({ id: d.id, name: d.name, kind: d.kind, financialRecovery: d.financialRecovery, binNumberMode: d.binNumberMode })),
+    destinations: destinationRows.map((d) => ({
+      id: d.id,
+      name: d.name,
+      kind: d.kind,
+      financialRecovery: d.financialRecovery,
+      binNumberMode: d.binNumberMode,
+    })),
     /** Dernier n° de poubelle noté par zone et par destination, pour préremplir la case (on ne le change qu'au changement de poubelle). */
-    lastBinNumbers: await lastBinNumbers(db, zones.map((z) => z.id)),
+    lastBinNumbers: await lastBinNumbers(
+      db,
+      zones.map((z) => z.id),
+    ),
     units: unitRows.map((u) => ({ code: u.code, label: u.label, kind: u.kind, toBaseFactor: u.toBaseFactor })),
     containers: containerRows.map((r) => ({
       id: r.type.id,

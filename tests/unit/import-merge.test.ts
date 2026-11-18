@@ -25,7 +25,9 @@ describe("rapprochement du tome et du plan S45", () => {
     expect(preview.recipes.filter((r) => isSnackCode(r.code))).toHaveLength(22);
     expect(preview.warnings).toEqual([]);
     const grid = s45PlanGrid().map((row) => (row[0] === "VG02" ? row.map((v, i) => (i === 15 ? "" : v)) : row));
-    expect(buildWeekImport(tome, parsePlan("S45", grid)).warnings).toContain("Recettes du tome sans équipe dans le plan (non proposées aux équipes) : VG02");
+    expect(buildWeekImport(tome, parsePlan("S45", grid)).warnings).toContain(
+      "Recettes du tome sans équipe dans le plan (non proposées aux équipes) : VG02",
+    );
   });
 
   it("signale une portion de plat en dehors de 300–380 g, pas celle d'un petit-déjeuner", () => {
@@ -51,6 +53,8 @@ describe("rapprochement du tome et du plan S45", () => {
     expect(buildWeekImport(tome, parsePlan("S46", s45PlanGrid())).errors).toEqual([
       "Le tome est celui de la semaine 45, l'onglet du plan celui de la semaine 46",
     ]);
-    expect(buildWeekImport({ recipes: [], subRecipes: [], anomalies: [] }, parsePlan("S45", s45PlanGrid())).errors[0]).toMatch(/Aucune recette/);
+    expect(
+      buildWeekImport({ recipes: [], subRecipes: [], anomalies: [] }, parsePlan("S45", s45PlanGrid())).errors[0],
+    ).toMatch(/Aucune recette/);
   });
 });

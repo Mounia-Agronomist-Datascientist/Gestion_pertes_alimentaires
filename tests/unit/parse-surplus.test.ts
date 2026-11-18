@@ -1,8 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { parseAmount, parseBoxes, parseLot, parseSheetDate, parseSurplus, sheetsToRead } from "@/modules/imports/surplus/parse-surplus";
+import {
+  parseAmount,
+  parseBoxes,
+  parseLot,
+  parseSheetDate,
+  parseSurplus,
+  sheetsToRead,
+} from "@/modules/imports/surplus/parse-surplus";
 
 // Extraits reconstitués des fichiers de l'entreprise (valeurs brutes de l'export Excel : dates en numéro de série).
-const TGTG_HEADER = ["Date ", "Nb barquettes à vendre", "", "Nb barquettes vendues en VF", "", "Nb barquettes proposées TGTG", "", "Nb barquettes vendues TGTG", "", "Formules TGTG", "", "CA TGTG", "RESULTAT REEL"];
+const TGTG_HEADER = [
+  "Date ",
+  "Nb barquettes à vendre",
+  "",
+  "Nb barquettes vendues en VF",
+  "",
+  "Nb barquettes proposées TGTG",
+  "",
+  "Nb barquettes vendues TGTG",
+  "",
+  "Formules TGTG",
+  "",
+  "CA TGTG",
+  "RESULTAT REEL",
+];
 // 2026-01-02 = 46024, 2026-01-07 = 46029, 2026-01-12 = 46034, 2026-02-09 = 46062.
 const tgtg2026 = [
   TGTG_HEADER,
@@ -15,33 +36,132 @@ const tgtg2026 = [
 ];
 // Onglet 2025 : colonnes « CA TGTG » et « Formules » inversées, ligne d'année, date avec la mauvaise année.
 const tgtg2025 = [
-  ["Date ", "Nb barquettes à vendre", "", "Nb barquettes vendues en VF", "", "Nb barquettes proposées TGTG", "", "Nb barquettes vendues TGTG", "", "CA TGTG", "Formules TGTG", ""],
+  [
+    "Date ",
+    "Nb barquettes à vendre",
+    "",
+    "Nb barquettes vendues en VF",
+    "",
+    "Nb barquettes proposées TGTG",
+    "",
+    "Nb barquettes vendues TGTG",
+    "",
+    "CA TGTG",
+    "Formules TGTG",
+    "",
+  ],
   ["2025.0", "", "", "", "", "", "", "", "", "", "", ""],
   ["45660.0", "1345.0", "", "440.0", "", "75.0", "", "75.0", "", "197.5", "2P + 1 dessert", ""],
   ["46374.0", "", "", "", "", "100", "", "90", "", "250", "6P", ""],
 ];
 
-const VF_HEADER = ["Date ", "Code ", "Clients concernés ", "", "Nb clients", "Type de formule ", "", "Prix ", "Quantités boxes vendues ", "", "Chiffre d'affaire TTC", ""];
+const VF_HEADER = [
+  "Date ",
+  "Code ",
+  "Clients concernés ",
+  "",
+  "Nb clients",
+  "Type de formule ",
+  "",
+  "Prix ",
+  "Quantités boxes vendues ",
+  "",
+  "Chiffre d'affaire TTC",
+  "",
+];
 const vf2026 = [
   [],
   [],
   VF_HEADER,
-  ["46052.0", "VF300126", "Clients en pause tte France ", "", "567.0", "10P (1 ou 2 box)", "", "70€/120€", "70 (dont 22 x 2box)", "", "4530.0", ""],
-  ["46150.0", "VF070526", "Clients en pause tte France ", "", "530.0", "10P (1 ou 2 box)", "", "70€/120€", "5.0", "", "350.0", "", "Week-end de l'ascencion "],
+  [
+    "46052.0",
+    "VF300126",
+    "Clients en pause tte France ",
+    "",
+    "567.0",
+    "10P (1 ou 2 box)",
+    "",
+    "70€/120€",
+    "70 (dont 22 x 2box)",
+    "",
+    "4530.0",
+    "",
+  ],
+  [
+    "46150.0",
+    "VF070526",
+    "Clients en pause tte France ",
+    "",
+    "530.0",
+    "10P (1 ou 2 box)",
+    "",
+    "70€/120€",
+    "5.0",
+    "",
+    "350.0",
+    "",
+    "Week-end de l'ascencion ",
+  ],
 ];
 const vf2024 = [
   ["VENTES FLASH  2024"],
   [],
   [],
-  ["Date ", "Code ", "Clients concernés ", "", "Nb clients", "Type de formule ", "", "Prix ", "Quantités boxes vendues ", "", "Commentaires "],
-  ["45559.0", "VF2409", "Clients en pause tte France ", "", "405.0", "10P / 10P + PDJ", "", "70€ / 80€ ", "41 dt 18 avec PDJ", "", ""],
+  [
+    "Date ",
+    "Code ",
+    "Clients concernés ",
+    "",
+    "Nb clients",
+    "Type de formule ",
+    "",
+    "Prix ",
+    "Quantités boxes vendues ",
+    "",
+    "Commentaires ",
+  ],
+  [
+    "45559.0",
+    "VF2409",
+    "Clients en pause tte France ",
+    "",
+    "405.0",
+    "10P / 10P + PDJ",
+    "",
+    "70€ / 80€ ",
+    "41 dt 18 avec PDJ",
+    "",
+    "",
+  ],
   ["45561.0", "VF2609", "Clients en pause tte France ", "", "349.0", "10P + PDJ", "", "80.0", "21.0", "", ""],
   ["45548.0", "VF1309", "Clients en pause tte France ", "", "419.0", "12P / 12P + PDJ", "", "80€ / 90€", "/", "", ""],
-  ["45604.0", "VF0811", "Clients en pause tte France ", "", "400.0", "10P (1 ou 2 box)", "", "70€/120€", "47 (25x1 et 11x2)", "", ""],
+  [
+    "45604.0",
+    "VF0811",
+    "Clients en pause tte France ",
+    "",
+    "400.0",
+    "10P (1 ou 2 box)",
+    "",
+    "70€/120€",
+    "47 (25x1 et 11x2)",
+    "",
+    "",
+  ],
 ];
 
 // Contacts (colonnes I et J) : jamais lus.
-const LINKEE_HEADER = ["Date de collecte ", "Nombre TOTAL barquette ", "Nombre de barquette ", "Nom plat", "N lot", "Cout de revient unitaire", "DLC", "Collecté ? ", "Contact "];
+const LINKEE_HEADER = [
+  "Date de collecte ",
+  "Nombre TOTAL barquette ",
+  "Nombre de barquette ",
+  "Nom plat",
+  "N lot",
+  "Cout de revient unitaire",
+  "DLC",
+  "Collecté ? ",
+  "Contact ",
+];
 const linkee = [
   LINKEE_HEADER,
   ["", "", "", "", "", "", "", "", "Contact A", "06 00 00 00 00"],
@@ -144,7 +264,9 @@ describe("fichier « VENTES FLASH »", () => {
 
   it("compte 10 barquettes par box et 5 barquettes de petit-déjeuner par box avec PDJ", () => {
     expect(r.source).toBe("vente_flash");
-    expect(r.entries.map((e) => [e.date, e.code, e.boxes, e.breakfastBoxes, e.trays, e.breakfastTrays, e.amountEur, e.note])).toEqual([
+    expect(
+      r.entries.map((e) => [e.date, e.code, e.boxes, e.breakfastBoxes, e.trays, e.breakfastTrays, e.amountEur, e.note]),
+    ).toEqual([
       ["2024-09-24", "VF2409", 41, 18, 410, 90, null, null],
       ["2024-09-26", "VF2609", 21, 21, 210, 105, null, null],
       ["2024-11-08", "VF0811", 47, 0, 470, 0, null, "dont 11 achats de 2 boxes"],

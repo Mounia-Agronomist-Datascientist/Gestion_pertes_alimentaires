@@ -73,7 +73,16 @@ export function summarizeSurplus(facts: readonly SurplusFact[], withCosts: boole
   const t = {
     tgtg: { sales: 0, offeredTrays: 0, trays: 0, clientEur: 0, missingAmount: 0, payouts: 0, receivedEur: 0 },
     flash: { sales: 0, boxes: 0, breakfastBoxes: 0, trays: 0, breakfastTrays: 0, revenueEur: 0, missingAmount: 0 },
-    linkee: { collections: 0, dishes: 0, trays: 0, notCollectedTrays: 0, kg: 0, weighedTrays: 0, costEur: 0, costedTrays: 0 },
+    linkee: {
+      collections: 0,
+      dishes: 0,
+      trays: 0,
+      notCollectedTrays: 0,
+      kg: 0,
+      weighedTrays: 0,
+      costEur: 0,
+      costedTrays: 0,
+    },
   };
   const collectionDates = new Set<string>();
   for (const f of facts) {
@@ -111,7 +120,11 @@ export function summarizeSurplus(facts: readonly SurplusFact[], withCosts: boole
   }
   t.linkee.collections = collectionDates.size;
   return {
-    tgtg: { ...t.tgtg, clientEur: withCosts ? cents(t.tgtg.clientEur) : null, receivedEur: withCosts ? cents(t.tgtg.receivedEur) : null },
+    tgtg: {
+      ...t.tgtg,
+      clientEur: withCosts ? cents(t.tgtg.clientEur) : null,
+      receivedEur: withCosts ? cents(t.tgtg.receivedEur) : null,
+    },
     flash: { ...t.flash, revenueEur: withCosts ? cents(t.flash.revenueEur) : null },
     linkee: { ...t.linkee, kg: roundQuantity(t.linkee.kg), costEur: withCosts ? cents(t.linkee.costEur) : null },
   };

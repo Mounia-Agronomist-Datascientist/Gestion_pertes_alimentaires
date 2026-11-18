@@ -49,13 +49,21 @@ describe("lecture des pertes pour les statistiques", () => {
     const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
     const team = (letter: string) => id(t.db.select().from(s.teams).where(eq(s.teams.letter, letter)));
     const account = async (login: string, roleCode: string, teamId?: string) =>
-      loadAuthUser(t.db, await createAccount(t.db, { login, displayName: login, roleCode, teamId, password: `mot-de-passe-${login}` }));
+      loadAuthUser(
+        t.db,
+        await createAccount(t.db, { login, displayName: login, roleCode, teamId, password: `mot-de-passe-${login}` }),
+      );
     admin = await account("admin", "admin");
     direction = await account("direction", "direction");
     teamDId = await team("D");
     teamD = await account("equipe-d", "equipe", teamDId);
     teamC = await account("equipe-c", "equipe", await team("C"));
-    await saveWeekImport(t.db, admin, { preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())), tomeFileName: "t.pdf", planFileName: "p.xlsx", planSheetName: "S45" });
+    await saveWeekImport(t.db, admin, {
+      preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())),
+      tomeFileName: "t.pdf",
+      planFileName: "p.xlsx",
+      planSheetName: "S45",
+    });
     const vi01 = (await weekCatalogs(t.db, teamD, "2026-11-02"))[0]!.dishes.find((d) => d.code === "VI01")!.id;
     const cuisine = await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE")));
     const cause = await id(t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION")));
@@ -63,7 +71,14 @@ describe("lecture des pertes pour les statistiques", () => {
     const tgtg = await dest("TGTG");
     compost = await dest("ALCHIMISTES");
     don = await dest("DON");
-    const input = (occurredOn: string, product: object, method: string, quantity: number, unitCode: string, destinations: object[]) => ({
+    const input = (
+      occurredOn: string,
+      product: object,
+      method: string,
+      quantity: number,
+      unitCode: string,
+      destinations: object[],
+    ) => ({
       occurredOn,
       subzoneId: cuisine,
       product,
@@ -74,10 +89,36 @@ describe("lecture des pertes pour les statistiques", () => {
       destinations,
     });
     const dish = { weekItem: { kind: "plat", id: vi01 } };
-    await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 10, "barquette", [{ destinationId: tgtg, quantity: 10, recoveredAmountEur: 6 }]), NOW);
-    const corrected = await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 2, "barquette", [{ destinationId: compost, quantity: 2, binNumber: "1" }]), NOW);
-    await correctDeclaration(t.db, teamD, corrected.id, input("2026-11-02", dish, "comptage", 3, "barquette", [{ destinationId: don, quantity: 3 }]), { reason: "Recompté", expectedRevision: 1 }, NOW);
-    const cancelled = await createDeclaration(t.db, teamD, input("2026-11-02", dish, "comptage", 50, "barquette", [{ destinationId: compost, quantity: 50, binNumber: "1" }]), NOW);
+    await createDeclaration(
+      t.db,
+      teamD,
+      input("2026-11-02", dish, "comptage", 10, "barquette", [
+        { destinationId: tgtg, quantity: 10, recoveredAmountEur: 6 },
+      ]),
+      NOW,
+    );
+    const corrected = await createDeclaration(
+      t.db,
+      teamD,
+      input("2026-11-02", dish, "comptage", 2, "barquette", [{ destinationId: compost, quantity: 2, binNumber: "1" }]),
+      NOW,
+    );
+    await correctDeclaration(
+      t.db,
+      teamD,
+      corrected.id,
+      input("2026-11-02", dish, "comptage", 3, "barquette", [{ destinationId: don, quantity: 3 }]),
+      { reason: "Recompté", expectedRevision: 1 },
+      NOW,
+    );
+    const cancelled = await createDeclaration(
+      t.db,
+      teamD,
+      input("2026-11-02", dish, "comptage", 50, "barquette", [
+        { destinationId: compost, quantity: 50, binNumber: "1" },
+      ]),
+      NOW,
+    );
     await cancelDeclaration(t.db, admin, cancelled.id, { reason: "Doublon", expectedRevision: 1 }, NOW);
     // Sous-recette qui sert à plusieurs plats de la semaine.
     const used = await t.db
@@ -89,9 +130,23 @@ describe("lecture des pertes pour les statistiques", () => {
       .orderBy(desc(count()));
     const mostUsed = used.find((u) => !isMouldLabel(u.name));
     shared = { id: mostUsed!.id!, recipes: mostUsed!.recipes };
-    await createDeclaration(t.db, teamD, input("2026-11-02", { weekItem: { kind: "sous_recette", id: shared.id } }, "pesee", 2, "kg", [{ destinationId: compost, quantity: 2, binNumber: "1" }]), NOW);
+    await createDeclaration(
+      t.db,
+      teamD,
+      input("2026-11-02", { weekItem: { kind: "sous_recette", id: shared.id } }, "pesee", 2, "kg", [
+        { destinationId: compost, quantity: 2, binNumber: "1" },
+      ]),
+      NOW,
+    );
     // Équipe C, en octobre mais dans la même semaine de production S45 (jeudi 29/10 → mercredi 04/11).
-    await createDeclaration(t.db, teamC, input("2026-10-30", { freeLabel: "Carottes", category: "matiere_premiere" }, "pesee", 1.5, "kg", [{ destinationId: compost, quantity: 1.5, binNumber: "1" }]), NOW);
+    await createDeclaration(
+      t.db,
+      teamC,
+      input("2026-10-30", { freeLabel: "Carottes", category: "matiere_premiere" }, "pesee", 1.5, "kg", [
+        { destinationId: compost, quantity: 1.5, binNumber: "1" },
+      ]),
+      NOW,
+    );
   });
 
   afterAll(async () => {
@@ -120,7 +175,9 @@ describe("lecture des pertes pour les statistiques", () => {
     expect(await loadFacts(t.db, direction, { kind: "annee", year: 2026 })).toHaveLength(4);
     expect(await loadFacts(t.db, direction, { kind: "periode", from: "2026-11-03", to: "2026-11-30" })).toHaveLength(0);
     expect(await loadFacts(t.db, direction, S45, { teamId: teamDId })).toHaveLength(3);
-    expect((await loadFacts(t.db, direction, S45, { destinationId: compost })).map((f) => f.productName)).toContain("Carottes");
+    expect((await loadFacts(t.db, direction, S45, { destinationId: compost })).map((f) => f.productName)).toContain(
+      "Carottes",
+    );
     expect(await loadFacts(t.db, direction, S45, { destinationId: compost })).toHaveLength(2);
     expect(await loadFacts(t.db, direction, S45, { category: "matiere_premiere" })).toHaveLength(1);
     expect(await loadFacts(t.db, direction, { kind: "semaine", year: 2031, number: 45 })).toEqual([]);
@@ -134,10 +191,18 @@ describe("lecture des pertes pour les statistiques", () => {
 
   it("tableau de bord général : période, période précédente et euros selon le profil", async () => {
     const forDirection = await generalDashboard(t.db, direction, S45, {});
-    expect(forDirection).toMatchObject({ withCosts: true, previousPeriod: { number: 44 }, nextPeriod: { number: 46 }, previous: { events: 0 } });
+    expect(forDirection).toMatchObject({
+      withCosts: true,
+      previousPeriod: { number: 44 },
+      nextPeriod: { number: 46 },
+      previous: { events: 0 },
+    });
     expect(forDirection.current.cost?.recoveredEur).toBe(6);
     const forTeam = await generalDashboard(t.db, teamC, S45, {});
-    expect(forTeam).toMatchObject({ withCosts: false, current: { events: 1, foodKg: 1.5, cost: null, kgByDestinationKind: { compost: 1.5 } } });
+    expect(forTeam).toMatchObject({
+      withCosts: false,
+      current: { events: 1, foodKg: 1.5, cost: null, kgByDestinationKind: { compost: 1.5 } },
+    });
   });
 
   it("compare les équipes (responsables seulement) et détaille une zone", async () => {
@@ -154,7 +219,10 @@ describe("lecture des pertes pour les statistiques", () => {
     expect(cuisine.label).toBe("Cuisine / Production");
     expect(cuisine.causes).toHaveLength(1);
     expect(cuisine.products.map((p) => [p.label, p.summary.events])).toEqual(
-      expect.arrayContaining([["Carottes", 1], [expect.stringMatching(/^VI01_/) as unknown as string, 2]]),
+      expect.arrayContaining([
+        ["Carottes", 1],
+        [expect.stringMatching(/^VI01_/) as unknown as string, 2],
+      ]),
     );
     expect(cuisine.teams.map((x) => x.label).sort()).toEqual(["Équipe C – Rose", "Équipe D – Jaune"]);
   });
@@ -177,7 +245,9 @@ describe("lecture des pertes pour les statistiques", () => {
 
   it("classe les plats par formule et compte une sous-recette une fois, avec les plats qui l'utilisent", async () => {
     const plats = await productRanking(t.db, direction, S45, {}, "plats", "kg");
-    expect(plats.rows.map((r) => [r.label.slice(0, 5), r.summary.events, r.summary.barquettes])).toEqual([["VI01_", 2, 13]]);
+    expect(plats.rows.map((r) => [r.label.slice(0, 5), r.summary.events, r.summary.barquettes])).toEqual([
+      ["VI01_", 2, 13],
+    ]);
     expect(plats.rows[0]!.mainCause).toMatchObject({ name: expect.any(String), share: 1 });
 
     const subs = await productRanking(t.db, direction, S45, {}, "sous_recettes", "kg");
@@ -202,14 +272,19 @@ describe("lecture des pertes pour les statistiques", () => {
   });
 
   it("volume prévu de la semaine d'après le plan importé, pour toutes les équipes ou une seule", async () => {
-    const [week] = await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)));
+    const [week] = await t.db
+      .select()
+      .from(s.productionWeeks)
+      .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)));
     const all = (await plannedVolumes(t.db, [week!.id])).get(week!.id)!;
     const teamOnly = (await plannedVolumes(t.db, [week!.id], teamDId)).get(week!.id)!;
     expect(all.barquettes).toBeGreaterThan(teamOnly.barquettes);
     expect(teamOnly.barquettes).toBeGreaterThan(0);
     expect(all.kg).toBeGreaterThan(all.barquettes * 0.25);
     expect((await plannedVolumes(t.db, [week!.id])).size).toBe(1);
-    expect(kgPerThousand(10, { barquettes: 20000, kg: null, dishesWithoutWeight: 0, costEur: null, dishesWithoutCost: 0 })).toBe(0.5);
+    expect(
+      kgPerThousand(10, { barquettes: 20000, kg: null, dishesWithoutWeight: 0, costEur: null, dishesWithoutCost: 0 }),
+    ).toBe(0.5);
     expect(kgPerThousand(10, null)).toBeNull();
   });
 
@@ -253,7 +328,9 @@ describe("lecture des pertes pour les statistiques", () => {
       [10, 1],
       [11, 3],
     ]);
-    expect((await annualEvolution(t.db, direction, 2026, {})).map((y) => [y.year, y.summary.events])).toEqual([[2026, 4]]);
+    expect((await annualEvolution(t.db, direction, 2026, {})).map((y) => [y.year, y.summary.events])).toEqual([
+      [2026, 4],
+    ]);
   });
 
   it("synthèse de la semaine : zones, causes et produits classés en euros (ou en kg pour une équipe)", async () => {
@@ -277,15 +354,23 @@ describe("lecture des pertes pour les statistiques", () => {
       const result = await exportOf(direction, tab);
       expect(result, tab).not.toBeNull();
       expect(result!.tables.length, tab).toBeGreaterThan(0);
-      for (const table of result!.tables) for (const row of table.rows) expect(row, `${tab} / ${table.title}`).toHaveLength(table.headers.length);
+      for (const table of result!.tables)
+        for (const row of table.rows) expect(row, `${tab} / ${table.title}`).toHaveLength(table.headers.length);
     }
     // Direction : détail du coût par composante ; vue générale = S45 puis S44.
     const general = (await exportOf(direction, "general"))!;
     expect(general.name).toBe("statistiques-s45-2026");
     const indicators = general.tables[0]!;
-    expect(indicators.headers).toEqual(expect.arrayContaining(["Matières premières (€)", "Coût brut (€)", "Recettes (€)", "Coût net (€)"]));
+    expect(indicators.headers).toEqual(
+      expect.arrayContaining(["Matières premières (€)", "Coût brut (€)", "Recettes (€)", "Coût net (€)"]),
+    );
     const dashboard = await generalDashboard(t.db, direction, S45, {});
-    expect(indicators.rows[0]!.slice(0, 4)).toEqual(["S45-2026", roundKg(dashboard.current.foodKg), dashboard.current.barquettes, dashboard.current.events]);
+    expect(indicators.rows[0]!.slice(0, 4)).toEqual([
+      "S45-2026",
+      roundKg(dashboard.current.foodKg),
+      dashboard.current.barquettes,
+      dashboard.current.events,
+    ]);
     expect(indicators.rows[0]!.at(-1)).toBe(dashboard.current.cost!.netEur);
     // Une équipe : ses pertes, aucun euro, et pas de comparaison des équipes.
     const team = (await exportOf(teamC, "general"))!;
@@ -299,7 +384,9 @@ describe("lecture des pertes pour les statistiques", () => {
     const teamDFood = (await generalDashboard(t.db, direction, S45, { teamId: teamDId })).current.foodKg;
     expect(filtered.tables[0]!.rows.map((r) => r[2])).toEqual([roundKg(teamDFood)]);
     // Synthèse : un seul tableau demandé, ou les deux.
-    expect((await exportOf(direction, "synthese", { tableau: "semaines" }))!.tables.map((x) => x.title)).toEqual(["12 semaines"]);
+    expect((await exportOf(direction, "synthese", { tableau: "semaines" }))!.tables.map((x) => x.title)).toEqual([
+      "12 semaines",
+    ]);
     expect((await exportOf(direction, "synthese"))!.tables).toHaveLength(2);
     // Classeur Excel : un onglet par tableau, en-têtes et nombres conservés.
     const workbook = new ExcelJS.Workbook();

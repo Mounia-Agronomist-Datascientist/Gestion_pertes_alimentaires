@@ -4,7 +4,11 @@ import type { CsvTable } from "@/domain/csv";
 
 /** Nom d'onglet accepté par Excel : 31 caractères au plus, sans : \ / ? * [ ], unique dans le classeur. */
 function sheetName(title: string, used: Set<string>): string {
-  const base = title.replace(/[:\\/?*[\]]/g, " ").slice(0, 31).trim() || "Tableau";
+  const base =
+    title
+      .replace(/[:\\/?*[\]]/g, " ")
+      .slice(0, 31)
+      .trim() || "Tableau";
   let name = base;
   for (let i = 2; used.has(name.toLowerCase()); i++) name = `${base.slice(0, 28)} ${i}`;
   used.add(name.toLowerCase());

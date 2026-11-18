@@ -52,7 +52,8 @@ export function buildWeekImport(tome: TomeParseResult, plan: PlanParseResult): W
   ];
 
   const weeks = [...new Set(tome.recipes.map((r) => `${r.year}-${r.week}`))];
-  if (tome.recipes.length === 0) errors.push("Aucune recette lue dans le tome : est-ce bien le PDF « Imprimer les recettes » de Melba ?");
+  if (tome.recipes.length === 0)
+    errors.push("Aucune recette lue dans le tome : est-ce bien le PDF « Imprimer les recettes » de Melba ?");
   if (weeks.length > 1) errors.push(`Le tome mélange plusieurs semaines (${weeks.join(", ")})`);
   const year = tome.recipes[0]?.year ?? null;
   const week = tome.recipes[0]?.week ?? null;
@@ -78,7 +79,8 @@ export function buildWeekImport(tome: TomeParseResult, plan: PlanParseResult): W
 
   const tomeCodes = new Set(tome.recipes.map((r) => r.code));
   const missingInTome = [...new Set([...groupOf.keys(), ...volumeOf.keys()])].filter((c) => !tomeCodes.has(c));
-  if (missingInTome.length) warnings.push(`Codes du plan absents du tome (aucune recette) : ${missingInTome.join(", ")}`);
+  if (missingInTome.length)
+    warnings.push(`Codes du plan absents du tome (aucune recette) : ${missingInTome.join(", ")}`);
   const withoutTeam = recipes.filter((r) => !r.team && !isSnackCode(r.code)).map((r) => r.code);
   if (withoutTeam.length) {
     warnings.push(`Recettes du tome sans équipe dans le plan (non proposées aux équipes) : ${withoutTeam.join(", ")}`);
@@ -91,7 +93,9 @@ export function buildWeekImport(tome: TomeParseResult, plan: PlanParseResult): W
     const grams = r.portionWeightG ?? (r.total && /^g$/i.test(r.total.unit.trim()) ? r.total.quantity : null);
     if (grams == null) warnings.push(`${r.code} : poids de la portion absent du tome`);
     else if (grams < PORTION_MIN_G || grams > PORTION_MAX_G) {
-      warnings.push(`${r.code} : portion de ${grams} g, en dehors de ${PORTION_MIN_G}–${PORTION_MAX_G} g habituels pour un plat`);
+      warnings.push(
+        `${r.code} : portion de ${grams} g, en dehors de ${PORTION_MIN_G}–${PORTION_MAX_G} g habituels pour un plat`,
+      );
     }
   }
 

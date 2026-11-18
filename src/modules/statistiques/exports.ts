@@ -27,7 +27,19 @@ import { type Co2Group, environmentDashboard } from "./environnement";
 import { alchimistesReconciliation, type ReconciliationPeriod } from "./alchimistes";
 import { weeklySummary } from "./weekly";
 
-export const EXPORT_TABS = ["general", "synthese", "zones", "equipes", "evolution", "ratios", "produits", "causes", "valorisation", "environnement", "alchimistes"] as const;
+export const EXPORT_TABS = [
+  "general",
+  "synthese",
+  "zones",
+  "equipes",
+  "evolution",
+  "ratios",
+  "produits",
+  "causes",
+  "valorisation",
+  "environnement",
+  "alchimistes",
+] as const;
 export type ExportTab = (typeof EXPORT_TABS)[number];
 
 export interface StatsExport {
@@ -36,7 +48,20 @@ export interface StatsExport {
   tables: CsvTable[];
 }
 
-const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const MONTHS = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+];
 /** Kg au gramme près. */
 export const roundKg = (n: number) => Math.round(n * 1000) / 1000;
 /** Taux en pourcentage (2 décimales) ; vide s'il n'est pas calculé. */
@@ -48,7 +73,9 @@ export function summaryHeaders(withCosts: boolean): string[] {
     "Kg alimentaires",
     "Barquettes perdues",
     "Pertes",
-    ...(withCosts ? [...COST_COMPONENTS.map((c) => `${c.label} (€)`), "Coût brut (€)", "Recettes (€)", "Coût net (€)"] : []),
+    ...(withCosts
+      ? [...COST_COMPONENTS.map((c) => `${c.label} (€)`), "Coût brut (€)", "Recettes (€)", "Coût net (€)"]
+      : []),
   ];
 }
 
@@ -57,12 +84,26 @@ export function summaryCells(s: StatsSummary, withCosts: boolean): CsvValue[] {
     roundKg(s.foodKg),
     s.barquettes,
     s.events,
-    ...(withCosts ? [...COST_COMPONENTS.map((c) => s.cost?.[c.key] ?? 0), s.cost?.grossEur ?? 0, s.cost?.recoveredEur ?? 0, s.cost?.netEur ?? 0] : []),
+    ...(withCosts
+      ? [
+          ...COST_COMPONENTS.map((c) => s.cost?.[c.key] ?? 0),
+          s.cost?.grossEur ?? 0,
+          s.cost?.recoveredEur ?? 0,
+          s.cost?.netEur ?? 0,
+        ]
+      : []),
   ];
 }
 
 /** Classement (libellé + agrégat) précédé de la période. */
-function ranked(title: string, first: string, period: string, rows: { label: string; summary: StatsSummary }[], withCosts: boolean, extra?: { headers: string[]; cells: (i: number) => CsvValue[] }): CsvTable {
+function ranked(
+  title: string,
+  first: string,
+  period: string,
+  rows: { label: string; summary: StatsSummary }[],
+  withCosts: boolean,
+  extra?: { headers: string[]; cells: (i: number) => CsvValue[] },
+): CsvTable {
   return {
     title,
     headers: ["Période", first, ...summaryHeaders(withCosts), ...(extra?.headers ?? [])],
@@ -81,24 +122,42 @@ export function fileName(...parts: string[]): string {
     .replace(/^-|-$/g, "");
 }
 
-const rankBy = (user: AuthUser, tri: string | undefined): RankBy => (tri === "cout" && can(user, "indicators.read") ? "cout" : tri === "evenements" ? "evenements" : "kg");
+const rankBy = (user: AuthUser, tri: string | undefined): RankBy =>
+  tri === "cout" && can(user, "indicators.read") ? "cout" : tri === "evenements" ? "evenements" : "kg";
 
-export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: StatsContext, params: Params): Promise<StatsExport | null> {
+export async function statsExport(
+  db: Db,
+  user: AuthUser,
+  tab: ExportTab,
+  ctx: StatsContext,
+  params: Params,
+): Promise<StatsExport | null> {
   const withCosts = can(user, "indicators.read");
   const label = periodLabel(ctx.period);
 
   switch (tab) {
     case "general": {
       const d = await generalDashboard(db, user, ctx.period, ctx.filters);
-      const periods = [{ label, summary: d.current }, ...(d.previous && d.previousPeriod ? [{ label: periodLabel(d.previousPeriod), summary: d.previous }] : [])];
+      const periods = [
+        { label, summary: d.current },
+        ...(d.previous && d.previousPeriod ? [{ label: periodLabel(d.previousPeriod), summary: d.previous }] : []),
+      ];
       return {
         name: fileName("statistiques", label),
         tables: [
-          { title: "Indicateurs", headers: ["Période", ...summaryHeaders(withCosts)], rows: periods.map((p) => [p.label, ...summaryCells(p.summary, withCosts)]) },
+          {
+            title: "Indicateurs",
+            headers: ["Période", ...summaryHeaders(withCosts)],
+            rows: periods.map((p) => [p.label, ...summaryCells(p.summary, withCosts)]),
+          },
           {
             title: "Devenir des pertes",
             headers: ["Période", "Destination", "Kg alimentaires"],
-            rows: DESTINATION_KIND_STATS.map((k) => [label, k.label, roundKg(d.current.kgByDestinationKind[k.kind] ?? 0)]),
+            rows: DESTINATION_KIND_STATS.map((k) => [
+              label,
+              k.label,
+              roundKg(d.current.kgByDestinationKind[k.kind] ?? 0),
+            ]),
           },
         ],
       };
@@ -117,7 +176,9 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           name: fileName(tab, label),
           tables: [
             ranked(`Par ${one.toLowerCase()}`, one, label, result.rows, withCosts, {
-              headers: previous ? [`Kg alimentaires ${previous}`, ...(withCosts ? [`Coût brut ${previous} (€)`] : [])] : [],
+              headers: previous
+                ? [`Kg alimentaires ${previous}`, ...(withCosts ? [`Coût brut ${previous} (€)`] : [])]
+                : [],
               cells: (i) => {
                 const p = result.rows[i]!.previous;
                 return previous ? [roundKg(p?.foodKg ?? 0), ...(withCosts ? [p?.cost?.grossEur ?? 0] : [])] : [];
@@ -133,7 +194,10 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
         ranked("Causes", "Cause", label, detail.causes, withCosts),
         ranked("Produits", "Produit", label, detail.products, withCosts, {
           headers: ["Type de produit"],
-          cells: (i) => [PRODUCT_CATEGORY_LABELS[detail.products[i]!.category as keyof typeof PRODUCT_CATEGORY_LABELS] ?? detail.products[i]!.category],
+          cells: (i) => [
+            PRODUCT_CATEGORY_LABELS[detail.products[i]!.category as keyof typeof PRODUCT_CATEGORY_LABELS] ??
+              detail.products[i]!.category,
+          ],
         }),
         ranked("Sous-zones", "Sous-zone", label, detail.subzones, withCosts),
         ...(detail.teams.length ? [ranked("Équipes", "Équipe", label, detail.teams, withCosts)] : []),
@@ -153,7 +217,13 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
         name: fileName("produits", PRODUCT_TYPES[type].label, label),
         tables: [
           ranked(PRODUCT_TYPES[type].label, "Produit", label, ranking.rows, withCosts, {
-            headers: ["Type de produit", "Cause principale", "Part de la cause principale (%)", "Sert aux plats", "Plats de la formule"],
+            headers: [
+              "Type de produit",
+              "Cause principale",
+              "Part de la cause principale (%)",
+              "Sert aux plats",
+              "Plats de la formule",
+            ],
             cells: (i) => {
               const r = ranking.rows[i]!;
               return [
@@ -174,8 +244,15 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
       return {
         name: fileName("causes", label),
         tables: [
-          ranked("Causes", "Cause", label, ranking.causes, withCosts, { headers: ["Surtout en"], cells: (i) => [ranking.causes[i]!.mainZone] }),
-          { title: "Destinations", headers: ["Période", "Destination", "Kg alimentaires", "Pertes"], rows: ranking.destinations.map((d) => [label, d.name, roundKg(d.foodKg), d.events]) },
+          ranked("Causes", "Cause", label, ranking.causes, withCosts, {
+            headers: ["Surtout en"],
+            cells: (i) => [ranking.causes[i]!.mainZone],
+          }),
+          {
+            title: "Destinations",
+            headers: ["Période", "Destination", "Kg alimentaires", "Pertes"],
+            rows: ranking.destinations.map((d) => [label, d.name, roundKg(d.foodKg), d.events]),
+          },
         ],
       };
     }
@@ -189,7 +266,16 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
         "Kg alimentaires",
         "Lignes sans kg",
         "Lignes emballages / moules",
-        ...(withCosts ? ["Coût des produits (€)", "Lignes sans coût", "Recettes (€)", "Ventes recette à saisir", "Part récupérée (%)", "Recette par kg (€)"] : []),
+        ...(withCosts
+          ? [
+              "Coût des produits (€)",
+              "Lignes sans coût",
+              "Recettes (€)",
+              "Ventes recette à saisir",
+              "Part récupérée (%)",
+              "Recette par kg (€)",
+            ]
+          : []),
       ];
       // Recette, part récupérée et recette par kg : ventes seulement (vide pour les autres groupes).
       const cells = (t: RecoveryTotals, sale: boolean): CsvValue[] => [
@@ -198,7 +284,13 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
         t.notConverted,
         t.nonFood,
         ...(t.cost
-          ? [t.cost.grossEur, t.cost.unvalued, ...(sale ? [t.cost.recoveredEur, t.cost.recoveryMissing, percent(recoveredShare(t)), recoveryPerKg(t)] : [null, null, null, null])]
+          ? [
+              t.cost.grossEur,
+              t.cost.unvalued,
+              ...(sale
+                ? [t.cost.recoveredEur, t.cost.recoveryMissing, percent(recoveredShare(t)), recoveryPerKg(t)]
+                : [null, null, null, null]),
+            ]
           : []),
       ];
       const tables: CsvTable[] = [
@@ -206,15 +298,29 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           title: "Destinations",
           headers: ["Période", "Groupe", "Destination", ...headers],
           rows: [
-            ...RECOVERY_GROUPS.map((g) => [label, g.label, "Total du groupe", ...cells(data.groups[g.key], g.key === "avec_recette")]),
-            ...data.destinations.map((d) => [label, groupLabel.get(d.group)!, d.name, ...cells(d, d.group === "avec_recette")]),
+            ...RECOVERY_GROUPS.map((g) => [
+              label,
+              g.label,
+              "Total du groupe",
+              ...cells(data.groups[g.key], g.key === "avec_recette"),
+            ]),
+            ...data.destinations.map((d) => [
+              label,
+              groupLabel.get(d.group)!,
+              d.name,
+              ...cells(d, d.group === "avec_recette"),
+            ]),
           ],
         },
       ];
       if (data.series.length)
         tables.push({
           title: "12 semaines",
-          headers: ["Semaine", ...RECOVERY_GROUPS.map((g) => `Kg ${g.label.toLowerCase()}`), ...(withCosts ? ["Recettes (€)"] : [])],
+          headers: [
+            "Semaine",
+            ...RECOVERY_GROUPS.map((g) => `Kg ${g.label.toLowerCase()}`),
+            ...(withCosts ? ["Recettes (€)"] : []),
+          ],
           rows: data.series.map((w) => [
             formatProductionWeek(w),
             ...RECOVERY_GROUPS.map((g) => roundKg(w.groups[g.key].foodKg)),
@@ -229,11 +335,30 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           const trays = surplusTrays(s);
           return SURPLUS_SOURCES.map((k) => trays[k]);
         };
-        const money = (s: SurplusTotals): CsvValue[] => (withCosts ? [s.tgtg.clientEur, s.tgtg.receivedEur, s.flash.revenueEur, s.linkee.costEur] : []);
-        const moneyHeaders = withCosts ? ["TGTG prix payé par les clients (€)", "TGTG versements reçus HT (€)", "Ventes flash CA TTC (€)", "Linkee coût matières Melba (€)"] : [];
+        const money = (s: SurplusTotals): CsvValue[] =>
+          withCosts ? [s.tgtg.clientEur, s.tgtg.receivedEur, s.flash.revenueEur, s.linkee.costEur] : [];
+        const moneyHeaders = withCosts
+          ? [
+              "TGTG prix payé par les clients (€)",
+              "TGTG versements reçus HT (€)",
+              "Ventes flash CA TTC (€)",
+              "Linkee coût matières Melba (€)",
+            ]
+          : [];
         tables.unshift({
           title: "Ventes et dons des surplus (fichiers de l'entreprise)",
-          headers: ["Période", "Ventes TGTG", "Versements TGTG", "Ventes flash", "Boxes vendues", "dont avec petit-déjeuner", "Collectes Linkee", ...sourceHeaders, "Kg Linkee", ...moneyHeaders],
+          headers: [
+            "Période",
+            "Ventes TGTG",
+            "Versements TGTG",
+            "Ventes flash",
+            "Boxes vendues",
+            "dont avec petit-déjeuner",
+            "Collectes Linkee",
+            ...sourceHeaders,
+            "Kg Linkee",
+            ...moneyHeaders,
+          ],
           rows: [
             [
               label,
@@ -253,7 +378,12 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           tables.push({
             title: "Ventes et dons des surplus, 12 semaines",
             headers: ["Semaine", ...sourceHeaders, "Kg Linkee", ...moneyHeaders],
-            rows: surplus.series.map((w) => [formatProductionWeek(w), ...sourceCells(w.totals), roundKg(w.totals.linkee.kg), ...money(w.totals)]),
+            rows: surplus.series.map((w) => [
+              formatProductionWeek(w),
+              ...sourceCells(w.totals),
+              roundKg(w.totals.linkee.kg),
+              ...money(w.totals),
+            ]),
           });
       }
       return { name: fileName("valorisation", label), tables };
@@ -265,16 +395,41 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
         category: (c) => PRODUCT_CATEGORY_LABELS[c as keyof typeof PRODUCT_CATEGORY_LABELS] ?? c,
         destinationKind: (k) => DESTINATION_KIND_STATS.find((d) => d.kind === k)?.label ?? k,
       });
-      const headers = ["kg CO2e", "dont mesuré (kg CO2e)", "dont estimé (kg CO2e)", "Kg mesurés", "Kg estimés", "Kg non couverts", "Pertes"];
-      const cells = (s: Co2Group["summary"]): CsvValue[] => [s.co2eKg, s.co2ByMethod.mesure, s.co2ByMethod.estime, roundKg(s.kg.mesure), roundKg(s.kg.estime), roundKg(s.kg.non_couvert), s.losses];
-      const group = (title: string, first: string, groups: Co2Group[]): CsvTable => ({ title, headers: ["Période", first, ...headers], rows: groups.map((g) => [label, g.label, ...cells(g.summary)]) });
+      const headers = [
+        "kg CO2e",
+        "dont mesuré (kg CO2e)",
+        "dont estimé (kg CO2e)",
+        "Kg mesurés",
+        "Kg estimés",
+        "Kg non couverts",
+        "Pertes",
+      ];
+      const cells = (s: Co2Group["summary"]): CsvValue[] => [
+        s.co2eKg,
+        s.co2ByMethod.mesure,
+        s.co2ByMethod.estime,
+        roundKg(s.kg.mesure),
+        roundKg(s.kg.estime),
+        roundKg(s.kg.non_couvert),
+        s.losses,
+      ];
+      const group = (title: string, first: string, groups: Co2Group[]): CsvTable => ({
+        title,
+        headers: ["Période", first, ...headers],
+        rows: groups.map((g) => [label, g.label, ...cells(g.summary)]),
+      });
       const tables: CsvTable[] = [
         { title: "Synthèse", headers: ["Période", ...headers], rows: [[label, ...cells(data.summary)]] },
         group("Par catégorie", "Catégorie", data.byCategory),
         group("Par devenir", "Devenir", data.byDestination),
         group("Produits", "Produit", data.byProduct),
       ];
-      if (data.series.length) tables.push({ title: "12 semaines", headers: ["Semaine", ...headers], rows: data.series.map((w) => [formatProductionWeek(w), ...cells(w.summary)]) });
+      if (data.series.length)
+        tables.push({
+          title: "12 semaines",
+          headers: ["Semaine", ...headers],
+          rows: data.series.map((w) => [formatProductionWeek(w), ...cells(w.summary)]),
+        });
       return { name: fileName("environnement", label), tables };
     }
 
@@ -284,7 +439,18 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
       if (!anchor) return null;
       const data = await alchimistesReconciliation(db, user, anchor);
       if (!data) return null;
-      const headers = ["Du", "Au", "Kg déclarés vers Les Alchimistes", "Lignes déclarées", "Lignes sans kg", "Kg pesés", "Bacs", "Écart pesé − déclaré (kg)", "Écart / pesé (%)", "État"];
+      const headers = [
+        "Du",
+        "Au",
+        "Kg déclarés vers Les Alchimistes",
+        "Lignes déclarées",
+        "Lignes sans kg",
+        "Kg pesés",
+        "Bacs",
+        "Écart pesé − déclaré (kg)",
+        "Écart / pesé (%)",
+        "État",
+      ];
       const cells = (r: ReconciliationPeriod): CsvValue[] => [
         r.from,
         r.to,
@@ -314,7 +480,10 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
       const last = comparison.series.at(-1)!;
       const [weekRow] = await db.query.productionWeeks.findMany({ where: (w, { eq }) => eq(w.id, last.id), limit: 1 });
       const endMonth = { year: Number(weekRow!.endDate.slice(0, 4)), month: Number(weekRow!.endDate.slice(5, 7)) };
-      const [months, years] = await Promise.all([monthlyEvolution(db, user, endMonth, ctx.filters), annualEvolution(db, user, anchor.year, ctx.filters)]);
+      const [months, years] = await Promise.all([
+        monthlyEvolution(db, user, endMonth, ctx.filters),
+        annualEvolution(db, user, anchor.year, ctx.filters),
+      ]);
       const firstMonth = months.findIndex((m) => m.summary.events > 0);
       return {
         name: fileName("evolution", periodLabel(anchor)),
@@ -341,12 +510,25 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           {
             title: "Mois",
             headers: ["Mois", ...summaryHeaders(withCosts)],
-            rows: (firstMonth < 0 ? months.slice(-1) : months.slice(firstMonth)).map((m) => [`${MONTHS[m.month - 1]} ${m.year}`, ...summaryCells(m.summary, withCosts)]),
+            rows: (firstMonth < 0 ? months.slice(-1) : months.slice(firstMonth)).map((m) => [
+              `${MONTHS[m.month - 1]} ${m.year}`,
+              ...summaryCells(m.summary, withCosts),
+            ]),
           },
-          { title: "Années", headers: ["Année de production", ...summaryHeaders(withCosts)], rows: years.map((y) => [String(y.year), ...summaryCells(y.summary, withCosts)]) },
+          {
+            title: "Années",
+            headers: ["Année de production", ...summaryHeaders(withCosts)],
+            rows: years.map((y) => [String(y.year), ...summaryCells(y.summary, withCosts)]),
+          },
           {
             title: "Tendance sur 8 semaines",
-            headers: ["Indicateur", "Moyenne des 4 dernières semaines", "Moyenne des 4 semaines d'avant", "Écart (%)", "Tendance"],
+            headers: [
+              "Indicateur",
+              "Moyenne des 4 dernières semaines",
+              "Moyenne des 4 semaines d'avant",
+              "Écart (%)",
+              "Tendance",
+            ],
             rows: comparison.trends.map((x) => [
               x.unit === "eur" ? `${x.label} (€)` : x.label,
               x.trend.recent,
@@ -358,7 +540,10 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
           {
             title: "Moyenne glissante sur 4 semaines",
             headers: ["Semaine", ...comparison.trends.map((x) => (x.unit === "eur" ? `${x.label} (€)` : x.label))],
-            rows: comparison.series.map((p, i) => [formatProductionWeek(p), ...comparison.trends.map((x) => x.average[i] ?? null)]),
+            rows: comparison.series.map((p, i) => [
+              formatProductionWeek(p),
+              ...comparison.trends.map((x) => x.average[i] ?? null),
+            ]),
           },
         ],
       };
@@ -380,7 +565,13 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
         `Kg perdus / kg (${s}) (%)`,
         `Kg alimentaires perdus`,
         `Kg (${s})`,
-        ...(ratios.withCosts ? [`Coût matières pertes / production (${s}) (%)`, `Coût matières des pertes (€)`, `Coût matières de la production (${s}) (€)`] : []),
+        ...(ratios.withCosts
+          ? [
+              `Coût matières pertes / production (${s}) (%)`,
+              `Coût matières des pertes (€)`,
+              `Coût matières de la production (${s}) (€)`,
+            ]
+          : []),
       ]);
       const cells = (v: RatioValues | null): CsvValue[] => [
         percent(v?.barquetteRate),
@@ -399,7 +590,11 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
             headers: ["Période", ...headers],
             rows: [
               ...ratios.series.map((w) => [formatProductionWeek(w), ...cells(w.prevu), ...cells(w.reel)]),
-              [`${ratios.year.year} jusqu'à ${formatProductionWeek(anchor)}`, ...cells(ratios.year.prevu), ...cells(ratios.year.reel)],
+              [
+                `${ratios.year.year} jusqu'à ${formatProductionWeek(anchor)}`,
+                ...cells(ratios.year.prevu),
+                ...cells(ratios.year.reel),
+              ],
             ],
           },
         ],
@@ -413,7 +608,11 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
       if (!data) return null;
       const week = formatProductionWeek(anchor);
       const unit = data.by === "cout" ? "Coût brut (€)" : "Kg";
-      const lines = [...data.byZone.map((r) => ["Zone", r] as const), ...data.byCause.map((r) => ["Cause", r] as const), ...data.byProduct.map((r) => ["Produit", r] as const)];
+      const lines = [
+        ...data.byZone.map((r) => ["Zone", r] as const),
+        ...data.byCause.map((r) => ["Cause", r] as const),
+        ...data.byProduct.map((r) => ["Produit", r] as const),
+      ];
       const weeks: CsvTable = {
         title: "12 semaines",
         headers: [
@@ -435,8 +634,28 @@ export async function statsExport(db: Db, user: AuthUser, tab: ExportTab, ctx: S
       };
       const detail: CsvTable = {
         title: "Détail de la semaine",
-        headers: ["Semaine", "Type", "Libellé", unit, "Part de la semaine (%)", `${unit} semaine précédente`, "Écart", "Pertes", "Kg alimentaires"],
-        rows: lines.map(([kind, r]) => [week, kind, r.label, r.value, Math.round(r.share * 1000) / 10, r.previous, r.delta, r.summary.events, roundKg(r.summary.foodKg)]),
+        headers: [
+          "Semaine",
+          "Type",
+          "Libellé",
+          unit,
+          "Part de la semaine (%)",
+          `${unit} semaine précédente`,
+          "Écart",
+          "Pertes",
+          "Kg alimentaires",
+        ],
+        rows: lines.map(([kind, r]) => [
+          week,
+          kind,
+          r.label,
+          r.value,
+          Math.round(r.share * 1000) / 10,
+          r.previous,
+          r.delta,
+          r.summary.events,
+          roundKg(r.summary.foodKg),
+        ]),
       };
       if (params.tableau === "semaines") return { name: fileName("synthese", week, "12-semaines"), tables: [weeks] };
       if (params.tableau === "detail") return { name: fileName("synthese", week, "detail"), tables: [detail] };

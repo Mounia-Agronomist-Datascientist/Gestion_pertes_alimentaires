@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
   const body = xlsx ? await tablesToXlsx(result.tables) : tablesToCsv(result.tables);
   return new NextResponse(body as BodyInit, {
     headers: {
-      "Content-Type": xlsx ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "text/csv; charset=utf-8",
+      "Content-Type": xlsx
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="${result.name}.${xlsx ? "xlsx" : "csv"}"`,
       "Cache-Control": "no-store",
     },

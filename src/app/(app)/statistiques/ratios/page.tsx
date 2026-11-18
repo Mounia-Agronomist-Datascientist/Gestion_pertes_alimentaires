@@ -8,19 +8,44 @@ import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { type RatioValues, weekRatios } from "@/modules/statistiques/ratios";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { ColumnChart } from "../evolution/column-chart";
-import { Card, euro, ExportLinks, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, StatsTabs, statsContext } from "../shared";
+import {
+  Card,
+  euro,
+  ExportLinks,
+  FilterForm,
+  num,
+  OptionChips,
+  type Params,
+  PeriodNav,
+  scopeNote,
+  StatsTabs,
+  statsContext,
+} from "../shared";
 
 export const metadata = { title: "Ratios — Statistiques — Pertes" };
 
-const percent = new Intl.NumberFormat("fr-FR", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 2 });
+const percent = new Intl.NumberFormat("fr-FR", {
+  style: "percent",
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 2,
+});
 
 type Kind = "barquettes" | "kg" | "cout";
-const KINDS: Record<Kind, { title: string; rate: (r: RatioValues) => number | null; detail: (r: RatioValues) => string | null; definition: string }> = {
+const KINDS: Record<
+  Kind,
+  {
+    title: string;
+    rate: (r: RatioValues) => number | null;
+    detail: (r: RatioValues) => string | null;
+    definition: string;
+  }
+> = {
   barquettes: {
     title: "Barquettes perdues / barquettes produites",
     rate: (r) => r.barquetteRate,
     detail: (r) => `${num.format(r.lostBarquettes)} / ${num.format(r.producedBarquettes)} barquettes`,
-    definition: "Pertes saisies en barquettes, rapportées aux barquettes de la semaine. Les plats perdus saisis en kg n'y sont pas.",
+    definition:
+      "Pertes saisies en barquettes, rapportées aux barquettes de la semaine. Les plats perdus saisis en kg n'y sont pas.",
   },
   kg: {
     title: "Kg de pertes alimentaires / kg produits",
@@ -32,7 +57,10 @@ const KINDS: Record<Kind, { title: string; rate: (r: RatioValues) => number | nu
   cout: {
     title: "Coût matières des pertes / coût matières de la production",
     rate: (r) => r.costRate,
-    detail: (r) => (r.materialLossEur != null && r.productionCostEur != null ? `${euro.format(r.materialLossEur)} / ${euro.format(r.productionCostEur)}` : null),
+    detail: (r) =>
+      r.materialLossEur != null && r.productionCostEur != null
+        ? `${euro.format(r.materialLossEur)} / ${euro.format(r.productionCostEur)}`
+        : null,
     definition:
       "Coût matières figé sur chaque perte, rapporté au coût matières de la production (barquettes × coût Melba d'une portion). Main-d'œuvre, emballages et charges ne sont pas dans ce ratio.",
   },
@@ -50,7 +78,11 @@ export default async function RatiosPage({ searchParams }: { searchParams: Promi
   }
   if (!anchor) return <p className="rounded-xl bg-red-50 p-3 text-red-800">Semaine absente du calendrier.</p>;
   const ctx = { ...base, period: anchor as Period };
-  const [ratios, previous, next] = await Promise.all([weekRatios(db, user, anchor, ctx.filters), adjacentOf(db, anchor, -1), adjacentOf(db, anchor, 1)]);
+  const [ratios, previous, next] = await Promise.all([
+    weekRatios(db, user, anchor, ctx.filters),
+    adjacentOf(db, anchor, -1),
+    adjacentOf(db, anchor, 1),
+  ]);
   if (!ratios) return <p className="rounded-xl bg-red-50 p-3 text-red-800">Semaine absente du calendrier.</p>;
   const kinds = (Object.keys(KINDS) as Kind[]).filter((k) => k !== "cout" || ratios.withCosts);
   const chartKind: Kind = kinds.includes(params.ratio as Kind) ? (params.ratio as Kind) : "kg";
@@ -71,8 +103,9 @@ export default async function RatiosPage({ searchParams }: { searchParams: Promi
       <PeriodNav path={path} ctx={ctx} previous={previous} next={next} extra={keep} />
       <FilterForm path={path} ctx={ctx} keep={keep} />
       <p className="text-sm text-slate-600">
-        Production {scope} : <strong>prévue</strong> d&apos;après le plan de production importé, <strong>réelle</strong> d&apos;après le « Décompte
-        barquettes » déposé (colonne « Ma production »). Sans l&apos;un ou l&apos;autre, le ratio n&apos;est pas calculé.
+        Production {scope} : <strong>prévue</strong> d&apos;après le plan de production importé, <strong>réelle</strong>{" "}
+        d&apos;après le « Décompte barquettes » déposé (colonne « Ma production »). Sans l&apos;un ou l&apos;autre, le
+        ratio n&apos;est pas calculé.
       </p>
 
       {kinds.map((k) => (
@@ -96,10 +129,23 @@ export default async function RatiosPage({ searchParams }: { searchParams: Promi
       ))}
 
       <Card title="Dernières semaines">
-        <OptionChips label="Ratio" path={path} ctx={ctx} name="ratio" value={chartKind} keep={keep} options={kinds.map((k) => ({ value: k, label: k === "barquettes" ? "Barquettes" : k === "kg" ? "Kg" : "Coût" }))} />
+        <OptionChips
+          label="Ratio"
+          path={path}
+          ctx={ctx}
+          name="ratio"
+          value={chartKind}
+          keep={keep}
+          options={kinds.map((k) => ({
+            value: k,
+            label: k === "barquettes" ? "Barquettes" : k === "kg" ? "Kg" : "Coût",
+          }))}
+        />
         {(["prevu", "reel"] as const).map((source) => (
           <div key={source} className="flex flex-col gap-1">
-            <h3 className="font-medium">{source === "prevu" ? "Sur la production prévue" : "Sur la production réelle"}</h3>
+            <h3 className="font-medium">
+              {source === "prevu" ? "Sur la production prévue" : "Sur la production réelle"}
+            </h3>
             <ColumnChart
               caption={`${KINDS[chartKind].title}, ${source === "prevu" ? "production prévue" : "production réelle"}, par semaine`}
               columns={ratios.series.map((w) => {
@@ -116,14 +162,28 @@ export default async function RatiosPage({ searchParams }: { searchParams: Promi
             />
           </div>
         ))}
-        <p className="text-xs text-slate-500">Un tiret : pas de plan importé ou pas de décompte déposé pour cette semaine.</p>
+        <p className="text-xs text-slate-500">
+          Un tiret : pas de plan importé ou pas de décompte déposé pour cette semaine.
+        </p>
       </Card>
-      <ExportLinks tab="ratios" ctx={ctx} note="Les 12 dernières semaines et le cumul de l'année, sur le prévu et sur le réel, avec les mêmes filtres." />
+      <ExportLinks
+        tab="ratios"
+        ctx={ctx}
+        note="Les 12 dernières semaines et le cumul de l'année, sur le prévu et sur le réel, avec les mêmes filtres."
+      />
     </div>
   );
 }
 
-function RatioCell({ values, kind, showWeeks = false }: { values: RatioValues | null; kind: Kind; showWeeks?: boolean }) {
+function RatioCell({
+  values,
+  kind,
+  showWeeks = false,
+}: {
+  values: RatioValues | null;
+  kind: Kind;
+  showWeeks?: boolean;
+}) {
   const rate = values ? KINDS[kind].rate(values) : null;
   if (!values || rate == null) return <span className="text-slate-500">non disponible</span>;
   const incomplete = (kind === "kg" && values.incomplete.weight > 0) || (kind === "cout" && values.incomplete.cost > 0);
@@ -131,8 +191,16 @@ function RatioCell({ values, kind, showWeeks = false }: { values: RatioValues | 
     <span>
       <span className="text-lg font-semibold tabular-nums">{percent.format(rate)}</span>
       <span className="block text-xs text-slate-600 tabular-nums">{KINDS[kind].detail(values)}</span>
-      {showWeeks && <span className="block text-xs text-slate-500">sur {values.weeks} semaine{values.weeks > 1 ? "s" : ""}</span>}
-      {incomplete && <span className="block text-xs text-amber-700">dénominateur incomplet (codes sans {kind === "kg" ? "poids" : "coût"} Melba)</span>}
+      {showWeeks && (
+        <span className="block text-xs text-slate-500">
+          sur {values.weeks} semaine{values.weeks > 1 ? "s" : ""}
+        </span>
+      )}
+      {incomplete && (
+        <span className="block text-xs text-amber-700">
+          dénominateur incomplet (codes sans {kind === "kg" ? "poids" : "coût"} Melba)
+        </span>
+      )}
     </span>
   );
 }

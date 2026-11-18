@@ -155,7 +155,9 @@ export const lossDeclarations = pgTable(
     index("loss_declarations_cause_idx").on(t.causeId),
     index("loss_declarations_product_idx").on(t.productId),
     index("loss_declarations_created_by_idx").on(t.createdBy),
-    uniqueIndex("loss_declarations_client_id_key").on(t.clientId).where(sql`${t.clientId} is not null`),
+    uniqueIndex("loss_declarations_client_id_key")
+      .on(t.clientId)
+      .where(sql`${t.clientId} is not null`),
     check("loss_declarations_quantity_positive", sql`${t.quantity} > 0 and ${t.netQuantity} > 0`),
     check(
       "loss_declarations_team_matches_responsibility",

@@ -5,7 +5,13 @@ import { reconciliationWeeks, weekReconciliation } from "@/modules/matieres/reco
 
 export const metadata = { title: "Recoupement de la semaine — Administration" };
 
-const fmtEur = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: n < 0.1 ? 4 : 2 });
+const fmtEur = (n: number) =>
+  n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: n < 0.1 ? 4 : 2,
+  });
 const fmtPct = (n: number) => `${n > 0 ? "+" : ""}${(n * 100).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} %`;
 const fmtQty = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 3 });
 const shortDate = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
@@ -20,7 +26,11 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
   const { semaine } = await searchParams;
   const weeks = await reconciliationWeeks(db, admin);
   // Par défaut : la semaine la plus récente qui a son tome et ses bons (le tome arrive le mardi, les bons le jeudi).
-  const selected = weeks.find((w) => w.id === semaine) ?? weeks.find((w) => w.hasTome && w.orders > 0) ?? weeks.find((w) => w.orders > 0) ?? weeks[0];
+  const selected =
+    weeks.find((w) => w.id === semaine) ??
+    weeks.find((w) => w.hasTome && w.orders > 0) ??
+    weeks.find((w) => w.orders > 0) ??
+    weeks[0];
   const r = selected ? await weekReconciliation(db, admin, selected.id) : null;
 
   return (
@@ -30,8 +40,8 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
       </Link>
       <h1 className="text-2xl font-bold">Recoupement de la semaine</h1>
       <p className="text-slate-600">
-        Les ingrédients du tome face aux bons de commande de la même semaine de production. Les bons de la semaine suivante arrivent au plus tôt le
-        jeudi : déposez-les dans{" "}
+        Les ingrédients du tome face aux bons de commande de la même semaine de production. Les bons de la semaine
+        suivante arrivent au plus tôt le jeudi : déposez-les dans{" "}
         <Link href="/admin/import" className="text-teal-800 underline">
           Import
         </Link>
@@ -39,17 +49,25 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
       </p>
 
       {!selected || !r ? (
-        <p className="rounded-2xl bg-white p-4 shadow-sm">Aucune semaine à recouper : importez un tome ou déposez des bons de commande.</p>
+        <p className="rounded-2xl bg-white p-4 shadow-sm">
+          Aucune semaine à recouper : importez un tome ou déposez des bons de commande.
+        </p>
       ) : (
         <>
           <form method="get" className="flex flex-wrap items-end gap-2 rounded-2xl bg-white p-4 shadow-sm">
             <label className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="text-sm font-medium text-slate-700">Semaine de production</span>
-              <select name="semaine" defaultValue={selected.id} className="w-full min-w-0 rounded-xl border border-slate-300 px-3 py-2 text-base">
+              <select
+                name="semaine"
+                defaultValue={selected.id}
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-3 py-2 text-base"
+              >
                 {weeks.map((w) => (
                   <option key={w.id} value={w.id}>
                     S{String(w.number).padStart(2, "0")}-{w.year} · {shortDate(w.startDate)} ·{" "}
-                    {[w.hasTome ? "tome" : "sans tome", w.orders ? plural(w.orders, "bon", "bons") : "aucun bon"].join(", ")}
+                    {[w.hasTome ? "tome" : "sans tome", w.orders ? plural(w.orders, "bon", "bons") : "aucun bon"].join(
+                      ", ",
+                    )}
                   </option>
                 ))}
               </select>
@@ -68,22 +86,26 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
 
           {!r.hasTome && (
             <p role="status" className="rounded-xl bg-amber-50 p-3 text-amber-950">
-              Le tome de {r.week.label} n&apos;est pas encore importé : toutes les lignes des bons apparaissent comme absentes du tome.
+              Le tome de {r.week.label} n&apos;est pas encore importé : toutes les lignes des bons apparaissent comme
+              absentes du tome.
             </p>
           )}
           {r.orders === 0 && (
             <p role="status" className="rounded-xl bg-amber-50 p-3 text-amber-950">
-              Aucun bon de commande déposé pour {r.week.label} : tous les ingrédients du tome apparaissent sans commande.
+              Aucun bon de commande déposé pour {r.week.label} : tous les ingrédients du tome apparaissent sans
+              commande.
             </p>
           )}
 
           <Section title="Écarts de prix entre le tome et le bon" count={r.priceGaps.length} open>
             <p className="text-sm text-slate-600">
-              Prix du tome de la semaine face au prix d&apos;achat du bon (la dernière livraison s&apos;il y en a plusieurs), du plus grand écart au plus
-              petit. Le coût du tome compte la préparation : une perte à l&apos;épluchage ou au parage le rend plus cher que le prix d&apos;achat, un
-              féculent qui gonfle à la cuisson le rend moins cher. Un écart n&apos;est donc pas forcément un changement de prix. Les écarts de moins de
-              0,5 % (arrondi du tome) ne sont pas montrés
-              {r.incomparable > 0 && `, ni ${plural(r.incomparable, "matière dont les prix ne se comparent pas", "matières dont les prix ne se comparent pas")} (liquide sans densité, unités différentes)`}
+              Prix du tome de la semaine face au prix d&apos;achat du bon (la dernière livraison s&apos;il y en a
+              plusieurs), du plus grand écart au plus petit. Le coût du tome compte la préparation : une perte à
+              l&apos;épluchage ou au parage le rend plus cher que le prix d&apos;achat, un féculent qui gonfle à la
+              cuisson le rend moins cher. Un écart n&apos;est donc pas forcément un changement de prix. Les écarts de
+              moins de 0,5 % (arrondi du tome) ne sont pas montrés
+              {r.incomparable > 0 &&
+                `, ni ${plural(r.incomparable, "matière dont les prix ne se comparent pas", "matières dont les prix ne se comparent pas")} (liquide sans densité, unités différentes)`}
               .
             </p>
             <Table head={["Matière", "Fournisseur", "Tome", "Bon", "Écart"]} right={[2, 3, 4]}>
@@ -106,7 +128,9 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
           </Section>
 
           <Section title="Commandes absentes du tome" count={r.notInTome.length} open>
-            <p className="text-sm text-slate-600">Lignes des bons de la semaine dont la désignation n&apos;est pas un ingrédient du tome de la semaine.</p>
+            <p className="text-sm text-slate-600">
+              Lignes des bons de la semaine dont la désignation n&apos;est pas un ingrédient du tome de la semaine.
+            </p>
             <Table head={["Fournisseur", "Désignation", "Quantité", "Total HT", "Cité dans le tome de"]} right={[2, 3]}>
               {r.notInTome.map((l) => (
                 <tr key={`${l.orderNumber}-${l.designation}`} className="border-t border-slate-100">
@@ -118,7 +142,9 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
                     {fmtQty(l.quantity)} {l.packagingLabel ?? ""}
                   </td>
                   <td className="py-1 pr-2 text-right tabular-nums">{l.totalEur != null ? fmtEur(l.totalEur) : "—"}</td>
-                  <td className="py-1">{l.otherTomes.length ? l.otherTomes.join(", ") : <span className="text-slate-500">aucun</span>}</td>
+                  <td className="py-1">
+                    {l.otherTomes.length ? l.otherTomes.join(", ") : <span className="text-slate-500">aucun</span>}
+                  </td>
                 </tr>
               ))}
             </Table>
@@ -126,8 +152,8 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
 
           <Section title="Ingrédients du tome sans commande cette semaine" count={r.withoutOrder.length}>
             <p className="text-sm text-slate-600">
-              Ingrédients du tome qu&apos;aucun bon de la semaine ne commande : pris sur le stock, commandés autrement, ou bon pas encore déposé. La
-              dernière commande déposée avant la semaine est indiquée.
+              Ingrédients du tome qu&apos;aucun bon de la semaine ne commande : pris sur le stock, commandés autrement,
+              ou bon pas encore déposé. La dernière commande déposée avant la semaine est indiquée.
             </p>
             <Table head={["Ingrédient", "Utilisé dans", "Dernière commande"]}>
               {r.withoutOrder.map((m) => (
@@ -135,7 +161,12 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
                   <td className="py-1 pr-2">{m.name}</td>
                   <td className="py-1 pr-2 text-slate-700">
                     {m.usedIn.slice(0, 2).join(" ; ")}
-                    {m.usedIn.length > 2 && <span className="text-slate-500"> et {m.usedIn.length - 2} autre{m.usedIn.length > 3 ? "s" : ""}</span>}
+                    {m.usedIn.length > 2 && (
+                      <span className="text-slate-500">
+                        {" "}
+                        et {m.usedIn.length - 2} autre{m.usedIn.length > 3 ? "s" : ""}
+                      </span>
+                    )}
                   </td>
                   <td className="py-1">
                     {m.lastOrder ? (
@@ -163,13 +194,27 @@ function Tile({ value, label }: { value: number; label: string }) {
   );
 }
 
-function Section({ title, count, open, children }: { title: string; count: number; open?: boolean; children: React.ReactNode }) {
+function Section({
+  title,
+  count,
+  open,
+  children,
+}: {
+  title: string;
+  count: number;
+  open?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <details open={open && count > 0} className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
       <summary className="cursor-pointer text-lg font-semibold">
         {title} ({count})
       </summary>
-      {count === 0 ? <p className="mt-2 text-slate-600">Rien à signaler.</p> : <div className="mt-2 flex flex-col gap-2">{children}</div>}
+      {count === 0 ? (
+        <p className="mt-2 text-slate-600">Rien à signaler.</p>
+      ) : (
+        <div className="mt-2 flex flex-col gap-2">{children}</div>
+      )}
     </details>
   );
 }

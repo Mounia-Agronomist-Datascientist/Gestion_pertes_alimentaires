@@ -18,7 +18,20 @@ export type Period =
 
 export const PERIOD_KINDS = ["semaine", "mois", "annee", "periode"] as const;
 
-const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const MONTHS = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+];
 const pad = (n: number) => String(n).padStart(2, "0");
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -33,7 +46,11 @@ export function monthBounds(year: number, month: number): { from: LocalDate; to:
  * semaine voisine dans le calendrier stocké (la semaine 1 n'a pas forcément de semaine 0) ; null s'il ne la
  * connaît pas.
  */
-export function adjacentPeriod(period: Period, step: -1 | 1, adjacentWeek?: { year: number; number: number } | null): Period | null {
+export function adjacentPeriod(
+  period: Period,
+  step: -1 | 1,
+  adjacentWeek?: { year: number; number: number } | null,
+): Period | null {
   switch (period.kind) {
     case "semaine":
       return adjacentWeek ? { kind: "semaine", ...adjacentWeek } : null;
@@ -51,7 +68,8 @@ export function adjacentPeriod(period: Period, step: -1 | 1, adjacentWeek?: { ye
 }
 
 /** Période précédente (évolution affichée au tableau de bord). */
-export const previousPeriod = (period: Period, previousWeek?: { year: number; number: number } | null) => adjacentPeriod(period, -1, previousWeek);
+export const previousPeriod = (period: Period, previousWeek?: { year: number; number: number } | null) =>
+  adjacentPeriod(period, -1, previousWeek);
 
 const frDate = (d: LocalDate) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}`;
 
@@ -78,7 +96,9 @@ export function parsePeriod(params: Record<string, string | undefined>): Period 
   switch (params.periode) {
     case "semaine": {
       const number = Number(params.semaine);
-      return validYear && Number.isInteger(number) && number >= 1 && number <= 53 ? { kind: "semaine", year, number } : null;
+      return validYear && Number.isInteger(number) && number >= 1 && number <= 53
+        ? { kind: "semaine", year, number }
+        : null;
     }
     case "mois": {
       const month = Number(params.mois);

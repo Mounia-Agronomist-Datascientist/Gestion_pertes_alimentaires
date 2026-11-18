@@ -1,7 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { PACKAGING_KIND_LABELS, PACKAGING_KINDS, type PackagingKind, PORTION_KIND_LABELS, PORTION_KINDS } from "@/modules/admin/packaging-labels";
+import {
+  PACKAGING_KIND_LABELS,
+  PACKAGING_KINDS,
+  type PackagingKind,
+  PORTION_KIND_LABELS,
+  PORTION_KINDS,
+} from "@/modules/admin/packaging-labels";
 import { type PlaceActionState, packagingAction } from "../actions";
 import { Feedback } from "../feedback";
 
@@ -29,17 +35,24 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
   const [creating, setCreating] = useState(false);
 
   const portionTotal = (kind: (typeof PORTION_KINDS)[number]) =>
-    items.filter((i) => i.active && i.perPortion[kind]).reduce((sum, i) => sum + (i.currentCostEur ?? 0) * i.perPortion[kind]!, 0);
-  const missingCost = (kind: (typeof PORTION_KINDS)[number]) => items.some((i) => i.active && i.perPortion[kind] && i.currentCostEur == null);
+    items
+      .filter((i) => i.active && i.perPortion[kind])
+      .reduce((sum, i) => sum + (i.currentCostEur ?? 0) * i.perPortion[kind]!, 0);
+  const missingCost = (kind: (typeof PORTION_KINDS)[number]) =>
+    items.some((i) => i.active && i.perPortion[kind] && i.currentCostEur == null);
 
   return (
     <div className="flex flex-col gap-4">
       <section className="grid gap-2 sm:grid-cols-2">
         {PORTION_KINDS.map((kind) => (
           <div key={kind} className="rounded-2xl bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-600">Emballages {PORTION_KIND_LABELS[kind].toLowerCase()}, aujourd&apos;hui</p>
+            <p className="text-sm text-slate-600">
+              Emballages {PORTION_KIND_LABELS[kind].toLowerCase()}, aujourd&apos;hui
+            </p>
             <p className="text-2xl font-bold">{fmtEur(Math.round(portionTotal(kind) * 100_000) / 100_000)}</p>
-            {missingCost(kind) && <p className="text-sm text-amber-800">Un emballage n&apos;a pas de coût : total incomplet</p>}
+            {missingCost(kind) && (
+              <p className="text-sm text-amber-800">Un emballage n&apos;a pas de coût : total incomplet</p>
+            )}
           </div>
         ))}
       </section>
@@ -73,18 +86,27 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
       {items.length === 0 && <p className="text-slate-600">Aucun emballage pour l&apos;instant.</p>}
       <ul className="flex flex-col gap-2">
         {items.map((i) => (
-          <li key={i.id} className={`flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ${i.active ? "" : "opacity-60"}`}>
+          <li
+            key={i.id}
+            className={`flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ${i.active ? "" : "opacity-60"}`}
+          >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="font-semibold">
                 {i.name} <span className="font-mono text-sm font-normal text-slate-500">{i.code}</span>
-                {!i.active && <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>}
+                {!i.active && (
+                  <span className="ml-2 rounded-full bg-slate-200 px-2 text-sm font-normal">Désactivé</span>
+                )}
               </span>
-              <span className="text-lg font-bold">{i.currentCostEur != null ? `${fmtEur(i.currentCostEur)} / ${i.unit}` : "Coût à saisir"}</span>
+              <span className="text-lg font-bold">
+                {i.currentCostEur != null ? `${fmtEur(i.currentCostEur)} / ${i.unit}` : "Coût à saisir"}
+              </span>
             </div>
             <span className="text-sm text-slate-600">
               {PACKAGING_KIND_LABELS[i.kind]}
               {i.supplier && ` · ${i.supplier}`}
-              {PORTION_KINDS.filter((k) => i.perPortion[k]).map((k) => ` · ${fmtQty(i.perPortion[k]!)} ${PORTION_KIND_LABELS[k].toLowerCase()}`)}
+              {PORTION_KINDS.filter((k) => i.perPortion[k]).map(
+                (k) => ` · ${fmtQty(i.perPortion[k]!)} ${PORTION_KIND_LABELS[k].toLowerCase()}`,
+              )}
             </span>
 
             {editing === i.id ? (
@@ -103,7 +125,12 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
                       <input name="validFrom" type="date" required defaultValue={today} className="field" />
                     </label>
                   </div>
-                  <input name="note" className="field" placeholder="Source ou motif (facultatif)" aria-label="Source ou motif" />
+                  <input
+                    name="note"
+                    className="field"
+                    placeholder="Source ou motif (facultatif)"
+                    aria-label="Source ou motif"
+                  />
                   <button type="submit" disabled={pending} className="btn-primary">
                     Enregistrer le coût
                   </button>
@@ -116,7 +143,12 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
                     {PORTION_KINDS.map((k) => (
                       <label key={k} className="flex flex-col gap-1">
                         <span className="text-sm">{PORTION_KIND_LABELS[k]}</span>
-                        <input name={`portion_${k}`} inputMode="decimal" defaultValue={i.perPortion[k] ?? ""} className="field" />
+                        <input
+                          name={`portion_${k}`}
+                          inputMode="decimal"
+                          defaultValue={i.perPortion[k] ?? ""}
+                          className="field"
+                        />
                       </label>
                     ))}
                   </div>
@@ -139,7 +171,11 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
             ) : (
               <form action={action} className="flex gap-4">
                 <input type="hidden" name="id" value={i.id} />
-                <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(i.id)}>
+                <button
+                  type="button"
+                  className="text-sm font-medium text-teal-800 underline"
+                  onClick={() => setEditing(i.id)}
+                >
                   Modifier
                 </button>
                 <button
@@ -161,7 +197,9 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
                     <li key={v.id}>
                       {fmtEur(v.unitCostEur)} — du {fmtDay(v.validFrom)}
                       {v.validTo && ` au ${fmtDay(v.validTo)}`}
-                      {v.validFrom > today ? " (à venir)" : (v.validTo == null || v.validTo >= today) && " (en vigueur)"}
+                      {v.validFrom > today
+                        ? " (à venir)"
+                        : (v.validTo == null || v.validTo >= today) && " (en vigueur)"}
                       {v.source && ` · ${v.source}`}
                     </li>
                   ))}

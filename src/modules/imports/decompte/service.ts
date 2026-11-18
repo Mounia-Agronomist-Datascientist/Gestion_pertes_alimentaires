@@ -45,7 +45,10 @@ export async function saveProductionCount(db: Db, admin: AuthUser, input: Decomp
       .orderBy(desc(s.productionCounts.version))
       .limit(1);
     if (previous?.status === "validee") {
-      await tx.update(s.productionCounts).set({ status: "remplacee", replacedAt: now }).where(eq(s.productionCounts.id, previous.id));
+      await tx
+        .update(s.productionCounts)
+        .set({ status: "remplacee", replacedAt: now })
+        .where(eq(s.productionCounts.id, previous.id));
     }
     const [created] = await tx
       .insert(s.productionCounts)
@@ -59,14 +62,22 @@ export async function saveProductionCount(db: Db, admin: AuthUser, input: Decomp
         createdAt: now,
       })
       .returning();
-    await tx.insert(s.productionCountLines).values(input.rows.map((r) => ({ countId: created!.id, code: r.code, madeBarquettes: r.made })));
+    await tx
+      .insert(s.productionCountLines)
+      .values(input.rows.map((r) => ({ countId: created!.id, code: r.code, madeBarquettes: r.made })));
     const total = input.rows.reduce((a, r) => a + r.made, 0);
     await writeAudit(tx, {
       userId: admin.id,
       action: "import_count",
       entity: "production_count",
       entityId: created!.id,
-      after: { week: `S${input.week}-${input.year}`, version: created!.version, codes: input.rows.length, barquettes: total, file: `${input.fileName} (onglet ${input.sheetName})` },
+      after: {
+        week: `S${input.week}-${input.year}`,
+        version: created!.version,
+        codes: input.rows.length,
+        barquettes: total,
+        file: `${input.fileName} (onglet ${input.sheetName})`,
+      },
       reason: previous ? `Remplace la version ${previous.version}` : null,
       occurredAt: now,
     });

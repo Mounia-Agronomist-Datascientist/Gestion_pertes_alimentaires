@@ -27,10 +27,21 @@ describe("référentiel des matières premières tiré des tomes", () => {
   let teamD: AuthUser;
   let s45: WeekImportPreview;
   const melba = () => t.db.select().from(s.products).where(like(s.products.externalId, "melba:%"));
-  const byKey = async (key: string) => (await t.db.select().from(s.products).where(eq(s.products.externalId, `melba:${key}`)))[0]!;
-  const pricesOf = (productId: string) => t.db.select().from(s.productPrices).where(eq(s.productPrices.productId, productId));
+  const byKey = async (key: string) =>
+    (
+      await t.db
+        .select()
+        .from(s.products)
+        .where(eq(s.products.externalId, `melba:${key}`))
+    )[0]!;
+  const pricesOf = (productId: string) =>
+    t.db.select().from(s.productPrices).where(eq(s.productPrices.productId, productId));
   const ingredientKeys = (p: WeekImportPreview) =>
-    new Set([...p.recipes.flatMap((r) => r.lines), ...p.subRecipes.flatMap((sr) => sr.lines)].filter((l) => !l.isSubRecipe).map((l) => l.key));
+    new Set(
+      [...p.recipes.flatMap((r) => r.lines), ...p.subRecipes.flatMap((sr) => sr.lines)]
+        .filter((l) => !l.isSubRecipe)
+        .map((l) => l.key),
+    );
   /** Change le coût de toutes les lignes d'un ingrédient (×factor) dans une copie de l'aperçu. */
   const withCost = (p: WeekImportPreview, key: string, factor: number, week: number) => {
     const copy = structuredClone(p);
@@ -40,14 +51,37 @@ describe("référentiel des matières premières tiré des tomes", () => {
     }
     return copy;
   };
-  const save = (preview: WeekImportPreview) => saveWeekImport(t.db, admin, { preview, tomeFileName: "tome.pdf", planFileName: "plan.xlsx", planSheetName: `S${preview.week}` });
+  const save = (preview: WeekImportPreview) =>
+    saveWeekImport(t.db, admin, {
+      preview,
+      tomeFileName: "tome.pdf",
+      planFileName: "plan.xlsx",
+      planSheetName: `S${preview.week}`,
+    });
 
   beforeAll(async () => {
     t = await createTestDb();
     await seed(t.db);
     const teamDId = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "D")))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    teamD = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-d", displayName: "Équipe D", roleCode: "equipe", teamId: teamDId, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    teamD = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-d",
+        displayName: "Équipe D",
+        roleCode: "equipe",
+        teamId: teamDId,
+        password: "mot-de-passe-equipe",
+      }),
+    );
     s45 = buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid()));
     // Produit saisi à la main avant le référentiel : il doit être rattaché, pas doublé.
     await createProduct(t.db, admin, { name: "Ail pelé", category: "matiere_premiere", defaultUnit: "kg" });
@@ -75,12 +109,24 @@ describe("référentiel des matières premières tiré des tomes", () => {
     const garlic = await byKey("ail pele");
     const before = (await pricesOf(garlic.id))[0]!;
     const other = (await melba()).find((p) => p.id !== garlic.id && p.category === "matiere_premiere")!;
-    await updateProduct(t.db, admin, other.id, { name: "Nom choisi à la main", category: "matiere_premiere", defaultUnit: other.defaultUnit });
+    await updateProduct(t.db, admin, other.id, {
+      name: "Nom choisi à la main",
+      category: "matiere_premiere",
+      defaultUnit: other.defaultUnit,
+    });
     await setProductActive(t.db, admin, other.id, false);
     const otherPrices = (await pricesOf(other.id)).length;
 
     const s46 = withCost(s45, "ail pele", 1.1, 46);
-    s46.recipes[0]!.lines.push({ label: "Fleur de sel de Camargue", key: "fleur de sel de camargue", isSubRecipe: false, quantity: 1000, unit: "g", unitWeightG: null, cost: 3 });
+    s46.recipes[0]!.lines.push({
+      label: "Fleur de sel de Camargue",
+      key: "fleur de sel de camargue",
+      isSubRecipe: false,
+      quantity: 1000,
+      unit: "g",
+      unitWeightG: null,
+      cost: 3,
+    });
     await save(s46);
 
     const prices = (await pricesOf(garlic.id)).sort((a, b) => a.validFrom.localeCompare(b.validFrom));
@@ -119,23 +165,41 @@ describe("référentiel des matières premières tiré des tomes", () => {
       createDeclaration(
         t.db,
         teamD,
-        { occurredOn, subzoneId: reception, product: { productId: garlic.id }, method: "pesee", quantity: 2, unitCode: "kg", causeId: cause, destinations: [{ destinationId: bin, quantity: 2, binNumber: "1" }] },
+        {
+          occurredOn,
+          subzoneId: reception,
+          product: { productId: garlic.id },
+          method: "pesee",
+          quantity: 2,
+          unitCode: "kg",
+          causeId: cause,
+          destinations: [{ destinationId: bin, quantity: 2, binNumber: "1" }],
+        },
         NOW,
       );
     const p45 = (await materialPriceAt(t.db, garlic.id, "2026-11-02"))!.perKgEur!;
     const p46 = (await materialPriceAt(t.db, garlic.id, "2026-11-06"))!.perKgEur!;
     const d45 = await create("2026-11-02");
     const d46 = await create("2026-11-06");
-    const row = async (id: string) => (await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, id)))[0]!;
-    expect(await row(d45.id)).toMatchObject({ costPerKgEur: p45, materialCostEur: Math.round(2 * p45 * 10_000) / 10_000 });
+    const row = async (id: string) =>
+      (await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, id)))[0]!;
+    expect(await row(d45.id)).toMatchObject({
+      costPerKgEur: p45,
+      materialCostEur: Math.round(2 * p45 * 10_000) / 10_000,
+    });
     expect(await row(d46.id)).toMatchObject({ costPerKgEur: p46 });
     expect((await row(d46.id)).costDetails).toMatchObject({ priceVersion: { source: "tome", validFrom: S46 } });
 
     // Un prix d'achat (bon de commande) passe devant le tome pour les pertes suivantes ; les anciennes ne bougent pas.
-    await t.db.insert(s.productPrices).values({ productId: garlic.id, source: "bon_commande", validFrom: "2026-11-06", unit: "kg", perKgEur: 9.5 });
+    await t.db
+      .insert(s.productPrices)
+      .values({ productId: garlic.id, source: "bon_commande", validFrom: "2026-11-06", unit: "kg", perKgEur: 9.5 });
     expect((await materialPriceAt(t.db, garlic.id, "2026-11-06"))!.perKgEur).toBe(9.5);
     expect((await row(d46.id)).costPerKgEur).toBe(p46);
-    const unchanged = await t.db.select().from(s.productPrices).where(and(eq(s.productPrices.productId, garlic.id), eq(s.productPrices.source, "tome")));
+    const unchanged = await t.db
+      .select()
+      .from(s.productPrices)
+      .where(and(eq(s.productPrices.productId, garlic.id), eq(s.productPrices.source, "tome")));
     expect(unchanged).toHaveLength(2);
   });
 
@@ -158,7 +222,10 @@ describe("référentiel des matières premières tiré des tomes", () => {
       .from(s.weeklyImports)
       .innerJoin(s.productionWeeks, eq(s.weeklyImports.productionWeekId, s.productionWeeks.id))
       .where(and(eq(s.productionWeeks.startDate, S45), eq(s.weeklyImports.status, "validee")));
-    const [oil] = await t.db.select().from(s.weekRecipeLines).where(and(eq(s.weekRecipeLines.importId, current!.id), eq(s.weekRecipeLines.key, "huile colza")));
+    const [oil] = await t.db
+      .select()
+      .from(s.weekRecipeLines)
+      .where(and(eq(s.weekRecipeLines.importId, current!.id), eq(s.weekRecipeLines.key, "huile colza")));
     expect(await findWeekItem(t.db, "ingredient", oil!.id)).toMatchObject({ densityKgPerL: 0.915 });
     const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
     const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
@@ -166,7 +233,16 @@ describe("référentiel des matières premières tiré des tomes", () => {
     const d = await createDeclaration(
       t.db,
       teamD,
-      { occurredOn: "2026-11-02", subzoneId: sub, product: { weekItem: { kind: "ingredient", id: oil!.id } }, method: "estimation_manuelle", quantity: 2, unitCode: "l", causeId: cause, destinations: [{ destinationId: bin, quantity: 2, binNumber: "1" }] },
+      {
+        occurredOn: "2026-11-02",
+        subzoneId: sub,
+        product: { weekItem: { kind: "ingredient", id: oil!.id } },
+        method: "estimation_manuelle",
+        quantity: 2,
+        unitCode: "l",
+        causeId: cause,
+        destinations: [{ destinationId: bin, quantity: 2, binNumber: "1" }],
+      },
       NOW,
     );
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));

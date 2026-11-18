@@ -32,11 +32,34 @@ describe("authentification et droits", () => {
     teamAId = teams.find((x) => x.letter === "A")!.id;
     teamBId = teams.find((x) => x.letter === "B")!.id;
     condZoneId = await zoneIdByCode(t.db, "CONDITIONNEMENT");
-    await createAccount(t.db, { login: "equipe-a", displayName: "Équipe A", roleCode: "equipe", teamId: teamAId, password: PASSWORD });
-    await createAccount(t.db, { login: "equipe-b", displayName: "Équipe B", roleCode: "equipe", teamId: teamBId, password: PASSWORD });
-    await createAccount(t.db, { login: "resp-cond", displayName: "Resp. conditionnement", roleCode: "resp_zone", zoneIds: [condZoneId], password: PASSWORD });
+    await createAccount(t.db, {
+      login: "equipe-a",
+      displayName: "Équipe A",
+      roleCode: "equipe",
+      teamId: teamAId,
+      password: PASSWORD,
+    });
+    await createAccount(t.db, {
+      login: "equipe-b",
+      displayName: "Équipe B",
+      roleCode: "equipe",
+      teamId: teamBId,
+      password: PASSWORD,
+    });
+    await createAccount(t.db, {
+      login: "resp-cond",
+      displayName: "Resp. conditionnement",
+      roleCode: "resp_zone",
+      zoneIds: [condZoneId],
+      password: PASSWORD,
+    });
     await createAccount(t.db, { login: "admin", displayName: "Admin", roleCode: "admin", password: PASSWORD });
-    await createAccount(t.db, { login: "direction", displayName: "Direction", roleCode: "direction", password: PASSWORD });
+    await createAccount(t.db, {
+      login: "direction",
+      displayName: "Direction",
+      roleCode: "direction",
+      password: PASSWORD,
+    });
   });
 
   afterAll(async () => {
@@ -60,7 +83,10 @@ describe("authentification et droits", () => {
     });
 
     it("refuse un mauvais mot de passe ou un identifiant inconnu, avec le même message", async () => {
-      expect(await login(t.db, { login: "equipe-a", password: "faux-mot-de-passe" })).toEqual({ ok: false, reason: "invalid" });
+      expect(await login(t.db, { login: "equipe-a", password: "faux-mot-de-passe" })).toEqual({
+        ok: false,
+        reason: "invalid",
+      });
       expect(await login(t.db, { login: "inconnu", password: PASSWORD })).toEqual({ ok: false, reason: "invalid" });
     });
 
@@ -69,7 +95,10 @@ describe("authentification et droits", () => {
       for (let i = 0; i < LOGIN_MAX_FAILURES; i++) {
         await login(t.db, { login: "equipe-b", password: "mauvais" }, { now });
       }
-      expect(await login(t.db, { login: "equipe-b", password: PASSWORD }, { now })).toEqual({ ok: false, reason: "locked" });
+      expect(await login(t.db, { login: "equipe-b", password: PASSWORD }, { now })).toEqual({
+        ok: false,
+        reason: "locked",
+      });
       expect((await login(t.db, { login: "admin", password: PASSWORD }, { now })).ok).toBe(true);
       // 15 minutes plus tard, le compte est débloqué.
       const later = new Date(now.getTime() + 16 * 60 * 1000);
@@ -141,7 +170,9 @@ describe("authentification et droits", () => {
       const id = here.user.id;
       expect(here.user.mustChangePassword).toBe(true);
 
-      await expect(changePassword(t.db, id, { current: "faux", next: "nouveau-mot-de-passe" })).rejects.toThrow(InvalidCurrentPasswordError);
+      await expect(changePassword(t.db, id, { current: "faux", next: "nouveau-mot-de-passe" })).rejects.toThrow(
+        InvalidCurrentPasswordError,
+      );
       await expect(changePassword(t.db, id, { current: PASSWORD, next: "court" })).rejects.toThrow(PasswordPolicyError);
 
       await changePassword(t.db, id, { current: PASSWORD, next: "nouveau-mot-de-passe" }, here.token);
@@ -153,7 +184,10 @@ describe("authentification et droits", () => {
 
   describe("matrice d'autorisation et périmètres", () => {
     async function userOf(loginName: string) {
-      const r = await login(t.db, { login: loginName, password: loginName === "direction" ? "nouveau-mot-de-passe" : PASSWORD });
+      const r = await login(t.db, {
+        login: loginName,
+        password: loginName === "direction" ? "nouveau-mot-de-passe" : PASSWORD,
+      });
       if (!r.ok) throw new Error(`connexion attendue pour ${loginName}`);
       return r.user;
     }

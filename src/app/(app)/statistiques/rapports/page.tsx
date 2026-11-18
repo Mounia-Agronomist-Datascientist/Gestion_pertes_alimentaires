@@ -17,7 +17,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   if (!canReadStats(user)) redirect("/");
   const params = await searchParams;
   const ctx = await statsContext(user, params);
-  const [anchor, previous, next] = await Promise.all([anchorWeek(db, ctx), adjacentOf(db, ctx.period, -1), adjacentOf(db, ctx.period, 1)]);
+  const [anchor, previous, next] = await Promise.all([
+    anchorWeek(db, ctx),
+    adjacentOf(db, ctx.period, -1),
+    adjacentOf(db, ctx.period, 1),
+  ]);
   const path = "/statistiques/rapports";
   const note = scopeNote(user, ctx.compareTeams);
 
@@ -33,15 +37,42 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         .where(and(eq(s.productionWeeks.year, ctx.period.year), eq(s.productionWeeks.number, ctx.period.number)));
       if (week) date = addDays(week.startDate, 4);
     }
-    month = ctx.period.kind === "annee" ? { kind: "mois", year: ctx.period.year, month: 12 } : { kind: "mois", year: Number(date.slice(0, 4)), month: Number(date.slice(5, 7)) };
+    month =
+      ctx.period.kind === "annee"
+        ? { kind: "mois", year: ctx.period.year, month: 12 }
+        : { kind: "mois", year: Number(date.slice(0, 4)), month: Number(date.slice(5, 7)) };
   }
-  const year: Extract<Period, { kind: "annee" }> = { kind: "annee", year: ctx.period.kind === "periode" ? Number(ctx.period.to.slice(0, 4)) : ctx.period.year };
-  const href = (type: string, period: Period) => `/statistiques/rapport?${new URLSearchParams({ ...periodParams(period), ...ctx.filterParams, type })}`;
+  const year: Extract<Period, { kind: "annee" }> = {
+    kind: "annee",
+    year: ctx.period.kind === "periode" ? Number(ctx.period.to.slice(0, 4)) : ctx.period.year,
+  };
+  const href = (type: string, period: Period) =>
+    `/statistiques/rapport?${new URLSearchParams({ ...periodParams(period), ...ctx.filterParams, type })}`;
   const reports = [
-    { type: "hebdomadaire", title: "Rapport hebdomadaire", period: anchor, text: "Montants, zones, causes et produits de la semaine, points d'amélioration, 12 dernières semaines." },
-    { type: "mensuel", title: "Rapport mensuel", period: month, text: "Synthèse du mois, devenir des pertes, zones, équipes, causes, produits, 12 derniers mois." },
-    { type: "annuel", title: "Rapport annuel", period: year, text: "Synthèse de l'année, zones, équipes, causes, produits, mois par mois." },
-    { type: "valorisation", title: "Rapport de valorisation", period: ctx.period, text: "Avec recette, sans recette, à part : kg, coût des produits, recettes, 12 semaines." },
+    {
+      type: "hebdomadaire",
+      title: "Rapport hebdomadaire",
+      period: anchor,
+      text: "Montants, zones, causes et produits de la semaine, points d'amélioration, 12 dernières semaines.",
+    },
+    {
+      type: "mensuel",
+      title: "Rapport mensuel",
+      period: month,
+      text: "Synthèse du mois, devenir des pertes, zones, équipes, causes, produits, 12 derniers mois.",
+    },
+    {
+      type: "annuel",
+      title: "Rapport annuel",
+      period: year,
+      text: "Synthèse de l'année, zones, équipes, causes, produits, mois par mois.",
+    },
+    {
+      type: "valorisation",
+      title: "Rapport de valorisation",
+      period: ctx.period,
+      text: "Avec recette, sans recette, à part : kg, coût des produits, recettes, 12 semaines.",
+    },
     {
       type: "environnemental",
       title: "Rapport environnemental",
@@ -61,15 +92,17 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <PeriodNav path={path} ctx={ctx} previous={previous} next={next} />
       <FilterForm path={path} ctx={ctx} />
       <p className="text-sm text-slate-600">
-        Chaque rapport reprend les chiffres des onglets, avec les mêmes filtres{ctx.compareTeams ? "" : " et votre périmètre"}. Choisissez la période
-        ci-dessus : le rapport mensuel prend son mois, le rapport annuel son année.
+        Chaque rapport reprend les chiffres des onglets, avec les mêmes filtres
+        {ctx.compareTeams ? "" : " et votre périmètre"}. Choisissez la période ci-dessus : le rapport mensuel prend son
+        mois, le rapport annuel son année.
       </p>
       {reports.map((r) => (
         <Card key={r.type} title={r.title}>
           <p className="text-sm text-slate-600">{r.text}</p>
           {r.period ? (
             <a className="btn-secondary flex items-center justify-center" href={href(r.type, r.period)}>
-              Télécharger le PDF — {r.period.kind === "semaine" ? formatProductionWeek(r.period) : periodLabel(r.period)}
+              Télécharger le PDF —{" "}
+              {r.period.kind === "semaine" ? formatProductionWeek(r.period) : periodLabel(r.period)}
             </a>
           ) : (
             <p className="text-sm text-red-800">Semaine absente du calendrier.</p>

@@ -8,7 +8,21 @@ import { can } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { PRODUCT_TYPES, type ProductType, productRanking, RANK_BY_LABELS } from "@/modules/statistiques/rankings";
-import { BarTable, Card, euro, ExportLinks, FilterForm, num, OptionChips, type Params, PeriodNav, pct, scopeNote, StatsTabs, statsContext } from "../shared";
+import {
+  BarTable,
+  Card,
+  euro,
+  ExportLinks,
+  FilterForm,
+  num,
+  OptionChips,
+  type Params,
+  PeriodNav,
+  pct,
+  scopeNote,
+  StatsTabs,
+  statsContext,
+} from "../shared";
 
 export const metadata = { title: "Produits — Statistiques — Pertes" };
 
@@ -20,23 +34,39 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const params = await searchParams;
   const ctx = await statsContext(user, params);
   const type: ProductType = params.type && params.type in PRODUCT_TYPES ? (params.type as ProductType) : "plats";
-  const by: RankBy = params.tri === "cout" && can(user, "indicators.read") ? "cout" : params.tri === "evenements" ? "evenements" : "kg";
-  const [ranking, previous, next] = await Promise.all([productRanking(db, user, ctx.period, ctx.filters, type, by), adjacentOf(db, ctx.period, -1), adjacentOf(db, ctx.period, 1)]);
+  const by: RankBy =
+    params.tri === "cout" && can(user, "indicators.read") ? "cout" : params.tri === "evenements" ? "evenements" : "kg";
+  const [ranking, previous, next] = await Promise.all([
+    productRanking(db, user, ctx.period, ctx.filters, type, by),
+    adjacentOf(db, ctx.period, -1),
+    adjacentOf(db, ctx.period, 1),
+  ]);
   const keep = { type, tri: by };
   const path = "/statistiques/produits";
   const note = scopeNote(user, ctx.compareTeams);
-  const value = (r: (typeof ranking.rows)[number]) => (by === "kg" ? r.summary.foodKg : by === "cout" ? (r.summary.cost?.grossEur ?? 0) : r.summary.events);
+  const value = (r: (typeof ranking.rows)[number]) =>
+    by === "kg" ? r.summary.foodKg : by === "cout" ? (r.summary.cost?.grossEur ?? 0) : r.summary.events;
   const text = (r: (typeof ranking.rows)[number]) =>
-    by === "kg" ? `${num.format(r.summary.foodKg)} kg` : by === "cout" ? euro.format(r.summary.cost?.grossEur ?? 0) : `${r.summary.events} perte${r.summary.events > 1 ? "s" : ""}`;
+    by === "kg"
+      ? `${num.format(r.summary.foodKg)} kg`
+      : by === "cout"
+        ? euro.format(r.summary.cost?.grossEur ?? 0)
+        : `${r.summary.events} perte${r.summary.events > 1 ? "s" : ""}`;
   const detail = (r: (typeof ranking.rows)[number]) =>
     [
-      type === "tous" || type === "autres" ? PRODUCT_CATEGORY_LABELS[r.category as keyof typeof PRODUCT_CATEGORY_LABELS] : null,
+      type === "tous" || type === "autres"
+        ? PRODUCT_CATEGORY_LABELS[r.category as keyof typeof PRODUCT_CATEGORY_LABELS]
+        : null,
       by !== "evenements" ? `${r.summary.events} perte${r.summary.events > 1 ? "s" : ""}` : null,
       by !== "kg" && r.summary.foodKg > 0 ? `${num.format(r.summary.foodKg)} kg` : null,
-      r.summary.barquettes > 0 ? `${num.format(r.summary.barquettes)} barquette${r.summary.barquettes > 1 ? "s" : ""}` : null,
+      r.summary.barquettes > 0
+        ? `${num.format(r.summary.barquettes)} barquette${r.summary.barquettes > 1 ? "s" : ""}`
+        : null,
       by !== "cout" && r.summary.cost ? euro.format(r.summary.cost.grossEur) : null,
       r.mainCause ? `cause principale : ${r.mainCause.name} (${pct.format(r.mainCause.share)})` : null,
-      r.usedIn?.length ? `sert à ${r.usedIn.length} plat${r.usedIn.length > 1 ? "s" : ""} : ${r.usedIn.join(", ")}` : null,
+      r.usedIn?.length
+        ? `sert à ${r.usedIn.length} plat${r.usedIn.length > 1 ? "s" : ""} : ${r.usedIn.join(", ")}`
+        : null,
       r.names.length ? `plats de la formule : ${r.names.join(" ; ")}` : null,
     ]
       .filter(Boolean)
@@ -52,7 +82,15 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       <StatsTabs user={user} ctx={ctx} active="produits" />
       <PeriodNav path={path} ctx={ctx} previous={previous} next={next} extra={keep} />
       <FilterForm path={path} ctx={ctx} keep={keep} />
-      <OptionChips label="Produits" path={path} ctx={ctx} name="type" value={type} keep={keep} options={Object.entries(PRODUCT_TYPES).map(([k, v]) => ({ value: k as ProductType, label: v.label }))} />
+      <OptionChips
+        label="Produits"
+        path={path}
+        ctx={ctx}
+        name="type"
+        value={type}
+        keep={keep}
+        options={Object.entries(PRODUCT_TYPES).map(([k, v]) => ({ value: k as ProductType, label: v.label }))}
+      />
       <OptionChips
         label="Classer"
         path={path}
@@ -60,7 +98,9 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         name="tri"
         value={by}
         keep={keep}
-        options={(Object.keys(RANK_BY_LABELS) as RankBy[]).filter((k) => k !== "cout" || ranking.withCosts).map((k) => ({ value: k, label: RANK_BY_LABELS[k] }))}
+        options={(Object.keys(RANK_BY_LABELS) as RankBy[])
+          .filter((k) => k !== "cout" || ranking.withCosts)
+          .map((k) => ({ value: k, label: RANK_BY_LABELS[k] }))}
       />
 
       <Card title={`${type === "tous" ? "Produits" : PRODUCT_TYPES[type].label} générant le plus de pertes`}>
@@ -68,16 +108,30 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           <p className="text-slate-600">Aucune perte sur cette période.</p>
         ) : (
           <>
-            <BarTable caption="Classement des produits" rows={ranking.rows.slice(0, LIMIT).map((r) => ({ key: r.key, label: r.label, value: value(r), text: text(r), detail: detail(r) }))} />
-            {ranking.rows.length > LIMIT && <p className="text-xs text-slate-500">{LIMIT} premiers sur {ranking.rows.length}.</p>}
+            <BarTable
+              caption="Classement des produits"
+              rows={ranking.rows
+                .slice(0, LIMIT)
+                .map((r) => ({ key: r.key, label: r.label, value: value(r), text: text(r), detail: detail(r) }))}
+            />
+            {ranking.rows.length > LIMIT && (
+              <p className="text-xs text-slate-500">
+                {LIMIT} premiers sur {ranking.rows.length}.
+              </p>
+            )}
           </>
         )}
       </Card>
-      <ExportLinks tab="produits" ctx={ctx} keep={keep} note="Tous les produits du classement (pas seulement les 20 premiers), avec la même période et les mêmes filtres." />
+      <ExportLinks
+        tab="produits"
+        ctx={ctx}
+        keep={keep}
+        note="Tous les produits du classement (pas seulement les 20 premiers), avec la même période et les mêmes filtres."
+      />
       <p className="text-sm text-slate-500">
-        Un plat est suivi par sa formule (code Melba) ; une sous-recette, sans code Melba, par son nom (identification au mieux d&apos;une semaine à
-        l&apos;autre) et comptée une seule fois même si elle sert à plusieurs plats. Les pertes rapportées à la production sont dans l&apos;onglet
-        « Ratios ».
+        Un plat est suivi par sa formule (code Melba) ; une sous-recette, sans code Melba, par son nom (identification
+        au mieux d&apos;une semaine à l&apos;autre) et comptée une seule fois même si elle sert à plusieurs plats. Les
+        pertes rapportées à la production sont dans l&apos;onglet « Ratios ».
       </p>
     </div>
   );

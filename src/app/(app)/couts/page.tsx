@@ -49,20 +49,28 @@ export default async function CostsPage({ searchParams }: { searchParams: Promis
 
       <section className="grid gap-2 sm:grid-cols-3" aria-label="Totaux de la semaine">
         <Stat label="Coût brut" value={euro.format(totals.grossEur)} />
-        <Stat label="Recettes encaissées" value={totals.recoveredEur ? `− ${euro.format(totals.recoveredEur)}` : euro.format(0)} />
+        <Stat
+          label="Recettes encaissées"
+          value={totals.recoveredEur ? `− ${euro.format(totals.recoveredEur)}` : euro.format(0)}
+        />
         <Stat label="Coût net" value={euro.format(totals.netEur)} strong />
       </section>
       <p className="text-sm text-slate-600">
-        {summary.declarations} perte{summary.declarations > 1 ? "s" : ""} déclarée{summary.declarations > 1 ? "s" : ""} (
-        {summary.netKg.toLocaleString("fr-FR")} kg), dont {summary.valued} valorisée{summary.valued > 1 ? "s" : ""}.
+        {summary.declarations} perte{summary.declarations > 1 ? "s" : ""} déclarée{summary.declarations > 1 ? "s" : ""}{" "}
+        ({summary.netKg.toLocaleString("fr-FR")} kg), dont {summary.valued} valorisée{summary.valued > 1 ? "s" : ""}.
         {summary.notValued > 0 &&
           ` ${summary.notValued} sans coût connu (produit hors liste ou du référentiel) : non comptée${summary.notValued > 1 ? "s" : ""}, jamais estimée${summary.notValued > 1 ? "s" : ""}.`}
-        {summary.packagingIncomplete > 0 && ` Emballages incomplets pour ${summary.packagingIncomplete} perte${summary.packagingIncomplete > 1 ? "s" : ""} (prix manquant à la date).`}
+        {summary.packagingIncomplete > 0 &&
+          ` Emballages incomplets pour ${summary.packagingIncomplete} perte${summary.packagingIncomplete > 1 ? "s" : ""} (prix manquant à la date).`}
       </p>
 
       <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="text-lg font-semibold">Répartition du coût brut</h2>
-        {totals.grossEur > 0 ? <Breakdown totals={totals} /> : <p className="text-slate-600">Aucun coût cette semaine.</p>}
+        {totals.grossEur > 0 ? (
+          <Breakdown totals={totals} />
+        ) : (
+          <p className="text-slate-600">Aucun coût cette semaine.</p>
+        )}
       </section>
 
       {summary.byTeam.length > 0 && (
@@ -71,7 +79,9 @@ export default async function CostsPage({ searchParams }: { searchParams: Promis
           rows={summary.byTeam.map((t) => ({ id: t.id, label: `Équipe ${t.letter} – ${t.colorName}`, totals: t }))}
         />
       )}
-      {summary.byZone.length > 0 && <CostTable title="Par zone" rows={summary.byZone.map((z) => ({ id: z.id, label: z.name, totals: z }))} />}
+      {summary.byZone.length > 0 && (
+        <CostTable title="Par zone" rows={summary.byZone.map((z) => ({ id: z.id, label: z.name, totals: z }))} />
+      )}
     </div>
   );
 }
@@ -90,7 +100,11 @@ function Breakdown({ totals }: { totals: CostTotals }) {
   const parts = COST_COMPONENTS.map((c) => ({ ...c, value: totals[c.key], share: totals[c.key] / totals.grossEur }));
   return (
     <>
-      <div className="flex h-6 w-full gap-[2px] overflow-hidden rounded" role="img" aria-label="Répartition du coût brut par composante">
+      <div
+        className="flex h-6 w-full gap-[2px] overflow-hidden rounded"
+        role="img"
+        aria-label="Répartition du coût brut par composante"
+      >
         {parts
           .filter((p) => p.value > 0)
           .map((p) => (
@@ -114,12 +128,20 @@ function Breakdown({ totals }: { totals: CostTotals }) {
           {parts.map((p) => (
             <tr key={p.key} className="border-t border-slate-100">
               <td className="py-2">
-                <span className="mr-2 inline-block size-3 rounded-sm align-middle" style={{ backgroundColor: COMPONENT_COLORS[p.key] }} aria-hidden />
+                <span
+                  className="mr-2 inline-block size-3 rounded-sm align-middle"
+                  style={{ backgroundColor: COMPONENT_COLORS[p.key] }}
+                  aria-hidden
+                />
                 {p.label}
-                {COMPONENT_NOTES[p.key] && <span className="block pl-5 text-xs text-slate-500">{COMPONENT_NOTES[p.key]}</span>}
+                {COMPONENT_NOTES[p.key] && (
+                  <span className="block pl-5 text-xs text-slate-500">{COMPONENT_NOTES[p.key]}</span>
+                )}
               </td>
               <td className="py-2 pl-3 text-right tabular-nums whitespace-nowrap">{euro.format(p.value)}</td>
-              <td className="w-16 py-2 pl-3 text-right tabular-nums whitespace-nowrap text-slate-600">{pct.format(p.share)}</td>
+              <td className="w-16 py-2 pl-3 text-right tabular-nums whitespace-nowrap text-slate-600">
+                {pct.format(p.share)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -147,7 +169,9 @@ function CostTable({ title, rows }: { title: string; rows: { id: string; label: 
               <tr key={r.id} className="border-t border-slate-100">
                 <td className="py-2">{r.label}</td>
                 <td className="py-2 text-right tabular-nums">{euro.format(r.totals.grossEur)}</td>
-                <td className="py-2 text-right tabular-nums text-slate-600">{r.totals.recoveredEur ? `− ${euro.format(r.totals.recoveredEur)}` : "—"}</td>
+                <td className="py-2 text-right tabular-nums text-slate-600">
+                  {r.totals.recoveredEur ? `− ${euro.format(r.totals.recoveredEur)}` : "—"}
+                </td>
                 <td className="py-2 text-right font-semibold tabular-nums">{euro.format(r.totals.netEur)}</td>
               </tr>
             ))}

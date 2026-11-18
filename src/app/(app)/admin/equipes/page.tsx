@@ -40,7 +40,10 @@ export default async function TeamsWeekPage({ searchParams }: { searchParams: Pr
       </p>
       <ul className="flex flex-col gap-2">
         {teams.map((t) => (
-          <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm">
+          <li
+            key={t.id}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm"
+          >
             <span className="flex items-center gap-3">
               <span
                 className="flex size-10 items-center justify-center rounded-full text-xl font-bold text-white"
@@ -62,8 +65,15 @@ export default async function TeamsWeekPage({ searchParams }: { searchParams: Pr
               <input type="hidden" name="teamId" value={t.id} />
               <input type="hidden" name="weekId" value={week.id} />
               <input type="hidden" name="active" value={t.activeThisWeek ? "0" : "1"} />
-              {t.activeThisWeek && <input name="note" placeholder="Motif (facultatif)" className="field min-h-10 w-40 text-base" />}
-              <button type="submit" className={t.activeThisWeek ? "font-medium text-red-800 underline" : "font-medium text-teal-800 underline"}>
+              {t.activeThisWeek && (
+                <input name="note" placeholder="Motif (facultatif)" className="field min-h-10 w-40 text-base" />
+              )}
+              <button
+                type="submit"
+                className={
+                  t.activeThisWeek ? "font-medium text-red-800 underline" : "font-medium text-teal-800 underline"
+                }
+              >
                 {t.activeThisWeek ? "Désactiver" : "Réactiver"}
               </button>
             </form>

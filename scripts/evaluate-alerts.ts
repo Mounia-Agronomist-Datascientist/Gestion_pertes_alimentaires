@@ -11,5 +11,7 @@ if (!startDate) console.warn("ALERTES_DEBUT n'est pas défini : aucune alerte n'
 const result = await evaluateMissingDeclarations(db, { startDate });
 console.log(`Alertes « rien de noté » créées : ${result.created} ; régularisées : ${result.regularized}.`);
 const analysis = await evaluateLossAlerts(db, { startDate });
-console.log(`Alertes d'analyse (${analysis.weeks} semaine(s) revue(s)) : ${analysis.created} créée(s), ${analysis.updated} mise(s) à jour, ${analysis.removed} retirée(s).`);
+console.log(
+  `Alertes d'analyse (${analysis.weeks} semaine(s) revue(s)) : ${analysis.created} créée(s), ${analysis.updated} mise(s) à jour, ${analysis.removed} retirée(s).`,
+);
 await sqlClient.end();

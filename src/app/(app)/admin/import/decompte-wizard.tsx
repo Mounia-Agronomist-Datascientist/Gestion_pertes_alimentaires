@@ -1,12 +1,21 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
-import { type DecompteParseResult, type DecompteWeek, decompteWeeks, parseDecompte } from "@/modules/imports/decompte/parse-decompte";
+import {
+  type DecompteParseResult,
+  type DecompteWeek,
+  decompteWeeks,
+  parseDecompte,
+} from "@/modules/imports/decompte/parse-decompte";
 import type { LightWorkbook } from "@/modules/imports/decompte/read-xlsx-sheet";
 import { Feedback } from "../feedback";
 import { type ImportActionState, importDecompteAction } from "./actions";
 
-type FileState = { status: "idle" } | { status: "reading"; fileName: string } | { status: "error"; message: string } | { status: "ready"; fileName: string; weeks: DecompteWeek[] };
+type FileState =
+  | { status: "idle" }
+  | { status: "reading"; fileName: string }
+  | { status: "error"; message: string }
+  | { status: "ready"; fileName: string; weeks: DecompteWeek[] };
 
 /**
  * Dépôt du « Décompte barquettes » (Excel téléchargé depuis Google Sheets) : seul l'onglet « Semaine NN » choisi
@@ -47,15 +56,23 @@ export function DecompteWizard({ existing }: { existing: { year: number; week: n
   const replaces = week && existing.find((e) => e.year === week.year && e.week === week.week);
   const payload =
     file.status === "ready" && week && result && !result.errors.length
-      ? JSON.stringify({ fileName: file.fileName, sheetName: week.sheetName, year: week.year, week: week.week, rows: result.rows.map(({ code, made }) => ({ code, made })), warnings: result.warnings })
+      ? JSON.stringify({
+          fileName: file.fileName,
+          sheetName: week.sheetName,
+          year: week.year,
+          week: week.week,
+          rows: result.rows.map(({ code, made }) => ({ code, made })),
+          warnings: result.warnings,
+        })
       : "";
 
   return (
     <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold">Barquettes réellement produites (Décompte barquettes)</h2>
       <p className="text-sm text-slate-600">
-        Après la semaine : Google Sheets « Décompte barquettes » → Fichier → Télécharger → Microsoft Excel. Seule la colonne « Ma production »
-        de l&apos;onglet « Semaine NN » est lue ; les onglets des jours (noms des opérateurs) ne sont jamais lus.
+        Après la semaine : Google Sheets « Décompte barquettes » → Fichier → Télécharger → Microsoft Excel. Seule la
+        colonne « Ma production » de l&apos;onglet « Semaine NN » est lue ; les onglets des jours (noms des opérateurs)
+        ne sont jamais lus.
       </p>
       <input
         type="file"
@@ -66,7 +83,9 @@ export function DecompteWizard({ existing }: { existing: { year: number; week: n
       />
       {file.status === "reading" && <p className="text-slate-600">Lecture de « {file.fileName} »…</p>}
       {file.status === "error" && <p className="text-red-800">{file.message}</p>}
-      {file.status === "ready" && file.weeks.length === 0 && <p className="text-red-800">Aucun onglet « Semaine NN » avec ses jours dans ce fichier.</p>}
+      {file.status === "ready" && file.weeks.length === 0 && (
+        <p className="text-red-800">Aucun onglet « Semaine NN » avec ses jours dans ce fichier.</p>
+      )}
       {file.status === "ready" && file.weeks.length > 0 && (
         <label className="flex flex-col gap-1">
           <span className="font-medium">Semaine</span>
@@ -104,19 +123,24 @@ export function DecompteWizard({ existing }: { existing: { year: number; week: n
           )}
           {result.rows.length > 0 && (
             <p className="text-slate-700">
-              {result.rows.length} codes · <span className="font-semibold">{total.toLocaleString("fr-FR")} barquettes produites</span>
+              {result.rows.length} codes ·{" "}
+              <span className="font-semibold">{total.toLocaleString("fr-FR")} barquettes produites</span>
             </p>
           )}
           {replaces && (
             <p className="rounded-xl bg-amber-50 p-3 text-amber-950">
-              Le décompte de cette semaine est déjà enregistré (version {replaces.version}) : la nouvelle version le remplacera, l&apos;ancienne reste
-              conservée.
+              Le décompte de cette semaine est déjà enregistré (version {replaces.version}) : la nouvelle version le
+              remplacera, l&apos;ancienne reste conservée.
             </p>
           )}
           <form action={action}>
             <input type="hidden" name="payload" value={payload} />
             <button type="submit" disabled={pending || !payload} className="btn-primary w-full">
-              {pending ? "Enregistrement…" : week ? `Enregistrer le décompte de S${String(week.week).padStart(2, "0")}` : "Enregistrer"}
+              {pending
+                ? "Enregistrement…"
+                : week
+                  ? `Enregistrer le décompte de S${String(week.week).padStart(2, "0")}`
+                  : "Enregistrer"}
             </button>
           </form>
         </>

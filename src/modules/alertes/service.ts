@@ -63,7 +63,9 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
 
     for (const window of windows) {
       for (const team of teams) {
-        const inactive = weekStatuses.some((st) => st.teamId === team.id && st.productionWeekId === week.id && !st.active);
+        const inactive = weekStatuses.some(
+          (st) => st.teamId === team.id && st.productionWeekId === week.id && !st.active,
+        );
         if (inactive) continue;
 
         // Comptent les pertes attribuées à l'équipe et celles saisies par son compte (même hors cuisine).
@@ -82,8 +84,13 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
               ),
             ),
           );
-        const missing = missingDays(window, declaredRows.map((r) => r.day));
-        const alert = existing.find((a) => a.teamId === team.id && a.productionWeekId === week.id && a.window === window.key);
+        const missing = missingDays(
+          window,
+          declaredRows.map((r) => r.day),
+        );
+        const alert = existing.find(
+          (a) => a.teamId === team.id && a.productionWeekId === week.id && a.window === window.key,
+        );
 
         if (missing.length > 0 && !alert) {
           const [created] = await db
@@ -102,18 +109,37 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
             .returning();
           if (created) {
             result.created++;
-            await writeAudit(db, { action: "alert_created", entity: "missing_declaration_alert", entityId: created.id, after: created, occurredAt: now });
+            await writeAudit(db, {
+              action: "alert_created",
+              entity: "missing_declaration_alert",
+              entityId: created.id,
+              after: created,
+              occurredAt: now,
+            });
           }
         } else if (alert?.status === "active" && missing.length === 0) {
           await db
             .update(s.missingDeclarationAlerts)
-            .set({ status: "regularisee", missingDays: [], resolvedAt: now, resolutionNote: "Tous les jours ont été renseignés après la détection" })
+            .set({
+              status: "regularisee",
+              missingDays: [],
+              resolvedAt: now,
+              resolutionNote: "Tous les jours ont été renseignés après la détection",
+            })
             .where(eq(s.missingDeclarationAlerts.id, alert.id));
           result.regularized++;
-          await writeAudit(db, { action: "alert_regularized", entity: "missing_declaration_alert", entityId: alert.id, occurredAt: now });
+          await writeAudit(db, {
+            action: "alert_regularized",
+            entity: "missing_declaration_alert",
+            entityId: alert.id,
+            occurredAt: now,
+          });
         } else if (alert?.status === "active" && missing.join() !== alert.missingDays.join()) {
           // Régularisation partielle : l'alerte reste active, la liste des jours manquants est mise à jour.
-          await db.update(s.missingDeclarationAlerts).set({ missingDays: missing }).where(eq(s.missingDeclarationAlerts.id, alert.id));
+          await db
+            .update(s.missingDeclarationAlerts)
+            .set({ missingDays: missing })
+            .where(eq(s.missingDeclarationAlerts.id, alert.id));
         }
       }
     }
@@ -159,7 +185,13 @@ export type AlertItem = Awaited<ReturnType<typeof listAlerts>>[number];
 export class AlertError extends Error {}
 
 /** Lève une alerte (ex. équipe absente non signalée) : l'estimation n'est plus comptée, motif obligatoire. */
-export async function cancelAlert(db: Db, user: AuthUser, alertId: string, note: string, now = new Date()): Promise<void> {
+export async function cancelAlert(
+  db: Db,
+  user: AuthUser,
+  alertId: string,
+  note: string,
+  now = new Date(),
+): Promise<void> {
   requirePermission(user, "alerts.resolve");
   const reason = note.trim();
   if (reason.length < 3) throw new AlertError("Indiquez le motif");
@@ -169,5 +201,12 @@ export async function cancelAlert(db: Db, user: AuthUser, alertId: string, note:
     .update(s.missingDeclarationAlerts)
     .set({ status: "annulee", resolvedAt: now, resolvedBy: user.id, resolutionNote: reason })
     .where(eq(s.missingDeclarationAlerts.id, alertId));
-  await writeAudit(db, { userId: user.id, action: "alert_cancelled", entity: "missing_declaration_alert", entityId: alertId, reason, occurredAt: now });
+  await writeAudit(db, {
+    userId: user.id,
+    action: "alert_cancelled",
+    entity: "missing_declaration_alert",
+    entityId: alertId,
+    reason,
+    occurredAt: now,
+  });
 }

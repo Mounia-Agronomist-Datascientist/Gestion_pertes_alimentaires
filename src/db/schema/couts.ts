@@ -12,7 +12,15 @@ const timestamps = {
  * Référentiel des emballages et consommables (cahier des charges §18.3, docs/PHASE3.md).
  * Les emballages ne sont pas entièrement référencés dans Melba : ce référentiel les complète.
  */
-export const packagingKindEnum = pgEnum("packaging_kind", ["barquette", "film", "etiquette", "moule", "plat", "gastro", "autre"]);
+export const packagingKindEnum = pgEnum("packaging_kind", [
+  "barquette",
+  "film",
+  "etiquette",
+  "moule",
+  "plat",
+  "gastro",
+  "autre",
+]);
 
 export const packagingItems = pgTable(
   "packaging_items",

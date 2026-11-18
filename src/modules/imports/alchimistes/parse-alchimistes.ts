@@ -37,13 +37,7 @@ export interface AlchimistesParseResult {
   warnings: string[];
 }
 
-const normalize = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+const normalize = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
 /** Colonnes lues, reconnues par le début de leur titre (sans accents ni majuscules). */
 const COLUMNS = {
@@ -81,7 +75,8 @@ export function parseCollectionDate(text: string): string | null {
   const dmy = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?: .*)?$/);
   if (ymd) iso = `${ymd[1]}-${ymd[2]}-${ymd[3]}`;
   else if (dmy) iso = `${dmy[3]}-${dmy[2]!.padStart(2, "0")}-${dmy[1]!.padStart(2, "0")}`;
-  else if (/^\d{5}(\.\d+)?$/.test(t)) iso = new Date(Date.UTC(1899, 11, 30) + Math.floor(Number(t)) * 86_400_000).toISOString().slice(0, 10);
+  else if (/^\d{5}(\.\d+)?$/.test(t))
+    iso = new Date(Date.UTC(1899, 11, 30) + Math.floor(Number(t)) * 86_400_000).toISOString().slice(0, 10);
   if (!iso) return null;
   const d = new Date(`${iso}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === iso ? iso : null;
@@ -100,17 +95,32 @@ const optional = (text: string | undefined, max = 120) => {
 };
 
 export function parseAlchimistes(grid: Grid): AlchimistesParseResult {
-  const result: AlchimistesParseResult = { collections: [], deliveries: 0, periodFrom: null, periodTo: null, errors: [], warnings: [] };
-  const headerRow = grid.findIndex((r) => r.some((c) => COLUMNS.date(normalize(c))) && r.some((c) => COLUMNS.netKg(normalize(c))));
+  const result: AlchimistesParseResult = {
+    collections: [],
+    deliveries: 0,
+    periodFrom: null,
+    periodTo: null,
+    errors: [],
+    warnings: [],
+  };
+  const headerRow = grid.findIndex(
+    (r) => r.some((c) => COLUMNS.date(normalize(c))) && r.some((c) => COLUMNS.netKg(normalize(c))),
+  );
   if (headerRow < 0) {
-    result.errors.push("Colonnes « Date » et « Poids net (contenu déchets) » introuvables : est-ce bien l'export des Alchimistes ?");
+    result.errors.push(
+      "Colonnes « Date » et « Poids net (contenu déchets) » introuvables : est-ce bien l'export des Alchimistes ?",
+    );
     return result;
   }
   const headers = grid[headerRow]!.map(normalize);
-  const index = Object.fromEntries((Object.keys(COLUMNS) as Column[]).map((k) => [k, headers.findIndex(COLUMNS[k])])) as Record<Column, number>;
+  const index = Object.fromEntries(
+    (Object.keys(COLUMNS) as Column[]).map((k) => [k, headers.findIndex(COLUMNS[k])]),
+  ) as Record<Column, number>;
   const missing = REQUIRED.filter((k) => index[k] < 0);
   if (missing.length) {
-    result.errors.push(`Colonne${missing.length > 1 ? "s" : ""} manquante${missing.length > 1 ? "s" : ""} : ${missing.map((k) => `« ${LABELS[k]} »`).join(", ")}.`);
+    result.errors.push(
+      `Colonne${missing.length > 1 ? "s" : ""} manquante${missing.length > 1 ? "s" : ""} : ${missing.map((k) => `« ${LABELS[k]} »`).join(", ")}.`,
+    );
     return result;
   }
 
@@ -144,7 +154,8 @@ export function parseAlchimistes(grid: Grid): AlchimistesParseResult {
     }
     if (netKg === 0) result.warnings.push(`Ligne ${line} (${date}) : collecte à 0 kg.`);
     const count = cell("count").trim();
-    if (count && count !== "1") result.warnings.push(`Ligne ${line} (${date}) : ${count} contenants sur une seule ligne, poids gardé tel quel.`);
+    if (count && count !== "1")
+      result.warnings.push(`Ligne ${line} (${date}) : ${count} contenants sur une seule ligne, poids gardé tel quel.`);
     const quality = /^\d$/.test(cell("quality").trim()) ? Number(cell("quality").trim()) : null;
     const fileWeek = optional(cell("fileWeek"), 10);
     const computed = computeProductionWeek(date);
@@ -166,8 +177,12 @@ export function parseAlchimistes(grid: Grid): AlchimistesParseResult {
     });
   }
 
-  for (const [type, n] of otherTypes) result.warnings.push(`${n} ligne${n > 1 ? "s" : ""} de type « ${type} » ignorée${n > 1 ? "s" : ""} (ni collecte ni livraison).`);
-  for (const [gap, n] of weekGaps) result.warnings.push(`Semaine différente (${n} bac${n > 1 ? "s" : ""}) — ${gap}. La semaine calculée est gardée.`);
+  for (const [type, n] of otherTypes)
+    result.warnings.push(
+      `${n} ligne${n > 1 ? "s" : ""} de type « ${type} » ignorée${n > 1 ? "s" : ""} (ni collecte ni livraison).`,
+    );
+  for (const [gap, n] of weekGaps)
+    result.warnings.push(`Semaine différente (${n} bac${n > 1 ? "s" : ""}) — ${gap}. La semaine calculée est gardée.`);
   if (dates.length) {
     dates.sort();
     result.periodFrom = dates[0]!;
@@ -181,7 +196,9 @@ export function parseAlchimistes(grid: Grid): AlchimistesParseResult {
 export function csvToGrid(text: string): string[][] {
   const clean = text.replace(/^﻿/, "");
   const firstLine = clean.slice(0, clean.search(/\r?\n|$/));
-  const separator = ["\t", ";", ","].map((s) => [s, firstLine.split(s).length] as const).sort((a, b) => b[1] - a[1])[0]![0];
+  const separator = ["\t", ";", ","]
+    .map((s) => [s, firstLine.split(s).length] as const)
+    .sort((a, b) => b[1] - a[1])[0]![0];
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";

@@ -57,9 +57,15 @@ export function stamp<T extends object>(payload: T, now = new Date()): T & { cli
 }
 
 /** Envoie les pertes en attente de ce compte, de la plus ancienne à la plus récente. */
-export async function flushQueue(store: QueueStore, userId: string, send: (item: QueuedItem) => Promise<SendResult>): Promise<FlushResult> {
+export async function flushQueue(
+  store: QueueStore,
+  userId: string,
+  send: (item: QueuedItem) => Promise<SendResult>,
+): Promise<FlushResult> {
   const result: FlushResult = { sent: 0, refused: 0, offline: false, authRequired: false };
-  const items = (await store.all()).filter((i) => i.userId === userId && i.status === "attente").sort((a, b) => a.enteredAt.localeCompare(b.enteredAt));
+  const items = (await store.all())
+    .filter((i) => i.userId === userId && i.status === "attente")
+    .sort((a, b) => a.enteredAt.localeCompare(b.enteredAt));
   for (const item of items) {
     let r: SendResult;
     try {

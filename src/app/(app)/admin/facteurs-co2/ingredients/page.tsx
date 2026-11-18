@@ -13,7 +13,11 @@ export default async function IngredientsPage() {
   const admin = await requireUser();
   const [rows, families, factors] = await Promise.all([
     listIngredientsForMapping(db, admin),
-    db.select().from(s.foodFamilies).where(eq(s.foodFamilies.active, true)).orderBy(asc(s.foodFamilies.displayOrder), asc(s.foodFamilies.name)),
+    db
+      .select()
+      .from(s.foodFamilies)
+      .where(eq(s.foodFamilies.active, true))
+      .orderBy(asc(s.foodFamilies.displayOrder), asc(s.foodFamilies.name)),
     validFactors(db),
   ]);
   return (
@@ -23,9 +27,10 @@ export default async function IngredientsPage() {
       </Link>
       <h1 className="text-2xl font-bold">Ingrédients Melba et familles</h1>
       <p className="text-sm text-slate-600">
-        Chaque ingrédient des recettes importées est rattaché à une famille alimentaire, dont le facteur donne son impact CO2e. Les plus utilisés sont
-        en tête. Une famille est proposée d&apos;après le nom de l&apos;ingrédient : rien n&apos;est enregistré sans votre validation. « Non couvert » : aliment
-        sans famille (épices, fonds…), compté à part ; « non alimentaire » : contenant listé dans une recette, jamais compté.
+        Chaque ingrédient des recettes importées est rattaché à une famille alimentaire, dont le facteur donne son
+        impact CO2e. Les plus utilisés sont en tête. Une famille est proposée d&apos;après le nom de l&apos;ingrédient :
+        rien n&apos;est enregistré sans votre validation. « Non couvert » : aliment sans famille (épices, fonds…),
+        compté à part ; « non alimentaire » : contenant listé dans une recette, jamais compté.
       </p>
       {families.length === 0 ? (
         <p className="rounded-xl bg-amber-50 p-3 text-amber-950">
@@ -42,9 +47,18 @@ export default async function IngredientsPage() {
             label: r.label,
             uses: r.uses,
             mapping: r.mapping ? { status: r.mapping.status, familyId: r.mapping.familyId } : null,
-            suggestion: !r.suggestion ? null : r.suggestion.kind === "famille" ? `f:${r.suggestion.familyId}` : "non_alimentaire",
+            suggestion: !r.suggestion
+              ? null
+              : r.suggestion.kind === "famille"
+                ? `f:${r.suggestion.familyId}`
+                : "non_alimentaire",
           }))}
-          families={families.map((f) => ({ id: f.id, name: f.name, category: f.category, validated: factors.has(f.id) }))}
+          families={families.map((f) => ({
+            id: f.id,
+            name: f.name,
+            category: f.category,
+            validated: factors.has(f.id),
+          }))}
         />
       )}
     </>

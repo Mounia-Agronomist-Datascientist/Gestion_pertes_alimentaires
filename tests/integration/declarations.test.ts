@@ -59,7 +59,13 @@ describe("déclaration de perte", () => {
       .insert(s.products)
       .values([
         { category: "sous_recette", code: "T-PUREE", name: "Purée test", defaultUnit: "kg" },
-        { category: "produit_fini", code: "T-BARQ", name: "Barquette test", defaultUnit: "barquette", unitWeightKg: 0.35 },
+        {
+          category: "produit_fini",
+          code: "T-BARQ",
+          name: "Barquette test",
+          defaultUnit: "barquette",
+          unitWeightKg: 0.35,
+        },
         { category: "sous_recette", code: "T-SAUCE", name: "Sauce test", defaultUnit: "l", densityKgPerL: 1.05 },
         { category: "consommable", code: "T-FILM", name: "Film test", defaultUnit: "piece" },
       ])
@@ -67,7 +73,10 @@ describe("déclaration de perte", () => {
     await byCode(inserted, "product");
 
     const mk = async (login: string, roleCode: string, extra: object = {}) =>
-      loadAuthUser(t.db, await createAccount(t.db, { login, displayName: login, roleCode, password: PASSWORD, ...extra }));
+      loadAuthUser(
+        t.db,
+        await createAccount(t.db, { login, displayName: login, roleCode, password: PASSWORD, ...extra }),
+      );
     teamC = await mk("equipe-c", "equipe", { teamId: ref("team:C") });
     respCond = await mk("resp-cond", "resp_zone", { zoneIds: [ref("zone:CONDITIONNEMENT")] });
     respPlonge = await mk("resp-plonge", "resp_zone", { zoneIds: [ref("zone:PLONGE")] });
@@ -134,7 +143,9 @@ describe("déclaration de perte", () => {
     });
 
     it("un responsable de zone ne déclare que dans sa zone", async () => {
-      await expect(createDeclaration(t.db, respPlonge, cuisine({ teamId: ref("team:B") }), NOW)).rejects.toThrow(/vos zones/);
+      await expect(createDeclaration(t.db, respPlonge, cuisine({ teamId: ref("team:B") }), NOW)).rejects.toThrow(
+        /vos zones/,
+      );
     });
 
     it("la direction ne peut pas déclarer", async () => {
@@ -147,7 +158,9 @@ describe("déclaration de perte", () => {
         .from(s.productionWeeks)
         .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 47)));
       await t.db.insert(s.teamWeekStatus).values({ teamId: ref("team:H"), productionWeekId: s47!.id, active: false });
-      await expect(createDeclaration(t.db, admin, cuisine({ teamId: ref("team:H") }), NOW)).rejects.toThrow(/pas active/);
+      await expect(createDeclaration(t.db, admin, cuisine({ teamId: ref("team:H") }), NOW)).rejects.toThrow(
+        /pas active/,
+      );
     });
   });
 
@@ -224,7 +237,11 @@ describe("déclaration de perte", () => {
         createDeclaration(
           t.db,
           teamC,
-          cuisine({ quantity: null, unitCode: null, tare: { grossKg: 2, gastros: [{ containerTypeId: ref("ct:GASTRO_1"), count: 3 }] } }),
+          cuisine({
+            quantity: null,
+            unitCode: null,
+            tare: { grossKg: 2, gastros: [{ containerTypeId: ref("ct:GASTRO_1"), count: 3 }] },
+          }),
           NOW,
         ),
       ).rejects.toThrow(/supérieur à la tare/);
@@ -249,8 +266,16 @@ describe("déclaration de perte", () => {
         NOW,
       );
       const row = await load(r.id);
-      expect(row).toMatchObject({ netKg: 4.2, kgStatus: "converti", measurementMethod: "conversion_reference", conversionFactorUsed: 0.35 });
-      const dest = await t.db.select().from(s.declarationDestinations).where(eq(s.declarationDestinations.declarationId, r.id));
+      expect(row).toMatchObject({
+        netKg: 4.2,
+        kgStatus: "converti",
+        measurementMethod: "conversion_reference",
+        conversionFactorUsed: 0.35,
+      });
+      const dest = await t.db
+        .select()
+        .from(s.declarationDestinations)
+        .where(eq(s.declarationDestinations.declarationId, r.id));
       expect(dest.map((d) => d.netKg).sort()).toEqual([1.4, 2.8]);
     });
 
@@ -258,17 +283,34 @@ describe("déclaration de perte", () => {
       const withDensity = await createDeclaration(
         t.db,
         teamC,
-        cuisine({ product: { productId: ref("product:T-SAUCE") }, method: "estimation_manuelle", quantity: 2, unitCode: "l", destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }] }),
+        cuisine({
+          product: { productId: ref("product:T-SAUCE") },
+          method: "estimation_manuelle",
+          quantity: 2,
+          unitCode: "l",
+          destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }],
+        }),
         NOW,
       );
       expect((await load(withDensity.id)).netKg).toBe(2.1);
       const freeLabel = await createDeclaration(
         t.db,
         teamC,
-        cuisine({ product: { freeLabel: "Jus inconnu", category: "matiere_premiere" }, method: "estimation_manuelle", quantity: 2, unitCode: "l", destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }] }),
+        cuisine({
+          product: { freeLabel: "Jus inconnu", category: "matiere_premiere" },
+          method: "estimation_manuelle",
+          quantity: 2,
+          unitCode: "l",
+          destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }],
+        }),
         NOW,
       );
-      expect(await load(freeLabel.id)).toMatchObject({ netKg: null, kgStatus: "non_converti", productUnlisted: true, productName: "Jus inconnu" });
+      expect(await load(freeLabel.id)).toMatchObject({
+        netKg: null,
+        kgStatus: "non_converti",
+        productUnlisted: true,
+        productName: "Jus inconnu",
+      });
     });
 
     it("un consommable reste en unités, jamais en kg alimentaires", async () => {
@@ -290,17 +332,23 @@ describe("déclaration de perte", () => {
     });
 
     it("refuse une unité non proposée pour la méthode", async () => {
-      await expect(createDeclaration(t.db, teamC, cuisine({ unitCode: "l" }), NOW)).rejects.toThrow(/Unité non proposée/);
+      await expect(createDeclaration(t.db, teamC, cuisine({ unitCode: "l" }), NOW)).rejects.toThrow(
+        /Unité non proposée/,
+      );
     });
   });
 
   describe("causes", () => {
     it("refuse une cause d'une autre zone", async () => {
-      await expect(createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:CON_SCELLAGE") }), NOW)).rejects.toThrow(/cette zone/);
+      await expect(
+        createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:CON_SCELLAGE") }), NOW),
+      ).rejects.toThrow(/cette zone/);
     });
 
     it("« Chutes de découpe » n'est acceptée qu'au déboîtage", async () => {
-      await expect(createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:CUI_CHUTES_DECOUPE") }), NOW)).rejects.toThrow(/sous-zone/);
+      await expect(
+        createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:CUI_CHUTES_DECOUPE") }), NOW),
+      ).rejects.toThrow(/sous-zone/);
       const r = await createDeclaration(
         t.db,
         teamC,
@@ -311,7 +359,12 @@ describe("déclaration de perte", () => {
     });
 
     it("« Autres pertes » est acceptée partout", async () => {
-      const r = await createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:AUTRES"), comment: "Bac renversé" }), NOW);
+      const r = await createDeclaration(
+        t.db,
+        teamC,
+        cuisine({ causeId: ref("cause:AUTRES"), comment: "Bac renversé" }),
+        NOW,
+      );
       expect(await load(r.id)).toMatchObject({ causeName: "Autres pertes", comment: "Bac renversé" });
     });
   });
@@ -338,7 +391,12 @@ describe("déclaration de perte", () => {
     it("exige une justification en cas d'écart, et la conserve", async () => {
       const unbalanced = cuisine({ quantity: 20, destinations: [{ destinationId: ref("dest:DON"), quantity: 17 }] });
       await expect(createDeclaration(t.db, teamC, unbalanced, NOW)).rejects.toThrow(/il reste 3 à affecter/);
-      const r = await createDeclaration(t.db, teamC, { ...unbalanced, destinationGapJustification: "3 kg non récupérables" }, NOW);
+      const r = await createDeclaration(
+        t.db,
+        teamC,
+        { ...unbalanced, destinationGapJustification: "3 kg non récupérables" },
+        NOW,
+      );
       expect((await load(r.id)).destinationGapJustification).toBe("3 kg non récupérables");
     });
   });
@@ -361,13 +419,18 @@ describe("déclaration de perte", () => {
 
     it("conserve le nom du produit au moment de la saisie (instantané)", async () => {
       const r = await createDeclaration(t.db, teamC, cuisine(), NOW);
-      await t.db.update(s.products).set({ name: "Purée renommée" }).where(eq(s.products.id, ref("product:T-PUREE")));
+      await t.db
+        .update(s.products)
+        .set({ name: "Purée renommée" })
+        .where(eq(s.products.id, ref("product:T-PUREE")));
       expect((await load(r.id)).productName).toBe("Purée test");
     });
 
     it("n'enregistre rien si la saisie est refusée", async () => {
       const before = await t.db.$count(s.lossDeclarations);
-      await expect(createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:CON_SCELLAGE") }), NOW)).rejects.toThrow(DeclarationError);
+      await expect(
+        createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:CON_SCELLAGE") }), NOW),
+      ).rejects.toThrow(DeclarationError);
       expect(await t.db.$count(s.lossDeclarations)).toBe(before);
     });
   });
@@ -380,12 +443,21 @@ describe("déclaration de perte", () => {
     beforeAll(async () => {
       teamA = await loadAuthUser(
         t.db,
-        await createAccount(t.db, { login: "equipe-a", displayName: "equipe-a", roleCode: "equipe", teamId: ref("team:A"), password: PASSWORD }),
+        await createAccount(t.db, {
+          login: "equipe-a",
+          displayName: "equipe-a",
+          roleCode: "equipe",
+          teamId: ref("team:A"),
+          password: PASSWORD,
+        }),
       );
     });
 
     async function linesOf(declarationId: string) {
-      return t.db.select().from(s.declarationDestinations).where(eq(s.declarationDestinations.declarationId, declarationId));
+      return t.db
+        .select()
+        .from(s.declarationDestinations)
+        .where(eq(s.declarationDestinations.declarationId, declarationId));
     }
 
     it("une correction crée la version 2, garde la version 1 et la date de saisie initiale", async () => {
@@ -395,7 +467,10 @@ describe("déclaration de perte", () => {
         t.db,
         teamC,
         created.id,
-        cuisine({ quantity: 3.8, destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 3.8, binNumber: "1" }] }),
+        cuisine({
+          quantity: 3.8,
+          destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 3.8, binNumber: "1" }],
+        }),
         { reason: "Erreur de pesée", expectedRevision: 1 },
         later,
       );
@@ -404,9 +479,15 @@ describe("déclaration de perte", () => {
       expect(row.declaredAt.toISOString()).toBe(NOW.toISOString());
 
       const lines = await linesOf(created.id);
-      expect(lines.map((l) => [l.revision, l.quantity]).sort()).toEqual([[1, 4.2], [2, 3.8]]);
+      expect(lines.map((l) => [l.revision, l.quantity]).sort()).toEqual([
+        [1, 4.2],
+        [2, 3.8],
+      ]);
 
-      const revisions = await t.db.select().from(s.declarationRevisions).where(eq(s.declarationRevisions.declarationId, created.id));
+      const revisions = await t.db
+        .select()
+        .from(s.declarationRevisions)
+        .where(eq(s.declarationRevisions.declarationId, created.id));
       expect(revisions.find((r) => r.revision === 2)).toMatchObject({ status: "corrigee", reason: "Erreur de pesée" });
 
       const [audit] = await t.db
@@ -419,14 +500,30 @@ describe("déclaration de perte", () => {
 
     it("exige un motif", async () => {
       const created = await createDeclaration(t.db, teamC, cuisine(), NOW);
-      await expect(correctDeclaration(t.db, teamC, created.id, cuisine(), { reason: " ", expectedRevision: 1 }, NOW)).rejects.toThrow(/motif/);
+      await expect(
+        correctDeclaration(t.db, teamC, created.id, cuisine(), { reason: " ", expectedRevision: 1 }, NOW),
+      ).rejects.toThrow(/motif/);
     });
 
     it("refuse une correction faite sur une version périmée (modification simultanée)", async () => {
       const created = await createDeclaration(t.db, teamC, cuisine(), NOW);
-      await correctDeclaration(t.db, teamC, created.id, cuisine({ comment: "1" }), { reason: "premier", expectedRevision: 1 }, NOW);
+      await correctDeclaration(
+        t.db,
+        teamC,
+        created.id,
+        cuisine({ comment: "1" }),
+        { reason: "premier", expectedRevision: 1 },
+        NOW,
+      );
       await expect(
-        correctDeclaration(t.db, teamC, created.id, cuisine({ comment: "2" }), { reason: "second", expectedRevision: 1 }, NOW),
+        correctDeclaration(
+          t.db,
+          teamC,
+          created.id,
+          cuisine({ comment: "2" }),
+          { reason: "second", expectedRevision: 1 },
+          NOW,
+        ),
       ).rejects.toThrow(DeclarationConflictError);
     });
 
@@ -447,18 +544,39 @@ describe("déclaration de perte", () => {
       expect((await getDeclarationDetail(t.db, teamC, created.id, lastDay))?.canModify).toBe(true);
       expect((await getDeclarationDetail(t.db, teamC, created.id, tooLate))?.canModify).toBe(false);
       // Correction après le délai de déclaration (7 jours après la perte) mais dans le délai de correction : acceptée.
-      await correctDeclaration(t.db, teamC, created.id, cuisine(), { reason: "pesée corrigée", expectedRevision: 1 }, lastDay);
+      await correctDeclaration(
+        t.db,
+        teamC,
+        created.id,
+        cuisine(),
+        { reason: "pesée corrigée", expectedRevision: 1 },
+        lastDay,
+      );
       await expect(
         correctDeclaration(t.db, teamC, created.id, cuisine(), { reason: "trop tard", expectedRevision: 2 }, tooLate),
       ).rejects.toThrow(/responsable/);
-      await correctDeclaration(t.db, admin, created.id, cuisine({ teamId: ref("team:C") }), { reason: "correction responsable", expectedRevision: 2 }, tooLate);
+      await correctDeclaration(
+        t.db,
+        admin,
+        created.id,
+        cuisine({ teamId: ref("team:C") }),
+        { reason: "correction responsable", expectedRevision: 2 },
+        tooLate,
+      );
       expect((await load(created.id)).revision).toBe(3);
     });
 
     it("une équipe déclare une perte jusqu'à 7 jours après ; au-delà, seul un responsable le peut", async () => {
       expect((await createDeclaration(t.db, teamC, cuisine({ occurredOn: "2026-11-05" }), NOW)).isLate).toBe(true);
-      await expect(createDeclaration(t.db, teamC, cuisine({ occurredOn: "2026-11-04" }), NOW)).rejects.toThrow(/plus de 7 jours/);
-      const byAdmin = await createDeclaration(t.db, admin, cuisine({ occurredOn: "2026-11-04", teamId: ref("team:C") }), NOW);
+      await expect(createDeclaration(t.db, teamC, cuisine({ occurredOn: "2026-11-04" }), NOW)).rejects.toThrow(
+        /plus de 7 jours/,
+      );
+      const byAdmin = await createDeclaration(
+        t.db,
+        admin,
+        cuisine({ occurredOn: "2026-11-04", teamId: ref("team:C") }),
+        NOW,
+      );
       expect(byAdmin.id).toBeTruthy();
     });
 
@@ -492,13 +610,22 @@ describe("déclaration de perte", () => {
       await cancelDeclaration(t.db, teamC, created.id, { reason: "Doublon", expectedRevision: 1 }, NOW);
       expect(await load(created.id)).toMatchObject({ status: "annulee", revision: 2 });
       expect((await listDeclarations(t.db, teamC)).some((d) => d.id === created.id)).toBe(false);
-      expect((await listDeclarations(t.db, teamC, { includeCancelled: true })).some((d) => d.id === created.id)).toBe(true);
+      expect((await listDeclarations(t.db, teamC, { includeCancelled: true })).some((d) => d.id === created.id)).toBe(
+        true,
+      );
       const detail = await getDeclarationDetail(t.db, teamC, created.id, NOW);
       expect(detail?.canModify).toBe(false);
       expect(detail?.destinations).toHaveLength(1);
       expect(detail?.revisions.map((r) => r.status)).toEqual(["annulee", "validee"]);
       await expect(
-        correctDeclaration(t.db, admin, created.id, cuisine({ teamId: ref("team:C") }), { reason: "essai", expectedRevision: 2 }, NOW),
+        correctDeclaration(
+          t.db,
+          admin,
+          created.id,
+          cuisine({ teamId: ref("team:C") }),
+          { reason: "essai", expectedRevision: 2 },
+          NOW,
+        ),
       ).rejects.toThrow(/annulée/);
     });
 
@@ -523,7 +650,13 @@ describe("déclaration groupée", () => {
     const [team] = await t.db.select().from(s.teams).where(eq(s.teams.letter, "C"));
     teamC = await loadAuthUser(
       t.db,
-      await createAccount(t.db, { login: "equipe-c", displayName: "equipe-c", roleCode: "equipe", teamId: team!.id, password: PASSWORD }),
+      await createAccount(t.db, {
+        login: "equipe-c",
+        displayName: "equipe-c",
+        roleCode: "equipe",
+        teamId: team!.id,
+        password: PASSWORD,
+      }),
     );
   });
 
@@ -553,7 +686,9 @@ describe("déclaration groupée", () => {
 
   it("n'enregistre rien si une seule ligne est invalide, et indique laquelle", async () => {
     const before = await t.db.$count(s.lossDeclarations);
-    const error = await createDeclarationBatch(t.db, teamC, [line(1), line(2, "CON_SCELLAGE"), line(3)], NOW).catch((e) => e);
+    const error = await createDeclarationBatch(t.db, teamC, [line(1), line(2, "CON_SCELLAGE"), line(3)], NOW).catch(
+      (e) => e,
+    );
     expect(error).toBeInstanceOf(BatchLineError);
     expect(error.lineIndex).toBe(1);
     expect(error.message).toMatch(/^Ligne 2 : .*zone/);

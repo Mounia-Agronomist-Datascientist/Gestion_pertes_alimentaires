@@ -43,7 +43,13 @@ export interface LossFact {
   /** null : perte sans coût connu, ou coûts non visibles pour ce profil. */
   cost: FactCost | null;
   /** recoveredEur : recette encaissée sur une ligne de vente (null : à saisir, ou euros non visibles). */
-  destinations: { destinationId: string; kind: string; quantity: number; netKg: number | null; recoveredEur: number | null }[];
+  destinations: {
+    destinationId: string;
+    kind: string;
+    quantity: number;
+    netKg: number | null;
+    recoveredEur: number | null;
+  }[];
 }
 
 export interface CostSummary extends FactCost {
@@ -77,13 +83,22 @@ export function summarize(facts: readonly LossFact[], withCosts: boolean): Stats
   let barquettes = 0;
   const nonFood = { events: 0, quantities: {} as Record<string, number> };
   const kgByDestinationKind: Record<string, number> = {};
-  const cost = { materialEur: 0, packagingEur: 0, labourEur: 0, indirectEur: 0, grossEur: 0, recoveredEur: 0, valued: 0 };
+  const cost = {
+    materialEur: 0,
+    packagingEur: 0,
+    labourEur: 0,
+    indirectEur: 0,
+    grossEur: 0,
+    recoveredEur: 0,
+    valued: 0,
+  };
 
   for (const f of facts) {
     if (f.food) {
       if (f.netKg == null) foodNotConverted++;
       else foodKg += f.netKg;
-      for (const d of f.destinations) if (d.netKg != null) kgByDestinationKind[d.kind] = (kgByDestinationKind[d.kind] ?? 0) + d.netKg;
+      for (const d of f.destinations)
+        if (d.netKg != null) kgByDestinationKind[d.kind] = (kgByDestinationKind[d.kind] ?? 0) + d.netKg;
     } else {
       nonFood.events++;
       nonFood.quantities[f.netUnitCode] = (nonFood.quantities[f.netUnitCode] ?? 0) + f.netQuantity;
@@ -95,7 +110,8 @@ export function summarize(facts: readonly LossFact[], withCosts: boolean): Stats
     }
   }
 
-  const roundAll = (r: Record<string, number>) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, roundQuantity(v)]));
+  const roundAll = (r: Record<string, number>) =>
+    Object.fromEntries(Object.entries(r).map(([k, v]) => [k, roundQuantity(v)]));
   return {
     events: facts.length,
     foodKg: roundQuantity(foodKg),
@@ -114,7 +130,10 @@ export function summarize(facts: readonly LossFact[], withCosts: boolean): Stats
 }
 
 /** Regroupe les pertes selon une clé (zone, équipe, cause…) ; une clé null (perte sans équipe) est ignorée. */
-export function groupFacts<K extends string>(facts: readonly LossFact[], keyOf: (f: LossFact) => K | null): Map<K, LossFact[]> {
+export function groupFacts<K extends string>(
+  facts: readonly LossFact[],
+  keyOf: (f: LossFact) => K | null,
+): Map<K, LossFact[]> {
   const groups = new Map<K, LossFact[]>();
   for (const f of facts) {
     const key = keyOf(f);
@@ -135,7 +154,12 @@ export interface RankedGroup<K extends string> {
 export type RankBy = "kg" | "cout" | "evenements";
 
 /** Agrège chaque groupe et le classe (kg alimentaires, coût brut ou nombre d'événements, décroissant). */
-export function rankGroups<K extends string>(facts: readonly LossFact[], keyOf: (f: LossFact) => K | null, withCosts: boolean, by: RankBy = "kg"): RankedGroup<K>[] {
+export function rankGroups<K extends string>(
+  facts: readonly LossFact[],
+  keyOf: (f: LossFact) => K | null,
+  withCosts: boolean,
+  by: RankBy = "kg",
+): RankedGroup<K>[] {
   const value = (s: StatsSummary) => (by === "kg" ? s.foodKg : by === "cout" ? (s.cost?.grossEur ?? 0) : s.events);
   return [...groupFacts(facts, keyOf)]
     .map(([key, list]) => ({ key, summary: summarize(list, withCosts) }))
@@ -143,11 +167,15 @@ export function rankGroups<K extends string>(facts: readonly LossFact[], keyOf: 
 }
 
 /** Totaux par destination (lignes de destination de chaque perte) : kg alimentaires et nombre de pertes. */
-export function destinationTotals(facts: readonly LossFact[]): Map<string, { kind: string; foodKg: number; events: number }> {
+export function destinationTotals(
+  facts: readonly LossFact[],
+): Map<string, { kind: string; foodKg: number; events: number }> {
   const totals = new Map<string, { kind: string; foodKg: number; events: number }>();
   for (const f of facts) {
     for (const d of f.destinations) {
-      const t = totals.get(d.destinationId) ?? totals.set(d.destinationId, { kind: d.kind, foodKg: 0, events: 0 }).get(d.destinationId)!;
+      const t =
+        totals.get(d.destinationId) ??
+        totals.set(d.destinationId, { kind: d.kind, foodKg: 0, events: 0 }).get(d.destinationId)!;
       t.events++;
       if (f.food && d.netKg != null) t.foodKg = roundQuantity(t.foodKg + d.netKg);
     }
@@ -156,7 +184,13 @@ export function destinationTotals(facts: readonly LossFact[]): Map<string, { kin
 }
 
 /** Évolution d'une valeur par rapport à la période précédente ; null sans base de comparaison. */
-export function evolution(current: number, previous: number | null | undefined): { delta: number; percent: number | null } | null {
+export function evolution(
+  current: number,
+  previous: number | null | undefined,
+): { delta: number; percent: number | null } | null {
   if (previous == null) return null;
-  return { delta: roundQuantity(current - previous), percent: previous === 0 ? null : Math.round(((current - previous) / previous) * 1000) / 10 };
+  return {
+    delta: roundQuantity(current - previous),
+    percent: previous === 0 ? null : Math.round(((current - previous) / previous) * 1000) / 10,
+  };
 }

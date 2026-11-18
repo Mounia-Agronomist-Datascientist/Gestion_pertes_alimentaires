@@ -1,5 +1,21 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, integer, jsonb, numeric, pgEnum, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  date,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  smallint,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { weeklyImports } from "./imports";
 import { productionWeeks } from "./production-weeks";
@@ -42,7 +58,10 @@ export const purchaseOrders = pgTable(
       .references(() => users.id),
     importedAt: timestamp("imported_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("purchase_orders_week_idx").on(t.productionWeekId), index("purchase_orders_delivery_idx").on(t.deliveryDate)],
+  (t) => [
+    index("purchase_orders_week_idx").on(t.productionWeekId),
+    index("purchase_orders_delivery_idx").on(t.deliveryDate),
+  ],
 );
 
 export const purchaseOrderLines = pgTable(
@@ -72,7 +91,10 @@ export const purchaseOrderLines = pgTable(
     perKgEur: numeric("per_kg_eur", { precision: 12, scale: 4, mode: "number" }),
     perUnitEur: numeric("per_unit_eur", { precision: 12, scale: 4, mode: "number" }),
   },
-  (t) => [index("purchase_order_lines_order_idx").on(t.orderId), index("purchase_order_lines_product_idx").on(t.productId)],
+  (t) => [
+    index("purchase_order_lines_order_idx").on(t.orderId),
+    index("purchase_order_lines_product_idx").on(t.productId),
+  ],
 );
 
 /** Colis fournisseur d'une matière : le dernier commandé chez ce fournisseur. */
@@ -160,6 +182,9 @@ export const productPrices = pgTable(
     uniqueIndex("product_prices_version_key").on(t.productId, t.source, t.validFrom),
     index("product_prices_product_idx").on(t.productId, t.validFrom),
     check("product_prices_known", sql`${t.perKgEur} is not null or ${t.perUnitEur} is not null`),
-    check("product_prices_positive", sql`(${t.perKgEur} is null or ${t.perKgEur} >= 0) and (${t.perUnitEur} is null or ${t.perUnitEur} >= 0)`),
+    check(
+      "product_prices_positive",
+      sql`(${t.perKgEur} is null or ${t.perKgEur} >= 0) and (${t.perUnitEur} is null or ${t.perUnitEur} >= 0)`,
+    ),
   ],
 );

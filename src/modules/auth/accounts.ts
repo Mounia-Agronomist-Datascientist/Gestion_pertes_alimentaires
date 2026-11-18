@@ -40,13 +40,22 @@ export async function createAccount(db: Db, account: NewAccount, actorId: string
       action: "create",
       entity: "user",
       entityId: created.id,
-      after: { login, displayName: account.displayName, roleCode: account.roleCode, teamId: account.teamId ?? null, zoneIds: account.zoneIds ?? [] },
+      after: {
+        login,
+        displayName: account.displayName,
+        roleCode: account.roleCode,
+        teamId: account.teamId ?? null,
+        zoneIds: account.zoneIds ?? [],
+      },
     });
     return created.id;
   });
 }
 
 export async function accountExists(db: Db, login: string): Promise<boolean> {
-  const rows = await db.select({ id: users.id }).from(users).where(eq(users.login, normalizeLogin(login)));
+  const rows = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.login, normalizeLogin(login)));
   return rows.length > 0;
 }

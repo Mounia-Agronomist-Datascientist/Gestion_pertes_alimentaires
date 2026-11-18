@@ -41,7 +41,13 @@ export interface ReconciliationRow extends ReconciliationInput {
 export function reconcile(input: ReconciliationInput): ReconciliationRow {
   const declaredKg = roundQuantity(input.declaredKg);
   const measuredKg = roundQuantity(input.measuredKg);
-  const status: ReconciliationStatus = !input.covered ? "sans_fichier" : input.bins === 0 ? "sans_collecte" : input.declaredLines === 0 ? "sans_declaration" : "rapproche";
+  const status: ReconciliationStatus = !input.covered
+    ? "sans_fichier"
+    : input.bins === 0
+      ? "sans_collecte"
+      : input.declaredLines === 0
+        ? "sans_declaration"
+        : "rapproche";
   const compared = status === "rapproche" || status === "sans_declaration";
   const gapKg = compared ? roundQuantity(measuredKg - declaredKg) : null;
   return {
@@ -57,7 +63,8 @@ export function reconcile(input: ReconciliationInput): ReconciliationRow {
 /** Total de plusieurs périodes : seules les périodes rapprochées (ou pesées sans déclaration) entrent dans l'écart. */
 export function reconcileTotal(rows: readonly ReconciliationRow[]): ReconciliationRow & { periods: number } {
   const compared = rows.filter((r) => r.gapKg != null);
-  const sum = (key: "declaredKg" | "declaredLines" | "notConverted" | "measuredKg" | "bins") => compared.reduce((a, r) => a + r[key], 0);
+  const sum = (key: "declaredKg" | "declaredLines" | "notConverted" | "measuredKg" | "bins") =>
+    compared.reduce((a, r) => a + r[key], 0);
   return {
     ...reconcile({
       declaredKg: sum("declaredKg"),

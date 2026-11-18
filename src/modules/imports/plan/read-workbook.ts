@@ -58,7 +58,11 @@ export function expectedSheetNames(year: number, week: number): string[] {
 export function displayedText(cell: Pick<ExcelJS.Cell, "value" | "numFmt" | "text">): string {
   const value = cell.value;
   const number =
-    typeof value === "number" ? value : value && typeof value === "object" && "result" in value && typeof value.result === "number" ? value.result : null;
+    typeof value === "number"
+      ? value
+      : value && typeof value === "object" && "result" in value && typeof value.result === "number"
+        ? value.result
+        : null;
   const format = cell.numFmt?.match(/^[#,]*0(?:\.(0+))?$/);
   if (number == null || !format) return cell.text ?? "";
   return Number(number.toFixed(format[1]?.length ?? 0)).toString();

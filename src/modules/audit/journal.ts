@@ -41,14 +41,17 @@ export function redact(value: unknown): unknown {
 export function changedFields(before: unknown, after: unknown): string[] | null {
   const pick = (v: unknown) =>
     v && typeof v === "object" && !Array.isArray(v)
-      ? ("declaration" in v ? (v as { declaration: unknown }).declaration : v) as Record<string, unknown>
+      ? (("declaration" in v ? (v as { declaration: unknown }).declaration : v) as Record<string, unknown>)
       : null;
   const a = pick(before);
   const b = pick(after);
   if (!a || !b) return null;
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
   return [...keys].filter(
-    (k) => !IGNORED_FIELDS.has(k) && !SENSITIVE_FIELD.test(k) && JSON.stringify(a[k] ?? null) !== JSON.stringify(b[k] ?? null),
+    (k) =>
+      !IGNORED_FIELDS.has(k) &&
+      !SENSITIVE_FIELD.test(k) &&
+      JSON.stringify(a[k] ?? null) !== JSON.stringify(b[k] ?? null),
   );
 }
 
@@ -80,7 +83,10 @@ export async function listAuditEntries(db: Db, user: AuthUser, filters: AuditFil
       .orderBy(desc(s.auditLog.occurredAt), desc(s.auditLog.id))
       .limit(AUDIT_PAGE_SIZE)
       .offset((page - 1) * AUDIT_PAGE_SIZE),
-    db.select({ n: sql<number>`count(*)::int` }).from(s.auditLog).where(where),
+    db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(s.auditLog)
+      .where(where),
   ]);
   return {
     page,

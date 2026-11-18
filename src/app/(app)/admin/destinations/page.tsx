@@ -16,8 +16,9 @@ export default async function DestinationsPage() {
       </Link>
       <h1 className="text-2xl font-bold">Destinations</h1>
       <p className="text-sm text-slate-600">
-        L&apos;ordre de la liste est celui proposé à la saisie. Un nouveau nom s&apos;affiche aussi dans l&apos;historique :
-        pour une destination vraiment différente, créez-en une nouvelle et désactivez l&apos;ancienne.
+        L&apos;ordre de la liste est celui proposé à la saisie. Un nouveau nom s&apos;affiche aussi dans
+        l&apos;historique : pour une destination vraiment différente, créez-en une nouvelle et désactivez
+        l&apos;ancienne.
       </p>
       <DestinationsAdmin
         destinations={destinations.map((d) => ({

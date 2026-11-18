@@ -2,7 +2,13 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as s from "@/db/schema";
 import { seed } from "@/db/seed/seed";
-import { canReadLossAlerts, listLossAlerts, markAllLossAlertsSeen, markLossAlertSeen, updateAlertSettings } from "@/modules/alertes/consultation";
+import {
+  canReadLossAlerts,
+  listLossAlerts,
+  markAllLossAlertsSeen,
+  markLossAlertSeen,
+  updateAlertSettings,
+} from "@/modules/alertes/consultation";
 import { loadAlertSettings } from "@/modules/alertes/reglages";
 import { createAccount } from "@/modules/auth/accounts";
 import type { AuthUser } from "@/modules/auth/permissions";
@@ -29,31 +35,64 @@ describe("consultation des alertes d'analyse et réglage des seuils", () => {
     for (const r of await t.db.select().from(s.teams)) team[r.letter] = r.id;
     for (const r of await t.db.select().from(s.zones)) zone[r.code] = r.id;
     const mk = async (login: string, roleCode: string, extra: { teamId?: string; zoneIds?: string[] } = {}) =>
-      loadAuthUser(t.db, await createAccount(t.db, { login, displayName: login, roleCode, ...extra, password: "mot-de-passe-test" }));
+      loadAuthUser(
+        t.db,
+        await createAccount(t.db, { login, displayName: login, roleCode, ...extra, password: "mot-de-passe-test" }),
+      );
     admin = await mk("admin", "admin");
     direction = await mk("direction", "direction");
     teamC = await mk("equipe-c", "equipe", { teamId: team.C });
     teamA = await mk("equipe-a", "equipe", { teamId: team.A });
     respCuisine = await mk("resp-cuisine", "resp_zone", { zoneIds: [zone.CUISINE!] });
-    const [s45] = await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)));
+    const [s45] = await t.db
+      .select()
+      .from(s.productionWeeks)
+      .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)));
     const insert = async (key: string, values: Partial<typeof s.lossAlerts.$inferInsert>) => {
       const [row] = await t.db
         .insert(s.lossAlerts)
-        .values({ kind: "perte_inhabituelle", productionWeekId: s45!.id, scope: "equipe", subjectKey: key, label: key, measure: "kg", value: 20, reference: 10, rate: 1, referenceWeeks: 4, ...values })
+        .values({
+          kind: "perte_inhabituelle",
+          productionWeekId: s45!.id,
+          scope: "equipe",
+          subjectKey: key,
+          label: key,
+          measure: "kg",
+          value: 20,
+          reference: 10,
+          rate: 1,
+          referenceWeeks: 4,
+          ...values,
+        })
         .returning();
       alert[key] = row!.id;
     };
     await insert("equipe-C", { scope: "equipe", subjectKey: team.C, teamId: team.C, label: "Équipe C – Bleu" });
     await insert("plat-C", { scope: "plat", subjectKey: "VI01", teamId: team.C, label: "VI01_Plat" });
-    await insert("zone-cuisine", { scope: "zone", subjectKey: zone.CUISINE, teamId: null, label: "Cuisine / Production" });
-    await insert("cause-A", { kind: "cause_recurrente", scope: "equipe", subjectKey: team.A, teamId: team.A, label: "Équipe A", details: { causeName: "Erreur", weeks: [] } });
+    await insert("zone-cuisine", {
+      scope: "zone",
+      subjectKey: zone.CUISINE,
+      teamId: null,
+      label: "Cuisine / Production",
+    });
+    await insert("cause-A", {
+      kind: "cause_recurrente",
+      scope: "equipe",
+      subjectKey: team.A,
+      teamId: team.A,
+      label: "Équipe A",
+      details: { causeName: "Erreur", weeks: [] },
+    });
   });
 
   afterAll(async () => {
     await t.close();
   });
 
-  const ids = async (user: AuthUser, options = {}) => (await listLossAlerts(t.db, user, options)).map((a) => Object.entries(alert).find(([, id]) => id === a.id)![0]).sort();
+  const ids = async (user: AuthUser, options = {}) =>
+    (await listLossAlerts(t.db, user, options))
+      .map((a) => Object.entries(alert).find(([, id]) => id === a.id)![0])
+      .sort();
 
   it("chacun voit les alertes de son périmètre", async () => {
     expect(await ids(admin)).toEqual(["cause-A", "equipe-C", "plat-C", "zone-cuisine"]);
@@ -80,10 +119,19 @@ describe("consultation des alertes d'analyse et réglage des seuils", () => {
   });
 
   it("l'administration règle les seuils, avec trace ; la tendance suit le réglage", async () => {
-    await expect(updateAlertSettings(t.db, teamC, { unusualPercent: 30, minKg: 2, recurrenceWeeks: 3, stablePercent: 10 })).rejects.toThrow();
-    await expect(updateAlertSettings(t.db, admin, { unusualPercent: 30, minKg: 2, recurrenceWeeks: 1, stablePercent: 10 })).rejects.toThrow(/2 semaines/);
+    await expect(
+      updateAlertSettings(t.db, teamC, { unusualPercent: 30, minKg: 2, recurrenceWeeks: 3, stablePercent: 10 }),
+    ).rejects.toThrow();
+    await expect(
+      updateAlertSettings(t.db, admin, { unusualPercent: 30, minKg: 2, recurrenceWeeks: 1, stablePercent: 10 }),
+    ).rejects.toThrow(/2 semaines/);
     await updateAlertSettings(t.db, admin, { unusualPercent: 30, minKg: 2, recurrenceWeeks: 4, stablePercent: 5 }, NOW);
-    expect(await loadAlertSettings(t.db)).toEqual({ unusualRate: 0.3, minKg: 2, recurrenceWeeks: 4, trendStableRate: 0.05 });
+    expect(await loadAlertSettings(t.db)).toEqual({
+      unusualRate: 0.3,
+      minKg: 2,
+      recurrenceWeeks: 4,
+      trendStableRate: 0.05,
+    });
     const [audit] = await t.db.select().from(s.auditLog).where(eq(s.auditLog.entity, "alert_settings"));
     expect(audit).toMatchObject({ userId: admin.id, action: "update" });
     expect((await weekComparison(t.db, admin, { year: 2026, number: 45 }, {}))!.trendStableRate).toBe(0.05);

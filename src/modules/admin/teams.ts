@@ -26,13 +26,18 @@ export async function setTeamWeekActive(
   input: { teamId: string; productionWeekId: string; active: boolean; note?: string | null },
 ): Promise<void> {
   requirePermission(admin, "referentiel.manage");
-  const where = and(eq(s.teamWeekStatus.teamId, input.teamId), eq(s.teamWeekStatus.productionWeekId, input.productionWeekId));
+  const where = and(
+    eq(s.teamWeekStatus.teamId, input.teamId),
+    eq(s.teamWeekStatus.productionWeekId, input.productionWeekId),
+  );
   const [before] = await db.select().from(s.teamWeekStatus).where(where);
   const values = { active: input.active, note: input.note?.trim() || null, updatedAt: new Date() };
   if (before) {
     await db.update(s.teamWeekStatus).set(values).where(where);
   } else {
-    await db.insert(s.teamWeekStatus).values({ teamId: input.teamId, productionWeekId: input.productionWeekId, ...values });
+    await db
+      .insert(s.teamWeekStatus)
+      .values({ teamId: input.teamId, productionWeekId: input.productionWeekId, ...values });
   }
   await writeAudit(db, {
     userId: admin.id,

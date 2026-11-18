@@ -7,7 +7,12 @@ describe("tendances", () => {
   });
 
   it("hausse, baisse ou stable selon l'écart des deux fenêtres de 4 semaines", () => {
-    expect(trendOf([10, 10, 10, 10, 12, 12, 12, 12])).toEqual({ recent: 12, previous: 10, rate: 0.2, direction: "hausse" });
+    expect(trendOf([10, 10, 10, 10, 12, 12, 12, 12])).toEqual({
+      recent: 12,
+      previous: 10,
+      rate: 0.2,
+      direction: "hausse",
+    });
     expect(trendOf([10, 10, 10, 10, 8, 8, 8, 8])).toEqual({ recent: 8, previous: 10, rate: -0.2, direction: "baisse" });
     expect(trendOf([10, 10, 10, 10, 10.9, 10.9, 10.9, 10.9])).toMatchObject({ direction: "stable", rate: 0.09 });
     // Seuil réglable.

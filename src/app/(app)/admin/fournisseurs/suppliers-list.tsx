@@ -12,7 +12,12 @@ interface Supplier {
   lastDelivery: string | null;
 }
 
-const dayFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const dayFormat = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
 const fmtDay = (date: string) => dayFormat.format(new Date(`${date}T12:00:00Z`));
 
 export function SuppliersList({ suppliers }: { suppliers: Supplier[] }) {
@@ -36,7 +41,14 @@ export function SuppliersList({ suppliers }: { suppliers: Supplier[] }) {
             {editing === x.id ? (
               <form action={action} className="flex flex-col gap-2 sm:flex-row" onSubmit={() => setEditing(null)}>
                 <input type="hidden" name="supplierId" value={x.id} />
-                <input name="name" defaultValue={x.name} className="field min-w-0 flex-1" required minLength={2} aria-label="Nom du fournisseur" />
+                <input
+                  name="name"
+                  defaultValue={x.name}
+                  className="field min-w-0 flex-1"
+                  required
+                  minLength={2}
+                  aria-label="Nom du fournisseur"
+                />
                 <div className="flex gap-2">
                   <button type="submit" disabled={pending} className="btn-primary">
                     Enregistrer
@@ -54,10 +66,17 @@ export function SuppliersList({ suppliers }: { suppliers: Supplier[] }) {
                   {x.lastDelivery && ` · dernière livraison le ${fmtDay(x.lastDelivery)}`}
                 </span>
                 <div className="flex flex-wrap gap-4">
-                  <Link href={`/admin/produits?fournisseur=${x.id}`} className="text-sm font-medium text-teal-800 underline">
+                  <Link
+                    href={`/admin/produits?fournisseur=${x.id}`}
+                    className="text-sm font-medium text-teal-800 underline"
+                  >
                     Voir ses matières
                   </Link>
-                  <button type="button" className="text-sm font-medium text-teal-800 underline" onClick={() => setEditing(x.id)}>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-teal-800 underline"
+                    onClick={() => setEditing(x.id)}
+                  >
                     Renommer
                   </button>
                 </div>

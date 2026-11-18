@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useOfflineQueue } from "../../offline-provider";
 
-const dateTime = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const dateTime = new Intl.DateTimeFormat("fr-FR", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 /**
  * Pertes gardées sur cet appareil (docs/PHASE6.md, étape 6.5) : en attente d'envoi, ou refusées par le serveur avec
@@ -20,22 +26,28 @@ export function PendingList() {
       </Link>
       <h1 className="text-2xl font-bold">Pertes en attente sur cet appareil</h1>
       <p className="text-slate-600">
-        Pertes validées sans réseau. Elles partent toutes seules au retour du réseau et n&apos;apparaissent dans l&apos;historique et les statistiques
-        qu&apos;une fois reçues. Elles ne sont visibles que sur cet appareil.
+        Pertes validées sans réseau. Elles partent toutes seules au retour du réseau et n&apos;apparaissent dans
+        l&apos;historique et les statistiques qu&apos;une fois reçues. Elles ne sont visibles que sur cet appareil.
       </p>
       {sorted.length === 0 ? (
         <p className="rounded-2xl bg-white p-4 text-slate-600">Aucune perte en attente.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {sorted.map((item) => (
-            <li key={item.id} className={`flex flex-col gap-1 rounded-2xl p-4 shadow-sm ${item.status === "refusee" ? "border-2 border-red-300 bg-red-50 text-red-950" : "bg-white"}`}>
+            <li
+              key={item.id}
+              className={`flex flex-col gap-1 rounded-2xl p-4 shadow-sm ${item.status === "refusee" ? "border-2 border-red-300 bg-red-50 text-red-950" : "bg-white"}`}
+            >
               <span className="font-semibold">{item.summary}</span>
               <span className="text-sm text-slate-600">
                 Saisie le {dateTime.format(new Date(item.enteredAt))}
                 {item.kind === "serie" && ` · série de ${item.payloads.length} pertes`}
               </span>
               {item.status === "attente" ? (
-                <span className="text-sm">En attente d&apos;envoi{item.attempts ? ` (${item.attempts} essai${item.attempts > 1 ? "s" : ""})` : ""}.</span>
+                <span className="text-sm">
+                  En attente d&apos;envoi
+                  {item.attempts ? ` (${item.attempts} essai${item.attempts > 1 ? "s" : ""})` : ""}.
+                </span>
               ) : (
                 <>
                   <span className="text-sm font-medium">Refusée par le serveur : {item.error}</span>
@@ -47,7 +59,12 @@ export function PendingList() {
                       type="button"
                       className="text-sm font-medium underline"
                       onClick={() => {
-                        if (window.confirm("Supprimer cette perte de l'appareil ? Elle ne sera pas enregistrée : saisissez-la à nouveau si besoin.")) void remove(item.id);
+                        if (
+                          window.confirm(
+                            "Supprimer cette perte de l'appareil ? Elle ne sera pas enregistrée : saisissez-la à nouveau si besoin.",
+                          )
+                        )
+                          void remove(item.id);
                       }}
                     >
                       Supprimer

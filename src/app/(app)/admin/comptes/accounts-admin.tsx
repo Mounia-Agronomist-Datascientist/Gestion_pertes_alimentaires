@@ -32,7 +32,12 @@ const ROLES = [
   { code: "direction", label: "Direction" },
 ];
 
-const dateFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const dateFormat = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
   const [state, action, pending] = useActionState<AccountActionState, FormData>(accountAction, {});
@@ -103,7 +108,12 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
           )}
           <label className="flex flex-col gap-1">
             <span className="font-medium">Intitulé affiché</span>
-            <input name="displayName" className="field" required placeholder="ex. Chef d'équipe – Équipe Turquoise (H)" />
+            <input
+              name="displayName"
+              className="field"
+              required
+              placeholder="ex. Chef d'équipe – Équipe Turquoise (H)"
+            />
             <span className="text-sm text-slate-500">Une fonction, pas un prénom.</span>
           </label>
           <label className="flex flex-col gap-1">
@@ -123,7 +133,10 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
 
       <ul className="flex flex-col gap-2">
         {accounts.map((a) => (
-          <li key={a.id} className={`flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ${a.active ? "" : "opacity-60"}`}>
+          <li
+            key={a.id}
+            className={`flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ${a.active ? "" : "opacity-60"}`}
+          >
             <span className="flex flex-wrap items-center gap-2">
               {a.teamLetter && (
                 <span
@@ -154,7 +167,12 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
                 value="reset"
                 className="text-sm font-medium text-teal-800 underline"
                 onClick={(e) => {
-                  if (!window.confirm(`Réinitialiser le mot de passe de « ${a.login} » ? Ses appareils seront déconnectés.`)) e.preventDefault();
+                  if (
+                    !window.confirm(
+                      `Réinitialiser le mot de passe de « ${a.login} » ? Ses appareils seront déconnectés.`,
+                    )
+                  )
+                    e.preventDefault();
                 }}
               >
                 Réinitialiser le mot de passe
@@ -166,7 +184,8 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
                   value={a.active ? "deactivate" : "activate"}
                   className={`text-sm font-medium underline ${a.active ? "text-red-800" : "text-teal-800"}`}
                   onClick={(e) => {
-                    if (a.active && !window.confirm(`Désactiver « ${a.login} » ? Il sera déconnecté partout.`)) e.preventDefault();
+                    if (a.active && !window.confirm(`Désactiver « ${a.login} » ? Il sera déconnecté partout.`))
+                      e.preventDefault();
                   }}
                 >
                   {a.active ? "Désactiver" : "Réactiver"}

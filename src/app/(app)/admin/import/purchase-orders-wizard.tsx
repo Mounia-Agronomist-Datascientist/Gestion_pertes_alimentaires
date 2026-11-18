@@ -6,8 +6,15 @@ import type { ParsedPurchaseOrder } from "@/modules/imports/bons-commande/parse-
 import { savePurchaseOrdersAction } from "./actions";
 
 type Failure = { fileName: string; error: string };
-type Reading = { status: "idle" } | { status: "reading"; done: number; total: number } | { status: "ready"; orders: ParsedPurchaseOrder[]; failures: Failure[]; ignored: number };
-type Saving = { status: "idle" } | { status: "saving"; done: number; total: number } | { status: "done"; message: string } | { status: "error"; message: string };
+type Reading =
+  | { status: "idle" }
+  | { status: "reading"; done: number; total: number }
+  | { status: "ready"; orders: ParsedPurchaseOrder[]; failures: Failure[]; ignored: number };
+type Saving =
+  | { status: "idle" }
+  | { status: "saving"; done: number; total: number }
+  | { status: "done"; message: string }
+  | { status: "error"; message: string };
 
 const BATCH = 40;
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
@@ -33,7 +40,8 @@ async function pdfFiles(files: File[]): Promise<{ pdfs: { name: string; data: Ui
       const zip = await JSZip.loadAsync(await f.arrayBuffer());
       for (const entry of Object.values(zip.files)) {
         if (entry.dir || entry.name.includes("__MACOSX")) continue;
-        if (/\.pdf$/i.test(entry.name)) pdfs.push({ name: baseName(entry.name), data: await entry.async("uint8array") });
+        if (/\.pdf$/i.test(entry.name))
+          pdfs.push({ name: baseName(entry.name), data: await entry.async("uint8array") });
         else ignored++;
       }
     } else {
@@ -73,17 +81,30 @@ export function PurchaseOrdersWizard() {
         failures.push({ fileName: pdf.name, error: "PDF illisible" });
       }
     }
-    const orders = [...byNumber.values()].sort((a, b) => a.deliveryDate.localeCompare(b.deliveryDate) || a.number.localeCompare(b.number));
+    const orders = [...byNumber.values()].sort(
+      (a, b) => a.deliveryDate.localeCompare(b.deliveryDate) || a.number.localeCompare(b.number),
+    );
     setReading({ status: "ready", orders, failures, ignored });
   };
 
   const save = async (orders: ParsedPurchaseOrder[]) => {
-    const total = { orders: 0, replaced: 0, lines: 0, createdMaterials: 0, newPrices: 0, newSuppliers: 0, outsideCalendar: 0 };
+    const total = {
+      orders: 0,
+      replaced: 0,
+      lines: 0,
+      createdMaterials: 0,
+      newPrices: 0,
+      newSuppliers: 0,
+      outsideCalendar: 0,
+    };
     for (let i = 0; i < orders.length; i += BATCH) {
       setSaving({ status: "saving", done: i, total: orders.length });
       const r = await savePurchaseOrdersAction(orders.slice(i, i + BATCH));
       if (!r.ok) {
-        setSaving({ status: "error", message: `${r.error}${i ? ` (${plural(i, "bon déjà enregistré", "bons déjà enregistrés")})` : ""}` });
+        setSaving({
+          status: "error",
+          message: `${r.error}${i ? ` (${plural(i, "bon déjà enregistré", "bons déjà enregistrés")})` : ""}`,
+        });
         return;
       }
       for (const k of Object.keys(total) as (keyof typeof total)[]) total[k] += r.result[k];
@@ -95,7 +116,9 @@ export function PurchaseOrdersWizard() {
       `${plural(total.newSuppliers, "fournisseur ajouté", "fournisseurs ajoutés")}`,
       `${plural(total.createdMaterials, "matière ajoutée", "matières ajoutées")}`,
       `${plural(total.newPrices, "prix d'achat enregistré", "prix d'achat enregistrés")}`,
-      total.outsideCalendar ? `${plural(total.outsideCalendar, "bon hors du calendrier de production", "bons hors du calendrier de production")}` : null,
+      total.outsideCalendar
+        ? `${plural(total.outsideCalendar, "bon hors du calendrier de production", "bons hors du calendrier de production")}`
+        : null,
     ].filter(Boolean);
     setSaving({ status: "done", message: `Enregistré : ${details.join(" · ")}.` });
     setReading({ status: "idle" });
@@ -119,9 +142,10 @@ export function PurchaseOrdersWizard() {
     <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold">Bons de commande fournisseurs</h2>
       <p className="text-sm text-slate-600">
-        Chaque jeudi : déposez les bons de commande Melba de la semaine suivante (PDF). Pour reprendre l&apos;historique, téléchargez le dossier des bons
-        de commande depuis le Drive (clic droit → Télécharger) et déposez le ZIP. Les fichiers sont lus sur cet ordinateur ; les adresses e-mail ne
-        sont jamais lues. Un bon déjà déposé est remplacé.
+        Chaque jeudi : déposez les bons de commande Melba de la semaine suivante (PDF). Pour reprendre
+        l&apos;historique, téléchargez le dossier des bons de commande depuis le Drive (clic droit → Télécharger) et
+        déposez le ZIP. Les fichiers sont lus sur cet ordinateur ; les adresses e-mail ne sont jamais lues. Un bon déjà
+        déposé est remplacé.
       </p>
       <input
         type="file"
@@ -140,12 +164,17 @@ export function PurchaseOrdersWizard() {
       {ready && (
         <>
           <p className="text-slate-700">
-            <span className="font-semibold">{plural(ready.orders.length, "bon de commande lu", "bons de commande lus")}</span>
-            {ready.ignored > 0 && ` · ${plural(ready.ignored, "fichier ignoré (pas un PDF)", "fichiers ignorés (pas des PDF)")}`}
+            <span className="font-semibold">
+              {plural(ready.orders.length, "bon de commande lu", "bons de commande lus")}
+            </span>
+            {ready.ignored > 0 &&
+              ` · ${plural(ready.ignored, "fichier ignoré (pas un PDF)", "fichiers ignorés (pas des PDF)")}`}
           </p>
           {ready.failures.length > 0 && (
             <details className="rounded-xl bg-red-50 p-3 text-red-900">
-              <summary className="cursor-pointer font-medium">{plural(ready.failures.length, "PDF non lu", "PDF non lus")}</summary>
+              <summary className="cursor-pointer font-medium">
+                {plural(ready.failures.length, "PDF non lu", "PDF non lus")}
+              </summary>
               <ul className="mt-2 list-disc pl-5 text-sm">
                 {ready.failures.map((f) => (
                   <li key={f.fileName}>
@@ -157,7 +186,9 @@ export function PurchaseOrdersWizard() {
           )}
           {warned.length > 0 && (
             <details className="rounded-xl bg-amber-50 p-3 text-amber-950">
-              <summary className="cursor-pointer font-medium">{plural(warned.length, "bon à vérifier", "bons à vérifier")}</summary>
+              <summary className="cursor-pointer font-medium">
+                {plural(warned.length, "bon à vérifier", "bons à vérifier")}
+              </summary>
               <ul className="mt-2 list-disc pl-5 text-sm">
                 {warned.map((o) => (
                   <li key={o.number}>
@@ -186,7 +217,9 @@ export function PurchaseOrdersWizard() {
                       <td className="py-1">{x.name}</td>
                       <td className="py-1 text-right tabular-nums">{x.orders}</td>
                       <td className="py-1 text-right tabular-nums">{x.lines}</td>
-                      <td className="py-1">{x.from === x.to ? shortDate(x.from) : `${shortDate(x.from)} → ${shortDate(x.to)}`}</td>
+                      <td className="py-1">
+                        {x.from === x.to ? shortDate(x.from) : `${shortDate(x.from)} → ${shortDate(x.to)}`}
+                      </td>
                       <td className="py-1 text-right tabular-nums">{euro.format(x.total)}</td>
                     </tr>
                   ))}
@@ -194,7 +227,12 @@ export function PurchaseOrdersWizard() {
               </table>
             </div>
           )}
-          <button type="button" className="btn-primary w-full" disabled={!ready.orders.length || saving.status === "saving"} onClick={() => save(ready.orders)}>
+          <button
+            type="button"
+            className="btn-primary w-full"
+            disabled={!ready.orders.length || saving.status === "saving"}
+            onClick={() => save(ready.orders)}
+          >
             Enregistrer {plural(ready.orders.length, "bon", "bons")}
           </button>
         </>

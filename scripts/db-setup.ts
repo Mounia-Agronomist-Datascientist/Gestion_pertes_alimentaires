@@ -26,7 +26,13 @@ if (admins.length === 0) {
     console.error("Aucun administrateur : définissez ADMIN_INITIAL_PASSWORD (10 caractères minimum) pour le créer.");
     process.exitCode = 1;
   } else {
-    await createAccount(db, { login: "admin", displayName: "Administration", roleCode: "admin", password, mustChangePassword: true });
+    await createAccount(db, {
+      login: "admin",
+      displayName: "Administration",
+      roleCode: "admin",
+      password,
+      mustChangePassword: true,
+    });
     console.log("Compte « admin » créé : mot de passe provisoire à changer à la première connexion.");
   }
 } else {

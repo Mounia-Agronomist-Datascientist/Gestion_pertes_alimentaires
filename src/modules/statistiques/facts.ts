@@ -42,8 +42,16 @@ async function periodCondition(db: Db, period: Period): Promise<SQL | null> {
       return week ? eq(s.lossDeclarations.productionWeekId, week.id) : null;
     }
     case "annee": {
-      const weeks = await db.select({ id: s.productionWeeks.id }).from(s.productionWeeks).where(eq(s.productionWeeks.year, period.year));
-      return weeks.length ? inArray(s.lossDeclarations.productionWeekId, weeks.map((w) => w.id)) : null;
+      const weeks = await db
+        .select({ id: s.productionWeeks.id })
+        .from(s.productionWeeks)
+        .where(eq(s.productionWeeks.year, period.year));
+      return weeks.length
+        ? inArray(
+            s.lossDeclarations.productionWeekId,
+            weeks.map((w) => w.id),
+          )
+        : null;
     }
     case "mois": {
       const { from, to } = monthBounds(period.year, period.month);
@@ -71,7 +79,12 @@ export async function adjacentOf(db: Db, period: Period, step: -1 | 1): Promise<
   return adjacentPeriod(period, step, next ?? null);
 }
 
-export async function loadFacts(db: Db, user: AuthUser, period: Period, filters: StatsFilters = {}): Promise<LossFact[]> {
+export async function loadFacts(
+  db: Db,
+  user: AuthUser,
+  period: Period,
+  filters: StatsFilters = {},
+): Promise<LossFact[]> {
   if (!canReadStats(user)) throw new ForbiddenError();
   const scope = can(user, "stats.compare_teams") ? undefined : scopeCondition(user);
   const inPeriod = await periodCondition(db, period);
@@ -88,7 +101,9 @@ export async function loadFacts(db: Db, user: AuthUser, period: Period, filters:
         filters.zoneId ? eq(d.zoneId, filters.zoneId) : undefined,
         filters.subzoneId ? eq(d.subzoneId, filters.subzoneId) : undefined,
         filters.teamId ? eq(d.teamId, filters.teamId) : undefined,
-        filters.category ? eq(d.productCategory, filters.category as (typeof d.productCategory.enumValues)[number]) : undefined,
+        filters.category
+          ? eq(d.productCategory, filters.category as (typeof d.productCategory.enumValues)[number])
+          : undefined,
         filters.causeId ? eq(d.causeId, filters.causeId) : undefined,
       ),
     )
@@ -107,14 +122,25 @@ export async function loadFacts(db: Db, user: AuthUser, period: Period, filters:
     })
     .from(s.declarationDestinations)
     .innerJoin(s.destinations, eq(s.destinations.id, s.declarationDestinations.destinationId))
-    .where(inArray(s.declarationDestinations.declarationId, rows.map((r) => r.id)));
+    .where(
+      inArray(
+        s.declarationDestinations.declarationId,
+        rows.map((r) => r.id),
+      ),
+    );
   const withCosts = can(user, "indicators.read");
   const revisionOf = new Map(rows.map((r) => [r.id, r.revision]));
   const destinationsOf = new Map<string, LossFact["destinations"]>();
   for (const l of lines) {
     if (revisionOf.get(l.declarationId) !== l.revision) continue;
     const list = destinationsOf.get(l.declarationId) ?? destinationsOf.set(l.declarationId, []).get(l.declarationId)!;
-    list.push({ destinationId: l.destinationId, kind: l.kind, quantity: l.quantity, netKg: l.netKg, recoveredEur: withCosts ? l.recoveredAmount : null });
+    list.push({
+      destinationId: l.destinationId,
+      kind: l.kind,
+      quantity: l.quantity,
+      netKg: l.netKg,
+      recoveredEur: withCosts ? l.recoveredAmount : null,
+    });
   }
 
   const facts = rows.map((r): LossFact => {
@@ -153,5 +179,7 @@ export async function loadFacts(db: Db, user: AuthUser, period: Period, filters:
       destinations: destinationsOf.get(r.id) ?? [],
     };
   });
-  return filters.destinationId ? facts.filter((f) => f.destinations.some((x) => x.destinationId === filters.destinationId)) : facts;
+  return filters.destinationId
+    ? facts.filter((f) => f.destinations.some((x) => x.destinationId === filters.destinationId))
+    : facts;
 }

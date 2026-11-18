@@ -41,7 +41,9 @@ describe("lecture du classeur Excel du plan de production", () => {
   });
 
   it("applique le format d'affichage des nombres, comme Google Sheets", () => {
-    expect(displayedText({ value: { formula: "A1*0.5", result: 676.5 } as never, numFmt: "0", text: "676.5" })).toBe("677");
+    expect(displayedText({ value: { formula: "A1*0.5", result: 676.5 } as never, numFmt: "0", text: "676.5" })).toBe(
+      "677",
+    );
     expect(displayedText({ value: 2.386363636, numFmt: "0.0", text: "2.386363636" })).toBe("2.4");
     expect(displayedText({ value: 50.6, numFmt: undefined as never, text: "50.6" })).toBe("50.6");
     expect(displayedText({ value: "A", numFmt: "0", text: "A" })).toBe("A");

@@ -19,9 +19,34 @@ describe("consultation du journal d'audit", () => {
     t = await createTestDb();
     await seed(t.db);
     const teamC = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "C")))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    production = await loadAuthUser(t.db, await createAccount(t.db, { login: "resp-production", displayName: "Responsable production", roleCode: "resp_production", password: "mot-de-passe-prod" }));
-    teamUser = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-c", displayName: "Équipe C", roleCode: "equipe", teamId: teamC, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    production = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "resp-production",
+        displayName: "Responsable production",
+        roleCode: "resp_production",
+        password: "mot-de-passe-prod",
+      }),
+    );
+    teamUser = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-c",
+        displayName: "Équipe C",
+        roleCode: "equipe",
+        teamId: teamC,
+        password: "mot-de-passe-equipe",
+      }),
+    );
     await login(t.db, { login: "admin", password: "mot-de-passe-admin" });
     const d = await createDestination(t.db, admin, { name: "Banque alimentaire", kind: "don" });
     await updateDestination(t.db, admin, d.id, { name: "Banque alimentaire locale", kind: "don" });

@@ -18,8 +18,9 @@ export default async function AlertSettingsPage() {
       </Link>
       <h1 className="text-2xl font-bold">Seuils des alertes</h1>
       <p className="text-sm text-slate-600">
-        Alertes d&apos;analyse calculées chaque nuit pour la semaine de production terminée, et sens des tendances dans les statistiques. Chaque
-        modification est inscrite au journal d&apos;audit ; les alertes déjà calculées ne changent pas tant que leur semaine n&apos;est pas recalculée.
+        Alertes d&apos;analyse calculées chaque nuit pour la semaine de production terminée, et sens des tendances dans
+        les statistiques. Chaque modification est inscrite au journal d&apos;audit ; les alertes déjà calculées ne
+        changent pas tant que leur semaine n&apos;est pas recalculée.
       </p>
       <SettingsForm
         values={{

@@ -25,10 +25,34 @@ describe("décompte des barquettes produites", () => {
   beforeAll(async () => {
     t = await createTestDb();
     await seed(t.db);
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    production = await loadAuthUser(t.db, await createAccount(t.db, { login: "prod", displayName: "Production", roleCode: "resp_production", password: "mot-de-passe-prod" }));
-    await saveWeekImport(t.db, admin, { preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())), tomeFileName: "t.pdf", planFileName: "p.xlsx", planSheetName: "S45" });
-    const [week] = await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    production = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "prod",
+        displayName: "Production",
+        roleCode: "resp_production",
+        password: "mot-de-passe-prod",
+      }),
+    );
+    await saveWeekImport(t.db, admin, {
+      preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())),
+      tomeFileName: "t.pdf",
+      planFileName: "p.xlsx",
+      planSheetName: "S45",
+    });
+    const [week] = await t.db
+      .select()
+      .from(s.productionWeeks)
+      .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 45)));
     weekId = week!.id;
     const [vi01] = await t.db.select().from(s.weekRecipes).where(eq(s.weekRecipes.code, "VI01"));
     teamOfVi01 = vi01!.teamId!;
@@ -39,11 +63,25 @@ describe("décompte des barquettes produites", () => {
   });
 
   const payload = (rows: { code: string; made: number }[]) =>
-    decomptePayloadSchema.parse({ fileName: "Décompte.xlsx", sheetName: "Semaine 45", year: 2026, week: 45, rows, warnings: [] });
+    decomptePayloadSchema.parse({
+      fileName: "Décompte.xlsx",
+      sheetName: "Semaine 45",
+      year: 2026,
+      week: 45,
+      rows,
+      warnings: [],
+    });
 
   it("enregistre une version, la remplace sans l'effacer et trace l'import", async () => {
     await saveProductionCount(t.db, admin, payload([{ code: "VI01", made: 2900 }]));
-    const second = await saveProductionCount(t.db, admin, payload([{ code: "VI01", made: 2938 }, { code: "ZZ99", made: 10 }]));
+    const second = await saveProductionCount(
+      t.db,
+      admin,
+      payload([
+        { code: "VI01", made: 2938 },
+        { code: "ZZ99", made: 10 },
+      ]),
+    );
     expect(second).toMatchObject({ version: 2, total: 2948 });
     const list = await listProductionCounts(t.db, admin);
     expect(list.map((c) => [c.version, c.status])).toEqual([
@@ -79,9 +117,25 @@ describe("décompte des barquettes produites", () => {
   });
 
   it("refuse les doublons, une semaine hors calendrier et les profils sans droit", async () => {
-    await expect(saveProductionCount(t.db, admin, payload([{ code: "VI01", made: 1 }, { code: "VI01", made: 2 }]))).rejects.toThrow(/deux fois/);
-    await expect(saveProductionCount(t.db, admin, { ...payload([{ code: "VI01", made: 1 }]), year: 2031 })).rejects.toThrow(/calendrier/);
-    await expect(saveProductionCount(t.db, production, payload([{ code: "VI01", made: 1 }]))).rejects.toThrow(ForbiddenError);
-    expect(decomptePayloadSchema.safeParse({ ...payload([{ code: "VI01", made: 1 }]), rows: [{ code: "Julien", made: 1 }] }).success).toBe(false);
+    await expect(
+      saveProductionCount(
+        t.db,
+        admin,
+        payload([
+          { code: "VI01", made: 1 },
+          { code: "VI01", made: 2 },
+        ]),
+      ),
+    ).rejects.toThrow(/deux fois/);
+    await expect(
+      saveProductionCount(t.db, admin, { ...payload([{ code: "VI01", made: 1 }]), year: 2031 }),
+    ).rejects.toThrow(/calendrier/);
+    await expect(saveProductionCount(t.db, production, payload([{ code: "VI01", made: 1 }]))).rejects.toThrow(
+      ForbiddenError,
+    );
+    expect(
+      decomptePayloadSchema.safeParse({ ...payload([{ code: "VI01", made: 1 }]), rows: [{ code: "Julien", made: 1 }] })
+        .success,
+    ).toBe(false);
   });
 });

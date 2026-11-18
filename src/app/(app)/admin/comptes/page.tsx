@@ -12,8 +12,15 @@ export default async function AccountsPage() {
   const admin = await requireUser();
   const [accounts, teams, zones] = await Promise.all([
     listAccounts(db, admin),
-    db.select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName }).from(s.teams).orderBy(asc(s.teams.displayOrder)),
-    db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones).where(eq(s.zones.active, true)).orderBy(asc(s.zones.displayOrder)),
+    db
+      .select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName })
+      .from(s.teams)
+      .orderBy(asc(s.teams.displayOrder)),
+    db
+      .select({ id: s.zones.id, name: s.zones.name })
+      .from(s.zones)
+      .where(eq(s.zones.active, true))
+      .orderBy(asc(s.zones.displayOrder)),
   ]);
   return (
     <>

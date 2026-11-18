@@ -27,7 +27,8 @@ export async function importWeekAction(_prev: ImportActionState, formData: FormD
     return { error: "Données d'import illisibles : rechargez la page et déposez à nouveau les fichiers" };
   }
   const parsed = importPayloadSchema.safeParse(raw);
-  if (!parsed.success) return { error: "Données d'import inattendues : rechargez la page et déposez à nouveau les fichiers" };
+  if (!parsed.success)
+    return { error: "Données d'import inattendues : rechargez la page et déposez à nouveau les fichiers" };
   const { tome, plan, ...files } = parsed.data;
   const preview = buildWeekImport(tome, plan);
   try {
@@ -66,7 +67,10 @@ export async function importDecompteAction(_prev: ImportActionState, formData: F
 }
 
 /** Valide le fichier des Alchimistes : collectes revérifiées par le serveur, semaine tirée du calendrier stocké. */
-export async function importAlchimistesAction(_prev: ImportActionState, formData: FormData): Promise<ImportActionState> {
+export async function importAlchimistesAction(
+  _prev: ImportActionState,
+  formData: FormData,
+): Promise<ImportActionState> {
   const admin = await requireUser();
   let raw: unknown;
   try {
@@ -106,10 +110,18 @@ export async function importSurplusAction(_prev: ImportActionState, formData: Fo
     revalidatePath("/admin/import");
     const details = [
       `${saved.entries} ligne${saved.entries > 1 ? "s" : ""}`,
-      parsed.data.source === "linkee" ? `${saved.matched} plat${saved.matched > 1 ? "s" : ""} retrouvé${saved.matched > 1 ? "s" : ""} dans Melba (poids et coût calculés)` : null,
-      saved.unmatched ? `${saved.unmatched} code${saved.unmatched > 1 ? "s" : ""} plat absent${saved.unmatched > 1 ? "s" : ""} des imports Melba (sans coût)` : null,
-      saved.outside ? `${saved.outside} ligne${saved.outside > 1 ? "s" : ""} hors du calendrier de production (comptée${saved.outside > 1 ? "s" : ""} par date)` : null,
-      saved.replaced ? `${saved.replaced} ligne${saved.replaced > 1 ? "s" : ""} déjà enregistrée${saved.replaced > 1 ? "s" : ""} sur la période remplacée${saved.replaced > 1 ? "s" : ""}` : null,
+      parsed.data.source === "linkee"
+        ? `${saved.matched} plat${saved.matched > 1 ? "s" : ""} retrouvé${saved.matched > 1 ? "s" : ""} dans Melba (poids et coût calculés)`
+        : null,
+      saved.unmatched
+        ? `${saved.unmatched} code${saved.unmatched > 1 ? "s" : ""} plat absent${saved.unmatched > 1 ? "s" : ""} des imports Melba (sans coût)`
+        : null,
+      saved.outside
+        ? `${saved.outside} ligne${saved.outside > 1 ? "s" : ""} hors du calendrier de production (comptée${saved.outside > 1 ? "s" : ""} par date)`
+        : null,
+      saved.replaced
+        ? `${saved.replaced} ligne${saved.replaced > 1 ? "s" : ""} déjà enregistrée${saved.replaced > 1 ? "s" : ""} sur la période remplacée${saved.replaced > 1 ? "s" : ""}`
+        : null,
     ].filter(Boolean);
     return { message: `${SURPLUS_SOURCE_LABELS[parsed.data.source]} enregistré : ${details.join(" · ")}.` };
   } catch (e) {

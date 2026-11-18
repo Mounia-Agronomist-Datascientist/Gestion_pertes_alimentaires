@@ -47,10 +47,15 @@ export interface ParsedPurchaseOrder {
   warnings: string[];
 }
 
-export type PurchaseOrderParse = { ok: true; order: ParsedPurchaseOrder } | { ok: false; fileName: string; error: string };
+export type PurchaseOrderParse =
+  { ok: true; order: ParsedPurchaseOrder } | { ok: false; fileName: string; error: string };
 
 const EMAIL = /\S+@\S+/;
-const clean = (t: string) => t.replace(/[\u0000-\u001f -]/g, " ").replace(/\s+/g, " ").trim();
+const clean = (t: string) =>
+  t
+    .replace(/[\u0000-\u001f -]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 /** « 1,000.00 » → 1000 ; « 2,110.60 € » → 2110.6. */
 export const parseAmount = (t: string): number | null => {
   const m = clean(t).match(/^(-?\d[\d,]*(?:\.\d+)?)/);
@@ -66,7 +71,8 @@ export function parsePackaging(text: string): PurchasePackaging | null {
   const t = clean(text);
   if (!t) return null;
   const m = t.match(/^(.*?)\s*\((\d[\d,]*(?:\.\d+)?)\s*([^()]*)\)$/);
-  if (!m) return { label: t, contentQuantity: /^kgs?$/i.test(t) ? 1 : null, contentUnit: /^kgs?$/i.test(t) ? "kg" : null };
+  if (!m)
+    return { label: t, contentQuantity: /^kgs?$/i.test(t) ? 1 : null, contentUnit: /^kgs?$/i.test(t) ? "kg" : null };
   // « Sachet 5kg) (5.00 kg) » : parenthèse orpheline tapée dans Melba.
   const raw = m[1]!.trim();
   const label = (raw.split(")").length > raw.split("(").length ? raw.replace(/\)\s*$/, "").trim() : raw) || t;
@@ -116,7 +122,8 @@ const TOLERANCE = 3;
 function columnOf(item: PdfItem, columns: readonly Column[]): Column["key"] | null {
   const right = item.x + item.width;
   for (const c of columns) {
-    if (["quantity", "packaging", "price", "total"].includes(c.key) && Math.abs(right - c.right) <= TOLERANCE) return c.key;
+    if (["quantity", "packaging", "price", "total"].includes(c.key) && Math.abs(right - c.right) <= TOLERANCE)
+      return c.key;
   }
   for (const c of columns) {
     if (["designation", "code", "category"].includes(c.key) && Math.abs(item.x - c.left) <= TOLERANCE) return c.key;
@@ -139,7 +146,11 @@ function cellBlocks(items: PdfItem[]) {
 }
 
 /** « 20261110_Pro à Pro_S47_BC 20261104019.pdf » → « Pro à Pro ». */
-const supplierOfFileName = (fileName: string) => fileName.replace(/^.*\//, "").match(/^\d{8}_(.+?)_S\d{1,2}_BC\b/i)?.[1]?.trim() || null;
+const supplierOfFileName = (fileName: string) =>
+  fileName
+    .replace(/^.*\//, "")
+    .match(/^\d{8}_(.+?)_S\d{1,2}_BC\b/i)?.[1]
+    ?.trim() || null;
 
 /** « S47 » dans le nom du fichier (« 20261110_APO_S47_BC 20261104036.pdf »), à défaut dans l'objet. */
 const weekOf = (fileName: string, subject: string | null) => {
@@ -154,20 +165,39 @@ export function parsePurchaseOrder(fileName: string, allItems: readonly PdfItem[
   const titleIndex = page1.findIndex((i) => /^Bon de commande/i.test(clean(i.text)));
   if (titleIndex < 0) return fail("Ce PDF n'est pas un bon de commande Melba (titre « Bon de commande N° » absent)");
   const title = page1[titleIndex]!;
-  const number = clean(title.text).match(/(\d{8,})/)?.[1] ?? page1.map((i) => clean(i.text)).find((t) => /^\d{8,}$/.test(t));
+  const number =
+    clean(title.text).match(/(\d{8,})/)?.[1] ?? page1.map((i) => clean(i.text)).find((t) => /^\d{8,}$/.test(t));
   if (!number) return fail("Numéro du bon de commande introuvable");
 
   const objectItem = page1.find((i) => /^Objet\s*:/i.test(clean(i.text)));
   const deliveryItem = page1.find((i) => /^Date de livraison/i.test(clean(i.text)));
   const deliveryDate = deliveryItem ? frenchDate(clean(deliveryItem.text)) : null;
   if (!deliveryDate) return fail("Date de livraison introuvable");
-  const subject = objectItem ? clean(clean(objectItem.text).replace(/^Objet\s*:\s*/i, "").replace(number, "")).replace(/^\(\s*|\s*\)$/g, "").trim() || null : null;
+  const subject = objectItem
+    ? clean(
+        clean(objectItem.text)
+          .replace(/^Objet\s*:\s*/i, "")
+          .replace(number, ""),
+      )
+        .replace(/^\(\s*|\s*\)$/g, "")
+        .trim() || null
+    : null;
 
   // Fournisseur : bloc de droite sous le titre, jusqu'à son adresse e-mail (jamais gardée). Les anciens bons
   // portent aussi la date (« Le 26 févr. 26 »), en plus gros.
   const top = objectItem?.y ?? deliveryItem!.y;
   const supplierParts: string[] = [];
-  for (const i of page1.filter((p) => p.x >= 300 && p.y > top && p.y < title.y - 5 && p.size <= title.size * 0.6 && !/^\d{8,}$/.test(clean(p.text)) && !/^Le \d/.test(clean(p.text))).sort((a, b) => b.y - a.y || a.x - b.x)) {
+  for (const i of page1
+    .filter(
+      (p) =>
+        p.x >= 300 &&
+        p.y > top &&
+        p.y < title.y - 5 &&
+        p.size <= title.size * 0.6 &&
+        !/^\d{8,}$/.test(clean(p.text)) &&
+        !/^Le \d/.test(clean(p.text)),
+    )
+    .sort((a, b) => b.y - a.y || a.x - b.x)) {
     if (EMAIL.test(i.text)) break;
     supplierParts.push(clean(i.text));
   }
@@ -190,14 +220,18 @@ export function parsePurchaseOrder(fileName: string, allItems: readonly PdfItem[
       const amount = pageItems.find((i) => Math.abs(i.y - footer.y) <= 3 && i.x > footer.x && /€/.test(i.text));
       totalEur = amount ? parseAmount(amount.text) : null;
     }
-    const tableItems = pageItems.filter((i) => (header ? i.y < header.y - 2 : i.y < title.y) && (!footer || i.y > footer.y + 3));
+    const tableItems = pageItems.filter(
+      (i) => (header ? i.y < header.y - 2 : i.y < title.y) && (!footer || i.y > footer.y + 3),
+    );
     const byColumn = new Map<Column["key"], PdfItem[]>();
     for (const i of tableItems) {
       const key = columnOf(i, columns);
       if (key) byColumn.set(key, [...(byColumn.get(key) ?? []), i]);
     }
     // Une ligne par quantité ; chaque cellule va à la quantité la plus proche en hauteur.
-    const anchors = (byColumn.get("quantity") ?? []).filter((i) => parseAmount(i.text) != null).sort((a, b) => b.y - a.y);
+    const anchors = (byColumn.get("quantity") ?? [])
+      .filter((i) => parseAmount(i.text) != null)
+      .sort((a, b) => b.y - a.y);
     if (!anchors.length) continue;
     const cells = new Map<Column["key"], { y: number; text: string }[][]>();
     for (const key of ["designation", "code", "category", "packaging", "price", "total"] as const) {
@@ -211,7 +245,13 @@ export function parsePurchaseOrder(fileName: string, allItems: readonly PdfItem[
       }
       cells.set(key, slots);
     }
-    const text = (key: Column["key"], idx: number) => clean(cells.get(key)![idx]!.map((b) => b.text).join(" "));
+    const text = (key: Column["key"], idx: number) =>
+      clean(
+        cells
+          .get(key)!
+          [idx]!.map((b) => b.text)
+          .join(" "),
+      );
     anchors.forEach((anchor, idx) => {
       const position = lines.length + 1;
       const designation = text("designation", idx);
@@ -238,7 +278,9 @@ export function parsePurchaseOrder(fileName: string, allItems: readonly PdfItem[
   if (!lines.length) return fail("Aucune ligne de produit lue");
   const sum = lines.reduce((acc, l) => acc + (l.totalEur ?? 0), 0);
   if (totalEur != null && Math.abs(sum - totalEur) > 0.05) {
-    warnings.push(`Total des lignes (${sum.toFixed(2)} €) différent du total du bon (${totalEur.toFixed(2)} €) : une ligne a pu être mal lue`);
+    warnings.push(
+      `Total des lignes (${sum.toFixed(2)} €) différent du total du bon (${totalEur.toFixed(2)} €) : une ligne a pu être mal lue`,
+    );
   }
   const orderedOn = /^(\d{4})(\d{2})(\d{2})/.exec(number);
   return {

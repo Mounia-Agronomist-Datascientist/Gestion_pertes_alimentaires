@@ -45,7 +45,10 @@ const RULES: readonly (readonly [RegExp, string | null])[] = [
   [/\bchevre\b/, "FROMAGE_CHEVRE"],
   [/\b(fromage frais|saint moret|ricotta|mascarpone|cream cheese)\b/, "FROMAGE_FRAIS"],
   [/\bmozzarella\b/, "MOZZARELLA"],
-  [/\b(emmental|comte|grana|parmesan|beaufort|cantal|morbier|raclette|mimolette|gruyere|tomme|reblochon)\b/, "FROMAGE_PATE_DURE"],
+  [
+    /\b(emmental|comte|grana|parmesan|beaufort|cantal|morbier|raclette|mimolette|gruyere|tomme|reblochon)\b/,
+    "FROMAGE_PATE_DURE",
+  ],
   [/\bbeurre\b/, "BEURRE"],
   [/\blait\b/, "LAIT"],
   [/\b(oeuf|oeufs|jaune d oeuf|blanc d oeuf)\b/, "OEUF"],
@@ -63,7 +66,10 @@ const RULES: readonly (readonly [RegExp, string | null])[] = [
   [/\bthon\b/, "THON"],
   [/\b(crevettes?|gambas)\b/, "CREVETTE"],
   [/\briz\b/, "RIZ"],
-  [/\b(pates|lasagnes?|papillons?|linguine|spaghetti|penne|macaroni|coquillettes?|tagliatelles?|fusilli|farfalle|orzo)\b/, "PATES"],
+  [
+    /\b(pates|lasagnes?|papillons?|linguine|spaghetti|penne|macaroni|coquillettes?|tagliatelles?|fusilli|farfalle|orzo)\b/,
+    "PATES",
+  ],
   [/\bsemoule\b/, "SEMOULE"],
   [/\bfarine\b/, "FARINE"],
   [/\b(pain|chapelure)\b/, "PAIN"],

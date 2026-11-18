@@ -37,7 +37,12 @@ export function subRecipeUnitCost(costEur: number | null, net: { quantity: numbe
 }
 
 /** Ingrédient : coût de la ligne rapporté à sa quantité (en grammes, ou par pièce si elle se compte). */
-export function ingredientUnitCost(line: { costEur: number | null; quantity: number; unit: string; unitWeightG: number | null }): UnitCost {
+export function ingredientUnitCost(line: {
+  costEur: number | null;
+  quantity: number;
+  unit: string;
+  unitWeightG: number | null;
+}): UnitCost {
   if (line.costEur == null || line.quantity <= 0) return NONE;
   const grams = gramsOf(line.quantity, line.unit) ?? (line.unitWeightG ? line.quantity * line.unitWeightG : null);
   const counted = gramsOf(1, line.unit) == null;
@@ -55,7 +60,10 @@ const COUNT_UNITS = new Set(["piece", "barquette"]);
  * coût d'une portion est le plus exact), sinon poids net × coût au kg ; null si le coût ou la conversion manquent
  * (jamais deviné).
  */
-export function estimateLossCost(loss: { netKg: number | null; quantity: number; unitCode: string }, cost: UnitCost): number | null {
+export function estimateLossCost(
+  loss: { netKg: number | null; quantity: number; unitCode: string },
+  cost: UnitCost,
+): number | null {
   if (cost.perUnitEur != null && COUNT_UNITS.has(loss.unitCode)) return roundQuantity(loss.quantity * cost.perUnitEur);
   if (loss.netKg != null && cost.perKgEur != null) return roundQuantity(loss.netKg * cost.perKgEur);
   return null;
@@ -89,7 +97,10 @@ export interface CostBreakdown {
 }
 
 /** Coût brut d'une perte par composante (cahier des charges §18.6). */
-export function lossCostBreakdown(loss: { netKg: number | null; quantity: number; unitCode: string }, inputs: CostInputs): CostBreakdown {
+export function lossCostBreakdown(
+  loss: { netKg: number | null; quantity: number; unitCode: string },
+  inputs: CostInputs,
+): CostBreakdown {
   const portions = COUNT_UNITS.has(loss.unitCode)
     ? loss.quantity
     : loss.netKg != null && inputs.portionWeightKg

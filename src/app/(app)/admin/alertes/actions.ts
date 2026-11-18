@@ -11,9 +11,17 @@ export interface SettingsActionState {
   message?: string;
 }
 
-const number = (v: FormDataEntryValue | null) => Number(String(v ?? "").replace(",", ".").trim() || NaN);
+const number = (v: FormDataEntryValue | null) =>
+  Number(
+    String(v ?? "")
+      .replace(",", ".")
+      .trim() || NaN,
+  );
 
-export async function updateAlertSettingsAction(_prev: SettingsActionState, formData: FormData): Promise<SettingsActionState> {
+export async function updateAlertSettingsAction(
+  _prev: SettingsActionState,
+  formData: FormData,
+): Promise<SettingsActionState> {
   const admin = await requireUser();
   try {
     await updateAlertSettings(db, admin, {
@@ -27,5 +35,7 @@ export async function updateAlertSettingsAction(_prev: SettingsActionState, form
     throw e;
   }
   revalidatePath("/admin/alertes");
-  return { message: "Seuils enregistrés. Ils s'appliquent à la prochaine analyse de nuit et aux tendances dès maintenant." };
+  return {
+    message: "Seuils enregistrés. Ils s'appliquent à la prochaine analyse de nuit et aux tendances dès maintenant.",
+  };
 }

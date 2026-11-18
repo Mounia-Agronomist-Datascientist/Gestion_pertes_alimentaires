@@ -35,7 +35,11 @@ export function lossAlertSummary(a: LossAlertView): string {
 export function lossAlertContext(a: LossAlertView): string | null {
   if (a.kind !== "perte_inhabituelle") return null;
   const d = a.details as { causes?: Weight[]; products?: Weight[] };
-  const list = (rows: Weight[] | undefined) => (rows ?? []).map((r) => `${r.label} (${num.format(r.kg)} kg)`).join(", ");
-  const parts = [d.causes?.length ? `Causes : ${list(d.causes)}` : null, d.products?.length && a.scope !== "plat" ? `Produits : ${list(d.products)}` : null].filter(Boolean);
+  const list = (rows: Weight[] | undefined) =>
+    (rows ?? []).map((r) => `${r.label} (${num.format(r.kg)} kg)`).join(", ");
+  const parts = [
+    d.causes?.length ? `Causes : ${list(d.causes)}` : null,
+    d.products?.length && a.scope !== "plat" ? `Produits : ${list(d.products)}` : null,
+  ].filter(Boolean);
   return parts.length ? `${parts.join(" · ")}.` : null;
 }

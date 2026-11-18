@@ -61,7 +61,8 @@ export default async function DeclarationDetailPage({
       </Link>
       {recette && (
         <p role="status" className="rounded-xl bg-emerald-50 p-3 text-emerald-800">
-          Recette encaissée enregistrée : le coût net est recalculé, l&apos;ancienne version reste dans l&apos;historique.
+          Recette encaissée enregistrée : le coût net est recalculé, l&apos;ancienne version reste dans
+          l&apos;historique.
         </p>
       )}
       {annulee && (
@@ -72,14 +73,18 @@ export default async function DeclarationDetailPage({
 
       <div className="flex items-start justify-between gap-3">
         <h1 className="text-2xl font-bold">{productLabel(d.productName, d.productCode)}</h1>
-        <span className={`rounded-full px-3 py-1 text-sm font-medium ${STATUS_STYLES[d.status]}`}>{STATUS_LABELS[d.status]}</span>
+        <span className={`rounded-full px-3 py-1 text-sm font-medium ${STATUS_STYLES[d.status]}`}>
+          {STATUS_LABELS[d.status]}
+        </span>
       </div>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-2xl bg-white p-4">
         <dt className="text-slate-500">Quantité</dt>
         <dd className="font-semibold">
           {fmtQuantity(d.netQuantity, d.netUnitCode, d.netKg)}
-          {d.kgStatus === "non_converti" && <span className="block text-sm font-normal text-amber-700">Non convertie en kg</span>}
+          {d.kgStatus === "non_converti" && (
+            <span className="block text-sm font-normal text-amber-700">Non convertie en kg</span>
+          )}
         </dd>
         {d.tareTotalKg != null && (
           <>
@@ -98,20 +103,29 @@ export default async function DeclarationDetailPage({
         )}
         <dt className="text-slate-500">Produit</dt>
         <dd>
-          {productLabel(d.productName, d.productCode)} <span className="text-sm text-slate-500">({PRODUCT_CATEGORY_LABELS[d.productCategory]})</span>
-          {d.productUnlisted && <span className="block text-sm text-amber-700">Hors liste : à rattacher au référentiel</span>}
+          {productLabel(d.productName, d.productCode)}{" "}
+          <span className="text-sm text-slate-500">({PRODUCT_CATEGORY_LABELS[d.productCategory]})</span>
+          {d.productUnlisted && (
+            <span className="block text-sm text-amber-700">Hors liste : à rattacher au référentiel</span>
+          )}
         </dd>
         {d.costImportId && (
           <>
             <dt className="text-slate-500">Coût brut</dt>
             <dd>
-              {d.grossCostEur != null ? `≈ ${fmtEuro(d.grossCostEur)}` : d.materialCostEur != null ? `≈ ${fmtEuro(d.materialCostEur)}` : "non calculable"}
+              {d.grossCostEur != null
+                ? `≈ ${fmtEuro(d.grossCostEur)}`
+                : d.materialCostEur != null
+                  ? `≈ ${fmtEuro(d.materialCostEur)}`
+                  : "non calculable"}
               <span className="block text-sm text-slate-500">
                 Matières : {d.materialCostEur != null ? fmtEuro(d.materialCostEur) : "—"}
                 {d.costPerUnitEur != null && ` (${fmtEuro(d.costPerUnitEur)} l'unité)`}
                 {d.costPerKgEur != null && ` (${fmtEuro(d.costPerKgEur)} le kg)`}
               </span>
-              <span className="block text-sm text-slate-500">Emballages : {d.packagingCostEur != null ? fmtEuro(d.packagingCostEur) : "—"}</span>
+              <span className="block text-sm text-slate-500">
+                Emballages : {d.packagingCostEur != null ? fmtEuro(d.packagingCostEur) : "—"}
+              </span>
               {(d.costDetails as { packagingComplete?: boolean | null } | null)?.packagingComplete === false && (
                 <span className="block text-sm text-amber-700">
                   Un emballage n&apos;avait pas de coût à la date de la perte : montant des emballages incomplet.
@@ -120,7 +134,8 @@ export default async function DeclarationDetailPage({
               <span className="block text-sm text-slate-500">Main-d&apos;œuvre : non imputée (méthode à définir)</span>
               {d.recoveredEur != null && (
                 <span className="block font-medium">
-                  Recettes encaissées : − {fmtEuro(d.recoveredEur)} · coût net {d.netCostEur != null ? `≈ ${fmtEuro(d.netCostEur)}` : "—"}
+                  Recettes encaissées : − {fmtEuro(d.recoveredEur)} · coût net{" "}
+                  {d.netCostEur != null ? `≈ ${fmtEuro(d.netCostEur)}` : "—"}
                 </span>
               )}
               <span className="block text-sm text-slate-500">
@@ -157,7 +172,11 @@ export default async function DeclarationDetailPage({
           {detail.zoneName} › {detail.subzoneName}
         </dd>
         <dt className="text-slate-500">Responsable</dt>
-        <dd>{detail.teamLetter ? `Équipe ${detail.teamLetter} – ${detail.teamColorName}` : `Responsable de zone (${detail.zoneName})`}</dd>
+        <dd>
+          {detail.teamLetter
+            ? `Équipe ${detail.teamLetter} – ${detail.teamColorName}`
+            : `Responsable de zone (${detail.zoneName})`}
+        </dd>
         <dt className="text-slate-500">Date</dt>
         <dd>
           {fmtDay(d.occurredOn)}

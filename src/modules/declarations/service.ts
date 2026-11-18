@@ -90,10 +90,14 @@ async function prepareDeclaration(
   }
   if (isBoundByTeamDelay(user)) {
     if (correction && !isWithinTeamCorrectionDelay(input.occurredOn, today)) {
-      throw new DeclarationError("Le délai de correction (une semaine après la fin de la semaine de production) est dépassé : demandez à un responsable");
+      throw new DeclarationError(
+        "Le délai de correction (une semaine après la fin de la semaine de production) est dépassé : demandez à un responsable",
+      );
     }
     if (!correction && !isWithinTeamDelay(input.occurredOn, today)) {
-      throw new DeclarationError(`Une perte de plus de ${TEAM_DELAY_DAYS} jours ne peut être déclarée que par un responsable`);
+      throw new DeclarationError(
+        `Une perte de plus de ${TEAM_DELAY_DAYS} jours ne peut être déclarée que par un responsable`,
+      );
     }
   }
   const [lossWeek, declaredWeek] = await Promise.all([
@@ -133,7 +137,11 @@ async function prepareDeclaration(
     densityKgPerL: number | null;
     refs?: { weekRecipeId: string | null; weekSubRecipeId: string | null; weekLineId: string | null };
     /** Coûts du tome de la semaine et import d'origine (produits de la semaine uniquement). */
-    cost?: { item: ResolvedWeekItem["cost"]; importId: string | null; priceVersion?: { id: string; source: string; validFrom: string } };
+    cost?: {
+      item: ResolvedWeekItem["cost"];
+      importId: string | null;
+      priceVersion?: { id: string; source: string; validFrom: string };
+    };
   };
   if ("weekItem" in input.product) {
     // Produit de l'import de la semaine (docs/PHASE2.md, étape 2.5).
@@ -146,7 +154,12 @@ async function prepareDeclaration(
     if (item.snack && !SNACK_ZONE_CODES.includes(place.zone.code)) {
       throw new DeclarationError("Les encas se déclarent en conditionnement, réception ou stockage");
     }
-    if (input.product.weekItem.kind === "plat" && !item.snack && place.subzone.teamMode === "equipe" && item.teamId !== teamId) {
+    if (
+      input.product.weekItem.kind === "plat" &&
+      !item.snack &&
+      place.subzone.teamMode === "equipe" &&
+      item.teamId !== teamId
+    ) {
       throw new DeclarationError("Ce plat n'est pas produit par cette équipe cette semaine");
     }
     product = {
@@ -182,7 +195,13 @@ async function prepareDeclaration(
       const unitCost = { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur };
       const mould = row.category === "moule_plat_gratin";
       product.cost = {
-        item: { food: mould ? { perKgEur: null, perUnitEur: null } : unitCost, mouldPerPortionEur: null, portionKind: null, portionWeightKg: null, packagingItself: mould ? unitCost : null },
+        item: {
+          food: mould ? { perKgEur: null, perUnitEur: null } : unitCost,
+          mouldPerPortionEur: null,
+          portionKind: null,
+          portionWeightKg: null,
+          packagingItself: mould ? unitCost : null,
+        },
         importId: price.weeklyImportId,
         priceVersion: { id: price.id, source: price.source, validFrom: price.validFrom },
       };
@@ -216,7 +235,8 @@ async function prepareDeclaration(
   };
 
   if (input.tare) {
-    if (isConsumable) throw new DeclarationError("La pesée en gastros concerne les denrées, pas les consommables ni les moules");
+    if (isConsumable)
+      throw new DeclarationError("La pesée en gastros concerne les denrées, pas les consommables ni les moules");
     const typeIds = [
       ...input.tare.gastros.map((g) => g.containerTypeId),
       ...(input.tare.supportTypeId ? [input.tare.supportTypeId] : []),
@@ -243,7 +263,13 @@ async function prepareDeclaration(
     };
     const gastros: GastroLine[] = input.tare.gastros.map((g) => {
       const row = tareOf(g.containerTypeId, "gastro");
-      return { containerTypeId: g.containerTypeId, tareId: row.tare.id, unitTareKg: row.tare.unitTareKg, count: g.count, maxCount: row.type.maxCount };
+      return {
+        containerTypeId: g.containerTypeId,
+        tareId: row.tare.id,
+        unitTareKg: row.tare.unitTareKg,
+        count: g.count,
+        maxCount: row.type.maxCount,
+      };
     });
     let support: SupportTare | null = null;
     if (input.tare.supportTypeId) {
@@ -266,11 +292,15 @@ async function prepareDeclaration(
     const [unit] = await db.select().from(s.units).where(eq(s.units.code, input.unitCode!));
     if (!unit || !unit.active) throw new DeclarationError("Unité inconnue");
     const quantity = roundQuantity(input.quantity!);
-    const conversion = convertToKg(quantity, { code: unit.code, kind: unit.kind as UnitKind, toBaseFactor: unit.toBaseFactor }, {
-      isConsumable,
-      unitWeightKg: product.unitWeightKg,
-      densityKgPerL: product.densityKgPerL,
-    });
+    const conversion = convertToKg(
+      quantity,
+      { code: unit.code, kind: unit.kind as UnitKind, toBaseFactor: unit.toBaseFactor },
+      {
+        isConsumable,
+        unitWeightKg: product.unitWeightKg,
+        densityKgPerL: product.densityKgPerL,
+      },
+    );
     measurement = {
       quantity,
       unitCode: unit.code,
@@ -305,17 +335,27 @@ async function prepareDeclaration(
   const destinationRows = await db
     .select()
     .from(s.destinations)
-    .where(inArray(s.destinations.id, input.destinations.map((d) => d.destinationId)));
+    .where(
+      inArray(
+        s.destinations.id,
+        input.destinations.map((d) => d.destinationId),
+      ),
+    );
   for (const d of input.destinations) {
     const row = destinationRows.find((r) => r.id === d.destinationId);
     if (!row || !row.active) throw new DeclarationError("Destination inconnue ou désactivée");
     if (!row.declarable && !keptDestinationIds.includes(row.id)) {
-      throw new DeclarationError(`« ${row.name} » n'est plus déclarée par les équipes : ses chiffres viennent des fichiers de l'entreprise`);
+      throw new DeclarationError(
+        `« ${row.name} » n'est plus déclarée par les équipes : ses chiffres viennent des fichiers de l'entreprise`,
+      );
     }
     if (d.recoveredAmountEur != null && !row.financialRecovery) {
-      throw new DeclarationError(`« ${row.name} » ne rapporte pas de recette : seules les ventes ont un montant encaissé`);
+      throw new DeclarationError(
+        `« ${row.name} » ne rapporte pas de recette : seules les ventes ont un montant encaissé`,
+      );
     }
-    if (row.binNumberMode === "obligatoire" && !d.binNumber) throw new DeclarationError(`Indiquez le n° de la poubelle pour « ${row.name} »`);
+    if (row.binNumberMode === "obligatoire" && !d.binNumber)
+      throw new DeclarationError(`Indiquez le n° de la poubelle pour « ${row.name} »`);
   }
   const binAsked = new Set(destinationRows.filter((r) => r.binNumberMode !== "aucun").map((r) => r.id));
   const { justification } = validateDestinationSplit(
@@ -344,7 +384,9 @@ async function prepareDeclaration(
   if (product.cost) {
     const c = product.cost.item;
     const packaging = c.portionKind ? await portionPackagingCost(db, c.portionKind, input.occurredOn) : null;
-    const packagingPerPortionEur = c.portionKind ? Math.round(((c.mouldPerPortionEur ?? 0) + packaging!.totalEur) * 100_000) / 100_000 : null;
+    const packagingPerPortionEur = c.portionKind
+      ? Math.round(((c.mouldPerPortionEur ?? 0) + packaging!.totalEur) * 100_000) / 100_000
+      : null;
     const loss = { netKg: measurement.netKg, quantity: measurement.netQuantity, unitCode: measurement.netUnitCode };
     const breakdown = lossCostBreakdown(loss, {
       food: c.food,
@@ -402,7 +444,10 @@ async function prepareDeclaration(
       weekSubRecipeId: product.refs?.weekSubRecipeId ?? null,
       weekLineId: product.refs?.weekLineId ?? null,
       ...costSnapshot,
-      ...netCost(costSnapshot.grossCostEur, input.destinations.map((d) => ({ recoveredAmount: d.recoveredAmountEur }))),
+      ...netCost(
+        costSnapshot.grossCostEur,
+        input.destinations.map((d) => ({ recoveredAmount: d.recoveredAmountEur })),
+      ),
       measurementMethod,
       quantity: measurement.quantity,
       unitCode: measurement.unitCode,
@@ -523,7 +568,11 @@ const RECEIVED_LATER_MS = 60 * 1000;
  * l'heure de réception. Refusée si elle est dans le futur, ou, pour une équipe, si elle date de plus que le délai
  * des équipes (horloge de l'appareil à vérifier, ou perte à faire enregistrer par un responsable).
  */
-function entryTimes(user: AuthUser, rawInput: unknown, now: Date): { enteredAt: Date; receivedAt: Date | null; clientId: string | null } {
+function entryTimes(
+  user: AuthUser,
+  rawInput: unknown,
+  now: Date,
+): { enteredAt: Date; receivedAt: Date | null; clientId: string | null } {
   const raw = (rawInput ?? {}) as { enteredAt?: unknown; clientId?: unknown };
   const clientId = typeof raw.clientId === "string" ? raw.clientId : null;
   if (typeof raw.enteredAt !== "string") return { enteredAt: now, receivedAt: null, clientId };
@@ -533,7 +582,9 @@ function entryTimes(user: AuthUser, rawInput: unknown, now: Date): { enteredAt: 
     throw new DeclarationError("L'heure de cet appareil est en avance : réglez-la, puis saisissez la perte à nouveau");
   }
   if (isBoundByTeamDelay(user) && now.getTime() - enteredAt.getTime() > TEAM_DELAY_DAYS * 86_400_000) {
-    throw new DeclarationError(`Perte saisie il y a plus de ${TEAM_DELAY_DAYS} jours sur cet appareil : à faire enregistrer par un responsable`);
+    throw new DeclarationError(
+      `Perte saisie il y a plus de ${TEAM_DELAY_DAYS} jours sur cet appareil : à faire enregistrer par un responsable`,
+    );
   }
   const later = now.getTime() - enteredAt.getTime() > RECEIVED_LATER_MS;
   // Une saisie « en avance » de quelques minutes (horloge de l'appareil) compte à l'heure de réception.
@@ -549,7 +600,9 @@ async function alreadyReceived(db: Db, user: AuthUser, clientId: string | null):
   return summarize(existing);
 }
 
-const isUniqueViolation = (e: unknown) => (e as { code?: string; cause?: { code?: string } })?.code === "23505" || (e as { cause?: { code?: string } })?.cause?.code === "23505";
+const isUniqueViolation = (e: unknown) =>
+  (e as { code?: string; cause?: { code?: string } })?.code === "23505" ||
+  (e as { cause?: { code?: string } })?.cause?.code === "23505";
 
 export async function createDeclaration(
   db: Db,
@@ -561,7 +614,16 @@ export async function createDeclaration(
   const times = entryTimes(user, rawInput, now);
   const existing = await alreadyReceived(db, user, times.clientId);
   if (existing) return existing;
-  const prepared = await prepareDeclaration(db, user, rawInput, now, times.enteredAt, [], times.enteredAt, times.receivedAt);
+  const prepared = await prepareDeclaration(
+    db,
+    user,
+    rawInput,
+    now,
+    times.enteredAt,
+    [],
+    times.enteredAt,
+    times.receivedAt,
+  );
   try {
     return await db.transaction((tx) => insertNewDeclaration(tx, user, prepared, now));
   } catch (e) {
@@ -615,7 +677,10 @@ export async function createDeclarationBatch(
       const times = entryTimes(user, raw, now);
       const existing = await alreadyReceived(db, user, times.clientId);
       if (existing) received.push(existing);
-      else prepared.push(await prepareDeclaration(db, user, raw, now, times.enteredAt, [], times.enteredAt, times.receivedAt));
+      else
+        prepared.push(
+          await prepareDeclaration(db, user, raw, now, times.enteredAt, [], times.enteredAt, times.receivedAt),
+        );
     } catch (e) {
       if (!isInputError(e)) throw e;
       throw new BatchLineError(index, e.message);
@@ -656,7 +721,8 @@ async function loadForChange(db: Db, user: AuthUser, id: string, options: Change
 
   const [existing] = await db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, id));
   if (!existing || !canReadDeclaration(user, existing)) throw new DeclarationError("Déclaration introuvable");
-  if (existing.status === "annulee") throw new DeclarationError("Cette déclaration est annulée : elle ne peut plus être modifiée");
+  if (existing.status === "annulee")
+    throw new DeclarationError("Cette déclaration est annulée : elle ne peut plus être modifiée");
 
   if (!canModifyDeclaration(user, existing, toProductionLocalDate(now))) {
     throw new ForbiddenError("Vous ne pouvez plus modifier cette déclaration : demandez à un responsable");
@@ -670,11 +736,21 @@ async function currentSnapshot(db: Db, declaration: typeof s.lossDeclarations.$i
     db
       .select()
       .from(s.declarationContainers)
-      .where(and(eq(s.declarationContainers.declarationId, declaration.id), eq(s.declarationContainers.revision, declaration.revision))),
+      .where(
+        and(
+          eq(s.declarationContainers.declarationId, declaration.id),
+          eq(s.declarationContainers.revision, declaration.revision),
+        ),
+      ),
     db
       .select()
       .from(s.declarationDestinations)
-      .where(and(eq(s.declarationDestinations.declarationId, declaration.id), eq(s.declarationDestinations.revision, declaration.revision))),
+      .where(
+        and(
+          eq(s.declarationDestinations.declarationId, declaration.id),
+          eq(s.declarationDestinations.revision, declaration.revision),
+        ),
+      ),
   ]);
   return { declaration, containers, destinations };
 }
@@ -724,7 +800,16 @@ export async function correctDeclaration(
       changedAt: now,
       reason,
     });
-    await writeAudit(tx, { userId: user.id, action: "update", entity: "loss_declaration", entityId: id, before, after, reason, occurredAt: now });
+    await writeAudit(tx, {
+      userId: user.id,
+      action: "update",
+      entity: "loss_declaration",
+      entityId: id,
+      before,
+      after,
+      reason,
+      occurredAt: now,
+    });
     return summarize(declaration);
   });
 }
@@ -751,8 +836,18 @@ export async function cancelDeclaration(
 
     // Les lignes de tares et destinations sont reconduites telles quelles dans la nouvelle version.
     const after = await writeVersionLines(tx, declaration, {
-      containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
-      destinations: before.destinations.map((d) => ({ destinationId: d.destinationId, quantity: d.quantity, netKg: d.netKg, recoveredAmount: d.recoveredAmount, binNumber: d.binNumber })),
+      containers: before.containers.map((c) => ({
+        containerTareId: c.containerTareId,
+        count: c.count,
+        tareKg: c.tareKgSnapshot,
+      })),
+      destinations: before.destinations.map((d) => ({
+        destinationId: d.destinationId,
+        quantity: d.quantity,
+        netKg: d.netKg,
+        recoveredAmount: d.recoveredAmount,
+        binNumber: d.binNumber,
+      })),
     });
     await tx.insert(s.declarationRevisions).values({
       declarationId: id,
@@ -763,7 +858,16 @@ export async function cancelDeclaration(
       changedAt: now,
       reason,
     });
-    await writeAudit(tx, { userId: user.id, action: "cancel", entity: "loss_declaration", entityId: id, before, after, reason, occurredAt: now });
+    await writeAudit(tx, {
+      userId: user.id,
+      action: "cancel",
+      entity: "loss_declaration",
+      entityId: id,
+      before,
+      after,
+      reason,
+      occurredAt: now,
+    });
   });
 }
 
@@ -801,17 +905,26 @@ export async function linkDeclarationsToProduct(
       };
       if (existing.tareTotalKg == null) {
         const [unit] = await tx.select().from(s.units).where(eq(s.units.code, existing.unitCode));
-        const conversion = convertToKg(existing.quantity, { code: unit!.code, kind: unit!.kind as UnitKind, toBaseFactor: unit!.toBaseFactor }, {
-          isConsumable: isNonFoodCategory(product.category),
-          unitWeightKg: product.unitWeightKg,
-          densityKgPerL: product.densityKgPerL,
-        });
-        const counted = existing.measurementMethod === "comptage" || existing.measurementMethod === "conversion_reference";
+        const conversion = convertToKg(
+          existing.quantity,
+          { code: unit!.code, kind: unit!.kind as UnitKind, toBaseFactor: unit!.toBaseFactor },
+          {
+            isConsumable: isNonFoodCategory(product.category),
+            unitWeightKg: product.unitWeightKg,
+            densityKgPerL: product.densityKgPerL,
+          },
+        );
+        const counted =
+          existing.measurementMethod === "comptage" || existing.measurementMethod === "conversion_reference";
         measurement = {
           netKg: conversion.netKg,
           kgStatus: conversion.kgStatus,
           conversionFactorUsed: conversion.factorUsed,
-          measurementMethod: counted ? (conversion.kgStatus === "converti" ? "conversion_reference" : "comptage") : existing.measurementMethod,
+          measurementMethod: counted
+            ? conversion.kgStatus === "converti"
+              ? "conversion_reference"
+              : "comptage"
+            : existing.measurementMethod,
         };
       } else if (isNonFoodCategory(product.category)) {
         throw new DeclarationError("Une pesée en gastros ne peut pas être rattachée à un consommable");
@@ -839,7 +952,11 @@ export async function linkDeclarationsToProduct(
 
       const kgPerUnit = declaration.netKg != null ? declaration.netKg / declaration.netQuantity : null;
       const after = await writeVersionLines(tx, declaration, {
-        containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
+        containers: before.containers.map((c) => ({
+          containerTareId: c.containerTareId,
+          count: c.count,
+          tareKg: c.tareKgSnapshot,
+        })),
         destinations: before.destinations.map((d) => ({
           destinationId: d.destinationId,
           quantity: d.quantity,
@@ -848,8 +965,25 @@ export async function linkDeclarationsToProduct(
           binNumber: d.binNumber,
         })),
       });
-      await tx.insert(s.declarationRevisions).values({ declarationId: existing.id, revision, status: "corrigee", data: after, changedBy: user.id, changedAt: now, reason });
-      await writeAudit(tx, { userId: user.id, action: "link_product", entity: "loss_declaration", entityId: existing.id, before, after, reason, occurredAt: now });
+      await tx.insert(s.declarationRevisions).values({
+        declarationId: existing.id,
+        revision,
+        status: "corrigee",
+        data: after,
+        changedBy: user.id,
+        changedAt: now,
+        reason,
+      });
+      await writeAudit(tx, {
+        userId: user.id,
+        action: "link_product",
+        entity: "loss_declaration",
+        entityId: existing.id,
+        before,
+        after,
+        reason,
+        occurredAt: now,
+      });
     }
     return rows.length;
   });
@@ -866,17 +1000,30 @@ export async function setRecoveredAmounts(
   input: { expectedRevision: number; amounts: Record<string, number | null> },
   now: Date = new Date(),
 ): Promise<void> {
-  const { existing } = await loadForChange(db, user, id, { reason: "Recette encaissée", expectedRevision: input.expectedRevision }, now);
+  const { existing } = await loadForChange(
+    db,
+    user,
+    id,
+    { reason: "Recette encaissée", expectedRevision: input.expectedRevision },
+    now,
+  );
   const before = await currentSnapshot(db, existing);
   const destinationRows = await db
     .select()
     .from(s.destinations)
-    .where(inArray(s.destinations.id, before.destinations.map((d) => d.destinationId)));
+    .where(
+      inArray(
+        s.destinations.id,
+        before.destinations.map((d) => d.destinationId),
+      ),
+    );
   for (const [destinationId, amount] of Object.entries(input.amounts)) {
     const row = destinationRows.find((r) => r.id === destinationId);
-    if (!row || !before.destinations.some((d) => d.destinationId === destinationId)) throw new DeclarationError("Ligne de destination introuvable");
+    if (!row || !before.destinations.some((d) => d.destinationId === destinationId))
+      throw new DeclarationError("Ligne de destination introuvable");
     if (!row.financialRecovery) throw new DeclarationError(`« ${row.name} » ne rapporte pas de recette`);
-    if (amount != null && (!Number.isFinite(amount) || amount < 0 || amount > 100_000)) throw new DeclarationError("Montant invalide");
+    if (amount != null && (!Number.isFinite(amount) || amount < 0 || amount > 100_000))
+      throw new DeclarationError("Montant invalide");
   }
   const lines = before.destinations.map((d) => ({
     destinationId: d.destinationId,
@@ -895,11 +1042,32 @@ export async function setRecoveredAmounts(
       .returning();
     if (!declaration) throw new DeclarationConflictError();
     const after = await writeVersionLines(tx, declaration, {
-      containers: before.containers.map((c) => ({ containerTareId: c.containerTareId, count: c.count, tareKg: c.tareKgSnapshot })),
+      containers: before.containers.map((c) => ({
+        containerTareId: c.containerTareId,
+        count: c.count,
+        tareKg: c.tareKgSnapshot,
+      })),
       destinations: lines,
     });
     const reason = "Recette encaissée";
-    await tx.insert(s.declarationRevisions).values({ declarationId: id, revision, status: "corrigee", data: after, changedBy: user.id, changedAt: now, reason });
-    await writeAudit(tx, { userId: user.id, action: "recovered_amount", entity: "loss_declaration", entityId: id, before, after, reason, occurredAt: now });
+    await tx.insert(s.declarationRevisions).values({
+      declarationId: id,
+      revision,
+      status: "corrigee",
+      data: after,
+      changedBy: user.id,
+      changedAt: now,
+      reason,
+    });
+    await writeAudit(tx, {
+      userId: user.id,
+      action: "recovered_amount",
+      entity: "loss_declaration",
+      entityId: id,
+      before,
+      after,
+      reason,
+      occurredAt: now,
+    });
   });
 }

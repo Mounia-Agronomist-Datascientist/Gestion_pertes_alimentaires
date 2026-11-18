@@ -27,16 +27,23 @@ export async function statsContext(db: Db, user: AuthUser, params: Params): Prom
   let period = parsePeriod(params);
   if (!period) {
     const week = await findStoredProductionWeek(db, today);
-    period = week ? { kind: "semaine", year: week.year, number: week.number } : { kind: "mois", year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) };
+    period = week
+      ? { kind: "semaine", year: week.year, number: week.number }
+      : { kind: "mois", year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) };
   }
   const compareTeams = can(user, "stats.compare_teams");
   const filters: StatsFilters = {
     zoneId: isUuid(params.zone) ? params.zone : undefined,
     teamId: compareTeams && isUuid(params.equipe) ? params.equipe : undefined,
-    category: params.categorie && (PRODUCT_CATEGORIES as readonly string[]).includes(params.categorie) ? params.categorie : undefined,
+    category:
+      params.categorie && (PRODUCT_CATEGORIES as readonly string[]).includes(params.categorie)
+        ? params.categorie
+        : undefined,
   };
   const filterParams = Object.fromEntries(
-    Object.entries({ zone: filters.zoneId, equipe: filters.teamId, categorie: filters.category }).filter((e): e is [string, string] => !!e[1]),
+    Object.entries({ zone: filters.zoneId, equipe: filters.teamId, categorie: filters.category }).filter(
+      (e): e is [string, string] => !!e[1],
+    ),
   );
   return { today, period, filters, filterParams, compareTeams };
 }

@@ -38,9 +38,12 @@ export const alchimistesPayloadSchema = z
       .max(20_000),
     warnings: z.array(z.string().max(400)).max(500),
   })
-  .refine((p) => p.periodFrom <= p.periodTo && p.collections.every((c) => p.periodFrom <= c.date && c.date <= p.periodTo), {
-    message: "Période incohérente",
-  });
+  .refine(
+    (p) => p.periodFrom <= p.periodTo && p.collections.every((c) => p.periodFrom <= c.date && c.date <= p.periodTo),
+    {
+      message: "Période incohérente",
+    },
+  );
 export type AlchimistesPayload = z.infer<typeof alchimistesPayloadSchema>;
 
 export async function saveAlchimistesImport(db: Db, admin: AuthUser, input: AlchimistesPayload, now = new Date()) {
@@ -51,7 +54,10 @@ export async function saveAlchimistesImport(db: Db, admin: AuthUser, input: Alch
     .where(and(lte(s.productionWeeks.startDate, input.periodTo), gte(s.productionWeeks.endDate, input.periodFrom)));
   const weekOf = (date: string) => weeks.find((w) => w.startDate <= date && date <= w.endDate)?.id;
   const outside = [...new Set(input.collections.map((c) => c.date).filter((d) => !weekOf(d)))];
-  if (outside.length) throw new ImportError(`Dates hors du calendrier de production : ${outside.slice(0, 5).join(", ")}${outside.length > 5 ? "…" : ""}`);
+  if (outside.length)
+    throw new ImportError(
+      `Dates hors du calendrier de production : ${outside.slice(0, 5).join(", ")}${outside.length > 5 ? "…" : ""}`,
+    );
   const totalKg = Math.round(input.collections.reduce((a, c) => a + c.netKg, 0) * 1000) / 1000;
 
   return db.transaction(async (tx) => {
@@ -101,8 +107,16 @@ export async function saveAlchimistesImport(db: Db, admin: AuthUser, input: Alch
       action: "import_alchimistes",
       entity: "alchimistes_import",
       entityId: created!.id,
-      after: { period: `${input.periodFrom} → ${input.periodTo}`, collections: input.collections.length, totalKg, deliveries: input.deliveries, file: input.fileName },
-      reason: replaced.length ? `Remplace ${replaced.length} collecte${replaced.length > 1 ? "s" : ""} de la période` : null,
+      after: {
+        period: `${input.periodFrom} → ${input.periodTo}`,
+        collections: input.collections.length,
+        totalKg,
+        deliveries: input.deliveries,
+        file: input.fileName,
+      },
+      reason: replaced.length
+        ? `Remplace ${replaced.length} collecte${replaced.length > 1 ? "s" : ""} de la période`
+        : null,
       occurredAt: now,
     });
     return { ...created!, replaced: replaced.length };

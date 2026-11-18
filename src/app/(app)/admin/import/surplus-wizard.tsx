@@ -1,11 +1,22 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { type NamedGrid, parseSurplus, SURPLUS_SOURCE_LABELS, type SurplusParseResult, type SurplusSource, sheetsToRead } from "@/modules/imports/surplus/parse-surplus";
+import {
+  type NamedGrid,
+  parseSurplus,
+  SURPLUS_SOURCE_LABELS,
+  type SurplusParseResult,
+  type SurplusSource,
+  sheetsToRead,
+} from "@/modules/imports/surplus/parse-surplus";
 import { Feedback } from "../feedback";
 import { type ImportActionState, importSurplusAction } from "./actions";
 
-type FileState = { status: "idle" } | { status: "reading"; fileName: string } | { status: "error"; message: string } | { status: "ready"; fileName: string; result: SurplusParseResult };
+type FileState =
+  | { status: "idle" }
+  | { status: "reading"; fileName: string }
+  | { status: "error"; message: string }
+  | { status: "ready"; fileName: string; result: SurplusParseResult };
 
 const int = new Intl.NumberFormat("fr-FR");
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
@@ -27,7 +38,20 @@ function byYear(result: SurplusParseResult): YearRow[] {
   const years = new Map<string, YearRow>();
   for (const e of result.entries) {
     const y = e.date.slice(0, 4);
-    const row = years.get(y) ?? years.set(y, { year: y, lines: 0, trays: 0, breakfastTrays: 0, amount: 0, payouts: 0, payoutAmount: 0, collections: new Set() }).get(y)!;
+    const row =
+      years.get(y) ??
+      years
+        .set(y, {
+          year: y,
+          lines: 0,
+          trays: 0,
+          breakfastTrays: 0,
+          amount: 0,
+          payouts: 0,
+          payoutAmount: 0,
+          collections: new Set(),
+        })
+        .get(y)!;
     if (e.kind === "versement") {
       row.payouts++;
       row.payoutAmount += e.amountEur ?? 0;
@@ -47,7 +71,11 @@ function byYear(result: SurplusParseResult): YearRow[] {
  * depuis Google Sheets en Excel : lus sur cet ordinateur, le type de fichier est reconnu tout seul. Seules les
  * ventes, versements et dons sont envoyés ; les contacts du fichier Linkee ne sont jamais lus.
  */
-export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSource, { from: string; to: string; entries: number }>> }) {
+export function SurplusWizard({
+  coverage,
+}: {
+  coverage: Partial<Record<SurplusSource, { from: string; to: string; entries: number }>>;
+}) {
   const [state, action, pending] = useActionState<ImportActionState, FormData>(importSurplusAction, {});
   const [file, setFile] = useState<FileState>({ status: "idle" });
 
@@ -56,13 +84,17 @@ export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSo
     setFile({ status: "reading", fileName: f.name });
     try {
       if (!/\.xlsx$/i.test(f.name)) {
-        setFile({ status: "error", message: "Fichier Excel (.xlsx) attendu : dans Google Sheets, Fichier → Télécharger → Microsoft Excel." });
+        setFile({
+          status: "error",
+          message: "Fichier Excel (.xlsx) attendu : dans Google Sheets, Fichier → Télécharger → Microsoft Excel.",
+        });
         return;
       }
       const { openLightWorkbook } = await import("@/modules/imports/decompte/read-xlsx-sheet");
       const workbook = await openLightWorkbook(new Uint8Array(await f.arrayBuffer()));
       const sheets: NamedGrid[] = [];
-      for (const name of sheetsToRead(workbook.sheetNames)) sheets.push({ name, grid: (await workbook.readSheet(name)) ?? [] });
+      for (const name of sheetsToRead(workbook.sheetNames))
+        sheets.push({ name, grid: (await workbook.readSheet(name)) ?? [] });
       setFile({ status: "ready", fileName: f.name, result: parseSurplus(sheets) });
     } catch {
       setFile({ status: "error", message: "Ce fichier n'a pas pu être lu (Excel .xlsx attendu)." });
@@ -73,7 +105,12 @@ export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSo
   const years = result ? byYear(result) : [];
   const source = result?.source ?? null;
   const covered = source ? coverage[source] : undefined;
-  const overlaps = covered && result?.periodFrom && result.periodTo && covered.from <= result.periodTo && covered.to >= result.periodFrom;
+  const overlaps =
+    covered &&
+    result?.periodFrom &&
+    result.periodTo &&
+    covered.from <= result.periodTo &&
+    covered.to >= result.periodFrom;
   const payload =
     file.status === "ready" && result && source && !result.errors.length && result.periodFrom && result.periodTo
       ? JSON.stringify({
@@ -91,9 +128,9 @@ export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSo
     <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold">Ventes et dons des surplus de barquettes</h2>
       <p className="text-sm text-slate-600">
-        Fichiers « VENTES TGTG », « VENTES FLASH » et « Gestion des surplus barquettes pour association Linkee » : dans Google Sheets, Fichier → Télécharger →
-        Microsoft Excel. Le type de fichier est reconnu tout seul. Ces fichiers font foi : les équipes ne déclarent plus ces destinations. Les contacts du
-        fichier Linkee ne sont pas lus.
+        Fichiers « VENTES TGTG », « VENTES FLASH » et « Gestion des surplus barquettes pour association Linkee » : dans
+        Google Sheets, Fichier → Télécharger → Microsoft Excel. Le type de fichier est reconnu tout seul. Ces fichiers
+        font foi : les équipes ne déclarent plus ces destinations. Les contacts du fichier Linkee ne sont pas lus.
       </p>
       <input
         type="file"
@@ -126,8 +163,9 @@ export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSo
           {source && result.periodFrom && result.periodTo && result.entries.length > 0 && (
             <>
               <p className="text-slate-700">
-                <span className="font-semibold">{SURPLUS_SOURCE_LABELS[source]}</span> · onglet{result.sheets.length > 1 ? "s" : ""} {result.sheets.join(", ")} · du{" "}
-                {shortDate(result.periodFrom)} au {shortDate(result.periodTo)}
+                <span className="font-semibold">{SURPLUS_SOURCE_LABELS[source]}</span> · onglet
+                {result.sheets.length > 1 ? "s" : ""} {result.sheets.join(", ")} · du {shortDate(result.periodFrom)} au{" "}
+                {shortDate(result.periodTo)}
               </p>
               <table className="w-full text-sm">
                 <caption className="sr-only">Totaux par année</caption>
@@ -137,7 +175,11 @@ export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSo
                     <th className="py-1 text-right font-medium">{source === "linkee" ? "Collectes" : "Ventes"}</th>
                     <th className="py-1 text-right font-medium">Barquettes</th>
                     {source === "vente_flash" && <th className="py-1 text-right font-medium">Petits-déj.</th>}
-                    {source !== "linkee" && <th className="py-1 text-right font-medium">{source === "tgtg" ? "Prix payé par les clients" : "CA TTC"}</th>}
+                    {source !== "linkee" && (
+                      <th className="py-1 text-right font-medium">
+                        {source === "tgtg" ? "Prix payé par les clients" : "CA TTC"}
+                      </th>
+                    )}
                     {source === "tgtg" && <th className="py-1 text-right font-medium">Reçu HT</th>}
                   </tr>
                 </thead>
@@ -145,9 +187,13 @@ export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSo
                   {years.map((y) => (
                     <tr key={y.year} className="border-t border-slate-100">
                       <td className="py-1">{y.year}</td>
-                      <td className="py-1 text-right tabular-nums">{int.format(source === "linkee" ? y.collections.size : y.lines)}</td>
+                      <td className="py-1 text-right tabular-nums">
+                        {int.format(source === "linkee" ? y.collections.size : y.lines)}
+                      </td>
                       <td className="py-1 text-right tabular-nums">{int.format(y.trays)}</td>
-                      {source === "vente_flash" && <td className="py-1 text-right tabular-nums">{int.format(y.breakfastTrays)}</td>}
+                      {source === "vente_flash" && (
+                        <td className="py-1 text-right tabular-nums">{int.format(y.breakfastTrays)}</td>
+                      )}
                       {source !== "linkee" && <td className="py-1 text-right tabular-nums">{euro.format(y.amount)}</td>}
                       {source === "tgtg" && (
                         <td className="py-1 text-right tabular-nums">
@@ -160,16 +206,18 @@ export function SurplusWizard({ coverage }: { coverage: Partial<Record<SurplusSo
               </table>
               {source === "linkee" && (
                 <p className="text-sm text-slate-600">
-                  {result.entries.filter((e) => e.dishCode).length} plats sur {result.entries.length} ont un code plat dans leur n° de lot : leur poids et leur coût
-                  seront calculés à l&apos;enregistrement d&apos;après l&apos;import Melba de leur semaine de production.
+                  {result.entries.filter((e) => e.dishCode).length} plats sur {result.entries.length} ont un code plat
+                  dans leur n° de lot : leur poids et leur coût seront calculés à l&apos;enregistrement d&apos;après
+                  l&apos;import Melba de leur semaine de production.
                 </p>
               )}
             </>
           )}
           {overlaps && (
             <p className="rounded-xl bg-amber-50 p-3 text-amber-950">
-              {int.format(covered.entries)} ligne{covered.entries > 1 ? "s" : ""} {SURPLUS_SOURCE_LABELS[source!]} déjà enregistrée{covered.entries > 1 ? "s" : ""} (du{" "}
-              {shortDate(covered.from)} au {shortDate(covered.to)}) : celles de la période du fichier seront remplacées. Les anciennes restent conservées.
+              {int.format(covered.entries)} ligne{covered.entries > 1 ? "s" : ""} {SURPLUS_SOURCE_LABELS[source!]} déjà
+              enregistrée{covered.entries > 1 ? "s" : ""} (du {shortDate(covered.from)} au {shortDate(covered.to)}) :
+              celles de la période du fichier seront remplacées. Les anciennes restent conservées.
             </p>
           )}
           <form action={action}>

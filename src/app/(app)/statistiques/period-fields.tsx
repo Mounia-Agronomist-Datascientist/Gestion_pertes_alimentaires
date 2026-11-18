@@ -3,7 +3,20 @@
 import { useState } from "react";
 import type { Period } from "@/domain/periodes";
 
-const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+const MONTHS = [
+  "Janvier",
+  "Février",
+  "Mars",
+  "Avril",
+  "Mai",
+  "Juin",
+  "Juillet",
+  "Août",
+  "Septembre",
+  "Octobre",
+  "Novembre",
+  "Décembre",
+];
 
 /** Champs de la période : seuls ceux du type choisi sont affichés (le formulaire reste un simple GET). */
 export function PeriodFields({ period, today }: { period: Period; today: string }) {
@@ -14,7 +27,12 @@ export function PeriodFields({ period, today }: { period: Period; today: string 
     <>
       <label className={label}>
         Période
-        <select name="periode" value={kind} onChange={(e) => setKind(e.target.value as Period["kind"])} className="field w-full min-w-0">
+        <select
+          name="periode"
+          value={kind}
+          onChange={(e) => setKind(e.target.value as Period["kind"])}
+          className="field w-full min-w-0"
+        >
           <option value="semaine">Semaine</option>
           <option value="mois">Mois</option>
           <option value="annee">Année</option>
@@ -24,19 +42,39 @@ export function PeriodFields({ period, today }: { period: Period; today: string 
       {kind !== "periode" && (
         <label className={label}>
           Année
-          <input name="annee" type="number" min={2000} max={2100} defaultValue={year} className="field w-full min-w-0" required />
+          <input
+            name="annee"
+            type="number"
+            min={2000}
+            max={2100}
+            defaultValue={year}
+            className="field w-full min-w-0"
+            required
+          />
         </label>
       )}
       {kind === "semaine" && (
         <label className={label}>
           Semaine
-          <input name="semaine" type="number" min={1} max={53} defaultValue={period.kind === "semaine" ? period.number : 1} className="field w-full min-w-0" required />
+          <input
+            name="semaine"
+            type="number"
+            min={1}
+            max={53}
+            defaultValue={period.kind === "semaine" ? period.number : 1}
+            className="field w-full min-w-0"
+            required
+          />
         </label>
       )}
       {kind === "mois" && (
         <label className={label}>
           Mois
-          <select name="mois" defaultValue={period.kind === "mois" ? period.month : Number(today.slice(5, 7))} className="field w-full min-w-0">
+          <select
+            name="mois"
+            defaultValue={period.kind === "mois" ? period.month : Number(today.slice(5, 7))}
+            className="field w-full min-w-0"
+          >
             {MONTHS.map((m, i) => (
               <option key={m} value={i + 1}>
                 {m}
@@ -49,11 +87,23 @@ export function PeriodFields({ period, today }: { period: Period; today: string 
         <>
           <label className={label}>
             Du
-            <input name="du" type="date" defaultValue={period.kind === "periode" ? period.from : today} className="field w-full min-w-0" required />
+            <input
+              name="du"
+              type="date"
+              defaultValue={period.kind === "periode" ? period.from : today}
+              className="field w-full min-w-0"
+              required
+            />
           </label>
           <label className={label}>
             Au
-            <input name="au" type="date" defaultValue={period.kind === "periode" ? period.to : today} className="field w-full min-w-0" required />
+            <input
+              name="au"
+              type="date"
+              defaultValue={period.kind === "periode" ? period.to : today}
+              className="field w-full min-w-0"
+              required
+            />
           </label>
         </>
       )}

@@ -19,7 +19,15 @@ const AVERAGE_COLOR = "#eb6834";
  * `average` : moyenne glissante tracée en ligne sur les colonnes (même unité, même axe), avec sa légende et sa
  * colonne dans le tableau des valeurs.
  */
-export function ColumnChart({ columns, caption, average }: { columns: Column[]; caption: string; average?: { label: string; values: (number | null)[]; text: (n: number) => string } }) {
+export function ColumnChart({
+  columns,
+  caption,
+  average,
+}: {
+  columns: Column[];
+  caption: string;
+  average?: { label: string; values: (number | null)[]; text: (n: number) => string };
+}) {
   const width = 360;
   const height = 170;
   const top = 18;
@@ -44,7 +52,8 @@ export function ColumnChart({ columns, caption, average }: { columns: Column[]; 
             <span className="inline-block size-2.5 rounded-sm bg-[#0f766e]" aria-hidden /> Semaine
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-0.5 w-4" style={{ background: AVERAGE_COLOR }} aria-hidden /> {average.label}
+            <span className="inline-block h-0.5 w-4" style={{ background: AVERAGE_COLOR }} aria-hidden />{" "}
+            {average.label}
           </span>
         </p>
       )}
@@ -59,14 +68,30 @@ export function ColumnChart({ columns, caption, average }: { columns: Column[]; 
               <title>{`${c.label} : ${c.text}`}</title>
               {/* Zone de survol plus large que la colonne. */}
               <rect x={i * slot} y={0} width={slot} height={height - bottom} fill="transparent" />
-              {c.value != null && h > 0 && <rect x={x} y={y} width={bar} height={h} rx={3} fill={c.highlight ? "#0f4f4a" : "#0f766e"} opacity={c.highlight ? 1 : 0.75} />}
+              {c.value != null && h > 0 && (
+                <rect
+                  x={x}
+                  y={y}
+                  width={bar}
+                  height={h}
+                  rx={3}
+                  fill={c.highlight ? "#0f4f4a" : "#0f766e"}
+                  opacity={c.highlight ? 1 : 0.75}
+                />
+              )}
               {c.value == null && (
                 <text x={x + bar / 2} y={height - bottom - 4} textAnchor="middle" fontSize={10} fill="#94a3b8">
                   –
                 </text>
               )}
               {c.highlight && c.value != null && (
-                <text {...valueAnchor(i, columns.length, x, bar)} y={Math.max(y - 4, 10)} fontSize={10} fontWeight={600} fill="#0f172a">
+                <text
+                  {...valueAnchor(i, columns.length, x, bar)}
+                  y={Math.max(y - 4, 10)}
+                  fontSize={10}
+                  fontWeight={600}
+                  fill="#0f172a"
+                >
                   {c.text}
                 </text>
               )}
@@ -80,9 +105,25 @@ export function ColumnChart({ columns, caption, average }: { columns: Column[]; 
           .filter((s) => s.length > 0)
           .map((s, k) => (
             <g key={`avg-${k}`}>
-              {s.length > 1 && <polyline points={s.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke={AVERAGE_COLOR} strokeWidth={2} strokeLinejoin="round" />}
+              {s.length > 1 && (
+                <polyline
+                  points={s.map((p) => `${p.x},${p.y}`).join(" ")}
+                  fill="none"
+                  stroke={AVERAGE_COLOR}
+                  strokeWidth={2}
+                  strokeLinejoin="round"
+                />
+              )}
               {s.map((p) => (
-                <circle key={`${p.x}`} cx={p.x} cy={p.y} r={2.5} fill={AVERAGE_COLOR} stroke="#ffffff" strokeWidth={1} />
+                <circle
+                  key={`${p.x}`}
+                  cx={p.x}
+                  cy={p.y}
+                  r={2.5}
+                  fill={AVERAGE_COLOR}
+                  stroke="#ffffff"
+                  strokeWidth={1}
+                />
               ))}
             </g>
           ))}
@@ -103,7 +144,11 @@ export function ColumnChart({ columns, caption, average }: { columns: Column[]; 
               <tr key={c.key} className="border-t border-slate-100">
                 <td className="py-1">{c.label}</td>
                 <td className="py-1 text-right tabular-nums">{c.value != null ? c.text : "—"}</td>
-                {average && <td className="py-1 text-right tabular-nums">{average.values[i] != null ? average.text(average.values[i]!) : "—"}</td>}
+                {average && (
+                  <td className="py-1 text-right tabular-nums">
+                    {average.values[i] != null ? average.text(average.values[i]!) : "—"}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

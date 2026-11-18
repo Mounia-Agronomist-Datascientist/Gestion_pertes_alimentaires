@@ -6,7 +6,8 @@ import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 
 type Account = { login: string; password: string };
-const accounts = (): Record<"admin" | "equipeC" | "equipeA", Account> => JSON.parse(readFileSync("node_modules/.cache/e2e-accounts.json", "utf8"));
+const accounts = (): Record<"admin" | "equipeC" | "equipeA", Account> =>
+  JSON.parse(readFileSync("node_modules/.cache/e2e-accounts.json", "utf8"));
 
 async function login(page: Page, who: keyof ReturnType<typeof accounts>) {
   const account = accounts()[who];
@@ -99,7 +100,10 @@ test("une équipe ne voit pas les pertes d'une autre équipe ni l'administration
   await expect(page.getByRole("button", { name: /Too Good To Go|Vente flash|Linkee/ })).toHaveCount(0);
 });
 
-test("sans réseau, la saisie s'ouvre, la perte est gardée puis envoyée au retour du réseau", async ({ page, context }) => {
+test("sans réseau, la saisie s'ouvre, la perte est gardée puis envoyée au retour du réseau", async ({
+  page,
+  context,
+}) => {
   await login(page, "equipeC");
   // Premier passage en ligne : le service worker s'installe et garde la page de saisie.
   await page.goto("/declarer");

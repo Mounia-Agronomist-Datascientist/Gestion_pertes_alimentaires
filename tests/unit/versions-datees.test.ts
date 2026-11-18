@@ -12,7 +12,13 @@ describe("valeurs datées", () => {
     expect(datedChange({ validFrom: "2026-11-10" }, "2026-11-10", "2026-11-10")).toEqual({ kind: "correction" });
   });
   it("refuse une date antérieure ou la réécriture d'une valeur appliquée", () => {
-    expect(datedChange(latest, "2026-10-15", "2026-11-10")).toMatchObject({ kind: "refus", message: expect.stringMatching(/01\/11\/2026/) });
-    expect(datedChange(latest, "2026-11-01", "2026-11-10")).toMatchObject({ kind: "refus", message: expect.stringMatching(/déjà appliquée/) });
+    expect(datedChange(latest, "2026-10-15", "2026-11-10")).toMatchObject({
+      kind: "refus",
+      message: expect.stringMatching(/01\/11\/2026/),
+    });
+    expect(datedChange(latest, "2026-11-01", "2026-11-10")).toMatchObject({
+      kind: "refus",
+      message: expect.stringMatching(/déjà appliquée/),
+    });
   });
 });

@@ -31,8 +31,25 @@ describe("saisie à partir des produits de la semaine", () => {
     await seed(t.db);
     const id = async <T extends { id: string }>(rows: Promise<T[]>) => (await rows)[0]!.id;
     const teamDId = await id(t.db.select().from(s.teams).where(eq(s.teams.letter, "D")));
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    teamD = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-d", displayName: "Équipe D", roleCode: "equipe", teamId: teamDId, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    teamD = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-d",
+        displayName: "Équipe D",
+        roleCode: "equipe",
+        teamId: teamDId,
+        password: "mot-de-passe-equipe",
+      }),
+    );
     await saveWeekImport(t.db, admin, {
       preview: buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid())),
       tomeFileName: "tome.pdf",
@@ -74,7 +91,16 @@ describe("saisie à partir des produits de la semaine", () => {
 
   it("une équipe voit ses plats de la semaine, avec leurs sous-recettes et ingrédients", () => {
     expect(catalog.map((c) => `S${c.number}`)).toEqual(["S45"]);
-    expect(catalog[0]!.dishes.map((d) => d.code)).toEqual(["FB04", "PJ02", "PJ09", "QD01", "QD04", "VI01", "VI06", "VI12"]);
+    expect(catalog[0]!.dishes.map((d) => d.code)).toEqual([
+      "FB04",
+      "PJ02",
+      "PJ09",
+      "QD01",
+      "QD04",
+      "VI01",
+      "VI06",
+      "VI12",
+    ]);
     const vi01 = dish("VI01");
     expect(vi01.lines.map((l) => l.label)).toContain("Viande: Haut de cuisse de poulet rôti nature");
     const chicken = vi01.lines.find((l) => l.label.startsWith("Viande"))!;
@@ -101,14 +127,27 @@ describe("saisie à partir des produits de la semaine", () => {
   });
 
   it("un produit hors liste n'a pas de coût (jamais deviné)", async () => {
-    const r = await declare(teamD, { freeLabel: "Produit sans coût", category: "sous_recette" }, { method: "pesee", unitCode: "kg" });
+    const r = await declare(
+      teamD,
+      { freeLabel: "Produit sans coût", category: "sous_recette" },
+      { method: "pesee", unitCode: "kg" },
+    );
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
     expect(row).toMatchObject({ costPerKgEur: null, costPerUnitEur: null, materialCostEur: null, costImportId: null });
   });
 
   it("une sous-recette pesée et un ingrédient compté (poids unitaire du tome)", async () => {
     const chicken = dish("VI01").lines.find((l) => l.label.startsWith("Viande"))!;
-    const sub = await declare(teamD, { weekItem: { kind: "sous_recette", id: chicken.subRecipeId! } }, { method: "pesee", quantity: 2.5, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 2.5, binNumber: "1" }] });
+    const sub = await declare(
+      teamD,
+      { weekItem: { kind: "sous_recette", id: chicken.subRecipeId! } },
+      {
+        method: "pesee",
+        quantity: 2.5,
+        unitCode: "kg",
+        destinations: [{ destinationId: ref.compost, quantity: 2.5, binNumber: "1" }],
+      },
+    );
     const [subRow] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, sub.id));
     expect(subRow).toMatchObject({ productCategory: "sous_recette", weekSubRecipeId: chicken.subRecipeId, netKg: 2.5 });
     const subCost = catalog[0]!.subRecipes[chicken.subRecipeId!]!.cost.perKgEur!;
@@ -120,18 +159,30 @@ describe("saisie à partir des produits de la semaine", () => {
       .find((l) => !l.subRecipeId && l.unitWeightG != null)!;
     const ing = await declare(teamD, { weekItem: { kind: "ingredient", id: ingredient.id } }, { unitCode: "piece" });
     const [ingRow] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, ing.id));
-    expect(ingRow).toMatchObject({ productCategory: "matiere_premiere", weekLineId: ingredient.id, kgStatus: "converti" });
+    expect(ingRow).toMatchObject({
+      productCategory: "matiere_premiere",
+      weekLineId: ingredient.id,
+      kgStatus: "converti",
+    });
     expect(ingRow?.netKg).toBeCloseTo((10 * ingredient.unitWeightG!) / 1000, 3);
   });
 
   it("refuse le plat d'une autre équipe et un encas en cuisine ; accepte l'encas en conditionnement", async () => {
     const adminCatalog = await weekCatalogs(t.db, admin, DAY);
     const other = adminCatalog[0]!.dishes.find((d) => d.code === "FB02")!; // équipe A
-    await expect(declare(teamD, { weekItem: { kind: "plat", id: other.id } })).rejects.toThrow(/pas produit par cette équipe/);
+    await expect(declare(teamD, { weekItem: { kind: "plat", id: other.id } })).rejects.toThrow(
+      /pas produit par cette équipe/,
+    );
     const snack = adminCatalog[0]!.dishes.find((d) => d.code === "EN02_EQ")!;
     expect(snack.snack).toBe(true);
-    await expect(declare(teamD, { weekItem: { kind: "plat", id: snack.id } })).rejects.toThrow(/conditionnement, réception ou stockage/);
-    const r = await declare(admin, { weekItem: { kind: "plat", id: snack.id } }, { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" });
+    await expect(declare(teamD, { weekItem: { kind: "plat", id: snack.id } })).rejects.toThrow(
+      /conditionnement, réception ou stockage/,
+    );
+    const r = await declare(
+      admin,
+      { weekItem: { kind: "plat", id: snack.id } },
+      { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" },
+    );
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
     expect(row).toMatchObject({ productCategory: "produit_externe", productCode: "EN02_EQ", teamId: null, netKg: 2.5 });
   });
@@ -141,15 +192,29 @@ describe("saisie à partir des produits de la semaine", () => {
     const mould = Object.values(all[0]!.subRecipes)
       .flatMap((sr) => sr.lines)
       .find((l) => l.mould && !l.subRecipeId)!;
-    const r = await declare(admin, { weekItem: { kind: "ingredient", id: mould.id } }, { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" });
+    const r = await declare(
+      admin,
+      { weekItem: { kind: "ingredient", id: mould.id } },
+      { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" },
+    );
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
-    expect(row).toMatchObject({ productCategory: "moule_plat_gratin", kgStatus: "sans_objet", netKg: null, materialCostEur: null });
+    expect(row).toMatchObject({
+      productCategory: "moule_plat_gratin",
+      kgStatus: "sans_objet",
+      netKg: null,
+      materialCostEur: null,
+    });
     expect(row?.packagingCostEur).toBeGreaterThan(0);
     expect(row?.grossCostEur).toBe(row?.packagingCostEur);
   });
 
   it("coût brut d'un plat : matières hors plat à gratin + emballages (plat à gratin Melba + référentiel à la date de la perte)", async () => {
-    const barquette = await createPackagingItem(t.db, admin, { code: "BARQ", name: "Barquette", kind: "barquette", unit: "pièce" });
+    const barquette = await createPackagingItem(t.db, admin, {
+      code: "BARQ",
+      name: "Barquette",
+      kind: "barquette",
+      unit: "pièce",
+    });
     const film = await createPackagingItem(t.db, admin, { code: "FILM", name: "Film", kind: "film", unit: "pièce" });
     await setPackagingCost(t.db, admin, barquette.id, { unitCostEur: "0,12", validFrom: "2026-10-01" }, "2026-10-01");
     await setPackagingCost(t.db, admin, film.id, { unitCostEur: "0,03", validFrom: "2026-10-01" }, "2026-10-01");
@@ -160,7 +225,11 @@ describe("saisie à partir des produits de la semaine", () => {
     const vi03 = adminCatalog[0]!.dishes.find((d) => d.code === "VI03")!; // Choutiflette : 1,46 € dont 0,07 € de plat à gratin
     expect(vi03).toMatchObject({ mouldPerPortionEur: 0.07, portionKind: "plat", cost: { perUnitEur: 1.39 } });
     const teamH = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "H")))[0]!.id;
-    const r = await declare(admin, { weekItem: { kind: "plat", id: vi03.id } }, { quantity: 4, teamId: teamH, destinations: [{ destinationId: ref.compost, quantity: 4, binNumber: "1" }] });
+    const r = await declare(
+      admin,
+      { weekItem: { kind: "plat", id: vi03.id } },
+      { quantity: 4, teamId: teamH, destinations: [{ destinationId: ref.compost, quantity: 4, binNumber: "1" }] },
+    );
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
     expect(row).toMatchObject({
       materialCostEur: 5.56,
@@ -173,7 +242,17 @@ describe("saisie à partir des produits de la semaine", () => {
     expect(row?.costDetails).toMatchObject({ portions: 4, packagingComplete: true, packagingDate: DAY });
 
     // Un sous-produit (sous-recette) n'a pas d'emballage ajouté.
-    const sub = await declare(admin, { weekItem: { kind: "sous_recette", id: vi03.lines[1]!.subRecipeId! } }, { teamId: teamH, method: "pesee", quantity: 1, unitCode: "kg", destinations: [{ destinationId: ref.compost, quantity: 1, binNumber: "1" }] });
+    const sub = await declare(
+      admin,
+      { weekItem: { kind: "sous_recette", id: vi03.lines[1]!.subRecipeId! } },
+      {
+        teamId: teamH,
+        method: "pesee",
+        quantity: 1,
+        unitCode: "kg",
+        destinations: [{ destinationId: ref.compost, quantity: 1, binNumber: "1" }],
+      },
+    );
     const [subRow] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, sub.id));
     expect(subRow?.packagingCostEur).toBeNull();
     expect(subRow?.grossCostEur).toBe(subRow?.materialCostEur);
@@ -189,7 +268,10 @@ describe("saisie à partir des produits de la semaine", () => {
     const all = await weekCatalogs(t.db, admin, DAY);
     expect(all[0]!.dishes).toHaveLength(82);
     expect(all[0]!.dishes.filter((d) => d.snack)).toHaveLength(22);
-    const [week] = await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 46)));
+    const [week] = await t.db
+      .select()
+      .from(s.productionWeeks)
+      .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 46)));
     expect(await weekCatalogs(t.db, teamD, week!.startDate)).toHaveLength(1); // S46 sans import : S45 reste proposée (déclarations tardives)
   });
 });

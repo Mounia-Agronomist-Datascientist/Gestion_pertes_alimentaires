@@ -19,7 +19,9 @@ const s = await import("../src/db/schema");
 const { seed } = await import("../src/db/seed/seed");
 const { createAccount } = await import("../src/modules/auth/accounts");
 
-await sqlClient.unsafe("drop schema if exists public cascade; drop schema if exists drizzle cascade; create schema public;");
+await sqlClient.unsafe(
+  "drop schema if exists public cascade; drop schema if exists drizzle cascade; create schema public;",
+);
 await migrate(db, { migrationsFolder: "src/db/migrations" });
 await seed(db);
 
@@ -30,9 +32,29 @@ const accounts = {
   equipeC: { login: "e2e-equipe-c", password: password() },
   equipeA: { login: "e2e-equipe-a", password: password() },
 };
-await createAccount(db, { login: accounts.admin.login, displayName: "Administration (tests)", roleCode: "admin", password: accounts.admin.password, mustChangePassword: false });
-await createAccount(db, { login: accounts.equipeC.login, displayName: "Équipe C (tests)", roleCode: "equipe", teamId: await teamId("C"), password: accounts.equipeC.password, mustChangePassword: false });
-await createAccount(db, { login: accounts.equipeA.login, displayName: "Équipe A (tests)", roleCode: "equipe", teamId: await teamId("A"), password: accounts.equipeA.password, mustChangePassword: false });
+await createAccount(db, {
+  login: accounts.admin.login,
+  displayName: "Administration (tests)",
+  roleCode: "admin",
+  password: accounts.admin.password,
+  mustChangePassword: false,
+});
+await createAccount(db, {
+  login: accounts.equipeC.login,
+  displayName: "Équipe C (tests)",
+  roleCode: "equipe",
+  teamId: await teamId("C"),
+  password: accounts.equipeC.password,
+  mustChangePassword: false,
+});
+await createAccount(db, {
+  login: accounts.equipeA.login,
+  displayName: "Équipe A (tests)",
+  roleCode: "equipe",
+  teamId: await teamId("A"),
+  password: accounts.equipeA.password,
+  mustChangePassword: false,
+});
 
 mkdirSync("node_modules/.cache", { recursive: true });
 writeFileSync("node_modules/.cache/e2e-accounts.json", JSON.stringify(accounts));

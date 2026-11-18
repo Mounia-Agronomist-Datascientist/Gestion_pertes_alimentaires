@@ -6,7 +6,9 @@ import { lossAlertContext, lossAlertSummary, lossAlertTitle } from "./analyse-fo
 export function LossAlertCard({ alert }: { alert: LossAlertView }) {
   const context = lossAlertContext(alert);
   return (
-    <li className={`flex flex-col gap-1 rounded-2xl border-2 p-4 ${alert.seen ? "border-transparent bg-white shadow-sm" : "border-amber-300 bg-amber-50 text-amber-950"}`}>
+    <li
+      className={`flex flex-col gap-1 rounded-2xl border-2 p-4 ${alert.seen ? "border-transparent bg-white shadow-sm" : "border-amber-300 bg-amber-50 text-amber-950"}`}
+    >
       <p className="font-semibold">
         <span aria-hidden>{alert.kind === "perte_inhabituelle" ? "▲ " : "↻ "}</span>
         {lossAlertTitle(alert)}
@@ -18,7 +20,10 @@ export function LossAlertCard({ alert }: { alert: LossAlertView }) {
       ) : (
         <form action={markLossAlertSeenAction}>
           <input type="hidden" name="alertId" value={alert.id} />
-          <button type="submit" className="mt-1 rounded-xl bg-white px-4 py-2 text-sm font-medium text-amber-950 shadow-sm">
+          <button
+            type="submit"
+            className="mt-1 rounded-xl bg-white px-4 py-2 text-sm font-medium text-amber-950 shadow-sm"
+          >
             Vu
           </button>
         </form>

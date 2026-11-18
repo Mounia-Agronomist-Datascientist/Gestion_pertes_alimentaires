@@ -7,7 +7,22 @@ import { requireUser } from "@/modules/auth/next-session";
 import { annualEvolution, monthlyEvolution, weekComparison, type WeekPoint } from "@/modules/statistiques/evolution";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
-import { BarTable, Card, detailOf, euro, ExportLinks, FilterForm, num, OptionChips, type Params, PeriodNav, scopeNote, shortTrend, StatsTabs, statsContext } from "../shared";
+import {
+  BarTable,
+  Card,
+  detailOf,
+  euro,
+  ExportLinks,
+  FilterForm,
+  num,
+  OptionChips,
+  type Params,
+  PeriodNav,
+  scopeNote,
+  shortTrend,
+  StatsTabs,
+  statsContext,
+} from "../shared";
 import { COST_COMPONENTS } from "@/modules/couts/summary";
 import { COMPONENT_COLORS } from "../../couts/colors";
 import { ColumnChart } from "./column-chart";
@@ -39,7 +54,10 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
 
   const comparison = await weekComparison(db, user, anchor, ctx.filters);
   if (!comparison) return <p className="rounded-xl bg-red-50 p-3 text-red-800">Semaine absente du calendrier.</p>;
-  const [weekRow] = await db.query.productionWeeks.findMany({ where: (w, { and, eq }) => and(eq(w.year, anchor.year), eq(w.number, anchor.number)), limit: 1 });
+  const [weekRow] = await db.query.productionWeeks.findMany({
+    where: (w, { and, eq }) => and(eq(w.year, anchor.year), eq(w.number, anchor.number)),
+    limit: 1,
+  });
   const endMonth = { year: Number(weekRow!.endDate.slice(0, 4)), month: Number(weekRow!.endDate.slice(5, 7)) };
   const [months, years, previous, next] = await Promise.all([
     monthlyEvolution(db, user, endMonth, ctx.filters),
@@ -56,10 +74,19 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
 
   const rows: {
     label: string;
-    point: Pick<WeekPoint, "perThousand" | "perThousandActual"> & { foodKg: number | null; barquettes: number | null; events: number | null; grossEur: number | null; planned: number | null; actual: number | null };
+    point: Pick<WeekPoint, "perThousand" | "perThousandActual"> & {
+      foodKg: number | null;
+      barquettes: number | null;
+      events: number | null;
+      grossEur: number | null;
+      planned: number | null;
+      actual: number | null;
+    };
   }[] = [
     { label: `${formatProductionWeek(current)} (choisie)`, point: flat(current) },
-    ...(comparison.previous ? [{ label: `${formatProductionWeek(comparison.previous)} (précédente)`, point: flat(comparison.previous) }] : []),
+    ...(comparison.previous
+      ? [{ label: `${formatProductionWeek(comparison.previous)} (précédente)`, point: flat(comparison.previous) }]
+      : []),
     ...(comparison.average
       ? [
           {
@@ -68,7 +95,9 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
           },
         ]
       : []),
-    ...(comparison.lastYear ? [{ label: `${formatProductionWeek(comparison.lastYear)} (un an avant)`, point: flat(comparison.lastYear) }] : []),
+    ...(comparison.lastYear
+      ? [{ label: `${formatProductionWeek(comparison.lastYear)} (un an avant)`, point: flat(comparison.lastYear) }]
+      : []),
   ];
   const cell = "py-2 pl-3 text-right tabular-nums whitespace-nowrap";
 
@@ -105,21 +134,30 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
                   <td className="py-2">{r.label}</td>
                   <td className={cell}>{r.point.foodKg != null ? num.format(r.point.foodKg) : "—"}</td>
                   <td className={cell}>{r.point.perThousand != null ? num.format(r.point.perThousand) : "—"}</td>
-                  <td className={cell}>{r.point.perThousandActual != null ? num.format(r.point.perThousandActual) : "—"}</td>
+                  <td className={cell}>
+                    {r.point.perThousandActual != null ? num.format(r.point.perThousandActual) : "—"}
+                  </td>
                   <td className={cell}>{r.point.barquettes != null ? num.format(r.point.barquettes) : "—"}</td>
                   <td className={cell}>{r.point.events != null ? num.format(r.point.events) : "—"}</td>
-                  {withCosts && <td className={cell}>{r.point.grossEur != null ? euro.format(r.point.grossEur) : "—"}</td>}
-                  <td className={`${cell} text-slate-600`}>{r.point.planned != null ? num.format(r.point.planned) : "—"}</td>
-                  <td className={`${cell} text-slate-600`}>{r.point.actual != null ? num.format(r.point.actual) : "—"}</td>
+                  {withCosts && (
+                    <td className={cell}>{r.point.grossEur != null ? euro.format(r.point.grossEur) : "—"}</td>
+                  )}
+                  <td className={`${cell} text-slate-600`}>
+                    {r.point.planned != null ? num.format(r.point.planned) : "—"}
+                  </td>
+                  <td className={`${cell} text-slate-600`}>
+                    {r.point.actual != null ? num.format(r.point.actual) : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <p className="text-xs text-slate-500">
-          « Kg / 1 000 barq. » : kg de pertes alimentaires pour 1 000 barquettes {scopeLabel} prévues au plan de production importé, ou
-          produites d&apos;après le « Décompte barquettes » déposé. Il permet de comparer des semaines de volumes différents ; sans plan ou sans
-          décompte, il n&apos;est pas calculé. Les moyennes ne comptent que les semaines qui ont ce volume.
+          « Kg / 1 000 barq. » : kg de pertes alimentaires pour 1 000 barquettes {scopeLabel} prévues au plan de
+          production importé, ou produites d&apos;après le « Décompte barquettes » déposé. Il permet de comparer des
+          semaines de volumes différents ; sans plan ou sans décompte, il n&apos;est pas calculé. Les moyennes ne
+          comptent que les semaines qui ont ce volume.
           {!comparison.lastYear && " Pas de pertes enregistrées la même semaine l'année précédente."}
         </p>
       </Card>
@@ -149,7 +187,8 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
               : `Kg de pertes pour 1 000 barquettes ${measure === "volume" ? "prévues" : "produites"}, par semaine`
           }
           columns={comparison.series.map((p) => {
-            const value = measure === "kg" ? p.summary.foodKg : measure === "volume" ? p.perThousand : p.perThousandActual;
+            const value =
+              measure === "kg" ? p.summary.foodKg : measure === "volume" ? p.perThousand : p.perThousandActual;
             return {
               key: p.id,
               label: `S${String(p.number).padStart(2, "0")}`,
@@ -201,7 +240,10 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
             }))}
             average={{
               label: "Moyenne sur 4 semaines",
-              values: comparison.trends.find((x) => x.key === "net")?.average.map((v) => (v == null ? null : Math.max(v, 0))) ?? [],
+              values:
+                comparison.trends
+                  .find((x) => x.key === "net")
+                  ?.average.map((v) => (v == null ? null : Math.max(v, 0))) ?? [],
               text: (n) => euro.format(n),
             }}
           />
@@ -222,17 +264,22 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
                   <tr key={`${m.year}-${m.month}`} className="border-t border-slate-100">
                     <td className="py-2">{`${MONTHS[m.month - 1]} ${m.year}`}</td>
                     <td className={cell}>{euro.format(m.summary.cost?.grossEur ?? 0)}</td>
-                    <td className={cell}>{m.summary.cost?.recoveredEur ? `− ${euro.format(m.summary.cost.recoveredEur)}` : euro.format(0)}</td>
+                    <td className={cell}>
+                      {m.summary.cost?.recoveredEur ? `− ${euro.format(m.summary.cost.recoveredEur)}` : euro.format(0)}
+                    </td>
                     <td className={`${cell} font-medium`}>{euro.format(m.summary.cost?.netEur ?? 0)}</td>
-                    <td className={`${cell} text-slate-600`}>{i > 0 ? shortTrend(m.summary.cost?.netEur ?? 0, shownMonths[i - 1]!.summary.cost?.netEur) : "—"}</td>
+                    <td className={`${cell} text-slate-600`}>
+                      {i > 0 ? shortTrend(m.summary.cost?.netEur ?? 0, shownMonths[i - 1]!.summary.cost?.netEur) : "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <p className="text-xs text-slate-500">
-            Coût figé sur chaque perte au moment de la saisie ; recettes : dons et ventes encaissés. La main-d&apos;œuvre et les charges indirectes
-            n&apos;apparaissent que lorsqu&apos;elles sont imputées (méthode à définir). Les pertes sans coût connu ne sont pas comptées.
+            Coût figé sur chaque perte au moment de la saisie ; recettes : dons et ventes encaissés. La
+            main-d&apos;œuvre et les charges indirectes n&apos;apparaissent que lorsqu&apos;elles sont imputées (méthode
+            à définir). Les pertes sans coût connu ne sont pas comptées.
           </p>
         </Card>
       )}
@@ -249,8 +296,10 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
             detail: `${detailOf(m.summary)}${i > 0 ? ` · ${shortTrend(m.summary.foodKg, shownMonths[i - 1]!.summary.foodKg)}` : ""}`,
           }))}
         />
-        <p className="text-xs text-slate-500">Mois de la date réelle de la perte (12 mois au plus, à partir de la première perte enregistrée) ; comparaison en kg avec le mois
-          d&apos;avant.</p>
+        <p className="text-xs text-slate-500">
+          Mois de la date réelle de la perte (12 mois au plus, à partir de la première perte enregistrée) ; comparaison
+          en kg avec le mois d&apos;avant.
+        </p>
       </Card>
 
       <Card title="Évolution annuelle">
@@ -269,9 +318,15 @@ export default async function EvolutionPage({ searchParams }: { searchParams: Pr
             }))}
           />
         )}
-        <p className="text-xs text-slate-500">Années de production (semaines S01 à S52/S53). L&apos;année en cours n&apos;est pas complète.</p>
+        <p className="text-xs text-slate-500">
+          Années de production (semaines S01 à S52/S53). L&apos;année en cours n&apos;est pas complète.
+        </p>
       </Card>
-      <ExportLinks tab="evolution" ctx={ctx} note="Les 12 dernières semaines (avec le détail du coût), les mois et les années, avec les mêmes filtres." />
+      <ExportLinks
+        tab="evolution"
+        ctx={ctx}
+        note="Les 12 dernières semaines (avec le détail du coût), les mois et les années, avec les mêmes filtres."
+      />
     </div>
   );
 }

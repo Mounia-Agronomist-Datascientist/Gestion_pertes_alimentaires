@@ -26,7 +26,11 @@ describe("densités de référence des liquides", () => {
 
   it("et les plus proches (décision du 18/11/2026)", () => {
     const blend = d("huile olive colza")!;
-    expect(blend).toMatchObject({ liquids: ["huile d'olive", "huile de colza"], approximate: true, densityKgPerL: 0.914 });
+    expect(blend).toMatchObject({
+      liquids: ["huile d'olive", "huile de colza"],
+      approximate: true,
+      densityKgPerL: 0.914,
+    });
     expect(referenceDensityLabel(blend)).toBe("huile d'olive + huile de colza, moyenne");
     expect(d("Lait demi-écrémé 🔵")).toMatchObject({ densityKgPerL: 1.033, approximate: true });
     expect(d("sauce soja sucrée kikkoman")).toMatchObject({ densityKgPerL: 1.15, approximate: true });
@@ -34,7 +38,16 @@ describe("densités de référence des liquides", () => {
   });
 
   it("aucune densité devinée pour le reste", () => {
-    for (const name of ["Lait de coco thai kitchen poche", "jus de citron jaune bio", "jus de cuisson légumes", "crème fraiche épaisse 30%", "Rösti aux oignons à l'huile de tournesol", "Beurre de cacahuètes sans huile de palme", "Pêche oreillon au sirop léger", "Bûche de chèvre au lait français 🟢"]) {
+    for (const name of [
+      "Lait de coco thai kitchen poche",
+      "jus de citron jaune bio",
+      "jus de cuisson légumes",
+      "crème fraiche épaisse 30%",
+      "Rösti aux oignons à l'huile de tournesol",
+      "Beurre de cacahuètes sans huile de palme",
+      "Pêche oreillon au sirop léger",
+      "Bûche de chèvre au lait français 🟢",
+    ]) {
       expect(d(name), name).toBeNull();
     }
   });

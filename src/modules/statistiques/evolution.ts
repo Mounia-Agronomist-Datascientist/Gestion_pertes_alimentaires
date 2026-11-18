@@ -41,18 +41,32 @@ function average(values: readonly (number | null)[]): number | null {
   return known.length ? Math.round((known.reduce((a, b) => a + b, 0) / known.length) * 100) / 100 : null;
 }
 
-async function weekPoints(db: Db, user: AuthUser, weeks: readonly { id: string; year: number; number: number; startDate: string; endDate: string }[], filters: StatsFilters) {
+async function weekPoints(
+  db: Db,
+  user: AuthUser,
+  weeks: readonly { id: string; year: number; number: number; startDate: string; endDate: string }[],
+  filters: StatsFilters,
+) {
   if (!weeks.length) return [];
   const withCosts = can(user, "indicators.read");
   const sorted = [...weeks].sort((a, b) => a.startDate.localeCompare(b.startDate));
   const team = volumeTeam(user, filters);
   const [facts, planned, actual] = await Promise.all([
     loadFacts(db, user, { kind: "periode", from: sorted[0]!.startDate, to: sorted.at(-1)!.endDate }, filters),
-    plannedVolumes(db, weeks.map((w) => w.id), team),
-    actualVolumes(db, weeks.map((w) => w.id), team),
+    plannedVolumes(
+      db,
+      weeks.map((w) => w.id),
+      team,
+    ),
+    actualVolumes(
+      db,
+      weeks.map((w) => w.id),
+      team,
+    ),
   ]);
   const byWeek = new Map<string, LossFact[]>();
-  for (const f of facts) (byWeek.get(f.productionWeekId) ?? byWeek.set(f.productionWeekId, []).get(f.productionWeekId)!).push(f);
+  for (const f of facts)
+    (byWeek.get(f.productionWeekId) ?? byWeek.set(f.productionWeekId, []).get(f.productionWeekId)!).push(f);
   return weeks.map((w): WeekPoint => {
     const summary = summarize(byWeek.get(w.id) ?? [], withCosts);
     const volume = planned.get(w.id) ?? null;
@@ -86,7 +100,12 @@ export async function recentWeeks(db: Db, anchor: { year: number; number: number
     .where(and(eq(s.productionWeeks.year, anchor.year), eq(s.productionWeeks.number, anchor.number)));
   if (!week) return null;
   return (
-    await db.select(WEEK_COLUMNS).from(s.productionWeeks).where(lte(s.productionWeeks.startDate, week.startDate)).orderBy(desc(s.productionWeeks.startDate)).limit(count)
+    await db
+      .select(WEEK_COLUMNS)
+      .from(s.productionWeeks)
+      .where(lte(s.productionWeeks.startDate, week.startDate))
+      .orderBy(desc(s.productionWeeks.startDate))
+      .limit(count)
   ).reverse();
 }
 
@@ -105,23 +124,62 @@ export interface TrendIndicator {
  * 1 000 barquettes prévues et produites, coût net pour les profils qui voient les euros. Sans aucune perte sur la
  * série, rien n'est calculé.
  */
-export function weekTrends(series: readonly WeekPoint[], withCosts: boolean, stableRate = TREND_STABLE_RATE): TrendIndicator[] {
+export function weekTrends(
+  series: readonly WeekPoint[],
+  withCosts: boolean,
+  stableRate = TREND_STABLE_RATE,
+): TrendIndicator[] {
   // Les semaines d'avant la première perte enregistrée de la série ne comptent pas : l'outil n'était pas encore
   // utilisé, elles feraient croire à une hausse (même règle que l'évolution mensuelle).
   const first = series.findIndex((p) => p.summary.events > 0);
-  const indicator = (key: TrendIndicator["key"], label: string, unit: TrendIndicator["unit"], all: (number | null)[]): TrendIndicator => {
+  const indicator = (
+    key: TrendIndicator["key"],
+    label: string,
+    unit: TrendIndicator["unit"],
+    all: (number | null)[],
+  ): TrendIndicator => {
     const values = all.map((v, i) => (first >= 0 && i >= first ? v : null));
     return { key, label, unit, values, average: movingAverage(values), trend: trendOf(values, stableRate) };
   };
   return [
-    indicator("kg", "Kg de pertes alimentaires", "kg", series.map((p) => p.summary.foodKg)),
-    indicator("volume", "Kg pour 1 000 barquettes prévues", "kg", series.map((p) => p.perThousand)),
-    indicator("reel", "Kg pour 1 000 barquettes produites", "kg", series.map((p) => p.perThousandActual)),
-    ...(withCosts ? [indicator("net", "Coût net", "eur", series.map((p) => p.summary.cost?.netEur ?? null))] : []),
+    indicator(
+      "kg",
+      "Kg de pertes alimentaires",
+      "kg",
+      series.map((p) => p.summary.foodKg),
+    ),
+    indicator(
+      "volume",
+      "Kg pour 1 000 barquettes prévues",
+      "kg",
+      series.map((p) => p.perThousand),
+    ),
+    indicator(
+      "reel",
+      "Kg pour 1 000 barquettes produites",
+      "kg",
+      series.map((p) => p.perThousandActual),
+    ),
+    ...(withCosts
+      ? [
+          indicator(
+            "net",
+            "Coût net",
+            "eur",
+            series.map((p) => p.summary.cost?.netEur ?? null),
+          ),
+        ]
+      : []),
   ];
 }
 
-export async function weekComparison(db: Db, user: AuthUser, anchor: { year: number; number: number }, filters: StatsFilters, count = 12) {
+export async function weekComparison(
+  db: Db,
+  user: AuthUser,
+  anchor: { year: number; number: number },
+  filters: StatsFilters,
+  count = 12,
+) {
   const recent = await recentWeeks(db, anchor, count);
   if (!recent) return null;
   const [lastYear] = await db
@@ -160,7 +218,13 @@ export async function weekComparison(db: Db, user: AuthUser, anchor: { year: num
 }
 
 /** Pertes des 12 mois jusqu'au mois donné (date réelle de la perte). */
-export async function monthlyEvolution(db: Db, user: AuthUser, anchor: { year: number; month: number }, filters: StatsFilters, count = 12) {
+export async function monthlyEvolution(
+  db: Db,
+  user: AuthUser,
+  anchor: { year: number; month: number },
+  filters: StatsFilters,
+  count = 12,
+) {
   const months = Array.from({ length: count }, (_, i) => {
     const index = anchor.year * 12 + anchor.month - 1 - (count - 1 - i);
     return { year: Math.floor(index / 12), month: (index % 12) + 1 };
@@ -172,16 +236,31 @@ export async function monthlyEvolution(db: Db, user: AuthUser, anchor: { year: n
   const facts = await loadFacts(db, user, { kind: "periode", from, to }, filters);
   return months.map((m) => {
     const key = `${m.year}-${String(m.month).padStart(2, "0")}`;
-    return { ...m, summary: summarize(facts.filter((f) => f.occurredOn.startsWith(key)), withCosts) };
+    return {
+      ...m,
+      summary: summarize(
+        facts.filter((f) => f.occurredOn.startsWith(key)),
+        withCosts,
+      ),
+    };
   });
 }
 
 /** Totaux par année de production, jusqu'à l'année donnée (années du calendrier ayant des pertes). */
 export async function annualEvolution(db: Db, user: AuthUser, upToYear: number, filters: StatsFilters) {
-  const years = (await db.selectDistinct({ year: s.productionWeeks.year }).from(s.productionWeeks).where(lte(s.productionWeeks.year, upToYear)).orderBy(asc(s.productionWeeks.year))).map(
-    (y) => y.year,
-  );
+  const years = (
+    await db
+      .selectDistinct({ year: s.productionWeeks.year })
+      .from(s.productionWeeks)
+      .where(lte(s.productionWeeks.year, upToYear))
+      .orderBy(asc(s.productionWeeks.year))
+  ).map((y) => y.year);
   const withCosts = can(user, "indicators.read");
-  const rows = await Promise.all(years.map(async (year) => ({ year, summary: summarize(await loadFacts(db, user, { kind: "annee", year }, filters), withCosts) })));
+  const rows = await Promise.all(
+    years.map(async (year) => ({
+      year,
+      summary: summarize(await loadFacts(db, user, { kind: "annee", year }, filters), withCosts),
+    })),
+  );
   return rows.filter((r) => r.summary.events > 0);
 }

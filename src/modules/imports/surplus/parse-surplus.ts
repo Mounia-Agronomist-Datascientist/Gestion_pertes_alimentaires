@@ -71,12 +71,7 @@ export interface NamedGrid {
 }
 
 const normalize = (s: string | undefined) =>
-  (s ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  (s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
 const blank = (s: string | undefined) => !(s ?? "").trim();
 
@@ -109,7 +104,11 @@ export function parseSheetDate(text: string | undefined, year?: number): string 
 export function parseAmount(text: string | undefined): number | null {
   const t = (text ?? "").replace(/[\s  €]/g, "");
   if (!t) return null;
-  const n = /^-?\d+(,\d+)?$/.test(t) ? Number(t.replace(",", ".")) : /^-?\d+(\.\d+)?(E[+-]?\d+)?$/i.test(t) ? Number(t) : NaN;
+  const n = /^-?\d+(,\d+)?$/.test(t)
+    ? Number(t.replace(",", "."))
+    : /^-?\d+(\.\d+)?(E[+-]?\d+)?$/i.test(t)
+      ? Number(t)
+      : NaN;
   return Number.isFinite(n) ? Math.round(n * 100) / 100 : null;
 }
 
@@ -124,13 +123,23 @@ function locate<C extends Record<string, (h: string) => boolean>>(grid: Grid, co
   type K = keyof C & string;
   for (let r = 0; r < Math.min(grid.length, 15); r++) {
     const headers = (grid[r] ?? []).map(normalize);
-    const index = Object.fromEntries((Object.keys(columns) as K[]).map((k) => [k, headers.findIndex(columns[k]!)])) as Record<K, number>;
+    const index = Object.fromEntries(
+      (Object.keys(columns) as K[]).map((k) => [k, headers.findIndex(columns[k]!)]),
+    ) as Record<K, number>;
     if (required.every((k) => index[k as K] >= 0)) return { headerRow: r, index };
   }
   return null;
 }
 
-const empty = (source: SurplusSource | null, sheets: string[]): SurplusParseResult => ({ source, sheets, entries: [], periodFrom: null, periodTo: null, errors: [], warnings: [] });
+const empty = (source: SurplusSource | null, sheets: string[]): SurplusParseResult => ({
+  source,
+  sheets,
+  entries: [],
+  periodFrom: null,
+  periodTo: null,
+  errors: [],
+  warnings: [],
+});
 
 const base = (sheet: string, row: number, date: string): SurplusEntry => ({
   kind: "vente",
@@ -192,34 +201,58 @@ function parseTgtgSheet(name: string, year: number, grid: Grid, out: SurplusPars
     const rawDate = cell(row, "date");
     let date = parseSheetDate(rawDate, year);
     // Ligne de l'année seule (« 2025 ») ou ligne sans rien.
-    if (!date && (offered == null && sold == null && revenue == null && payout == null)) continue;
+    if (!date && offered == null && sold == null && revenue == null && payout == null) continue;
     if (!date) {
       if (!lastDate) {
         out.warnings.push(`${name}, ligne ${line} : pas de date (« ${(rawDate ?? "").trim()} »), ligne ignorée.`);
         continue;
       }
       date = lastDate;
-      out.warnings.push(`${name}, ligne ${line} : « ${(rawDate ?? "").trim()} » n'est pas une date ; la date de la ligne précédente (${shortDate(date)}) est gardée.`);
+      out.warnings.push(
+        `${name}, ligne ${line} : « ${(rawDate ?? "").trim()} » n'est pas une date ; la date de la ligne précédente (${shortDate(date)}) est gardée.`,
+      );
     } else {
       if (Number(date.slice(0, 4)) !== year) {
         const fixed = `${year}${date.slice(4)}`;
-        out.warnings.push(`${name}, ligne ${line} : date du ${shortDate(date)} dans l'onglet ${year} ; le ${shortDate(fixed)} est gardé.`);
+        out.warnings.push(
+          `${name}, ligne ${line} : date du ${shortDate(date)} dans l'onglet ${year} ; le ${shortDate(fixed)} est gardé.`,
+        );
         date = fixed;
       }
-      if (lastDate && date < lastDate) out.warnings.push(`${name}, ligne ${line} : le ${shortDate(date)} vient après le ${shortDate(lastDate)} ; vérifiez la date.`);
+      if (lastDate && date < lastDate)
+        out.warnings.push(
+          `${name}, ligne ${line} : le ${shortDate(date)} vient après le ${shortDate(lastDate)} ; vérifiez la date.`,
+        );
       lastDate = date;
     }
     if (sold != null || offered != null) {
-      if (sold == null) out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : ${offered} barquettes proposées sans nombre de vendues, ligne ignorée.`);
+      if (sold == null)
+        out.warnings.push(
+          `${name}, ligne ${line} (${shortDate(date)}) : ${offered} barquettes proposées sans nombre de vendues, ligne ignorée.`,
+        );
       else {
-        if (offered != null && sold > offered) out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : ${sold} barquettes vendues pour ${offered} proposées.`);
+        if (offered != null && sold > offered)
+          out.warnings.push(
+            `${name}, ligne ${line} (${shortDate(date)}) : ${sold} barquettes vendues pour ${offered} proposées.`,
+          );
         if (revenue == null && sold > 0) missingRevenue++;
-        out.entries.push({ ...base(name, line, date), kind: "vente", trays: sold, offeredTrays: offered, formula: text(cell(row, "formula"), 60), amountEur: revenue });
+        out.entries.push({
+          ...base(name, line, date),
+          kind: "vente",
+          trays: sold,
+          offeredTrays: offered,
+          formula: text(cell(row, "formula"), 60),
+          amountEur: revenue,
+        });
       }
-    } else if (revenue != null) out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : montant sans barquettes vendues, ligne ignorée.`);
+    } else if (revenue != null)
+      out.warnings.push(
+        `${name}, ligne ${line} (${shortDate(date)}) : montant sans barquettes vendues, ligne ignorée.`,
+      );
     if (payout != null) out.entries.push({ ...base(name, line, date), kind: "versement", amountEur: payout });
   }
-  if (missingRevenue) out.warnings.push(`${name} : ${missingRevenue} vente${missingRevenue > 1 ? "s" : ""} sans « CA TGTG ».`);
+  if (missingRevenue)
+    out.warnings.push(`${name} : ${missingRevenue} vente${missingRevenue > 1 ? "s" : ""} sans « CA TGTG ».`);
 }
 
 // ─── Ventes flash ────────────────────────────────────────────────────────────
@@ -236,45 +269,61 @@ const VF_COLUMNS = {
  * Quantité de boxes : le premier nombre ; « dt 18 avec PDJ » / « dont 16 PDJ » = boxes avec petit-déjeuner ;
  * « dont 22 x 2box », « 11x2 » = achats de deux boxes (déjà comptés dans le premier nombre). null si illisible.
  */
-export function parseBoxes(raw: string | undefined): { boxes: number; breakfastBoxes: number | null; doubles: number | null } | null {
+export function parseBoxes(
+  raw: string | undefined,
+): { boxes: number; breakfastBoxes: number | null; doubles: number | null } | null {
   const t = normalize(raw).replace(/^(\d+)\.0+$/, "$1");
   const m = t.match(/^(\d+)(?:\s|\(|$)/);
   if (!m) return null;
   const rest = t.slice(m[1]!.length);
   const breakfast = rest.match(/(\d+)\s*(?:avec\s*)?pdj/);
   const doubles = rest.match(/(\d+)\s*x\s*2/);
-  return { boxes: Number(m[1]), breakfastBoxes: breakfast ? Number(breakfast[1]) : null, doubles: doubles ? Number(doubles[1]) : null };
+  return {
+    boxes: Number(m[1]),
+    breakfastBoxes: breakfast ? Number(breakfast[1]) : null,
+    doubles: doubles ? Number(doubles[1]) : null,
+  };
 }
 
 function parseFlashSheet(name: string, year: number, grid: Grid, out: SurplusParseResult) {
   const found = locate(grid, VF_COLUMNS, ["date", "formula", "boxes"]);
   if (!found) {
-    out.errors.push(`Onglet ${name} : colonnes « Date », « Type de formule » et « Quantités boxes vendues » introuvables.`);
+    out.errors.push(
+      `Onglet ${name} : colonnes « Date », « Type de formule » et « Quantités boxes vendues » introuvables.`,
+    );
     return;
   }
   const { headerRow, index } = found;
   const cell = (row: readonly string[], k: keyof typeof VF_COLUMNS) => (index[k] >= 0 ? row[index[k]] : undefined);
   const lastColumn = Math.max(...Object.values(index));
   let missingRevenue = 0;
-  if (index.revenue < 0) out.warnings.push(`${name} : pas de colonne « Chiffre d'affaire TTC » ; ventes enregistrées sans montant.`);
+  if (index.revenue < 0)
+    out.warnings.push(`${name} : pas de colonne « Chiffre d'affaire TTC » ; ventes enregistrées sans montant.`);
   for (let i = headerRow + 1; i < grid.length; i++) {
     const row = grid[i] ?? [];
     if (row.every(blank)) continue;
     const line = i + 1;
     const date = parseSheetDate(cell(row, "date"), year);
     if (!date) {
-      if (!blank(cell(row, "boxes"))) out.warnings.push(`${name}, ligne ${line} : date illisible « ${(cell(row, "date") ?? "").trim()} », ligne ignorée.`);
+      if (!blank(cell(row, "boxes")))
+        out.warnings.push(
+          `${name}, ligne ${line} : date illisible « ${(cell(row, "date") ?? "").trim()} », ligne ignorée.`,
+        );
       continue;
     }
     const formula = text(cell(row, "formula"), 60) ?? "";
     const boxes = parseBoxes(cell(row, "boxes"));
     if (!boxes) {
-      out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : quantité « ${(cell(row, "boxes") ?? "").trim()} » illisible, vente ignorée.`);
+      out.warnings.push(
+        `${name}, ligne ${line} (${shortDate(date)}) : quantité « ${(cell(row, "boxes") ?? "").trim()} » illisible, vente ignorée.`,
+      );
       continue;
     }
     const perBox = Number(normalize(formula).match(/(\d+)\s*p\b/)?.[1] ?? NaN);
     if (!Number.isFinite(perBox)) {
-      out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : formule « ${formula} » sans nombre de barquettes par box, vente ignorée.`);
+      out.warnings.push(
+        `${name}, ligne ${line} (${shortDate(date)}) : formule « ${formula} » sans nombre de barquettes par box, vente ignorée.`,
+      );
       continue;
     }
     // Petits-déjeuners : nombre écrit (« dt 18 avec PDJ »), toutes les boxes si la formule n'existe qu'avec PDJ.
@@ -282,16 +331,23 @@ function parseFlashSheet(name: string, year: number, grid: Grid, out: SurplusPar
     const onlyBreakfast = /\+\s*pdj/.test(f) && !f.includes("/");
     let breakfastBoxes = boxes.breakfastBoxes ?? (onlyBreakfast ? boxes.boxes : 0);
     if (boxes.breakfastBoxes == null && !onlyBreakfast && /pdj/.test(f)) {
-      out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : formule « ${formula} » sans nombre de boxes avec petit-déjeuner ; comptées sans petit-déjeuner.`);
+      out.warnings.push(
+        `${name}, ligne ${line} (${shortDate(date)}) : formule « ${formula} » sans nombre de boxes avec petit-déjeuner ; comptées sans petit-déjeuner.`,
+      );
       breakfastBoxes = 0;
     }
     if (breakfastBoxes > boxes.boxes) {
-      out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : plus de boxes avec petit-déjeuner que de boxes ; vente ignorée.`);
+      out.warnings.push(
+        `${name}, ligne ${line} (${shortDate(date)}) : plus de boxes avec petit-déjeuner que de boxes ; vente ignorée.`,
+      );
       continue;
     }
     const revenue = parseAmount(cell(row, "revenue"));
     if (revenue == null && index.revenue >= 0 && boxes.boxes > 0) missingRevenue++;
-    const comments = row.slice(lastColumn + 1).map((c) => text(c, 200)).filter(Boolean);
+    const comments = row
+      .slice(lastColumn + 1)
+      .map((c) => text(c, 200))
+      .filter(Boolean);
     out.entries.push({
       ...base(name, line, date),
       kind: "vente",
@@ -302,10 +358,13 @@ function parseFlashSheet(name: string, year: number, grid: Grid, out: SurplusPar
       formula,
       amountEur: revenue,
       code: text(cell(row, "code"), 40),
-      note: [boxes.doubles ? `dont ${boxes.doubles} achats de 2 boxes` : null, ...comments].filter(Boolean).join(" · ") || null,
+      note:
+        [boxes.doubles ? `dont ${boxes.doubles} achats de 2 boxes` : null, ...comments].filter(Boolean).join(" · ") ||
+        null,
     });
   }
-  if (missingRevenue) out.warnings.push(`${name} : ${missingRevenue} vente${missingRevenue > 1 ? "s" : ""} sans chiffre d'affaires.`);
+  if (missingRevenue)
+    out.warnings.push(`${name} : ${missingRevenue} vente${missingRevenue > 1 ? "s" : ""} sans chiffre d'affaires.`);
 }
 
 // ─── Linkee ──────────────────────────────────────────────────────────────────
@@ -349,12 +408,15 @@ function sumOfNumbers(raw: string | undefined): number | null {
 function parseLinkeeSheet(name: string, grid: Grid, out: SurplusParseResult) {
   const found = locate(grid, LINKEE_COLUMNS, ["date", "trays", "dish"]);
   if (!found) {
-    out.errors.push(`Onglet ${name} : colonnes « Date de collecte », « Nombre de barquette » et « Nom plat » introuvables.`);
+    out.errors.push(
+      `Onglet ${name} : colonnes « Date de collecte », « Nombre de barquette » et « Nom plat » introuvables.`,
+    );
     return;
   }
   const { headerRow, index } = found;
   // Seules ces colonnes sont lues ; les colonnes suivantes (contacts) jamais.
-  const cell = (row: readonly string[] | undefined, k: keyof typeof LINKEE_COLUMNS) => (row && index[k] >= 0 ? row[index[k]] : undefined);
+  const cell = (row: readonly string[] | undefined, k: keyof typeof LINKEE_COLUMNS) =>
+    row && index[k] >= 0 ? row[index[k]] : undefined;
   const keys = Object.keys(LINKEE_COLUMNS) as (keyof typeof LINKEE_COLUMNS)[];
   // Une collecte : une date ; le total n'est écrit que sur sa première ligne (parfois en deux fois).
   let current = null as { date: string; total: number | null; sum: number } | null;
@@ -362,7 +424,9 @@ function parseLinkeeSheet(name: string, grid: Grid, out: SurplusParseResult) {
   let unreadLots = 0;
   const closeCollection = () => {
     if (current && current.total != null && current.sum !== current.total) {
-      out.warnings.push(`${name}, collecte du ${shortDate(current.date)} : total de ${current.total} barquettes, ${current.sum} détaillées plat par plat.`);
+      out.warnings.push(
+        `${name}, collecte du ${shortDate(current.date)} : total de ${current.total} barquettes, ${current.sum} détaillées plat par plat.`,
+      );
     }
   };
   for (let i = headerRow + 1; i < grid.length; i++) {
@@ -374,7 +438,10 @@ function parseLinkeeSheet(name: string, grid: Grid, out: SurplusParseResult) {
     if (!date && rawDate === "0") {
       // Date vide (« 0 ») : celle de la ligne suivante, quand elle en a une.
       date = parseSheetDate(cell(grid[i + 1], "date"));
-      if (date) out.warnings.push(`${name}, ligne ${line} : date vide, celle de la ligne suivante (${shortDate(date)}) est gardée.`);
+      if (date)
+        out.warnings.push(
+          `${name}, ligne ${line} : date vide, celle de la ligne suivante (${shortDate(date)}) est gardée.`,
+        );
     } else if (!date && rawDate) {
       out.warnings.push(`${name}, ligne ${line} : date illisible « ${rawDate} », ligne ignorée.`);
       continue;
@@ -392,7 +459,9 @@ function parseLinkeeSheet(name: string, grid: Grid, out: SurplusParseResult) {
     const dishName = text(cell(row, "dish"), 200);
     const trays = parseCount(cell(row, "trays"));
     if (trays == null) {
-      out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : nombre de barquettes « ${(cell(row, "trays") ?? "").trim()} » illisible${dishName ? ` pour « ${dishName} »` : ""}, ligne ignorée.`);
+      out.warnings.push(
+        `${name}, ligne ${line} (${shortDate(date)}) : nombre de barquettes « ${(cell(row, "trays") ?? "").trim()} » illisible${dishName ? ` pour « ${dishName} »` : ""}, ligne ignorée.`,
+      );
       continue;
     }
     if (trays === 0) continue;
@@ -402,7 +471,8 @@ function parseLinkeeSheet(name: string, grid: Grid, out: SurplusParseResult) {
     if (lot && /^L\d/i.test(lot) && (!producedOn || !dishCode)) unreadLots++;
     const collected = ["1", "true", "vrai", "oui", "x"].includes(normalize(cell(row, "collected")));
     if (!collected) notCollected++;
-    if (!dishName) out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : ${trays} barquettes sans nom de plat.`);
+    if (!dishName)
+      out.warnings.push(`${name}, ligne ${line} (${shortDate(date)}) : ${trays} barquettes sans nom de plat.`);
     out.entries.push({
       ...base(name, line, date),
       kind: "don",
@@ -416,8 +486,12 @@ function parseLinkeeSheet(name: string, grid: Grid, out: SurplusParseResult) {
     });
   }
   closeCollection();
-  if (unreadLots) out.warnings.push(`${unreadLots} n° de lot dont la date de production ou le code plat ne se lisent pas.`);
-  if (notCollected) out.warnings.push(`${notCollected} plat${notCollected > 1 ? "s" : ""} sans « Collecté ? » coché (enregistrés comme non collectés).`);
+  if (unreadLots)
+    out.warnings.push(`${unreadLots} n° de lot dont la date de production ou le code plat ne se lisent pas.`);
+  if (notCollected)
+    out.warnings.push(
+      `${notCollected} plat${notCollected > 1 ? "s" : ""} sans « Collecté ? » coché (enregistrés comme non collectés).`,
+    );
 }
 
 // ─── Reconnaissance du fichier ───────────────────────────────────────────────
@@ -434,17 +508,25 @@ export function parseSurplus(sheets: NamedGrid[]): SurplusParseResult {
   const linkee = sheets.filter((s) => locate(s.grid, LINKEE_COLUMNS, ["date", "trays", "dish"]));
   let out: SurplusParseResult;
   if (tgtg.length) {
-    out = empty("tgtg", tgtg.map((s) => s.name));
+    out = empty(
+      "tgtg",
+      tgtg.map((s) => s.name),
+    );
     for (const s of tgtg) parseTgtgSheet(s.name, s.year, s.grid, out);
   } else if (flash.length) {
-    out = empty("vente_flash", flash.map((s) => s.name));
+    out = empty(
+      "vente_flash",
+      flash.map((s) => s.name),
+    );
     for (const s of flash) parseFlashSheet(s.name, s.year, s.grid, out);
   } else if (linkee.length) {
     out = empty("linkee", [linkee[0]!.name]);
     parseLinkeeSheet(linkee[0]!.name, linkee[0]!.grid, out);
   } else {
     out = empty(null, []);
-    out.errors.push("Fichier non reconnu : onglets « TGTG2026 » ou « VF2026 », ou colonne « Date de collecte » (Linkee) attendus.");
+    out.errors.push(
+      "Fichier non reconnu : onglets « TGTG2026 » ou « VF2026 », ou colonne « Date de collecte » (Linkee) attendus.",
+    );
     return out;
   }
   const dates = out.entries.map((e) => e.date).sort();

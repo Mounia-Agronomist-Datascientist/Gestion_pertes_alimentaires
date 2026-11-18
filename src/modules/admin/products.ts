@@ -23,10 +23,12 @@ const optionalText = (max: number) =>
     .nullable()
     .optional();
 // Valeurs connues uniquement (docs/REGLES_METIER.md R2) : vide = inconnu, jamais une valeur par défaut.
-const optionalPositive = z.preprocess(
-  (v) => (v === "" || v == null ? null : typeof v === "string" ? Number(v.replace(",", ".")) : v),
-  z.number({ message: "Nombre invalide" }).positive("La valeur doit être positive").nullable(),
-).optional();
+const optionalPositive = z
+  .preprocess(
+    (v) => (v === "" || v == null ? null : typeof v === "string" ? Number(v.replace(",", ".")) : v),
+    z.number({ message: "Nombre invalide" }).positive("La valeur doit être positive").nullable(),
+  )
+  .optional();
 
 const productSchema = z.object({
   name: z.string().trim().min(2, "Le nom du produit est trop court").max(200),
@@ -69,8 +71,17 @@ export async function listProductsForAdmin(db: Db, admin: AuthUser) {
 export async function createProduct(db: Db, admin: AuthUser, raw: ProductInput) {
   requirePermission(admin, "referentiel.manage");
   const input = await validate(db, raw);
-  const [created] = await db.insert(s.products).values({ ...input, source: "manuel" }).returning();
-  await writeAudit(db, { userId: admin.id, action: "create", entity: "product", entityId: created!.id, after: created });
+  const [created] = await db
+    .insert(s.products)
+    .values({ ...input, source: "manuel" })
+    .returning();
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "create",
+    entity: "product",
+    entityId: created!.id,
+    after: created,
+  });
   return created!;
 }
 
@@ -93,7 +104,13 @@ export async function setProductActive(db: Db, admin: AuthUser, productId: strin
   const [before] = await db.select().from(s.products).where(eq(s.products.id, productId));
   if (!before) throw new AdminError("Produit introuvable");
   await db.update(s.products).set({ active, updatedAt: new Date() }).where(eq(s.products.id, productId));
-  await writeAudit(db, { userId: admin.id, action: active ? "activate" : "deactivate", entity: "product", entityId: productId, before });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: active ? "activate" : "deactivate",
+    entity: "product",
+    entityId: productId,
+    before,
+  });
 }
 
 export interface UnlistedGroup {
@@ -117,7 +134,9 @@ export async function listUnlistedGroups(db: Db, admin: AuthUser): Promise<Unlis
       occurredOn: s.lossDeclarations.occurredOn,
     })
     .from(s.lossDeclarations)
-    .where(and(eq(s.lossDeclarations.productUnlisted, true), inArray(s.lossDeclarations.status, ["validee", "corrigee"])))
+    .where(
+      and(eq(s.lossDeclarations.productUnlisted, true), inArray(s.lossDeclarations.status, ["validee", "corrigee"])),
+    )
     .orderBy(desc(s.lossDeclarations.occurredOn));
   const groups = new Map<string, UnlistedGroup>();
   for (const r of rows) {
@@ -127,7 +146,14 @@ export async function listUnlistedGroups(db: Db, admin: AuthUser): Promise<Unlis
       group.count++;
       group.declarationIds.push(r.id);
     } else {
-      groups.set(key, { key, label: r.name, category: r.category, count: 1, lastOccurredOn: r.occurredOn, declarationIds: [r.id] });
+      groups.set(key, {
+        key,
+        label: r.name,
+        category: r.category,
+        count: 1,
+        lastOccurredOn: r.occurredOn,
+        declarationIds: [r.id],
+      });
     }
   }
   return [...groups.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "fr"));
@@ -137,12 +163,20 @@ export async function countUnlistedDeclarations(db: Db): Promise<number> {
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(s.lossDeclarations)
-    .where(and(eq(s.lossDeclarations.productUnlisted, true), inArray(s.lossDeclarations.status, ["validee", "corrigee"])));
+    .where(
+      and(eq(s.lossDeclarations.productUnlisted, true), inArray(s.lossDeclarations.status, ["validee", "corrigee"])),
+    );
   return row?.n ?? 0;
 }
 
 /** Rattache toutes les saisies d'un groupe « hors liste » à un produit existant. */
-export async function linkUnlistedGroup(db: Db, admin: AuthUser, groupKey: string, productId: string, now = new Date()) {
+export async function linkUnlistedGroup(
+  db: Db,
+  admin: AuthUser,
+  groupKey: string,
+  productId: string,
+  now = new Date(),
+) {
   const group = (await listUnlistedGroups(db, admin)).find((g) => g.key === groupKey);
   if (!group) throw new AdminError("Ces saisies ont déjà été rattachées");
   return linkDeclarationsToProduct(db, admin, { declarationIds: group.declarationIds, productId }, now);

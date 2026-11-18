@@ -40,7 +40,11 @@ export function movingAverage(values: readonly (number | null)[], window = TREND
 }
 
 /** Sens de la tendance d'une série (du plus ancien au plus récent, la semaine choisie en dernier). */
-export function trendOf(values: readonly (number | null)[], stableRate = TREND_STABLE_RATE, window = TREND_WINDOW): Trend {
+export function trendOf(
+  values: readonly (number | null)[],
+  stableRate = TREND_STABLE_RATE,
+  window = TREND_WINDOW,
+): Trend {
   const recent = values.length >= window ? windowAverage(values.slice(-window)) : null;
   const previous = values.length >= 2 * window ? windowAverage(values.slice(-2 * window, -window)) : null;
   if (recent == null || previous == null) return { recent, previous, rate: null, direction: null };
@@ -49,6 +53,10 @@ export function trendOf(values: readonly (number | null)[], stableRate = TREND_S
   return { recent, previous, rate, direction: Math.abs(rate) < stableRate ? "stable" : rate > 0 ? "hausse" : "baisse" };
 }
 
-export const TREND_LABELS: Record<TrendDirection, string> = { hausse: "En hausse", stable: "Stable", baisse: "En baisse" };
+export const TREND_LABELS: Record<TrendDirection, string> = {
+  hausse: "En hausse",
+  stable: "Stable",
+  baisse: "En baisse",
+};
 /** Symbole écrit à côté du libellé (jamais le sens par la seule couleur). */
 export const TREND_SYMBOLS: Record<TrendDirection, string> = { hausse: "▲", stable: "=", baisse: "▼" };

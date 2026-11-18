@@ -30,14 +30,20 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
       <h1 className="text-2xl font-bold">Alertes « saisie incomplète »</h1>
       <p className="text-slate-600">
         Chaque jour de production doit avoir au moins une déclaration. Si un jour d&apos;une plage (jeudi-vendredi ou
-        lundi-mercredi) n&apos;est pas renseigné, l&apos;équipe reçoit une perte estimée de {ESTIMATED_LOSS_KG_PER_WINDOW} kg
-        pour cette plage, toujours comptée à part des pertes déclarées.
+        lundi-mercredi) n&apos;est pas renseigné, l&apos;équipe reçoit une perte estimée de{" "}
+        {ESTIMATED_LOSS_KG_PER_WINDOW} kg pour cette plage, toujours comptée à part des pertes déclarées.
       </p>
       <nav className="flex gap-2">
-        <Link href="/alertes" className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-teal-700 text-white"}`}>
+        <Link
+          href="/alertes"
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-teal-700 text-white"}`}
+        >
           En cours
         </Link>
-        <Link href="/alertes?toutes=1" className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-teal-700 text-white" : "bg-white shadow-sm"}`}>
+        <Link
+          href="/alertes?toutes=1"
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-teal-700 text-white" : "bg-white shadow-sm"}`}
+        >
           Historique
         </Link>
       </nav>
@@ -54,7 +60,11 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
             <li key={a.id} className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
               <span className="flex flex-wrap items-center justify-between gap-2">
                 <span className="flex items-center gap-2 font-semibold">
-                  <span className="flex size-8 items-center justify-center rounded-full text-white" style={{ backgroundColor: a.teamColorHex }} aria-hidden>
+                  <span
+                    className="flex size-8 items-center justify-center rounded-full text-white"
+                    style={{ backgroundColor: a.teamColorHex }}
+                    aria-hidden
+                  >
                     {a.teamLetter}
                   </span>
                   Équipe {a.teamLetter} – {a.teamColorName}

@@ -54,15 +54,38 @@ export async function materialsOfWeek(db: Db, weekId: string): Promise<WeekMater
   ]);
   const externalIds = tomeKeys.map((k) => melbaExternalId(k.key)).filter((id) => id !== melbaExternalId(""));
   const orderedIds = new Set(ordered.map((o) => o.productId));
-  const columns = { id: s.products.id, name: s.products.name, categoryId: s.products.materialCategoryId, storageSubzoneId: s.products.storageSubzoneId, externalId: s.products.externalId };
+  const columns = {
+    id: s.products.id,
+    name: s.products.name,
+    categoryId: s.products.materialCategoryId,
+    storageSubzoneId: s.products.storageSubzoneId,
+    externalId: s.products.externalId,
+  };
   const [fromTome, fromOrders] = await Promise.all([
-    externalIds.length ? db.select(columns).from(s.products).where(and(inArray(s.products.externalId, externalIds), eq(s.products.active, true))) : Promise.resolve([]),
-    orderedIds.size ? db.select(columns).from(s.products).where(and(inArray(s.products.id, [...orderedIds]), eq(s.products.active, true))) : Promise.resolve([]),
+    externalIds.length
+      ? db
+          .select(columns)
+          .from(s.products)
+          .where(and(inArray(s.products.externalId, externalIds), eq(s.products.active, true)))
+      : Promise.resolve([]),
+    orderedIds.size
+      ? db
+          .select(columns)
+          .from(s.products)
+          .where(and(inArray(s.products.id, [...orderedIds]), eq(s.products.active, true)))
+      : Promise.resolve([]),
   ]);
   const inTome = new Set(fromTome.map((p) => p.id));
   const byId = new Map([...fromTome, ...fromOrders].map((p) => [p.id, p]));
   return [...byId.values()]
-    .map((p) => ({ productId: p.id, name: p.name, categoryId: p.categoryId, storageSubzoneId: p.storageSubzoneId, ordered: orderedIds.has(p.id), inTome: inTome.has(p.id) }))
+    .map((p) => ({
+      productId: p.id,
+      name: p.name,
+      categoryId: p.categoryId,
+      storageSubzoneId: p.storageSubzoneId,
+      ordered: orderedIds.has(p.id),
+      inTome: inTome.has(p.id),
+    }))
     .sort((a, b) => a.name.localeCompare(b.name, "fr"));
 }
 
@@ -72,13 +95,24 @@ export async function recentWeekMaterials(db: Db, today: LocalDate): Promise<Wee
   if (!thisWeek) return [];
   const previous = await findStoredProductionWeek(db, addDays(thisWeek.startDate, -1));
   const weeks = [thisWeek, previous].filter((w) => w != null);
-  return Promise.all(weeks.map(async (w) => ({ weekId: w.id, year: w.year, number: w.number, materials: await materialsOfWeek(db, w.id) })));
+  return Promise.all(
+    weeks.map(async (w) => ({
+      weekId: w.id,
+      year: w.year,
+      number: w.number,
+      materials: await materialsOfWeek(db, w.id),
+    })),
+  );
 }
 
 /** Catégories Melba et leur lieu de stockage (sous-zone de Stockage), pour filtrer la liste par sous-zone. */
 export async function materialCategoriesWithStorage(db: Db) {
   return db
-    .select({ id: s.materialCategories.id, name: s.materialCategories.name, storageSubzoneId: s.materialCategories.storageSubzoneId })
+    .select({
+      id: s.materialCategories.id,
+      name: s.materialCategories.name,
+      storageSubzoneId: s.materialCategories.storageSubzoneId,
+    })
     .from(s.materialCategories)
     .orderBy(asc(s.materialCategories.name));
 }
@@ -91,7 +125,10 @@ export class StorageSettingError extends Error {}
  */
 export async function setCategoriesStorage(db: Db, admin: AuthUser, raw: unknown): Promise<number> {
   requirePermission(admin, "referentiel.manage");
-  const parsed = z.array(z.object({ categoryId: z.uuid(), subzoneId: z.uuid().nullable() })).max(500).safeParse(raw);
+  const parsed = z
+    .array(z.object({ categoryId: z.uuid(), subzoneId: z.uuid().nullable() }))
+    .max(500)
+    .safeParse(raw);
   if (!parsed.success) throw new StorageSettingError("Réglage illisible.");
   const storage = await db
     .select({ id: s.subzones.id })
@@ -99,7 +136,8 @@ export async function setCategoriesStorage(db: Db, admin: AuthUser, raw: unknown
     .innerJoin(s.zones, eq(s.subzones.zoneId, s.zones.id))
     .where(eq(s.zones.code, "STOCKAGE"));
   const allowed = new Set(storage.map((x) => x.id));
-  if (parsed.data.some((a) => a.subzoneId && !allowed.has(a.subzoneId))) throw new StorageSettingError("Lieu de stockage inconnu.");
+  if (parsed.data.some((a) => a.subzoneId && !allowed.has(a.subzoneId)))
+    throw new StorageSettingError("Lieu de stockage inconnu.");
   return db.transaction(async (tx) => {
     const current = new Map((await tx.select().from(s.materialCategories)).map((c) => [c.id, c]));
     const changes: { category: string; before: string | null; after: string | null }[] = [];
@@ -107,10 +145,19 @@ export async function setCategoriesStorage(db: Db, admin: AuthUser, raw: unknown
       const c = current.get(a.categoryId);
       if (!c) throw new StorageSettingError("Catégorie inconnue.");
       if (c.storageSubzoneId === a.subzoneId) continue;
-      await tx.update(s.materialCategories).set({ storageSubzoneId: a.subzoneId, updatedAt: new Date() }).where(eq(s.materialCategories.id, c.id));
+      await tx
+        .update(s.materialCategories)
+        .set({ storageSubzoneId: a.subzoneId, updatedAt: new Date() })
+        .where(eq(s.materialCategories.id, c.id));
       changes.push({ category: c.name, before: c.storageSubzoneId, after: a.subzoneId });
     }
-    if (changes.length) await writeAudit(tx, { userId: admin.id, action: "set_category_storage", entity: "material_category", after: { changes } });
+    if (changes.length)
+      await writeAudit(tx, {
+        userId: admin.id,
+        action: "set_category_storage",
+        entity: "material_category",
+        after: { changes },
+      });
     return changes.length;
   });
 }
@@ -130,10 +177,15 @@ export async function categoriesForSetting(db: Db, admin: AuthUser) {
   requirePermission(admin, "referentiel.manage");
   const [categories, counts] = await Promise.all([
     materialCategoriesWithStorage(db),
-    db.select({ categoryId: s.products.materialCategoryId, n: sql<number>`count(*)::int` }).from(s.products)
+    db
+      .select({ categoryId: s.products.materialCategoryId, n: sql<number>`count(*)::int` })
+      .from(s.products)
       .where(and(eq(s.products.category, "matiere_premiere"), eq(s.products.active, true)))
       .groupBy(s.products.materialCategoryId),
   ]);
   const countOf = new Map(counts.map((c) => [c.categoryId, c.n]));
-  return { categories: categories.map((c) => ({ ...c, materials: countOf.get(c.id) ?? 0 })), uncategorized: countOf.get(null) ?? 0 };
+  return {
+    categories: categories.map((c) => ({ ...c, materials: countOf.get(c.id) ?? 0 })),
+    uncategorized: countOf.get(null) ?? 0,
+  };
 }

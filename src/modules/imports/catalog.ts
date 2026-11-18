@@ -133,10 +133,24 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
       const id = queue.pop()!;
       const sr = byId.get(id);
       if (!sr || reachable[id]) continue;
-      reachable[id] = { id, name: sr.name, mould: isMouldLabel(sr.name), cost: subRecipeCost(sr), lines: linesOf({ subRecipeId: id }) };
+      reachable[id] = {
+        id,
+        name: sr.name,
+        mould: isMouldLabel(sr.name),
+        cost: subRecipeCost(sr),
+        lines: linesOf({ subRecipeId: id }),
+      };
       for (const l of reachable[id].lines) if (l.subRecipeId) queue.push(l.subRecipeId);
     }
-    catalogs.push({ weekId: week.id, year: week.year, number: week.number, startDate: week.startDate, endDate: week.endDate, dishes, subRecipes: reachable });
+    catalogs.push({
+      weekId: week.id,
+      year: week.year,
+      number: week.number,
+      startDate: week.startDate,
+      endDate: week.endDate,
+      dishes,
+      subRecipes: reachable,
+    });
   }
   return catalogs;
 }
@@ -149,7 +163,12 @@ function importStructure(lines: readonly LineRow[], subRecipes: readonly SubReci
   const asLine = (l: LineRow) => ({ label: l.label, costEur: l.costEur, subRecipeId: l.componentSubRecipeId });
   return {
     linesOfRecipe: (recipeId: string) => lines.filter((l) => l.recipeId === recipeId).map(asLine),
-    subRecipes: new Map(subRecipes.map((sr) => [sr.id, { totalCostEur: sr.totalCostEur, lines: lines.filter((l) => l.subRecipeId === sr.id).map(asLine) }])),
+    subRecipes: new Map(
+      subRecipes.map((sr) => [
+        sr.id,
+        { totalCostEur: sr.totalCostEur, lines: lines.filter((l) => l.subRecipeId === sr.id).map(asLine) },
+      ]),
+    ),
   };
 }
 
@@ -161,14 +180,23 @@ function dishCosts(r: typeof s.weekRecipes.$inferSelect, structure: ReturnType<t
   const snack = isSnackCode(r.code);
   const mould = snack ? 0 : mouldCostOf(structure.linesOfRecipe(r.id), structure.subRecipes, isMouldLabel);
   return {
-    cost: dishUnitCost(r.totalCostEur != null ? Math.round((r.totalCostEur - mould) * 10_000) / 10_000 : null, portionWeightG(r)),
+    cost: dishUnitCost(
+      r.totalCostEur != null ? Math.round((r.totalCostEur - mould) * 10_000) / 10_000 : null,
+      portionWeightG(r),
+    ),
     mouldPerPortionEur: mould,
     portionKind: snack ? null : r.code.startsWith("PJ") ? ("petit_dejeuner" as const) : ("plat" as const),
   };
 }
 
 /** Coût d'une sous-recette rapporté à son poids net (à défaut, à sa quantité de référence en g ou kg). */
-const subRecipeCost = (sr: { totalCostEur: number | null; netQuantity: number | null; netUnit: string | null; referenceQuantity: number | null; referenceUnit: string | null }) =>
+const subRecipeCost = (sr: {
+  totalCostEur: number | null;
+  netQuantity: number | null;
+  netUnit: string | null;
+  referenceQuantity: number | null;
+  referenceUnit: string | null;
+}) =>
   subRecipeUnitCost(
     sr.totalCostEur,
     sr.netQuantity != null && sr.netUnit
@@ -188,7 +216,8 @@ const itemCost = (cost: UnitCost, mould: boolean): ResolvedWeekItem["cost"] => (
 });
 
 /** Poids d'une portion : celui du rendement (« (315.1 g) »), sinon la « Recette totale » d'une recette. */
-const portionWeightG = (r: { portionWeightG: number | null; totalWeightG: number | null }) => r.portionWeightG ?? r.totalWeightG;
+const portionWeightG = (r: { portionWeightG: number | null; totalWeightG: number | null }) =>
+  r.portionWeightG ?? r.totalWeightG;
 
 export interface ResolvedWeekItem {
   category: (typeof s.productCategoryEnum.enumValues)[number];
@@ -252,7 +281,18 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
   if (kind === "sous_recette") {
     const [sr] = await db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.id, id));
     if (!sr) return null;
-    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, densityKgPerL: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false, cost: itemCost(subRecipeCost(sr), isMouldLabel(sr.name)) };
+    return {
+      category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette",
+      name: sr.name,
+      code: null,
+      unitWeightKg: null,
+      densityKgPerL: null,
+      refs: { ...none, weekSubRecipeId: sr.id },
+      importId: sr.importId,
+      teamId: null,
+      snack: false,
+      cost: itemCost(subRecipeCost(sr), isMouldLabel(sr.name)),
+    };
   }
   const [l] = await db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.id, id));
   if (!l || l.isSubRecipe) return null;

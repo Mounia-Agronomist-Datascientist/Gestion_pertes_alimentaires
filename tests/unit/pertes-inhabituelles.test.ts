@@ -19,10 +19,19 @@ describe("pertes inhabituelles", () => {
   });
 
   it("compare en kg quand la production manque", () => {
-    expect(checkUnusual(w(15), [w(10), w(10), w(10), w(10)], settings)).toEqual({ measure: "kg", value: 15, reference: 10, rate: 0.5, referenceWeeks: 4 });
+    expect(checkUnusual(w(15), [w(10), w(10), w(10), w(10)], settings)).toEqual({
+      measure: "kg",
+      value: 15,
+      reference: 10,
+      rate: 0.5,
+      referenceWeeks: 4,
+    });
     expect(checkUnusual(w(14.9), [w(10), w(10)], settings)).toBeNull();
     // Production connue cette semaine mais pas assez de semaines de référence avec production : en kg.
-    expect(checkUnusual(w(15, 10_000), [w(10, 10_000), w(10), w(10)], settings)).toMatchObject({ measure: "kg", referenceWeeks: 3 });
+    expect(checkUnusual(w(15, 10_000), [w(10, 10_000), w(10), w(10)], settings)).toMatchObject({
+      measure: "kg",
+      referenceWeeks: 3,
+    });
   });
 
   it("n'alerte pas sous 5 kg ni sans 2 semaines de référence concernées", () => {
@@ -33,6 +42,12 @@ describe("pertes inhabituelles", () => {
   });
 
   it("signale une hausse depuis zéro sans pourcentage", () => {
-    expect(checkUnusual(w(6), [w(0), w(0)], settings)).toEqual({ measure: "kg", value: 6, reference: 0, rate: null, referenceWeeks: 2 });
+    expect(checkUnusual(w(6), [w(0), w(0)], settings)).toEqual({
+      measure: "kg",
+      value: 6,
+      reference: 0,
+      rate: null,
+      referenceWeeks: 2,
+    });
   });
 });

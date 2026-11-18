@@ -1,5 +1,20 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, integer, jsonb, numeric, pgEnum, pgTable, smallint, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { teams } from "./organisation";
 import { productionWeeks } from "./production-weeks";
@@ -25,7 +40,10 @@ export const weeklyImports = pgTable(
     planFileName: text("plan_file_name").notNull(),
     planSheetName: text("plan_sheet_name").notNull(),
     /** Anomalies affichées au moment de la validation (conservées telles quelles). */
-    anomalies: jsonb("anomalies").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    anomalies: jsonb("anomalies")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id),
@@ -35,7 +53,9 @@ export const weeklyImports = pgTable(
   (t) => [
     unique("weekly_imports_week_version_key").on(t.productionWeekId, t.version),
     // Une seule version en vigueur par semaine.
-    uniqueIndex("weekly_imports_one_valid_per_week").on(t.productionWeekId).where(sql`${t.status} = 'validee'`),
+    uniqueIndex("weekly_imports_one_valid_per_week")
+      .on(t.productionWeekId)
+      .where(sql`${t.status} = 'validee'`),
   ],
 );
 
@@ -63,7 +83,10 @@ export const weekRecipes = pgTable(
     totalWeightG: numeric("total_weight_g", { precision: 12, scale: 3, mode: "number" }),
     totalCostEur: numeric("total_cost_eur", { precision: 10, scale: 4, mode: "number" }),
   },
-  (t) => [unique("week_recipes_import_code_key").on(t.importId, t.code), index("week_recipes_team_idx").on(t.importId, t.teamId)],
+  (t) => [
+    unique("week_recipes_import_code_key").on(t.importId, t.code),
+    index("week_recipes_team_idx").on(t.importId, t.teamId),
+  ],
 );
 
 /** Sous-recette d'une semaine, identifiée par son nom normalisé (pas de code Melba). */
@@ -136,7 +159,10 @@ export const productionCounts = pgTable(
     status: weeklyImportStatusEnum("status").notNull().default("validee"),
     fileName: text("file_name").notNull(),
     sheetName: text("sheet_name").notNull(),
-    anomalies: jsonb("anomalies").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    anomalies: jsonb("anomalies")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id),
@@ -145,7 +171,9 @@ export const productionCounts = pgTable(
   },
   (t) => [
     unique("production_counts_week_version_key").on(t.productionWeekId, t.version),
-    uniqueIndex("production_counts_one_valid_per_week").on(t.productionWeekId).where(sql`${t.status} = 'validee'`),
+    uniqueIndex("production_counts_one_valid_per_week")
+      .on(t.productionWeekId)
+      .where(sql`${t.status} = 'validee'`),
   ],
 );
 
@@ -159,5 +187,8 @@ export const productionCountLines = pgTable(
     code: text("code").notNull(),
     madeBarquettes: integer("made_barquettes").notNull(),
   },
-  (t) => [unique("production_count_lines_count_code_key").on(t.countId, t.code), check("production_count_lines_positive", sql`${t.madeBarquettes} >= 0`)],
+  (t) => [
+    unique("production_count_lines_count_code_key").on(t.countId, t.code),
+    check("production_count_lines_positive", sql`${t.madeBarquettes} >= 0`),
+  ],
 );

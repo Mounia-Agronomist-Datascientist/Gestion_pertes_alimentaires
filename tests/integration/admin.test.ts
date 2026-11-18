@@ -29,11 +29,30 @@ describe("administration", () => {
     t = await createTestDb();
     await seed(t.db);
     teamH = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "H")))[0]!.id;
-    week = (await t.db.select().from(s.productionWeeks).where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 47))))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
+    week = (
+      await t.db
+        .select()
+        .from(s.productionWeeks)
+        .where(and(eq(s.productionWeeks.year, 2026), eq(s.productionWeeks.number, 47)))
+    )[0]!.id;
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
     teamUser = await loadAuthUser(
       t.db,
-      await createAccount(t.db, { login: "equipe-h", displayName: "Chef d'équipe – Équipe Turquoise (H)", roleCode: "equipe", teamId: teamH, password: "mot-de-passe-equipe" }),
+      await createAccount(t.db, {
+        login: "equipe-h",
+        displayName: "Chef d'équipe – Équipe Turquoise (H)",
+        roleCode: "equipe",
+        teamId: teamH,
+        password: "mot-de-passe-equipe",
+      }),
     );
   });
 
@@ -57,9 +76,15 @@ describe("administration", () => {
     });
 
     it("refuse un identifiant déjà pris, un compte équipe sans équipe, un responsable sans zone", async () => {
-      await expect(createAccountByAdmin(t.db, admin, { login: "admin", displayName: "Doublon", roleCode: "admin" })).rejects.toThrow(/existe déjà/);
-      await expect(createAccountByAdmin(t.db, admin, { login: "equipe-x", displayName: "Équipe X", roleCode: "equipe" })).rejects.toThrow(/équipe/);
-      await expect(createAccountByAdmin(t.db, admin, { login: "resp-x", displayName: "Responsable X", roleCode: "resp_zone" })).rejects.toThrow(/zone/);
+      await expect(
+        createAccountByAdmin(t.db, admin, { login: "admin", displayName: "Doublon", roleCode: "admin" }),
+      ).rejects.toThrow(/existe déjà/);
+      await expect(
+        createAccountByAdmin(t.db, admin, { login: "equipe-x", displayName: "Équipe X", roleCode: "equipe" }),
+      ).rejects.toThrow(/équipe/);
+      await expect(
+        createAccountByAdmin(t.db, admin, { login: "resp-x", displayName: "Responsable X", roleCode: "resp_zone" }),
+      ).rejects.toThrow(/zone/);
     });
 
     it("réinitialise un mot de passe et déconnecte tous les appareils du compte", async () => {
@@ -87,13 +112,20 @@ describe("administration", () => {
 
     it("journalise les opérations sur les comptes", async () => {
       const actions = (await t.db.select().from(s.auditLog).where(eq(s.auditLog.entity, "user"))).map((a) => a.action);
-      expect(actions).toEqual(expect.arrayContaining(["create", "password_reset", "deactivate", "activate", "sessions_revoked"]));
+      expect(actions).toEqual(
+        expect.arrayContaining(["create", "password_reset", "deactivate", "activate", "sessions_revoked"]),
+      );
     });
   });
 
   describe("équipes inactives pour une semaine", () => {
     it("désactive puis réactive une équipe pour une semaine, sans la supprimer", async () => {
-      await setTeamWeekActive(t.db, admin, { teamId: teamH, productionWeekId: week, active: false, note: "Période creuse" });
+      await setTeamWeekActive(t.db, admin, {
+        teamId: teamH,
+        productionWeekId: week,
+        active: false,
+        note: "Période creuse",
+      });
       let teams = await listTeamsForWeek(t.db, admin, week);
       expect(teams.find((x) => x.letter === "H")).toMatchObject({ activeThisWeek: false, note: "Période creuse" });
       expect(teams).toHaveLength(8);
@@ -117,8 +149,25 @@ describe("causes", () => {
     cuisine = await zoneIdByCode(t.db, "CUISINE");
     plonge = await zoneIdByCode(t.db, "PLONGE");
     const teamA = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "A")))[0]!.id;
-    admin = await loadAuthUser(t.db, await createAccount(t.db, { login: "admin", displayName: "Administration", roleCode: "admin", password: "mot-de-passe-admin" }));
-    team = await loadAuthUser(t.db, await createAccount(t.db, { login: "equipe-a", displayName: "Équipe A", roleCode: "equipe", teamId: teamA, password: "mot-de-passe-equipe" }));
+    admin = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "admin",
+        displayName: "Administration",
+        roleCode: "admin",
+        password: "mot-de-passe-admin",
+      }),
+    );
+    team = await loadAuthUser(
+      t.db,
+      await createAccount(t.db, {
+        login: "equipe-a",
+        displayName: "Équipe A",
+        roleCode: "equipe",
+        teamId: teamA,
+        password: "mot-de-passe-equipe",
+      }),
+    );
   });
 
   afterAll(async () => {
@@ -140,14 +189,20 @@ describe("causes", () => {
     expect(await activeCauseNames(cuisine)).not.toContain("Bac renversé au transport");
     expect(await countPendingProposals(t.db)).toBe(1);
 
-    await reviewCause(t.db, admin, proposed.id, { accept: true, name: "Bac renversé pendant le transport", zoneIds: [cuisine, plonge] });
+    await reviewCause(t.db, admin, proposed.id, {
+      accept: true,
+      name: "Bac renversé pendant le transport",
+      zoneIds: [cuisine, plonge],
+    });
     expect(await activeCauseNames(cuisine)).toContain("Bac renversé pendant le transport");
     expect(await activeCauseNames(plonge)).toContain("Bac renversé pendant le transport");
     expect(await countPendingProposals(t.db)).toBe(0);
   });
 
   it("refuse les doublons de formulation (accents, casse, ponctuation)", async () => {
-    await expect(proposeCause(t.db, team, { name: "erreur de PREPARATION !", zoneId: cuisine })).rejects.toThrow(/existe déjà/);
+    await expect(proposeCause(t.db, team, { name: "erreur de PREPARATION !", zoneId: cuisine })).rejects.toThrow(
+      /existe déjà/,
+    );
   });
 
   it("une proposition rejetée ne bloque pas une nouvelle proposition du même nom", async () => {

@@ -22,7 +22,8 @@ function visibility(user: AuthUser): SQL | undefined | null {
   if (can(user, "alerts.read.all") || can(user, "stats.compare_teams")) return undefined;
   const parts: SQL[] = [];
   if (user.teamId) parts.push(eq(s.lossAlerts.teamId, user.teamId));
-  if (can(user, "declaration.read.zone") && user.zoneIds.length) parts.push(and(eq(s.lossAlerts.scope, "zone"), inArray(s.lossAlerts.subjectKey, [...user.zoneIds]))!);
+  if (can(user, "declaration.read.zone") && user.zoneIds.length)
+    parts.push(and(eq(s.lossAlerts.scope, "zone"), inArray(s.lossAlerts.subjectKey, [...user.zoneIds]))!);
   return parts.length ? or(...parts)! : null;
 }
 
@@ -48,7 +49,11 @@ export interface LossAlertView {
 }
 
 /** Alertes visibles, de la semaine la plus récente à la plus ancienne. */
-export async function listLossAlerts(db: Db, user: AuthUser, options: { unseenOnly?: boolean; limit?: number } = {}): Promise<LossAlertView[]> {
+export async function listLossAlerts(
+  db: Db,
+  user: AuthUser,
+  options: { unseenOnly?: boolean; limit?: number } = {},
+): Promise<LossAlertView[]> {
   const scope = visibility(user);
   if (scope === null) return [];
   const a = s.lossAlerts;
@@ -82,10 +87,17 @@ export async function listLossAlerts(db: Db, user: AuthUser, options: { unseenOn
 export async function markLossAlertSeen(db: Db, user: AuthUser, alertId: string, now = new Date()): Promise<void> {
   const scope = visibility(user);
   if (scope === null) throw new ForbiddenError();
-  const [alert] = await db.select({ id: s.lossAlerts.id, seenAt: s.lossAlerts.seenAt }).from(s.lossAlerts).where(and(eq(s.lossAlerts.id, alertId), scope));
+  const [alert] = await db
+    .select({ id: s.lossAlerts.id, seenAt: s.lossAlerts.seenAt })
+    .from(s.lossAlerts)
+    .where(and(eq(s.lossAlerts.id, alertId), scope));
   if (!alert) throw new ForbiddenError("Alerte introuvable");
   await db.insert(s.lossAlertViews).values({ alertId, userId: user.id, seenAt: now }).onConflictDoNothing();
-  if (!alert.seenAt) await db.update(s.lossAlerts).set({ seenAt: now, seenBy: user.id }).where(and(eq(s.lossAlerts.id, alertId), isNull(s.lossAlerts.seenAt)));
+  if (!alert.seenAt)
+    await db
+      .update(s.lossAlerts)
+      .set({ seenAt: now, seenBy: user.id })
+      .where(and(eq(s.lossAlerts.id, alertId), isNull(s.lossAlerts.seenAt)));
 }
 
 /** Note comme vues toutes les alertes visibles et non vues de ce compte. */
@@ -106,7 +118,12 @@ export const alertSettingsSchema = z.object({
 });
 
 /** Modifie les seuils (administration), avec trace dans le journal d'audit. */
-export async function updateAlertSettings(db: Db, admin: AuthUser, raw: z.input<typeof alertSettingsSchema>, now = new Date()): Promise<AlertSettings> {
+export async function updateAlertSettings(
+  db: Db,
+  admin: AuthUser,
+  raw: z.input<typeof alertSettingsSchema>,
+  now = new Date(),
+): Promise<AlertSettings> {
   requirePermission(admin, "referentiel.manage");
   const parsed = alertSettingsSchema.safeParse(raw);
   if (!parsed.success) throw new AlertSettingsError(parsed.error.issues[0]?.message ?? "Valeurs invalides");
@@ -121,6 +138,14 @@ export async function updateAlertSettings(db: Db, admin: AuthUser, raw: z.input<
     .insert(s.alertSettings)
     .values({ id: 1, ...after, updatedAt: now, updatedBy: admin.id })
     .onConflictDoUpdate({ target: s.alertSettings.id, set: { ...after, updatedAt: now, updatedBy: admin.id } });
-  await writeAudit(db, { userId: admin.id, action: "update", entity: "alert_settings", entityId: null, before, after, occurredAt: now });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "update",
+    entity: "alert_settings",
+    entityId: null,
+    before,
+    after,
+    occurredAt: now,
+  });
   return after;
 }

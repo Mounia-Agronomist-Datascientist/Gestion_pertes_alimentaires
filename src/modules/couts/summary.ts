@@ -19,7 +19,15 @@ export interface CostTotals {
   netEur: number;
 }
 
-const empty = (): CostTotals => ({ materialEur: 0, packagingEur: 0, labourEur: 0, indirectEur: 0, grossEur: 0, recoveredEur: 0, netEur: 0 });
+const empty = (): CostTotals => ({
+  materialEur: 0,
+  packagingEur: 0,
+  labourEur: 0,
+  indirectEur: 0,
+  grossEur: 0,
+  recoveredEur: 0,
+  netEur: 0,
+});
 
 /**
  * Coût brut d'une déclaration : celui figé à la saisie ; pour une perte saisie avant le coût brut (Phase 2), son
@@ -48,9 +56,16 @@ export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: 
     db
       .select()
       .from(s.lossDeclarations)
-      .where(and(eq(s.lossDeclarations.productionWeekId, productionWeekId), inArray(s.lossDeclarations.status, ["validee", "corrigee"]))),
+      .where(
+        and(
+          eq(s.lossDeclarations.productionWeekId, productionWeekId),
+          inArray(s.lossDeclarations.status, ["validee", "corrigee"]),
+        ),
+      ),
     db.select({ id: s.zones.id, name: s.zones.name, order: s.zones.displayOrder }).from(s.zones),
-    db.select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName, order: s.teams.displayOrder }).from(s.teams),
+    db
+      .select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName, order: s.teams.displayOrder })
+      .from(s.teams),
   ]);
 
   const totals = empty();
@@ -63,7 +78,8 @@ export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: 
     kg += d.netKg ?? 0;
     if (grossOf(d) == null && d.recoveredEur == null) continue;
     valued++;
-    if ((d.costDetails as { packagingComplete?: boolean | null } | null)?.packagingComplete === false) packagingIncomplete++;
+    if ((d.costDetails as { packagingComplete?: boolean | null } | null)?.packagingComplete === false)
+      packagingIncomplete++;
     add(totals, d);
     add(byZone.get(d.zoneId) ?? byZone.set(d.zoneId, empty()).get(d.zoneId)!, d);
     if (d.teamId) add(byTeam.get(d.teamId) ?? byTeam.set(d.teamId, empty()).get(d.teamId)!, d);

@@ -40,7 +40,10 @@ export async function submitCorrection(input: {
 }): Promise<SubmitResult> {
   const user = await requireUser();
   return run(() =>
-    correctDeclaration(db, user, input.id, input.payload, { reason: input.reason, expectedRevision: input.expectedRevision }),
+    correctDeclaration(db, user, input.id, input.payload, {
+      reason: input.reason,
+      expectedRevision: input.expectedRevision,
+    }),
   );
 }
 
@@ -59,7 +62,11 @@ export async function submitBatch(payloads: unknown[]): Promise<BatchResult> {
   }
 }
 
-export async function proposeCauseAction(input: { name: string; description: string; zoneId: string }): Promise<{ ok: boolean; error?: string }> {
+export async function proposeCauseAction(input: {
+  name: string;
+  description: string;
+  zoneId: string;
+}): Promise<{ ok: boolean; error?: string }> {
   const user = await requireUser();
   try {
     await proposeCause(db, user, input);
@@ -76,7 +83,12 @@ export async function proposeCauseAction(input: { name: string; description: str
  */
 export async function sendQueued(kind: "une" | "serie", payloads: unknown[]): Promise<SendResult> {
   const user = await getCurrentUser();
-  if (!user || user.mustChangePassword) return { ok: false, error: "Reconnectez-vous pour envoyer les pertes gardées sur cet appareil.", authRequired: true };
+  if (!user || user.mustChangePassword)
+    return {
+      ok: false,
+      error: "Reconnectez-vous pour envoyer les pertes gardées sur cet appareil.",
+      authRequired: true,
+    };
   try {
     if (kind === "une") await createDeclaration(db, user, payloads[0]);
     else await createDeclarationBatch(db, user, payloads);

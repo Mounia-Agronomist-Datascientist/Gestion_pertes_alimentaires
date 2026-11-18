@@ -30,7 +30,14 @@ export default async function LabourPage() {
             id: z.id,
             name: z.name,
             current: z.current ? { hourlyCostEur: z.current.hourlyCostEur, unit: z.current.unit } : null,
-            versions: z.versions.map((v) => ({ id: v.id, hourlyCostEur: v.hourlyCostEur, unit: v.unit, validFrom: v.validFrom, validTo: v.validTo, source: v.source })),
+            versions: z.versions.map((v) => ({
+              id: v.id,
+              hourlyCostEur: v.hourlyCostEur,
+              unit: v.unit,
+              validFrom: v.validFrom,
+              validTo: v.validTo,
+              source: v.source,
+            })),
           }))}
       />
     </>

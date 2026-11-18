@@ -3,7 +3,12 @@ import { computeNetWeight, TareError, type GastroLine } from "@/domain/tares";
 
 // Valeurs du fichier « Multiplication des gastros » (novembre 2026).
 const gastroFin: Omit<GastroLine, "count"> = { containerTypeId: "G1", tareId: "t-G1", unitTareKg: 1.1, maxCount: 40 };
-const gastroProfond: Omit<GastroLine, "count"> = { containerTypeId: "G4", tareId: "t-G4", unitTareKg: 2.25, maxCount: 30 };
+const gastroProfond: Omit<GastroLine, "count"> = {
+  containerTypeId: "G4",
+  tareId: "t-G4",
+  unitTareKg: 2.25,
+  maxCount: 30,
+};
 const echelleClassique = { containerTypeId: "ECH", tareId: "t-ECH", unitTareKg: 21 };
 
 describe("calcul du poids net avec tares de gastros", () => {
@@ -45,7 +50,9 @@ describe("calcul du poids net avec tares de gastros", () => {
 
   it("refuse un poids brut inférieur ou égal à la tare", () => {
     expect(() => computeNetWeight({ grossKg: 3.3, gastros: [{ ...gastroFin, count: 3 }] })).toThrow(TareError);
-    expect(() => computeNetWeight({ grossKg: 2, gastros: [{ ...gastroFin, count: 3 }] })).toThrow(/supérieur à la tare/);
+    expect(() => computeNetWeight({ grossKg: 2, gastros: [{ ...gastroFin, count: 3 }] })).toThrow(
+      /supérieur à la tare/,
+    );
   });
 
   it("refuse un nombre de gastros non entier, nul ou au-delà de la capacité de l'échelle", () => {
@@ -61,7 +68,13 @@ describe("calcul du poids net avec tares de gastros", () => {
 
   it("refuse deux lignes du même type", () => {
     expect(() =>
-      computeNetWeight({ grossKg: 50, gastros: [{ ...gastroFin, count: 1 }, { ...gastroFin, count: 2 }] }),
+      computeNetWeight({
+        grossKg: 50,
+        gastros: [
+          { ...gastroFin, count: 1 },
+          { ...gastroFin, count: 2 },
+        ],
+      }),
     ).toThrow(/qu'une fois/);
   });
 });

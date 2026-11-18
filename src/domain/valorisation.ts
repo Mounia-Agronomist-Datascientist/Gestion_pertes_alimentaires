@@ -16,7 +16,11 @@ import { roundQuantity } from "./nombres";
 export const RECOVERY_GROUPS = [
   { key: "avec_recette", label: "Avec recette", kinds: ["vente"] },
   { key: "sans_recette", label: "Sans recette", kinds: ["destruction", "compost", "don", "personnel", "autre"] },
-  { key: "a_part", label: "À part : réutilisation et retours fournisseurs", kinds: ["reutilisation", "retour_fournisseur"] },
+  {
+    key: "a_part",
+    label: "À part : réutilisation et retours fournisseurs",
+    kinds: ["reutilisation", "retour_fournisseur"],
+  },
 ] as const;
 export type RecoveryGroup = (typeof RECOVERY_GROUPS)[number]["key"];
 
@@ -68,7 +72,8 @@ function add(t: RecoveryTotals, f: LossFact, d: LossFact["destinations"][number]
   else if (d.netKg == null) t.notConverted++;
   else t.foodKg += d.netKg;
   if (!t.cost) return;
-  if (f.cost && f.cost.grossEur > 0 && f.netQuantity > 0) t.cost.grossEur += (f.cost.grossEur * d.quantity) / f.netQuantity;
+  if (f.cost && f.cost.grossEur > 0 && f.netQuantity > 0)
+    t.cost.grossEur += (f.cost.grossEur * d.quantity) / f.netQuantity;
   else t.cost.unvalued++;
   if (d.kind === "vente") {
     if (d.recoveredEur == null) t.cost.recoveryMissing++;
@@ -97,18 +102,30 @@ function round(t: RecoveryTotals): RecoveryTotals {
 /** Totaux par destination et par groupe ; les destinations sont classées par kg décroissants. */
 export function recoverySummary(facts: readonly LossFact[], withCosts: boolean) {
   const byDestination = new Map<string, DestinationRecovery>();
-  const byGroup = Object.fromEntries(RECOVERY_GROUPS.map((g) => [g.key, empty(withCosts)])) as Record<RecoveryGroup, RecoveryTotals>;
+  const byGroup = Object.fromEntries(RECOVERY_GROUPS.map((g) => [g.key, empty(withCosts)])) as Record<
+    RecoveryGroup,
+    RecoveryTotals
+  >;
   for (const f of facts) {
     for (const d of f.destinations) {
       const group = recoveryGroupOf(d.kind);
-      const row = byDestination.get(d.destinationId) ?? byDestination.set(d.destinationId, { destinationId: d.destinationId, kind: d.kind, group, ...empty(withCosts) }).get(d.destinationId)!;
+      const row =
+        byDestination.get(d.destinationId) ??
+        byDestination
+          .set(d.destinationId, { destinationId: d.destinationId, kind: d.kind, group, ...empty(withCosts) })
+          .get(d.destinationId)!;
       add(row, f, d);
       add(byGroup[group], f, d);
     }
   }
   return {
-    destinations: [...byDestination.values()].map((r) => ({ ...r, ...round(r) })).sort((a, b) => b.foodKg - a.foodKg || b.lines - a.lines),
-    groups: Object.fromEntries(Object.entries(byGroup).map(([k, t]) => [k, round(t)])) as Record<RecoveryGroup, RecoveryTotals>,
+    destinations: [...byDestination.values()]
+      .map((r) => ({ ...r, ...round(r) }))
+      .sort((a, b) => b.foodKg - a.foodKg || b.lines - a.lines),
+    groups: Object.fromEntries(Object.entries(byGroup).map(([k, t]) => [k, round(t)])) as Record<
+      RecoveryGroup,
+      RecoveryTotals
+    >,
   };
 }
 
@@ -119,5 +136,7 @@ export function recoveredShare(t: RecoveryTotals): number | null {
 
 /** Recette par kg vendu (ventes dont la recette est saisie) ; null sans kg. */
 export function recoveryPerKg(t: RecoveryTotals): number | null {
-  return t.cost && t.cost.kgWithRecovery > 0 ? Math.round((t.cost.recoveredEur / t.cost.kgWithRecovery) * 100) / 100 : null;
+  return t.cost && t.cost.kgWithRecovery > 0
+    ? Math.round((t.cost.recoveredEur / t.cost.kgWithRecovery) * 100) / 100
+    : null;
 }

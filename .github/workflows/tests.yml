@@ -17,6 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      - run: npm run format:check
       - run: npm test
 
   # Parcours de bout en bout (docs/PLAN_TESTS.md §6) : application de production + base PostgreSQL jetable, Chrome

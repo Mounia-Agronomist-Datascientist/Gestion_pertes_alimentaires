@@ -25,9 +25,17 @@ export interface WeeklyRow {
   delta: number;
 }
 
-const valueOf = (by: RankBy) => (s: StatsSummary | undefined) => (s ? (by === "cout" ? (s.cost?.grossEur ?? 0) : s.foodKg) : 0);
+const valueOf = (by: RankBy) => (s: StatsSummary | undefined) =>
+  s ? (by === "cout" ? (s.cost?.grossEur ?? 0) : s.foodKg) : 0;
 
-function compareGroups(current: readonly LossFact[], previous: readonly LossFact[], keyOf: (f: LossFact) => string | null, labelOf: (key: string, facts: LossFact[]) => string, by: RankBy, withCosts: boolean): WeeklyRow[] {
+function compareGroups(
+  current: readonly LossFact[],
+  previous: readonly LossFact[],
+  keyOf: (f: LossFact) => string | null,
+  labelOf: (key: string, facts: LossFact[]) => string,
+  by: RankBy,
+  withCosts: boolean,
+): WeeklyRow[] {
   const value = valueOf(by);
   const before = new Map(rankGroups(previous, keyOf, withCosts, by).map((g) => [g.key, g.summary]));
   const groups = rankGroups(current, keyOf, withCosts, by);
@@ -50,7 +58,12 @@ function compareGroups(current: readonly LossFact[], previous: readonly LossFact
   });
 }
 
-export async function weeklySummary(db: Db, user: AuthUser, anchor: { year: number; number: number }, filters: StatsFilters) {
+export async function weeklySummary(
+  db: Db,
+  user: AuthUser,
+  anchor: { year: number; number: number },
+  filters: StatsFilters,
+) {
   const withCosts = can(user, "indicators.read");
   const week = { kind: "semaine" as const, ...anchor };
   const [comparison, previousPeriod, zones] = await Promise.all([
@@ -59,15 +72,39 @@ export async function weeklySummary(db: Db, user: AuthUser, anchor: { year: numb
     db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones).orderBy(asc(s.zones.displayOrder)),
   ]);
   if (!comparison) return null;
-  const [current, previous] = await Promise.all([loadFacts(db, user, week, filters), previousPeriod ? loadFacts(db, user, previousPeriod, filters) : Promise.resolve([])]);
+  const [current, previous] = await Promise.all([
+    loadFacts(db, user, week, filters),
+    previousPeriod ? loadFacts(db, user, previousPeriod, filters) : Promise.resolve([]),
+  ]);
   const zoneName = new Map(zones.map((z) => [z.id, z.name]));
   const summary = summarize(current, withCosts);
   // En euros pour les profils qui les voient, sauf semaine sans aucune perte chiffrée : alors en kg.
   const by: RankBy = withCosts && (summary.cost?.grossEur ?? 0) > 0 ? "cout" : "kg";
 
-  const byZone = compareGroups(current, previous, (f) => f.zoneId, (k) => zoneName.get(k) ?? "—", by, withCosts);
-  const byCause = compareGroups(current, previous, (f) => f.causeId, (_, list) => list[0]!.causeName, by, withCosts);
-  const byProduct = compareGroups(current, previous, (f) => f.productKey, (_, list) => productLabel(list[0]!.productName, list[0]!.productCode), by, withCosts);
+  const byZone = compareGroups(
+    current,
+    previous,
+    (f) => f.zoneId,
+    (k) => zoneName.get(k) ?? "—",
+    by,
+    withCosts,
+  );
+  const byCause = compareGroups(
+    current,
+    previous,
+    (f) => f.causeId,
+    (_, list) => list[0]!.causeName,
+    by,
+    withCosts,
+  );
+  const byProduct = compareGroups(
+    current,
+    previous,
+    (f) => f.productKey,
+    (_, list) => productLabel(list[0]!.productName, list[0]!.productCode),
+    by,
+    withCosts,
+  );
 
   // Points d'attention : les plus fortes hausses par rapport à la semaine précédente (zones, causes, produits).
   const rises = [
