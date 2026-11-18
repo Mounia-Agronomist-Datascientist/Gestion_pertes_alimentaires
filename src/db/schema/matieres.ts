@@ -98,6 +98,34 @@ export const supplierProducts = pgTable(
   (t) => [primaryKey({ columns: [t.productId, t.supplierId] })],
 );
 
+/**
+ * Colis fournisseur saisi à la main (étape 6.11, décision du 18/11/2026) : pour l'information seulement, gardé à côté
+ * du colis lu dans les bons (jamais remplacé par un bon), un par produit et par fournisseur.
+ */
+export const manualPackagings = pgTable(
+  "manual_packagings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id),
+    supplierId: uuid("supplier_id")
+      .notNull()
+      .references(() => suppliers.id),
+    supplierCode: text("supplier_code"),
+    packagingLabel: text("packaging_label").notNull(),
+    contentQuantity: numeric("content_quantity", { precision: 12, scale: 3, mode: "number" }),
+    contentUnit: text("content_unit"),
+    createdBy: uuid("created_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("manual_packagings_product_supplier_key").on(t.productId, t.supplierId),
+    check("manual_packagings_content_positive", sql`${t.contentQuantity} is null or ${t.contentQuantity} > 0`),
+  ],
+);
+
 // ─── Prix datés ──────────────────────────────────────────────────────────────
 
 /**

@@ -5,7 +5,7 @@
 > La même information, lisible par un programme : [progress.yaml](progress.yaml).
 > **Mettre à jour les deux fichiers à chaque commit d'étape.**
 
-Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.11 : Administration → Produits (fiche, prix saisis, lieu propre, fournisseurs)`
+Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.11 : colis fournisseur saisi à la main`
 
 ## En ce moment
 
@@ -44,7 +44,7 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.11 : Admi
 ## Bloquants et en attente
 
 - **Mise en ligne en attente** : crédits Netlify épuisés jusqu'au **08/12/2026**. Ensuite, dans l'ordre et après
-  une sauvegarde : migrations 0014 à 0027 → « Compléter depuis les tomes importés » (Administration → Produits)
+  une sauvegarde : migrations 0014 à 0028 → « Compléter depuis les tomes importés » (Administration → Produits)
   → dépôt du ZIP des bons de commande ([docs/pilote/PLAN_PILOTE.md](docs/pilote/PLAN_PILOTE.md)).
 - **Lieux de stockage des matières** : les 20 catégories Melba sont rangées en local (18/11) ; à refaire en ligne
   après la mise en ligne et le dépôt des bons (Administration → Lieux de stockage des matières).

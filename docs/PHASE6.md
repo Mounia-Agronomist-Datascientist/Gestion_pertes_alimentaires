@@ -412,7 +412,7 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
     celui de sa catégorie (« Celui de la catégorie (…) » par défaut). En Stockage, la saisie range une matière
     d'après son lieu propre, sinon celui de sa catégorie. Vérifié (sous-zone de la zone Stockage) et tracé.
   - **Colis fournisseurs** : pour chaque fournisseur, le dernier colis commandé, le code fournisseur et la date du
-    dernier bon livré, lus dans les bons (lecture seule).
+    dernier bon livré, lus dans les bons (lecture seule) ; et les **colis saisis à la main** (voir plus bas).
   - **Prix** : toutes les versions (tome avec sa semaine, bon de commande avec son numéro et son fournisseur, saisi à
     la main), la version en vigueur aujourd'hui signalée. **Saisir un prix** : nouvelle version datée (au kg et/ou à
     l'unité) qui compte comme un prix d'achat (règle R23) ; une seule par date. Un prix saisi à la main peut être
@@ -430,6 +430,12 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 - **Vérifié** : 1 test unitaire et 4 tests d'intégration (8 vrais bons, redéposés pour vérifier que les réglages
   restent) ; en local (Chrome piloté) : lieu propre enregistré, prix saisi, doublon refusé, prix retiré, lieu remis
   à vide ; liste filtrée par fournisseur.
-- **Pas fait, à décider** : saisir ou corriger un colis fournisseur à la main (les bons le donnent ; la décision du
-  17/11 prévoyait une saisie dans l'administration quand aucun fichier ne le donne).
+- **Colis saisis à la main** (décisions du 18/11/2026) : sur la fiche, « Saisir un colis » — fournisseur **connu ou
+  nouveau** (nom seulement, aucun contact ; il reçoit la clé que lui donneraient ses bons, qui le retrouvent ensuite
+  sans doublon), libellé du colis, code fournisseur, contenu et son unité (kg, g, L, cL, mL, pièces ; les deux ou
+  aucun). Un par produit et par fournisseur (une nouvelle saisie remplace la précédente). **Gardé à côté** du colis
+  lu dans les bons, jamais remplacé par un bon ; retirable. **Information seulement** : aucun effet sur le coût des
+  pertes ni sur la saisie. Comptés dans les matières d'un fournisseur et dans le filtre par fournisseur. Tracés dans
+  le journal d'audit. Migration **0028** (`manual_packagings`) ; 1 test d'intégration (bons redéposés : les deux
+  colis restent) et parcours vérifié en local (ajout, remplacement, refus d'un contenu sans unité, retrait).
 

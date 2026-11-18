@@ -31,7 +31,7 @@ import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { DeclarationError } from "@/modules/declarations/service";
-import { addManualPrice, ProductSheetError, removeManualPrice, renameSupplier, setProductPlacement } from "@/modules/matieres/fiche";
+import { addManualPrice, ProductSheetError, removeManualPackaging, removeManualPrice, renameSupplier, saveManualPackaging, setProductPlacement } from "@/modules/matieres/fiche";
 import { buildMaterialsFromTomes } from "@/modules/matieres/referentiel";
 import { setCategoriesStorage, StorageSettingError } from "@/modules/matieres/semaine";
 
@@ -480,6 +480,22 @@ export async function productSheetAction(_prev: ProductSheetState, formData: For
         message = `Prix enregistré à partir du ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${p.validFrom}T12:00:00Z`))}. Les pertes déjà enregistrées gardent leur coût.`;
         break;
       }
+      case "save_packaging": {
+        const r = await saveManualPackaging(db, admin, productId, {
+          supplierId: String(formData.get("supplierId") ?? "") || null,
+          newSupplier: String(formData.get("newSupplier") ?? ""),
+          supplierCode: String(formData.get("supplierCode") ?? ""),
+          packagingLabel: String(formData.get("packagingLabel") ?? ""),
+          contentQuantity: String(formData.get("contentQuantity") ?? ""),
+          contentUnit: String(formData.get("contentUnit") ?? "") || null,
+        });
+        message = r.replaced ? "Colis saisi remplacé pour ce fournisseur." : "Colis enregistré.";
+        break;
+      }
+      case "remove_packaging":
+        await removeManualPackaging(db, admin, productId, String(formData.get("packagingId") ?? ""));
+        message = "Colis saisi à la main retiré.";
+        break;
       case "remove_price":
         await removeManualPrice(db, admin, productId, String(formData.get("priceId") ?? ""));
         message = "Prix saisi à la main retiré. Les pertes déjà enregistrées gardent leur coût.";

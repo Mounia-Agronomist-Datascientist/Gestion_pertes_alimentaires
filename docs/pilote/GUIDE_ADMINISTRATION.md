@@ -36,7 +36,8 @@ Application **Pertes** · semaine de production du **jeudi au mercredi**.
   sa catégorie : lieu propre sur sa fiche (Administration → Produits → Fiche).
 - **Prix d'une matière** (Administration → Produits → Fiche) : voir toutes les versions (tome, bon, saisi à la
   main) ; saisir un prix daté quand le bon ou le tome est faux. Les pertes déjà enregistrées gardent leur coût.
-- **Fournisseurs** (Administration → Fournisseurs) : renommer, voir les matières de chacun.
+- **Fournisseurs** (Administration → Fournisseurs) : renommer, voir les matières de chacun. Un colis qu'aucun bon ne
+  donne : « Saisir un colis » sur la fiche du produit (pour l'information).
 - **Emballages et main-d'œuvre** : mettre à jour les coûts datés quand ils changent.
 - **Journal d'audit** : qui a fait quoi, avant/après.
 

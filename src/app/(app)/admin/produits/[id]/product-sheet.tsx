@@ -35,6 +35,18 @@ interface Props {
     contentUnit: string | null;
     lastDeliveryDate: string;
   }[];
+  manualPackagings: {
+    id: string;
+    supplierId: string;
+    supplier: string;
+    supplierCode: string | null;
+    packagingLabel: string;
+    contentQuantity: number | null;
+    contentUnit: string | null;
+    updatedOn: string;
+  }[];
+  suppliers: { id: string; name: string }[];
+  contentUnits: string[];
   prices: {
     id: string;
     source: "tome" | "bon_commande" | "manuel";
@@ -70,10 +82,21 @@ function Feedback({ state }: { state: { error?: string; message?: string } }) {
   return null;
 }
 
-export function ProductSheet({ today, units, categories, subzones, product: p, packagings, prices }: Props) {
+export function ProductSheet({ today, units, categories, subzones, product: p, packagings, manualPackagings, suppliers, contentUnits, prices }: Props) {
   const [productState, productFormAction, productPending] = useActionState<ProductActionState, FormData>(productAction, {});
   const [sheetState, sheetAction, sheetPending] = useActionState<ProductSheetState, FormData>(productSheetAction, {});
   const [editing, setEditing] = useState(false);
+  const [addingPackaging, setAddingPackaging] = useState(false);
+  const [packagingSupplier, setPackagingSupplier] = useState("");
+  // Après un enregistrement réussi, le formulaire est vidé par React : on le referme, remis à zéro.
+  const [seenState, setSeenState] = useState(sheetState);
+  if (seenState !== sheetState) {
+    setSeenState(sheetState);
+    if (sheetState.message) {
+      setAddingPackaging(false);
+      setPackagingSupplier("");
+    }
+  }
   const [categoryId, setCategoryId] = useState(p.materialCategoryId ?? "");
   const category = categories.find((c) => c.id === categoryId);
   const categoryPlace = subzones.find((z) => z.id === category?.storageSubzoneId)?.name ?? null;
@@ -166,22 +189,107 @@ export function ProductSheet({ today, units, categories, subzones, product: p, p
       {/* ─── Colis fournisseurs ──────────────────────────────────────── */}
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="text-lg font-semibold">Colis fournisseurs</h2>
-        {packagings.length === 0 ? (
-          <p className="text-sm text-slate-600">Jamais commandé dans un bon déposé.</p>
+        <p className="text-sm text-slate-600">
+          Lus dans les bons de commande (le dernier colis commandé chez chaque fournisseur), et saisis à la main. Les deux restent côte à côte :
+          un bon ne remplace jamais un colis saisi. Pour l&apos;information seulement, sans effet sur le coût des pertes.
+        </p>
+        {packagings.length === 0 && manualPackagings.length === 0 ? (
+          <p className="text-sm text-slate-600">Aucun colis connu.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-slate-100">
             {packagings.map((k) => (
-              <li key={k.supplierId} className="flex flex-col py-2">
+              <li key={`bc-${k.supplierId}`} className="flex flex-col py-2">
                 <span className="font-medium">{k.supplier}</span>
                 <span className="text-sm text-slate-600">
                   {k.packagingLabel ?? "Colis non précisé"}
-                  {k.supplierCode && ` · code ${k.supplierCode}`} · dernier bon livré le {fmtDay(k.lastDeliveryDate)}
+                  {k.supplierCode && ` · code ${k.supplierCode}`} · bon de commande, dernier livré le {fmtDay(k.lastDeliveryDate)}
                 </span>
+              </li>
+            ))}
+            {manualPackagings.map((k) => (
+              <li key={k.id} className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 flex-col">
+                  <span className="font-medium">{k.supplier}</span>
+                  <span className="text-sm text-slate-600">
+                    {k.packagingLabel}
+                    {k.contentQuantity != null && ` (${fmtNumber(k.contentQuantity)} ${k.contentUnit ?? ""})`}
+                    {k.supplierCode && ` · code ${k.supplierCode}`} · saisi à la main le {fmtDay(k.updatedOn)}
+                  </span>
+                </div>
+                <form action={sheetAction}>
+                  <input type="hidden" name="intent" value="remove_packaging" />
+                  <input type="hidden" name="productId" value={p.id} />
+                  <input type="hidden" name="packagingId" value={k.id} />
+                  <button type="submit" disabled={sheetPending} className="text-sm font-medium text-red-800 underline">
+                    Retirer
+                  </button>
+                </form>
               </li>
             ))}
           </ul>
         )}
-        <p className="text-sm text-slate-500">Lus dans les bons de commande : le dernier colis commandé chez chaque fournisseur.</p>
+        {!addingPackaging ? (
+          <button type="button" className="btn-secondary self-start" onClick={() => setAddingPackaging(true)}>
+            + Saisir un colis
+          </button>
+        ) : (
+          <form action={sheetAction} className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+            <input type="hidden" name="intent" value="save_packaging" />
+            <input type="hidden" name="productId" value={p.id} />
+            <h3 className="font-semibold">Saisir un colis</h3>
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">Fournisseur</span>
+              <select name="supplierId" className="field" value={packagingSupplier} onChange={(e) => setPackagingSupplier(e.target.value)}>
+                <option value="">— Nouveau fournisseur —</option>
+                {suppliers.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {!packagingSupplier && (
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Nom du nouveau fournisseur</span>
+                <input name="newSupplier" className="field" required minLength={2} placeholder="Nom seulement, sans contact" />
+              </label>
+            )}
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Colis</span>
+                <input name="packagingLabel" className="field" required minLength={2} placeholder="ex. carton de 6, sac 10 kg" />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Code fournisseur (facultatif)</span>
+                <input name="supplierCode" className="field" />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Contenu (facultatif)</span>
+                <input name="contentQuantity" inputMode="decimal" className="field" placeholder="ex. 10" />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Unité du contenu</span>
+                <select name="contentUnit" className="field" defaultValue="">
+                  <option value="">—</option>
+                  {contentUnits.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <p className="text-sm text-slate-500">Un colis déjà saisi pour ce fournisseur est remplacé.</p>
+            <div className="flex gap-2">
+              <button type="submit" disabled={sheetPending} className="btn-secondary">
+                Enregistrer le colis
+              </button>
+              <button type="button" className="px-4 text-slate-700" onClick={() => setAddingPackaging(false)}>
+                Fermer
+              </button>
+            </div>
+          </form>
+        )}
       </section>
 
       {/* ─── Prix ────────────────────────────────────────────────────── */}

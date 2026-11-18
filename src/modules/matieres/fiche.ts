@@ -9,6 +9,7 @@ import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { priceInForce } from "@/domain/matieres";
+import { tomeKey } from "@/modules/imports/tome/parse-tome";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 
@@ -20,7 +21,7 @@ export async function productSheet(db: Db, admin: AuthUser, productId: string, t
   if (!z.uuid().safeParse(productId).success) return null;
   const [product] = await db.select().from(s.products).where(eq(s.products.id, productId));
   if (!product) return null;
-  const [category, packagings, prices, orderLines] = await Promise.all([
+  const [category, packagings, manualPackagings, prices, orderLines] = await Promise.all([
     product.materialCategoryId
       ? db.select().from(s.materialCategories).where(eq(s.materialCategories.id, product.materialCategoryId)).then((r) => r[0] ?? null)
       : Promise.resolve(null),
@@ -38,6 +39,21 @@ export async function productSheet(db: Db, admin: AuthUser, productId: string, t
       .innerJoin(s.suppliers, eq(s.supplierProducts.supplierId, s.suppliers.id))
       .where(eq(s.supplierProducts.productId, productId))
       .orderBy(desc(s.supplierProducts.lastDeliveryDate)),
+    db
+      .select({
+        id: s.manualPackagings.id,
+        supplierId: s.suppliers.id,
+        supplier: s.suppliers.name,
+        supplierCode: s.manualPackagings.supplierCode,
+        packagingLabel: s.manualPackagings.packagingLabel,
+        contentQuantity: s.manualPackagings.contentQuantity,
+        contentUnit: s.manualPackagings.contentUnit,
+        updatedAt: s.manualPackagings.updatedAt,
+      })
+      .from(s.manualPackagings)
+      .innerJoin(s.suppliers, eq(s.manualPackagings.supplierId, s.suppliers.id))
+      .where(eq(s.manualPackagings.productId, productId))
+      .orderBy(asc(s.suppliers.name)),
     db.select().from(s.productPrices).where(eq(s.productPrices.productId, productId)),
     db
       .select({ orderId: s.purchaseOrders.id, number: s.purchaseOrders.number, supplier: s.suppliers.name })
@@ -61,6 +77,7 @@ export async function productSheet(db: Db, admin: AuthUser, productId: string, t
     product,
     category,
     packagings,
+    manualPackagings,
     prices: prices
       .map((p) => ({
         id: p.id,
@@ -195,16 +212,20 @@ export async function removeManualPrice(db: Db, admin: AuthUser, productId: stri
 /** Fournisseurs des bons déposés, avec leur nombre de bons, de matières et leur dernière livraison. */
 export async function listSuppliers(db: Db, admin: AuthUser) {
   requirePermission(admin, "referentiel.manage");
-  const [suppliers, orders, materials] = await Promise.all([
+  const [suppliers, orders, fromOrders, fromManual] = await Promise.all([
     db.select().from(s.suppliers).orderBy(asc(s.suppliers.name)),
     db
       .select({ supplierId: s.purchaseOrders.supplierId, orders: count(), lastDelivery: max(s.purchaseOrders.deliveryDate) })
       .from(s.purchaseOrders)
       .groupBy(s.purchaseOrders.supplierId),
-    db.select({ supplierId: s.supplierProducts.supplierId, materials: count() }).from(s.supplierProducts).groupBy(s.supplierProducts.supplierId),
+    db.select({ supplierId: s.supplierProducts.supplierId, productId: s.supplierProducts.productId }).from(s.supplierProducts),
+    db.select({ supplierId: s.manualPackagings.supplierId, productId: s.manualPackagings.productId }).from(s.manualPackagings),
   ]);
   const ordersOf = new Map(orders.map((o) => [o.supplierId, o]));
-  const materialsOf = new Map(materials.map((m) => [m.supplierId, m.materials]));
+  // Matières d'un fournisseur : commandées dans ses bons ou avec un colis saisi à la main, une fois chacune.
+  const productsOf = new Map<string, Set<string>>();
+  for (const r of [...fromOrders, ...fromManual]) productsOf.set(r.supplierId, (productsOf.get(r.supplierId) ?? new Set()).add(r.productId));
+  const materialsOf = new Map([...productsOf].map(([id, set]) => [id, set.size]));
   return suppliers.map((x) => ({
     id: x.id,
     name: x.name,
@@ -228,10 +249,105 @@ export async function renameSupplier(db: Db, admin: AuthUser, supplierId: string
 
 /** Fournisseurs de chaque produit (filtre de la liste des produits). */
 export async function suppliersByProduct(db: Db) {
-  const rows = await db
-    .select({ productId: s.supplierProducts.productId, supplierId: s.supplierProducts.supplierId })
-    .from(s.supplierProducts);
+  const rows = await Promise.all([
+    db.select({ productId: s.supplierProducts.productId, supplierId: s.supplierProducts.supplierId }).from(s.supplierProducts),
+    db.select({ productId: s.manualPackagings.productId, supplierId: s.manualPackagings.supplierId }).from(s.manualPackagings),
+  ]);
   const map = new Map<string, string[]>();
-  for (const r of rows) map.set(r.productId, [...(map.get(r.productId) ?? []), r.supplierId]);
+  for (const r of rows.flat()) if (!map.get(r.productId)?.includes(r.supplierId)) map.set(r.productId, [...(map.get(r.productId) ?? []), r.supplierId]);
   return map;
+}
+
+// ─── Colis saisis à la main (décision du 18/11/2026) ───────────────────────────
+
+/** Unités du contenu d'un colis saisi (mêmes notations que les bons de commande). */
+export const PACKAGING_CONTENT_UNITS = ["kg", "g", "L", "cL", "mL", "pièce(s)"] as const;
+
+const optionalShortText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .transform((v) => v || null)
+    .nullable()
+    .optional();
+
+const manualPackagingSchema = z
+  .object({
+    supplierId: z.uuid().nullable().optional(),
+    /** Nouveau fournisseur : son nom seulement (aucun contact). */
+    newSupplier: optionalShortText(120),
+    supplierCode: optionalShortText(60),
+    packagingLabel: z.string().trim().min(2, "Décrivez le colis (ex. carton de 6, sac de 10 kg).").max(120),
+    contentQuantity: z.preprocess(
+      (v) => (v === "" || v == null ? null : typeof v === "string" ? Number(v.replace(",", ".").replace(/\s/g, "")) : v),
+      z.number({ message: "Contenu invalide" }).positive("Le contenu doit être positif").nullable(),
+    ),
+    contentUnit: z.enum(PACKAGING_CONTENT_UNITS).nullable().optional(),
+  })
+  .refine((p) => p.supplierId || (p.newSupplier && p.newSupplier.length >= 2), { message: "Choisissez le fournisseur ou tapez son nom." })
+  .refine((p) => (p.contentQuantity == null) === (p.contentUnit == null), { message: "Indiquez le contenu et son unité, ou ni l'un ni l'autre." });
+
+/**
+ * Colis saisi à la main pour un produit chez un fournisseur : ajouté, ou remplacé s'il existe déjà pour ce
+ * fournisseur. Gardé à côté du colis lu dans les bons, jamais remplacé par un bon. Information seulement.
+ * Un nouveau fournisseur reçoit la clé que lui donneraient ses bons : ses bons déposés ensuite le retrouvent.
+ */
+export async function saveManualPackaging(db: Db, admin: AuthUser, productId: string, raw: unknown) {
+  requirePermission(admin, "referentiel.manage");
+  const parsed = manualPackagingSchema.safeParse(raw);
+  if (!parsed.success) throw new ProductSheetError(parsed.error.issues[0]?.message ?? "Colis invalide.");
+  const p = parsed.data;
+  const [product] = await db.select({ id: s.products.id }).from(s.products).where(eq(s.products.id, productId));
+  if (!product) throw new ProductSheetError("Produit introuvable.");
+  return db.transaction(async (tx) => {
+    let supplierId = p.supplierId ?? null;
+    if (supplierId) {
+      const [found] = await tx.select({ id: s.suppliers.id }).from(s.suppliers).where(eq(s.suppliers.id, supplierId));
+      if (!found) throw new ProductSheetError("Fournisseur inconnu.");
+    } else {
+      const key = tomeKey(p.newSupplier!);
+      if (!key) throw new ProductSheetError("Nom de fournisseur invalide.");
+      const [existing] = await tx.select({ id: s.suppliers.id }).from(s.suppliers).where(eq(s.suppliers.key, key));
+      if (existing) supplierId = existing.id;
+      else {
+        const [created] = await tx.insert(s.suppliers).values({ name: p.newSupplier!, key }).returning();
+        await writeAudit(tx, { userId: admin.id, action: "create", entity: "supplier", entityId: created!.id, after: { name: created!.name } });
+        supplierId = created!.id;
+      }
+    }
+    const values = {
+      supplierCode: p.supplierCode ?? null,
+      packagingLabel: p.packagingLabel,
+      contentQuantity: p.contentQuantity,
+      contentUnit: p.contentUnit ?? null,
+    };
+    const [before] = await tx
+      .select()
+      .from(s.manualPackagings)
+      .where(and(eq(s.manualPackagings.productId, productId), eq(s.manualPackagings.supplierId, supplierId)));
+    const [saved] = before
+      ? await tx.update(s.manualPackagings).set({ ...values, updatedAt: new Date() }).where(eq(s.manualPackagings.id, before.id)).returning()
+      : await tx.insert(s.manualPackagings).values({ productId, supplierId, ...values, createdBy: admin.id }).returning();
+    await writeAudit(tx, { userId: admin.id, action: before ? "update" : "create", entity: "manual_packaging", entityId: saved!.id, before: before ?? null, after: saved });
+    return { packaging: saved!, replaced: before != null };
+  });
+}
+
+/** Retrait d'un colis saisi à la main (dépassé ou faux). Les colis lus dans les bons ne se retirent pas. */
+export async function removeManualPackaging(db: Db, admin: AuthUser, productId: string, packagingId: string) {
+  requirePermission(admin, "referentiel.manage");
+  if (!z.uuid().safeParse(packagingId).success) throw new ProductSheetError("Colis introuvable.");
+  const [before] = await db
+    .select()
+    .from(s.manualPackagings)
+    .where(and(eq(s.manualPackagings.id, packagingId), eq(s.manualPackagings.productId, productId)));
+  if (!before) throw new ProductSheetError("Colis introuvable.");
+  await db.delete(s.manualPackagings).where(eq(s.manualPackagings.id, packagingId));
+  await writeAudit(db, { userId: admin.id, action: "delete", entity: "manual_packaging", entityId: packagingId, before });
+}
+
+/** Fournisseurs proposés pour un colis saisi. */
+export async function supplierChoices(db: Db) {
+  return db.select({ id: s.suppliers.id, name: s.suppliers.name }).from(s.suppliers).orderBy(asc(s.suppliers.name));
 }

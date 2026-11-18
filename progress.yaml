@@ -2,7 +2,7 @@
 # Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
 
 mise_a_jour: 2026-11-18
-dernier_commit: "Étape 6.11 : Administration → Produits (fiche, prix saisis, lieu propre, fournisseurs)"
+dernier_commit: "Étape 6.11 : colis fournisseur saisi à la main"
 
 en_cours:
   phase: 6
@@ -33,9 +33,9 @@ etapes_phase_6:
   - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: faite, date: 2026-11-18 }
 
 base_de_donnees:
-  derniere_migration: "0027_lieu_stockage_produit"
+  derniere_migration: "0028_colis_saisis"
   production:
-    a_appliquer: "0014 à 0027"
+    a_appliquer: "0014 à 0028"
     puis:
       - "Compléter depuis les tomes importés (Administration → Produits)"
       - "Dépôt du ZIP des bons de commande"

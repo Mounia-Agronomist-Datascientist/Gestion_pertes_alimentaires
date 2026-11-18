@@ -7,7 +7,7 @@ import { referenceDensity, referenceDensityLabel } from "@/domain/densites";
 import { toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
-import { placementChoices, productSheet } from "@/modules/matieres/fiche";
+import { PACKAGING_CONTENT_UNITS, placementChoices, productSheet, supplierChoices } from "@/modules/matieres/fiche";
 import { ProductSheet } from "./product-sheet";
 
 export const metadata = { title: "Fiche produit — Administration" };
@@ -17,10 +17,11 @@ export default async function ProductSheetPage({ params }: { params: Promise<{ i
   const { id } = await params;
   const admin = await requireUser();
   const today = toProductionLocalDate(new Date());
-  const [sheet, choices, units] = await Promise.all([
+  const [sheet, choices, units, suppliers] = await Promise.all([
     productSheet(db, admin, id, today),
     placementChoices(db),
     db.select({ code: s.units.code, label: s.units.label }).from(s.units).where(eq(s.units.active, true)).orderBy(asc(s.units.code)),
+    supplierChoices(db),
   ]);
   if (!sheet) notFound();
   const { product: p } = sheet;
@@ -59,6 +60,9 @@ export default async function ProductSheetPage({ params }: { params: Promise<{ i
           storageSubzoneId: p.storageSubzoneId,
         }}
         packagings={sheet.packagings}
+        manualPackagings={sheet.manualPackagings.map(({ updatedAt, ...k }) => ({ ...k, updatedOn: toProductionLocalDate(updatedAt) }))}
+        suppliers={suppliers}
+        contentUnits={[...PACKAGING_CONTENT_UNITS]}
         prices={sheet.prices}
       />
     </>

@@ -9,7 +9,7 @@ import { loadAuthUser } from "@/modules/auth/service";
 import { parsePurchaseOrder } from "@/modules/imports/bons-commande/parse-bon";
 import type { PdfItem } from "@/modules/imports/tome/pdf-items";
 import { savePurchaseOrders } from "@/modules/matieres/bons-commande";
-import { addManualPrice, listSuppliers, placementChoices, ProductSheetError, productSheet, removeManualPrice, renameSupplier, setProductPlacement } from "@/modules/matieres/fiche";
+import { addManualPrice, listSuppliers, removeManualPackaging, saveManualPackaging, suppliersByProduct, placementChoices, ProductSheetError, productSheet, removeManualPrice, renameSupplier, setProductPlacement } from "@/modules/matieres/fiche";
 import { materialPriceAt } from "@/modules/matieres/referentiel";
 import { materialsOfWeek } from "@/modules/matieres/semaine";
 import { createTestDb } from "../helpers/test-db";
@@ -111,4 +111,39 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     expect((await t.db.select().from(s.suppliers).where(eq(s.suppliers.id, first.id)))[0]!.name).toBe("Nom choisi");
     expect((await listSuppliers(t.db, admin)).length).toBe(suppliers.length);
   });
+
+  it("colis saisi à la main : fournisseur connu ou nouveau, gardé à côté du colis des bons", async () => {
+    const sheet0 = (await productSheet(t.db, admin, product.id, "2026-12-31"))!;
+    const known = sheet0.packagings[0]!;
+    const a = await saveManualPackaging(t.db, admin, product.id, { supplierId: known.supplierId, packagingLabel: "Carton de 6", contentQuantity: "6", contentUnit: "pièce(s)" });
+    expect(a.replaced).toBe(false);
+    const b = await saveManualPackaging(t.db, admin, product.id, { supplierId: known.supplierId, packagingLabel: "Carton de 12", contentQuantity: "12", contentUnit: "pièce(s)", supplierCode: "X12" });
+    expect(b.replaced).toBe(true);
+    expect(b.packaging.id).toBe(a.packaging.id);
+
+    // Nouveau fournisseur : nom seulement ; même clé que ses futurs bons, pas de doublon.
+    const before = (await t.db.select().from(s.suppliers)).length;
+    const n = await saveManualPackaging(t.db, admin, product.id, { newSupplier: "Ferme des Écureuils", packagingLabel: "Sac 10 kg", contentQuantity: "10", contentUnit: "kg" });
+    expect((await t.db.select().from(s.suppliers)).length).toBe(before + 1);
+    await saveManualPackaging(t.db, admin, product.id, { newSupplier: "ferme des ecureuils", packagingLabel: "Sac 5 kg", contentQuantity: "5", contentUnit: "kg" });
+    expect((await t.db.select().from(s.suppliers)).length).toBe(before + 1);
+    expect((await suppliersByProduct(t.db)).get(product.id)).toContain(n.packaging.supplierId);
+    expect((await listSuppliers(t.db, admin)).find((x) => x.id === n.packaging.supplierId)).toMatchObject({ orders: 0, materials: 1, lastDelivery: null });
+
+    await expect(saveManualPackaging(t.db, admin, product.id, { packagingLabel: "Carton" , contentQuantity: "" })).rejects.toThrow(/fournisseur/);
+    await expect(saveManualPackaging(t.db, admin, product.id, { supplierId: known.supplierId, packagingLabel: "Carton", contentQuantity: "6" })).rejects.toThrow(/unité/);
+    await expect(saveManualPackaging(t.db, admin, product.id, { supplierId: known.supplierId, packagingLabel: "", contentQuantity: "" })).rejects.toBeInstanceOf(ProductSheetError);
+
+    // Bons redéposés : le colis saisi reste, celui du bon aussi.
+    await savePurchaseOrders(t.db, admin, orders);
+    const sheet = (await productSheet(t.db, admin, product.id, "2026-12-31"))!;
+    expect(sheet.packagings.find((k) => k.supplierId === known.supplierId)?.packagingLabel).toBe(known.packagingLabel);
+    expect(sheet.manualPackagings.map((k) => k.packagingLabel).sort()).toEqual(["Carton de 12", "Sac 5 kg"]);
+
+    await removeManualPackaging(t.db, admin, product.id, b.packaging.id);
+    await expect(removeManualPackaging(t.db, admin, product.id, b.packaging.id)).rejects.toBeInstanceOf(ProductSheetError);
+    expect((await productSheet(t.db, admin, product.id, "2026-12-31"))!.manualPackagings).toHaveLength(1);
+    expect((await t.db.select().from(s.auditLog).where(eq(s.auditLog.entity, "manual_packaging"))).map((x) => x.action)).toEqual(["create", "update", "create", "update", "delete"]);
+  });
 });
+
