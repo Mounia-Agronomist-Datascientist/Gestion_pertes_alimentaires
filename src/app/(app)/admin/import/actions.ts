@@ -10,6 +10,7 @@ import { buildWeekImport } from "@/modules/imports/merge";
 import { importPayloadSchema } from "@/modules/imports/payload";
 import { SURPLUS_SOURCE_LABELS, saveSurplusImport, surplusPayloadSchema } from "@/modules/imports/surplus/service";
 import { ImportError, saveWeekImport } from "@/modules/imports/service";
+import { PurchaseOrderError, type PurchaseOrdersResult, savePurchaseOrders } from "@/modules/matieres/bons-commande";
 
 export interface ImportActionState {
   error?: string;
@@ -113,6 +114,25 @@ export async function importSurplusAction(_prev: ImportActionState, formData: Fo
     return { message: `${SURPLUS_SOURCE_LABELS[parsed.data.source]} enregistré : ${details.join(" · ")}.` };
   } catch (e) {
     if (e instanceof ImportError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+}
+
+export type PurchaseOrdersActionResult = { ok: true; result: PurchaseOrdersResult } | { ok: false; error: string };
+
+/**
+ * Enregistre un paquet de bons de commande lus dans le navigateur (docs/PHASE6.md, étape 6.8). Appelée en boucle
+ * par l'écran d'import : un dossier entier du Drive part par paquets de 40 bons.
+ */
+export async function savePurchaseOrdersAction(orders: unknown): Promise<PurchaseOrdersActionResult> {
+  const admin = await requireUser();
+  try {
+    const result = await savePurchaseOrders(db, admin, orders);
+    revalidatePath("/admin/import");
+    revalidatePath("/admin/produits");
+    return { ok: true, result };
+  } catch (e) {
+    if (e instanceof PurchaseOrderError || e instanceof ForbiddenError) return { ok: false, error: e.message };
     throw e;
   }
 }

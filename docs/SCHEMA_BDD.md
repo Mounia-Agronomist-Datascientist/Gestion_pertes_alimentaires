@@ -114,7 +114,17 @@ Matières tirées des tomes (Phase 6, étape 6.7) : `external_id` = `melba:<clé
 **product_prices** (Phase 6, étape 6.7) — versions datées du prix d'un produit : `id`, `product_id`, `source`
 (`tome`|`bon_commande`|`manuel`), `valid_from` (date), `unit` (unité du tome), `unit_weight_g`, `per_kg_eur`,
 `per_unit_eur` (au moins un des deux), `weekly_import_id` null, `created_by` null, `created_at`. Unicité
-(`product_id`,`source`,`valid_from`). Prix en vigueur : règle R23.
+(`product_id`,`source`,`valid_from`), `purchase_order_id` null (source `bon_commande`). Prix en vigueur : règle R23.
+
+**Bons de commande** (Phase 6, étape 6.8) — `suppliers` (`name`, `key` unique, `active` ; aucun contact) ;
+`material_categories` (catégorie Melba : `name`, `key` unique, `storage_subzone_id` null) ;
+`products.material_category_id` null ; `purchase_orders` (`number` unique, `supplier_id`, `supplier_label` (libellé
+Melba), `subject`, `week_number`, `production_week_id` null, `delivery_date`, `ordered_on`, `total_eur`,
+`file_name`, `warnings`, `version`, `imported_by`, `imported_at`) ; `purchase_order_lines` (`order_id`, `position`,
+`designation`, `key` (clé du tome), `product_id`, `supplier_code`, `material_category_id`, `quantity`,
+`packaging_label`, `content_quantity`, `content_unit`, `unit_price_eur`, `price_unit`, `total_eur`, `per_kg_eur`,
+`per_unit_eur`) ; `supplier_products` (PK `product_id`,`supplier_id` : `supplier_code`, conditionnement et
+contenance du dernier bon livré, `last_order_id`, `last_delivery_date`).
 
 **causes** — `id`, `code`, `name`, `description`, `is_other` (cause « Autres pertes », toujours disponible),
 `status` (`proposee`|`active`|`rejetee`|`inactive`), `proposed_by` FK users null, `proposed_at`,

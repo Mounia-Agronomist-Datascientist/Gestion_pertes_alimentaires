@@ -1,0 +1,51 @@
+/**
+ * Prix d'une ligne de bon de commande ramené au kg (ou à la pièce), docs/PHASE6.md étape 6.8.
+ * Jamais deviné : null quand le bon ne permet pas de le calculer (prix au litre, colis sans poids).
+ */
+import type { UnitCost } from "./couts";
+
+const fold = (t: string) =>
+  t
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+/** Grammes d'une contenance (« 5 kg », « 350 g », « 1 kgs », « 100 gr ») ; null pour un volume ou un nombre de pièces. */
+export function contentGrams(quantity: number | null, unit: string | null): number | null {
+  if (quantity == null || !unit) return null;
+  const u = fold(unit);
+  if (/^kgs?$/.test(u)) return quantity * 1000;
+  if (/^(g|gr|grs|grammes?)$/.test(u)) return quantity;
+  return null;
+}
+
+const isVolume = (unit: string) => /^(l|cl|ml|litres?)$/.test(fold(unit));
+
+export interface PurchaseLinePriceInput {
+  unitPriceEur: number;
+  priceUnit: string;
+  packaging: { label: string; contentQuantity: number | null; contentUnit: string | null } | null;
+}
+
+export function purchaseLinePrice(line: PurchaseLinePriceInput): UnitCost {
+  const none: UnitCost = { perKgEur: null, perUnitEur: null };
+  const round = (n: number) => Math.round(n * 10_000) / 10_000;
+  const unit = fold(line.priceUnit);
+  if (/^kgs?$/.test(unit)) return { perKgEur: round(line.unitPriceEur), perUnitEur: null };
+  if (/^(g|gr)$/.test(unit)) return { perKgEur: round(line.unitPriceEur * 1000), perUnitEur: null };
+  const p = line.packaging;
+  if (!p) return none;
+  // Prix d'une pièce du colis (« 10.28 € / poche 3l » pour un carton de 4 poches) : prix à la pièce.
+  if (p.contentUnit && unit === fold(p.contentUnit) && !isVolume(p.contentUnit) && contentGrams(1, p.contentUnit) == null) {
+    return { perKgEur: null, perUnitEur: round(line.unitPriceEur) };
+  }
+  // Prix du colis (« 32.50 € / Carton » pour un carton de 5 kg).
+  if (unit === fold(p.label) || fold(p.label).startsWith(unit)) {
+    const grams = contentGrams(p.contentQuantity, p.contentUnit);
+    if (grams) return { perKgEur: round((line.unitPriceEur / grams) * 1000), perUnitEur: null };
+    if (p.contentQuantity && p.contentUnit && !isVolume(p.contentUnit)) return { perKgEur: null, perUnitEur: round(line.unitPriceEur / p.contentQuantity) };
+  }
+  return none;
+}

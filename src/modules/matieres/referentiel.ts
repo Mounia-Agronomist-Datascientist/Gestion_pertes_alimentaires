@@ -45,7 +45,9 @@ export async function syncMaterialsFromImport(db: Db, importId: string, validFro
 
   const categories = ["matiere_premiere", "moule_plat_gratin"] as const;
   const existing = await db.select().from(s.products).where(inArray(s.products.category, [...categories]));
-  const byExternalId = new Map(existing.filter((p) => isMelbaExternalId(p.externalId)).map((p) => [p.externalId!, p]));
+  // Matières déjà connues (tomes ou bons de commande), quelle que soit leur catégorie.
+  const melba = await db.select().from(s.products).where(like(s.products.externalId, melbaExternalId("%")));
+  const byExternalId = new Map(melba.filter((p) => isMelbaExternalId(p.externalId)).map((p) => [p.externalId!, p]));
   // Produit saisi à la main avant le référentiel : rattaché à la matière Melba de même nom plutôt que doublé.
   const manualByKey = new Map(existing.filter((p) => !p.externalId).map((p) => [`${p.category}|${tomeKey(`${p.name} ${p.variant ?? ""}`)}`, p]));
 

@@ -281,7 +281,7 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 | Étape | Contenu | État |
 |---|---|---|
 | 6.7 | **Référentiel des matières premières** : matières (une par ingrédient Melba, rapprochées par le libellé) et prix datés tirés des tomes, construit à partir des tomes déjà importés. Les fournisseurs, catégories Melba, conditionnements et zones de stockage arrivent avec les bons de commande (6.8), qui les donnent. | Faite (17/11/2026) |
-| 6.8 | **Import des bons de commande** : dépôt de plusieurs PDF, lecture, aperçu (matières nouvelles, prix changés, lignes illisibles), validation ; un BC redéposé remplace l'ancien (même numéro). Reprise de l'historique du Drive. | Proposée |
+| 6.8 | **Import des bons de commande** : dépôt de plusieurs PDF ou du ZIP du dossier Drive, lecture, aperçu, enregistrement ; fournisseurs, catégories Melba, colis fournisseur et prix d'achat ; un BC redéposé remplace l'ancien (même numéro). | Faite (18/11/2026) |
 | 6.9 | **Recoupement de la semaine** : pour une semaine de production, ingrédients du tome face aux matières commandées — ingrédients sans commande, commandes absentes du tome, écarts de prix tome/BC. | Proposée |
 | 6.10 | **Saisie en Réception et en Stockage** : d'abord les matières de la semaine (commandées et du tome) et les encas, filtrées par sous-zone de stockage ; tout le référentiel par la recherche ; coût d'après la version en vigueur à la date de la perte. | Proposée |
 | 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; réglage catégorie → zone ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Proposée |
@@ -316,3 +316,36 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 - **Vérifié** : 7 tests unitaires et 5 tests d'intégration sur le vrai tome S45 ; base locale : 268 matières, 362
   prix pour S45 à S47, reprise relancée sans effet ; écran d'administration et saisie en Réception dans le
   navigateur.
+
+## Étape 6.8 — Import des bons de commande (faite le 18/11/2026)
+
+- **Dépôt** : Administration → Import → « Bons de commande fournisseurs ». Un ou plusieurs PDF, ou le **ZIP du
+  dossier du Drive** (clic droit → Télécharger) pour reprendre l'historique ; les autres fichiers du ZIP (fiches de
+  répartition, etc.) sont ignorés. Les PDF sont lus dans le navigateur ; seules les lignes lues sont envoyées, par
+  paquets de 40 bons. Aperçu : bons lus par fournisseur, PDF non lus avec le motif, bons à vérifier.
+- **Lecture** (`parse-bon.ts`) : colonnes retrouvées d'après l'en-tête du tableau (leur position varie d'un bon à
+  l'autre, en-tête sur 1 à 3 lignes) ; une ligne par quantité ; désignation, catégorie, conditionnement et prix
+  sur plusieurs lignes recollés. Contrôle : la somme des lignes doit égaler le total du bon, sinon « à vérifier ».
+  Les anciens bons (date dans l'en-tête, autre mise en page) sont lus aussi.
+- **Fournisseur** : celui du nom du fichier (`AAAAMMJJ_Fournisseur_Snn_BC numéro.pdf`, donc les noms des dossiers
+  du Drive), le libellé Melba de l'en-tête (« Pro à Pro (Neg) ») étant gardé sur le bon. **Aucune adresse e-mail
+  n'est lue ni gardée** (ni dans les données enregistrées, ni dans les fichiers de test).
+- **Semaine de production** : le numéro du nom du fichier (à défaut de l'objet), dans l'année la plus proche de la
+  date de livraison.
+- **Matière** : même clé que l'ingrédient du tome (libellé sans accents ni ponctuation) ; une désignation absente des
+  tomes crée la matière (source « bon de commande »), que le tome retrouvera ensuite. Un produit saisi à la main de
+  même nom est rattaché. **Catégorie Melba** renseignée sur la matière si elle n'en a pas (jamais remplacée).
+- **Colis fournisseur** (`supplier_products`) : code article, conditionnement et contenance du dernier bon livré
+  chez chaque fournisseur.
+- **Prix d'achat** ramené au kg (prix au kg ; prix du colis ÷ son poids) ou à la pièce (prix d'une pièce du colis,
+  prix du colis ÷ son nombre de pièces). **Jamais inventé** : un prix au litre ou dont l'unité ne correspond pas au
+  conditionnement ne donne pas de prix (le tome reste la référence). Nouvelle version datée du **jour de livraison**
+  quand il change (même tolérance de 0,5 %) ; deux bons livrés le même jour : le dernier lu fait foi.
+- **Bon redéposé** (même numéro) : lignes et prix remplacés, version du bon + 1.
+- Migration **0026** : `suppliers`, `material_categories` (avec une sous-zone de stockage, réglée à l'étape 6.11),
+  `purchase_orders`, `purchase_order_lines`, `supplier_products`, `products.material_category_id`,
+  `product_prices.purchase_order_id`.
+- **Vérifié** : 10 tests unitaires sur 8 vrais bons (APO, Guasch, Metro, Passion Froid, Pro à Pro dont un ancien de
+  S11, Rue Traversette, Transgourmet ; adresses e-mail remplacées) et 5 tests d'intégration ; en local, ZIP de ces
+  8 bons déposé dans l'écran (Chrome piloté) : 8 bons, 48 lignes, 7 fournisseurs, 42 lignes rattachées à un
+  ingrédient des tomes, 6 matières nouvelles, 47 prix d'achat.

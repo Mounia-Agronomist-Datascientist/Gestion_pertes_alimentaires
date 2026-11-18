@@ -309,3 +309,6 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Prix retenu pour une perte : le **dernier prix d'achat** (bon de commande) ou la dernière correction manuelle en
   vigueur à la date de la perte, à défaut le **coût du tome**. Il est figé sur la déclaration.
 - Un import ne change jamais le nom, l'état ni les réglages faits à la main.
+- Prix d'achat (bons de commande, 18/11/2026) : daté du **jour de livraison** ; ramené au kg (prix au kg, ou prix du
+  colis ÷ son poids) ou à la pièce ; jamais calculé pour un prix au litre ou une unité qui ne correspond pas au
+  conditionnement. Deux bons livrés le même jour : le dernier déposé fait foi. Un bon redéposé remplace ses prix.

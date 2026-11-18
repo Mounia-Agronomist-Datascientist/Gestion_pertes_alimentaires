@@ -5,9 +5,11 @@ import { alchimistesCoverage, listAlchimistesImports } from "@/modules/imports/a
 import { listProductionCounts } from "@/modules/imports/decompte/service";
 import { listSurplusImports, SURPLUS_SOURCE_LABELS, surplusCoverage } from "@/modules/imports/surplus/service";
 import { listWeekImports } from "@/modules/imports/service";
+import { purchaseOrdersOverview } from "@/modules/matieres/bons-commande";
 import { AlchimistesWizard } from "./alchimistes-wizard";
 import { DecompteWizard } from "./decompte-wizard";
 import { ImportWizard } from "./import-wizard";
+import { PurchaseOrdersWizard } from "./purchase-orders-wizard";
 import { SurplusWizard } from "./surplus-wizard";
 
 export const metadata = { title: "Import de la semaine — Administration" };
@@ -17,13 +19,14 @@ const dateTimeFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month:
 
 export default async function ImportPage() {
   const admin = await requireUser();
-  const [imports, counts, alchimistes, coverage, surplus, surplusCovered] = await Promise.all([
+  const [imports, counts, alchimistes, coverage, surplus, surplusCovered, purchases] = await Promise.all([
     listWeekImports(db, admin),
     listProductionCounts(db, admin),
     listAlchimistesImports(db, admin),
     alchimistesCoverage(db, admin),
     listSurplusImports(db, admin),
     surplusCoverage(db, admin),
+    purchaseOrdersOverview(db, admin),
   ]);
   return (
     <>
@@ -41,6 +44,34 @@ export default async function ImportPage() {
           .filter((i) => i.status === "validee")
           .map((i) => ({ year: i.weekYear, week: i.weekNumber, version: i.version }))}
       />
+
+      <PurchaseOrdersWizard />
+      {purchases.bySupplier.length > 0 && (
+        <details className="rounded-2xl bg-white p-4 shadow-sm">
+          <summary className="cursor-pointer font-semibold">
+            Bons de commande enregistrés : {purchases.bySupplier.reduce((n, x) => n + x.orders, 0)} bons, {purchases.bySupplier.length} fournisseurs,{" "}
+            {purchases.orderedMaterials} matières commandées
+          </summary>
+          <ul className="mt-2 flex flex-col gap-1 text-sm">
+            {purchases.bySupplier.map((x) => (
+              <li key={x.supplier}>
+                <span className="font-medium">{x.supplier}</span> · {x.orders} bon{x.orders > 1 && "s"} · livraisons du {shortDate(x.from)} au {shortDate(x.to)}
+              </li>
+            ))}
+          </ul>
+          <h3 className="mt-3 font-medium">Derniers déposés</h3>
+          <ul className="mt-1 flex flex-col gap-1 text-sm">
+            {purchases.recent.map((o) => (
+              <li key={o.id}>
+                {o.supplier} · n° {o.number} · {o.subject ?? (o.weekNumber ? `S${o.weekNumber}` : "")} · livraison {shortDate(o.deliveryDate)} · {o.lines} ligne
+                {o.lines > 1 && "s"}
+                {o.version > 1 && ` · version ${o.version}`}
+                {o.warnings.length > 0 && ` · ${o.warnings.length} point${o.warnings.length > 1 ? "s" : ""} à vérifier`}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       <DecompteWizard
         existing={counts.filter((c) => c.status === "validee").map((c) => ({ year: c.weekYear, week: c.weekNumber, version: c.version }))}

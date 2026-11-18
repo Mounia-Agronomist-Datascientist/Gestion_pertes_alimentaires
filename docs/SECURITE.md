@@ -63,4 +63,6 @@ modifications de référentiels, de comptes et de tares, imports. Valeurs avant/
 - Sauvegardes : voir ARCHITECTURE.md §7.
 - Données personnelles limitées (prénoms des responsables, identifiants de comptes) — pas de données
   individuelles de performance nominative en V1.
+- Fichiers déposés lus dans le navigateur, seules les données utiles envoyées : les contacts du fichier Linkee et
+  les adresses e-mail des bons de commande ne sont jamais lus ni gardés.
 - Dépendances : `npm audit` en CI, mises à jour régulières.

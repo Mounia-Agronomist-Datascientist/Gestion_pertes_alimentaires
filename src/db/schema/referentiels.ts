@@ -56,6 +56,19 @@ export const productCategoryEnum = pgEnum("product_category", [
   "moule_plat_gratin",
 ]);
 
+/**
+ * Catégories Melba des matières (« Viande », « Légume 4eme gamme: prêt à l'emploi »…), lues dans les bons de
+ * commande (docs/PHASE6.md, étape 6.8) ; chacune peut recevoir une sous-zone de stockage (étape 6.11).
+ */
+export const materialCategories = pgTable("material_categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  /** Nom sans accents, ponctuation ni majuscules : une catégorie par clé. */
+  key: text("key").notNull().unique(),
+  storageSubzoneId: uuid("storage_subzone_id").references(() => subzones.id),
+  ...timestamps,
+});
+
 export const products = pgTable(
   "products",
   {
@@ -72,6 +85,8 @@ export const products = pgTable(
     unitWeightKg: numeric("unit_weight_kg", { precision: 12, scale: 4, mode: "number" }),
     densityKgPerL: numeric("density_kg_per_l", { precision: 8, scale: 4, mode: "number" }),
     source: text("source").notNull().default("manuel"),
+    /** Catégorie Melba (bons de commande) ; jamais changée par un import une fois renseignée. */
+    materialCategoryId: uuid("material_category_id").references(() => materialCategories.id),
     active: boolean("active").notNull().default(true),
     ...timestamps,
   },
