@@ -2,12 +2,12 @@
 # Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
 
 mise_a_jour: 2026-11-18
-dernier_commit: "Étape 6.8 : import des bons de commande fournisseurs"
+dernier_commit: "Étape 6.9 : recoupement de la semaine (tome / bons de commande)"
 
 en_cours:
   phase: 6
-  derniere_etape: "6.8"
-  prochaine_etape: "6.9"
+  derniere_etape: "6.9"
+  prochaine_etape: "6.10"
   prochaine_etape_statut: proposee   # à valider avant de coder
 
 phases:
@@ -28,7 +28,7 @@ etapes_phase_6:
   - { id: "6.6", nom: "Ouverture sans réseau", statut: faite, date: 2026-11-17 }
   - { id: "6.7", nom: "Référentiel des matières premières", statut: faite, date: 2026-11-17 }
   - { id: "6.8", nom: "Import des bons de commande", statut: faite, date: 2026-11-18 }
-  - { id: "6.9", nom: "Recoupement de la semaine (tome / bons de commande)", statut: proposee }
+  - { id: "6.9", nom: "Recoupement de la semaine (tome / bons de commande)", statut: faite, date: 2026-11-18 }
   - { id: "6.10", nom: "Saisie en Réception et en Stockage", statut: proposee }
   - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: proposee }
 
@@ -48,6 +48,7 @@ en_attente:
   - sujet: "Essai pilote avec les équipes"
     raison: "préparé (docs/pilote/), pas encore lancé"
   - { sujet: "Mise en service des alertes", point: P4, raison: "après les essais des équipes" }
+  - { sujet: "Prix du tome et prix d'achat", point: "14", raison: "écarts forts (banane, basilic) : le tome compte-t-il l'épluchage ?" }
   - { sujet: "Facteurs carbone", point: "10", raison: "valider les facteurs et les rattachements « À revoir »" }
   - { sujet: "Main-d'œuvre et coûts indirects", point: "3", raison: "méthode d'imputation à définir" }
   - { sujet: "Estimation par contenant", point: P2, raison: "poids de référence à fournir" }

@@ -282,7 +282,7 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 |---|---|---|
 | 6.7 | **Référentiel des matières premières** : matières (une par ingrédient Melba, rapprochées par le libellé) et prix datés tirés des tomes, construit à partir des tomes déjà importés. Les fournisseurs, catégories Melba, conditionnements et zones de stockage arrivent avec les bons de commande (6.8), qui les donnent. | Faite (17/11/2026) |
 | 6.8 | **Import des bons de commande** : dépôt de plusieurs PDF ou du ZIP du dossier Drive, lecture, aperçu, enregistrement ; fournisseurs, catégories Melba, colis fournisseur et prix d'achat ; un BC redéposé remplace l'ancien (même numéro). | Faite (18/11/2026) |
-| 6.9 | **Recoupement de la semaine** : pour une semaine de production, ingrédients du tome face aux matières commandées — ingrédients sans commande, commandes absentes du tome, écarts de prix tome/BC. | Proposée |
+| 6.9 | **Recoupement de la semaine** : pour une semaine de production, ingrédients du tome face aux matières commandées — ingrédients sans commande, commandes absentes du tome, écarts de prix tome/BC. | Faite (18/11/2026) |
 | 6.10 | **Saisie en Réception et en Stockage** : d'abord les matières de la semaine (commandées et du tome) et les encas, filtrées par sous-zone de stockage ; tout le référentiel par la recherche ; coût d'après la version en vigueur à la date de la perte. | Proposée |
 | 6.11 | **Administration → Produits** : fournisseurs, matières, conditionnements, prix et leurs versions ; réglage catégorie → zone ; ajout, modification datée, désactivation ; modifications manuelles gardées aux imports suivants. | Proposée |
 
@@ -349,3 +349,24 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
   S11, Rue Traversette, Transgourmet ; adresses e-mail remplacées) et 5 tests d'intégration ; en local, ZIP de ces
   8 bons déposé dans l'écran (Chrome piloté) : 8 bons, 48 lignes, 7 fournisseurs, 42 lignes rattachées à un
   ingrédient des tomes, 6 matières nouvelles, 47 prix d'achat.
+
+## Étape 6.9 — Recoupement de la semaine (faite le 18/11/2026)
+
+- **Écran** : Administration → **Recoupement de la semaine**. Choix de la semaine de production parmi celles qui ont un
+  tome en vigueur ou des bons ; par défaut, la plus récente qui a les deux (le tome arrive le mardi, les bons de la
+  semaine suivante au plus tôt le jeudi). Lecture seule.
+- **Rapprochement** : ingrédients du tome en vigueur (plats et sous-recettes) face aux lignes des bons de la même
+  semaine de production (le numéro de semaine du nom du fichier), par la même clé que le référentiel (6.7).
+- **Écarts de prix** : prix du tome de la semaine face au prix d'achat du bon (la dernière livraison s'il y en a
+  plusieurs), au kg ou à la pièce ; au-delà de 0,5 % seulement (arrondi du tome), du plus grand écart au plus
+  petit. Un prix au litre ou dans une autre unité n'est pas comparé (compté à part).
+- **Commandes absentes du tome** : fournisseur, livraison, quantité, colis, total, et les autres semaines dont le
+  tome cite la désignation (commande pour une autre semaine, encas, nouveau produit).
+- **Ingrédients sans commande** : plats ou sous-recettes qui les utilisent, et la dernière commande déposée avant
+  la semaine (fournisseur, date) — stock, commande hors Melba ou bon pas encore déposé.
+- **Rien n'est déduit** : pas de quantité « nécessaire » calculée (elle demanderait de multiplier les recettes par
+  les barquettes du plan, à décider), pas de seuil d'alerte.
+- **Vérifié** : 4 tests unitaires et 4 tests d'intégration (vrai tome S45 et 8 vrais bons) ; en local sur S47
+  (Chrome piloté, ordinateur et téléphone) : 25 ingrédients commandés sur 153, 4 lignes de bon absentes du tome,
+  4 écarts de prix. Exemple : banane 3,96 €/kg dans le tome, 1,98 €/kg au bon (8 cartons de 8,5 kg à 1,98 €/kg) ;
+  basilic 32,31 €/kg contre 21 €/kg — le tome compte peut-être une perte à l'épluchage (point 14 à valider).

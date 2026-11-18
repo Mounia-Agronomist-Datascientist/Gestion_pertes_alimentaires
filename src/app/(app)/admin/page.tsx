@@ -6,6 +6,7 @@ const SECTIONS = [
   { href: "/admin/comptes", title: "Comptes", text: "Créer un compte, réinitialiser un mot de passe, désactiver" },
   { href: "/admin/equipes", title: "Équipes par semaine", text: "Désactiver une équipe pendant une semaine creuse" },
   { href: "/admin/import", title: "Import de la semaine", text: "Tome Melba + plan de production, chaque mardi" },
+  { href: "/admin/recoupement", title: "Recoupement de la semaine", text: "Ingrédients du tome face aux bons de commande, écarts de prix" },
   { href: "/admin/produits", title: "Produits", text: "Liste des produits et saisies « hors liste » à rattacher" },
   { href: "/admin/emballages", title: "Emballages et consommables", text: "Coûts unitaires datés, emballages par portion" },
   { href: "/admin/main-oeuvre", title: "Main-d'œuvre", text: "Coût horaire moyen par zone (non imputé aux pertes)" },

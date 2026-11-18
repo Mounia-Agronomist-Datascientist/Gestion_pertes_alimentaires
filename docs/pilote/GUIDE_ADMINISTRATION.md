@@ -11,6 +11,7 @@ Application **Pertes** · semaine de production du **jeudi au mercredi**.
 | Avant un férié ou un samedi travaillé | Administration → **Jours de production** | Retirer le jour férié, ajouter le samedi. |
 | **Après la fin de la semaine** (jeudi) | Administration → **Import** → « Barquettes réellement produites » | Déposer le **« Décompte barquettes »** : il donne les ratios et la comparaison à volume égal. |
 | **Jeudi** | Administration → **Import** → « Bons de commande fournisseurs » | Déposer les **bons de commande** de la semaine suivante (PDF, ou le dossier du Drive en ZIP). Nouvelles matières, colis et prix d'achat sont enregistrés ; un bon redéposé est remplacé. |
+| Jeudi, après les bons | Administration → **Recoupement de la semaine** | Ingrédients du tome face aux bons de la semaine : écarts de prix, commandes absentes du tome, ingrédients sans commande. |
 | Jeudi | Accueil, **Alertes d'analyse** | Pertes inhabituelles et causes récurrentes de la semaine terminée (calculées dans la nuit). Les lire, noter « Vu ». |
 | Chaque jour ou deux | **Alertes « saisie incomplète »** | Équipes sans déclaration un jour de production (150 kg estimés). Lever une alerte justifiée, avec motif (équipe en formation…). |
 | Quand les fichiers sont mis à jour | Administration → **Import** → « Ventes et dons des surplus » | Déposer **VENTES TGTG**, **VENTES FLASH**, **Linkee** (Excel). Un fichier redéposé remplace sa période. |

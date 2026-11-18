@@ -5,14 +5,14 @@
 > La même information, lisible par un programme : [progress.yaml](progress.yaml).
 > **Mettre à jour les deux fichiers à chaque commit d'étape.**
 
-Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.8 : import des bons de commande fournisseurs`
+Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.9 : recoupement de la semaine (tome / bons de commande)`
 
 ## En ce moment
 
 - **Phase en cours** : Phase 6 — Optimisation et automatisation ([docs/PHASE6.md](docs/PHASE6.md))
-- **Dernière étape faite** : 6.8 — Import des bons de commande fournisseurs (18/11/2026)
-- **Prochaine étape** : 6.9 — Recoupement de la semaine (ingrédients du tome face aux matières commandées) —
-  *proposée, à valider avant de coder*
+- **Dernière étape faite** : 6.9 — Recoupement de la semaine (18/11/2026)
+- **Prochaine étape** : 6.10 — Saisie en Réception et en Stockage (matières de la semaine d'abord, filtre par
+  sous-zone) — *proposée, à valider avant de coder*
 
 ## Phases
 
@@ -24,7 +24,7 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.8 : impor
 | 3 | Calcul des coûts | ✅ Terminée (10/11) |
 | 4 | Statistiques et exports | ✅ Terminée (12/11) |
 | 5 | Valorisation, Alchimistes, environnement, rapports PDF | ✅ Terminée (13–16/11) |
-| 6 | Optimisation et automatisation | 🔄 En cours (8 étapes sur 11) |
+| 6 | Optimisation et automatisation | 🔄 En cours (9 étapes sur 11) |
 
 ## Phase 6 — étapes
 
@@ -38,7 +38,7 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.8 : impor
 | 6.6 | Ouverture sans réseau | ✅ 17/11 |
 | 6.7 | Référentiel des matières premières | ✅ 17/11 |
 | 6.8 | Import des bons de commande | ✅ 18/11 |
-| 6.9 | Recoupement de la semaine (tome / BC) | ⏳ Proposée |
+| 6.9 | Recoupement de la semaine (tome / BC) | ✅ 18/11 |
 | 6.10 | Saisie en Réception et en Stockage | ⏳ Proposée |
 | 6.11 | Administration → Produits (fournisseurs, matières, prix) | ⏳ Proposée |
 
@@ -49,6 +49,7 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.8 : impor
   → dépôt du ZIP des bons de commande ([docs/pilote/PLAN_PILOTE.md](docs/pilote/PLAN_PILOTE.md)).
 - **Essai pilote** avec les équipes : préparé (docs/pilote/), pas encore lancé.
 - **Mise en service des alertes** (P4) : après les essais des équipes.
+- **Prix du tome et prix d'achat** (14) : écarts forts (banane, basilic) — le tome compte-t-il l'épluchage ?
 - **Facteurs carbone** (10) : valider les facteurs proposés et les rattachements « À revoir ».
 - **Main-d'œuvre** (3) et **coûts indirects** : méthode d'imputation à définir avec l'entreprise.
 - **Estimation par contenant** (P2) et **poids unitaires / densités** (4) : valeurs à fournir.

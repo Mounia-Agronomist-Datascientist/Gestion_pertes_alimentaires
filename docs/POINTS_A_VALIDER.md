@@ -38,6 +38,7 @@ Légende : 🔴 bloquant pour démarrer la Phase 1 · 🟠 nécessaire pendant l
 | 9 ⚪ | Récupération financière | Ventes à déduire du coût net | Phase 3 |
 | 13 ✅ | Coûts matières | Les coûts Melba du tome sont la référence ; extraction hebdomadaire avec le prix de chaque recette et sous-recette, conservés par semaine (les plats changent chaque semaine) | Phase 3 |
 | 8 🟠 | Volumes de production | Validé le 10/11/2026 : ratios sur le **prévu** (plan importé) et le **réel** (« Décompte barquettes ») côte à côte ; kg produits = barquettes × poids d'une portion Melba. Réel : colonne « Ma production » de l'onglet « Semaine NN » du « Décompte barquettes », fichier déposé chaque semaine (décision du 12/11/2026) | ✅ |
+| 14 🟠 | Prix du tome et prix d'achat | Le recoupement de S47 montre des écarts forts : banane 3,96 €/kg dans le tome, 1,98 €/kg au bon de commande ; basilic 32,31 €/kg contre 21 €/kg. Le coût Melba compte-t-il une perte à l'épluchage ou au parage ? Rien n'est corrigé : la perte d'une matière prend le prix d'achat (décision du 17/11/2026) | Étape 6.9 |
 | 10 🟠 | Facteurs carbone | Décidé le 12/11/2026 : calcul par la recette Melba (ingrédients rattachés à des familles, facteurs Agribalyse validés avant usage). Reste : valider les facteurs proposés et les rattachements « À revoir » | Mise en ligne |
 
 ## Phase 2 — saisie à partir des plats de la semaine (09/11/2026)
