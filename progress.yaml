@@ -1,0 +1,60 @@
+# Avancement du projet, lisible par un programme (même contenu que progress.md).
+# Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
+
+mise_a_jour: 2026-11-18
+dernier_commit: "Étape 6.8 : import des bons de commande fournisseurs"
+
+en_cours:
+  phase: 6
+  derniere_etape: "6.8"
+  prochaine_etape: "6.9"
+  prochaine_etape_statut: proposee   # à valider avant de coder
+
+phases:
+  - { id: 0, nom: "Cadrage technique", statut: terminee, fin: 2026-11-06 }
+  - { id: 1, nom: "Déclarations", statut: terminee, fin: 2026-11-09 }
+  - { id: 2, nom: "Import Melba et saisie par plats de la semaine", statut: terminee, fin: 2026-11-10 }
+  - { id: 3, nom: "Calcul des coûts", statut: terminee, fin: 2026-11-10 }
+  - { id: 4, nom: "Statistiques et exports", statut: terminee, fin: 2026-11-12 }
+  - { id: 5, nom: "Valorisation, Alchimistes, environnement, rapports PDF", statut: terminee, fin: 2026-11-16 }
+  - { id: 6, nom: "Optimisation et automatisation", statut: en_cours, doc: docs/PHASE6.md }
+
+etapes_phase_6:
+  - { id: "6.1", nom: "Tendances", statut: faite, date: 2026-11-16 }
+  - { id: "6.2", nom: "Pertes inhabituelles", statut: faite, date: 2026-11-16 }
+  - { id: "6.3", nom: "Causes récurrentes", statut: faite, date: 2026-11-16 }
+  - { id: "6.4", nom: "Affichage des alertes et réglages", statut: faite, date: 2026-11-17 }
+  - { id: "6.5", nom: "Envoi qui résiste aux coupures", statut: faite, date: 2026-11-17 }
+  - { id: "6.6", nom: "Ouverture sans réseau", statut: faite, date: 2026-11-17 }
+  - { id: "6.7", nom: "Référentiel des matières premières", statut: faite, date: 2026-11-17 }
+  - { id: "6.8", nom: "Import des bons de commande", statut: faite, date: 2026-11-18 }
+  - { id: "6.9", nom: "Recoupement de la semaine (tome / bons de commande)", statut: proposee }
+  - { id: "6.10", nom: "Saisie en Réception et en Stockage", statut: proposee }
+  - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: proposee }
+
+base_de_donnees:
+  derniere_migration: "0026_bons_de_commande"
+  production:
+    a_appliquer: "0014 à 0026"
+    puis:
+      - "Compléter depuis les tomes importés (Administration → Produits)"
+      - "Dépôt du ZIP des bons de commande"
+    precaution: "sauvegarde avant"
+
+en_attente:
+  - sujet: "Mise en ligne"
+    raison: "crédits Netlify épuisés"
+    jusqu_au: 2026-12-08
+  - sujet: "Essai pilote avec les équipes"
+    raison: "préparé (docs/pilote/), pas encore lancé"
+  - { sujet: "Mise en service des alertes", point: P4, raison: "après les essais des équipes" }
+  - { sujet: "Facteurs carbone", point: "10", raison: "valider les facteurs et les rattachements « À revoir »" }
+  - { sujet: "Main-d'œuvre et coûts indirects", point: "3", raison: "méthode d'imputation à définir" }
+  - { sujet: "Estimation par contenant", point: P2, raison: "poids de référence à fournir" }
+  - { sujet: "Poids unitaires et densités", point: "4", raison: "valeurs à fournir" }
+
+regles_de_travail:
+  - "Une étape validée avant d'être codée ; un commit par étape"
+  - "Ne jamais inventer de règle métier (coûts, densités, facteurs carbone)"
+  - "Aucun prénom ni adresse e-mail dans les données, les tests ou les commits"
+  - "Next.js 16 : lire node_modules/next/dist/docs/ avant d'écrire du code"
