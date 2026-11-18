@@ -310,5 +310,25 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   vigueur à la date de la perte, à défaut le **coût du tome**. Il est figé sur la déclaration.
 - Un import ne change jamais le nom, l'état ni les réglages faits à la main.
 - Prix d'achat (bons de commande, 18/11/2026) : daté du **jour de livraison** ; ramené au kg (prix au kg, ou prix du
-  colis ÷ son poids) ou à la pièce ; jamais calculé pour un prix au litre ou une unité qui ne correspond pas au
-  conditionnement. Deux bons livrés le même jour : le dernier déposé fait foi. Un bon redéposé remplace ses prix.
+  colis ÷ son poids) ou à la pièce ; un prix au litre est ramené au kg avec la densité de la matière (R24), jamais
+  calculé sans densité ni pour une unité qui ne correspond pas au conditionnement. Deux bons livrés le même jour :
+  le dernier déposé fait foi. Un bon redéposé remplace ses prix.
+- Le coût du tome **compte la préparation** (réponse du 18/11/2026) : perte à l'épluchage ou au parage, gain des
+  féculents qui gonflent. Un écart entre le tome et le prix d'achat n'est donc pas forcément un changement de prix.
+  Une matière perdue telle qu'achetée (Réception, Stockage) prend le prix d'achat ; un ingrédient de la semaine
+  choisi dans un plat garde le coût du tome.
+
+## R24 — Densités des liquides (Phase 6, 18/11/2026)
+
+- Tableau de référence fourni le 18/11/2026 (huiles : Codex Alimentarius CXS 210 et FAO ; autres liquides : eau,
+  laits, crème liquide, jus, vinaigres, sauce soja, sirops, miel, mélasse), en kg/L à 20 °C ; valeur retenue : le
+  **milieu de la plage** (src/domain/densites.ts).
+- Rattachement par le nom de la matière : liquides du tableau, et aussi **au plus proche** (mélange d'huiles =
+  moyenne des huiles, lait demi-écrémé = moyenne entier/écrémé, toute sauce soja = sauce soja, tout vinaigre autre
+  que balsamique = vinaigre blanc, eau de cuisson = eau). Sans correspondance (lait de coco, jus de citron, crème
+  épaisse…) : pas de densité.
+- Donnée à une matière **qui n'en a pas** (import du tome, dépôt des bons, « Compléter depuis les tomes importés ») ;
+  une densité saisie à la main n'est jamais remplacée. Administration → Produits indique l'origine d'une densité de
+  référence.
+- Sert à convertir en kg une perte saisie en litres (matière de la liste ou ingrédient de la semaine) et à ramener
+  au kg un prix d'achat au litre.

@@ -80,8 +80,10 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
           <Section title="Écarts de prix entre le tome et le bon" count={r.priceGaps.length} open>
             <p className="text-sm text-slate-600">
               Prix du tome de la semaine face au prix d&apos;achat du bon (la dernière livraison s&apos;il y en a plusieurs), du plus grand écart au plus
-              petit. Les écarts de moins de 0,5 % (arrondi du tome) ne sont pas montrés
-              {r.incomparable > 0 && `, ni ${plural(r.incomparable, "matière dont les prix ne se comparent pas", "matières dont les prix ne se comparent pas")} (prix au litre, unités différentes)`}
+              petit. Le coût du tome compte la préparation : une perte à l&apos;épluchage ou au parage le rend plus cher que le prix d&apos;achat, un
+              féculent qui gonfle à la cuisson le rend moins cher. Un écart n&apos;est donc pas forcément un changement de prix. Les écarts de moins de
+              0,5 % (arrondi du tome) ne sont pas montrés
+              {r.incomparable > 0 && `, ni ${plural(r.incomparable, "matière dont les prix ne se comparent pas", "matières dont les prix ne se comparent pas")} (liquide sans densité, unités différentes)`}
               .
             </p>
             <Table head={["Matière", "Fournisseur", "Tome", "Bon", "Écart"]} right={[2, 3, 4]}>
@@ -97,7 +99,7 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
                   <td className="py-1 pr-2 text-right tabular-nums">
                     {fmtEur(g.orderEur)} / {g.basis === "kg" ? "kg" : "pièce"}
                   </td>
-                  <td className={`py-1 text-right font-medium tabular-nums ${g.gap > 0 ? "text-red-800" : "text-emerald-800"}`}>{fmtPct(g.gap)}</td>
+                  <td className="py-1 text-right font-medium tabular-nums">{fmtPct(g.gap)}</td>
                 </tr>
               ))}
             </Table>

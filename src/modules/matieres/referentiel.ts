@@ -5,9 +5,10 @@
  *   pas (les pertes passées gardent leur coût figé).
  * - Le nom, l'état (actif ou non) et les autres réglages faits à la main ne sont jamais écrasés par un import.
  */
-import { and, asc, eq, inArray, like, lte } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, like, lte } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import { referenceDensity } from "@/domain/densites";
 import { isMelbaExternalId, melbaExternalId, priceInForce, samePrice, tomeMaterials } from "@/domain/matieres";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
@@ -19,6 +20,27 @@ export interface MaterialSyncResult {
   created: number;
   linked: number;
   newPrices: number;
+  densities: number;
+}
+
+/**
+ * Densité de référence (liquides, décision du 18/11/2026) donnée aux matières qui n'en ont pas. Une densité déjà
+ * renseignée, à la main ou non, n'est jamais remplacée.
+ */
+export async function applyReferenceDensities(db: Db, productIds?: readonly string[]): Promise<number> {
+  if (productIds && !productIds.length) return 0;
+  const rows = await db
+    .select({ id: s.products.id, name: s.products.name })
+    .from(s.products)
+    .where(and(isNull(s.products.densityKgPerL), inArray(s.products.category, ["matiere_premiere"]), productIds ? inArray(s.products.id, [...productIds]) : undefined));
+  let n = 0;
+  for (const p of rows) {
+    const ref = referenceDensity(p.name);
+    if (!ref) continue;
+    await db.update(s.products).set({ densityKgPerL: ref.densityKgPerL, updatedAt: new Date() }).where(eq(s.products.id, p.id));
+    n++;
+  }
+  return n;
 }
 
 const gramsToKg = (g: number | null) => (g == null ? null : Math.round((g / 1000) * 10_000) / 10_000);
@@ -40,7 +62,7 @@ export async function syncMaterialsFromImport(db: Db, importId: string, validFro
     .from(s.weekRecipeLines)
     .where(and(eq(s.weekRecipeLines.importId, importId), eq(s.weekRecipeLines.isSubRecipe, false)));
   const materials = tomeMaterials(lines);
-  const result: MaterialSyncResult = { materials: materials.length, created: 0, linked: 0, newPrices: 0 };
+  const result: MaterialSyncResult = { materials: materials.length, created: 0, linked: 0, newPrices: 0, densities: 0 };
   if (!materials.length) return result;
 
   const categories = ["matiere_premiere", "moule_plat_gratin"] as const;
@@ -85,6 +107,7 @@ export async function syncMaterialsFromImport(db: Db, importId: string, validFro
   }
 
   const ids = [...productIds.values()];
+  result.densities = await applyReferenceDensities(db, ids);
   const versions = await db
     .select()
     .from(s.productPrices)
@@ -127,14 +150,17 @@ export async function buildMaterialsFromTomes(db: Db, admin: AuthUser) {
     .where(eq(s.weeklyImports.status, "validee"))
     .orderBy(asc(s.productionWeeks.startDate));
   return db.transaction(async (tx) => {
-    const total: MaterialSyncResult & { weeks: string[] } = { materials: 0, created: 0, linked: 0, newPrices: 0, weeks: [] };
+    const total: MaterialSyncResult & { weeks: string[] } = { materials: 0, created: 0, linked: 0, newPrices: 0, densities: 0, weeks: [] };
     for (const imp of imports) {
       const r = await syncMaterialsFromImport(tx, imp.id, imp.startDate, admin.id);
       total.created += r.created;
       total.linked += r.linked;
       total.newPrices += r.newPrices;
+      total.densities += r.densities;
       total.weeks.push(`S${imp.number}-${imp.year}`);
     }
+    // Matières venues des seuls bons de commande.
+    total.densities += await applyReferenceDensities(tx);
     total.materials = (await tx.select({ id: s.products.id }).from(s.products).where(like(s.products.externalId, melbaExternalId("%")))).length;
     await writeAudit(tx, { userId: admin.id, action: "build_materials", entity: "product", after: total });
     return total;

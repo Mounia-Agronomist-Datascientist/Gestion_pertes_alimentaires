@@ -369,4 +369,16 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 - **Vérifié** : 4 tests unitaires et 4 tests d'intégration (vrai tome S45 et 8 vrais bons) ; en local sur S47
   (Chrome piloté, ordinateur et téléphone) : 25 ingrédients commandés sur 153, 4 lignes de bon absentes du tome,
   4 écarts de prix. Exemple : banane 3,96 €/kg dans le tome, 1,98 €/kg au bon (8 cartons de 8,5 kg à 1,98 €/kg) ;
-  basilic 32,31 €/kg contre 21 €/kg — le tome compte peut-être une perte à l'épluchage (point 14 à valider).
+  basilic 32,31 €/kg contre 21 €/kg — le tome compte la préparation (point 14, réponse ci-dessous).
+
+## Densités des liquides et coût du tome (18/11/2026)
+
+- **Réponse au point 14** : le coût du tome compte la préparation (perte à l'épluchage ou au parage, gain des
+  féculents qui gonflent). L'écran de recoupement le rappelle ; les écarts n'y sont plus colorés.
+- **Densités de référence** (règle R24) : tableau fourni (huiles d'après le Codex et la FAO, autres liquides),
+  milieu de chaque plage, rattachement par le nom et au plus proche. Données aux matières sans densité à l'import du
+  tome, au dépôt des bons et par « Compléter depuis les tomes importés » ; jamais à la place d'une valeur saisie.
+- **Effets** : une perte saisie en litres est convertie en kg (aussi pour un ingrédient de la semaine, qui prend la
+  densité de sa matière) ; un prix d'achat au litre est ramené au kg. Sans migration (colonne de densité existante).
+- **En local** : 17 liquides avec une densité ; huile de sésame à 8,61 €/kg (5,07 € les 64 cl à 0,92 kg/L). Le tome
+  la compte à 7,92 €/kg, soit exactement 5,07 € ÷ 0,64 : Melba semble compter 1 L = 1 kg.

@@ -158,7 +158,7 @@ async function prepareDeclaration(
       code: item.code,
       variant: null,
       unitWeightKg: item.unitWeightKg,
-      densityKgPerL: null,
+      densityKgPerL: item.densityKgPerL,
       refs: item.refs,
       cost: { item: item.cost, importId: item.importId },
     };

@@ -15,6 +15,8 @@ interface Product {
   defaultUnit: string;
   unitWeightKg: number | null;
   densityKgPerL: number | null;
+  /** Origine d'une densité tirée du tableau des liquides (« huile d'olive »), null si saisie à la main. */
+  densityReference?: string | null;
   source: string;
   active: boolean;
   /** Matière tirée des tomes Melba (référentiel des matières premières). */
@@ -137,7 +139,8 @@ export function ProductsAdmin({ products, groups, units }: Props) {
         <h2 className="text-lg font-semibold">Matières premières des tomes ({products.filter((p) => p.melba).length})</h2>
         <p className="text-sm text-slate-600">
           Chaque nouvel import de la semaine ajoute les nouveaux ingrédients et enregistre les prix qui changent, sans
-          toucher aux pertes passées ni aux noms modifiés ici. Ce bouton reprend les tomes déjà importés ; il peut être
+          toucher aux pertes passées ni aux noms modifiés ici. Les liquides (huiles, lait, crème, vinaigres, sauce soja…)
+          reçoivent la densité du tableau de référence s&apos;ils n&apos;en ont pas. Ce bouton reprend les tomes déjà importés ; il peut être
           relancé sans risque.
         </p>
         <form action={action}>
@@ -219,7 +222,7 @@ export function ProductsAdmin({ products, groups, units }: Props) {
                     {PRODUCT_CATEGORY_LABELS[p.category]}
                     {p.code && ` · code ${p.code}`} · unité {units.find((u) => u.code === p.defaultUnit)?.label ?? p.defaultUnit}
                     {p.unitWeightKg != null && ` · ${fmtNumber(p.unitWeightKg)} kg par unité`}
-                    {p.densityKgPerL != null && ` · densité ${fmtNumber(p.densityKgPerL)} kg/L`}
+                    {p.densityKgPerL != null && ` · densité ${fmtNumber(p.densityKgPerL)} kg/L${p.densityReference ? ` (référence : ${p.densityReference})` : ""}`}
                     {p.melba && " · tome Melba"}
                   </span>
                   {p.price ? (

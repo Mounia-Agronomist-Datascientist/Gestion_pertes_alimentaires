@@ -194,7 +194,7 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
       }
       case "build_materials": {
         const r = await buildMaterialsFromTomes(db, admin);
-        message = `Référentiel complété depuis ${r.weeks.length} tome${r.weeks.length > 1 ? "s" : ""} : ${r.created} matière${r.created > 1 ? "s" : ""} ajoutée${r.created > 1 ? "s" : ""}, ${r.linked} rattachée${r.linked > 1 ? "s" : ""} à un produit existant, ${r.newPrices} prix enregistré${r.newPrices > 1 ? "s" : ""}.`;
+        message = `Référentiel complété depuis ${r.weeks.length} tome${r.weeks.length > 1 ? "s" : ""} : ${r.created} matière${r.created > 1 ? "s" : ""} ajoutée${r.created > 1 ? "s" : ""}, ${r.linked} rattachée${r.linked > 1 ? "s" : ""} à un produit existant, ${r.newPrices} prix enregistré${r.newPrices > 1 ? "s" : ""}, ${r.densities} densité${r.densities > 1 ? "s" : ""} de liquide renseignée${r.densities > 1 ? "s" : ""}.`;
         break;
       }
       case "create_link": {

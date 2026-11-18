@@ -16,6 +16,7 @@ import { daysBetween } from "@/domain/semaine-production";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import { isMouldLabel } from "@/modules/imports/merge";
+import { applyReferenceDensities } from "@/modules/matieres/referentiel";
 import { tomeKey } from "@/modules/imports/tome/parse-tome";
 
 export class PurchaseOrderError extends Error {}
@@ -162,7 +163,11 @@ export async function savePurchaseOrders(db: Db, admin: AuthUser, raw: unknown, 
           await tx.update(s.products).set({ materialCategoryId: categoryId, updatedAt: now }).where(eq(s.products.id, product.id));
         }
 
-        const price = purchaseLinePrice(line);
+        // Liquide : densité de référence si la matière n'en a pas, pour ramener un prix au litre au kg.
+        if (product!.densityKgPerL == null && (await applyReferenceDensities(tx, [product!.id]))) {
+          [product] = await tx.select().from(s.products).where(eq(s.products.id, product!.id));
+        }
+        const price = purchaseLinePrice(line, product!.densityKgPerL);
         await tx.insert(s.purchaseOrderLines).values({
           orderId,
           position: line.position,

@@ -1,6 +1,7 @@
 /**
  * Prix d'une ligne de bon de commande ramené au kg (ou à la pièce), docs/PHASE6.md étape 6.8.
- * Jamais deviné : null quand le bon ne permet pas de le calculer (prix au litre, colis sans poids).
+ * Jamais deviné : null quand le bon ne permet pas de le calculer (colis sans poids, prix au litre d'une matière sans
+ * densité). Un prix au litre est ramené au kg avec la densité de la matière (décision du 18/11/2026).
  */
 import type { UnitCost } from "./couts";
 
@@ -21,7 +22,14 @@ export function contentGrams(quantity: number | null, unit: string | null): numb
   return null;
 }
 
-const isVolume = (unit: string) => /^(l|cl|ml|litres?)$/.test(fold(unit));
+const LITRES: Record<string, number> = { l: 1, litre: 1, litres: 1, cl: 0.01, ml: 0.001 };
+/** Litres d'une contenance (« 64 cL », « 5 L ») ; null pour un poids ou un nombre de pièces. */
+export function contentLitres(quantity: number | null, unit: string | null): number | null {
+  if (quantity == null || !unit) return null;
+  const factor = LITRES[fold(unit)];
+  return factor == null ? null : quantity * factor;
+}
+const isVolume = (unit: string) => Object.hasOwn(LITRES, fold(unit));
 
 export interface PurchaseLinePriceInput {
   unitPriceEur: number;
@@ -29,12 +37,14 @@ export interface PurchaseLinePriceInput {
   packaging: { label: string; contentQuantity: number | null; contentUnit: string | null } | null;
 }
 
-export function purchaseLinePrice(line: PurchaseLinePriceInput): UnitCost {
+export function purchaseLinePrice(line: PurchaseLinePriceInput, densityKgPerL: number | null = null): UnitCost {
   const none: UnitCost = { perKgEur: null, perUnitEur: null };
   const round = (n: number) => Math.round(n * 10_000) / 10_000;
   const unit = fold(line.priceUnit);
   if (/^kgs?$/.test(unit)) return { perKgEur: round(line.unitPriceEur), perUnitEur: null };
   if (/^(g|gr)$/.test(unit)) return { perKgEur: round(line.unitPriceEur * 1000), perUnitEur: null };
+  // Prix au litre (ou au cL) : au kg avec la densité, sinon pas de prix.
+  if (Object.hasOwn(LITRES, unit)) return densityKgPerL ? { perKgEur: round(line.unitPriceEur / (LITRES[unit]! * densityKgPerL)), perUnitEur: null } : none;
   const p = line.packaging;
   if (!p) return none;
   // Prix d'une pièce du colis (« 10.28 € / poche 3l » pour un carton de 4 poches) : prix à la pièce.
@@ -45,6 +55,8 @@ export function purchaseLinePrice(line: PurchaseLinePriceInput): UnitCost {
   if (unit === fold(p.label) || fold(p.label).startsWith(unit)) {
     const grams = contentGrams(p.contentQuantity, p.contentUnit);
     if (grams) return { perKgEur: round((line.unitPriceEur / grams) * 1000), perUnitEur: null };
+    const litres = contentLitres(p.contentQuantity, p.contentUnit);
+    if (litres) return densityKgPerL ? { perKgEur: round(line.unitPriceEur / (litres * densityKgPerL)), perUnitEur: null } : none;
     if (p.contentQuantity && p.contentUnit && !isVolume(p.contentUnit)) return { perKgEur: null, perUnitEur: round(line.unitPriceEur / p.contentQuantity) };
   }
   return none;

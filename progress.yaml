@@ -2,7 +2,7 @@
 # Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
 
 mise_a_jour: 2026-11-18
-dernier_commit: "Étape 6.9 : recoupement de la semaine (tome / bons de commande)"
+dernier_commit: "Densités de référence des liquides ; coût du tome et préparation"
 
 en_cours:
   phase: 6
@@ -48,11 +48,10 @@ en_attente:
   - sujet: "Essai pilote avec les équipes"
     raison: "préparé (docs/pilote/), pas encore lancé"
   - { sujet: "Mise en service des alertes", point: P4, raison: "après les essais des équipes" }
-  - { sujet: "Prix du tome et prix d'achat", point: "14", raison: "écarts forts (banane, basilic) : le tome compte-t-il l'épluchage ?" }
   - { sujet: "Facteurs carbone", point: "10", raison: "valider les facteurs et les rattachements « À revoir »" }
   - { sujet: "Main-d'œuvre et coûts indirects", point: "3", raison: "méthode d'imputation à définir" }
   - { sujet: "Estimation par contenant", point: P2, raison: "poids de référence à fournir" }
-  - { sujet: "Poids unitaires et densités", point: "4", raison: "valeurs à fournir" }
+  - { sujet: "Poids unitaires", point: "4", raison: "valeurs à fournir (densités des liquides faites le 18/11/2026)" }
 
 regles_de_travail:
   - "Une étape validée avant d'être codée ; un commit par étape"

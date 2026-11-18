@@ -36,6 +36,8 @@ export type ProductChoice =
       name: string;
       category: string;
       unitWeightKg: number | null;
+      /** Densité d'un ingrédient liquide (matière du référentiel). */
+      densityKgPerL?: number | null;
       /** Semaine de production de l'import (le produit n'est valable que pour une perte de cette semaine). */
       week: { year: number; number: number };
       /** Coûts du tome de la semaine (matières, emballages par portion). */
@@ -238,7 +240,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       {
         isConsumable,
         unitWeightKg: product?.kind === "week" ? product.unitWeightKg : listedProduct?.unitWeightKg,
-        densityKgPerL: listedProduct?.densityKgPerL,
+        densityKgPerL: product?.kind === "week" ? product.densityKgPerL : listedProduct?.densityKgPerL,
       },
     );
     return { quantity: q, unitCode: unit.code, kg: conversion.netKg, note: conversion.reason };
@@ -1265,6 +1267,7 @@ function ProductStep({
       name: l.label,
       category: l.mould ? "moule_plat_gratin" : "matiere_premiere",
       unitWeightKg: gramsToKg(l.unitWeightG),
+      densityKgPerL: l.densityKgPerL,
       week: week!,
       cost: itemCostInputs(l.cost, l.mould),
     });

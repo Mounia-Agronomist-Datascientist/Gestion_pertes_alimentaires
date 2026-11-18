@@ -5,7 +5,7 @@
 > La même information, lisible par un programme : [progress.yaml](progress.yaml).
 > **Mettre à jour les deux fichiers à chaque commit d'étape.**
 
-Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.9 : recoupement de la semaine (tome / bons de commande)`
+Dernière mise à jour : **18/11/2026** — dernier commit : `Densités de référence des liquides ; coût du tome et préparation`
 
 ## En ce moment
 
@@ -49,10 +49,9 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Étape 6.9 : recou
   → dépôt du ZIP des bons de commande ([docs/pilote/PLAN_PILOTE.md](docs/pilote/PLAN_PILOTE.md)).
 - **Essai pilote** avec les équipes : préparé (docs/pilote/), pas encore lancé.
 - **Mise en service des alertes** (P4) : après les essais des équipes.
-- **Prix du tome et prix d'achat** (14) : écarts forts (banane, basilic) — le tome compte-t-il l'épluchage ?
 - **Facteurs carbone** (10) : valider les facteurs proposés et les rattachements « À revoir ».
 - **Main-d'œuvre** (3) et **coûts indirects** : méthode d'imputation à définir avec l'entreprise.
-- **Estimation par contenant** (P2) et **poids unitaires / densités** (4) : valeurs à fournir.
+- **Estimation par contenant** (P2) et **poids unitaires** (4) : valeurs à fournir (densités des liquides : faites le 18/11).
 
 Liste complète : [docs/POINTS_A_VALIDER.md](docs/POINTS_A_VALIDER.md).
 

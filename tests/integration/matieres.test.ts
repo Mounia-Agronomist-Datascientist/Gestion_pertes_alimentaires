@@ -11,6 +11,7 @@ import { buildWeekImport, type WeekImportPreview } from "@/modules/imports/merge
 import { parsePlan } from "@/modules/imports/plan/parse-plan";
 import { saveWeekImport } from "@/modules/imports/service";
 import { parseTome } from "@/modules/imports/tome/parse-tome";
+import { findWeekItem } from "@/modules/imports/catalog";
 import { buildMaterialsFromTomes, materialPriceAt } from "@/modules/matieres/referentiel";
 import { s45PlanGrid, s45TomeItems } from "../helpers/s45";
 import { createTestDb } from "../helpers/test-db";
@@ -136,5 +137,39 @@ describe("référentiel des matières premières tiré des tomes", () => {
     expect((await row(d46.id)).costPerKgEur).toBe(p46);
     const unchanged = await t.db.select().from(s.productPrices).where(and(eq(s.productPrices.productId, garlic.id), eq(s.productPrices.source, "tome")));
     expect(unchanged).toHaveLength(2);
+  });
+
+  it("les liquides reçoivent la densité de référence ; une perte en litres est convertie en kg", async () => {
+    expect((await byKey("huile colza")).densityKgPerL).toBe(0.915);
+    expect((await byKey("huile olive colza")).densityKgPerL).toBe(0.914); // mélange : moyenne
+    expect((await byKey("lait demi ecreme")).densityKgPerL).toBe(1.033);
+    expect((await byKey("lait de coco thai kitchen poche")).densityKgPerL).toBeNull();
+    expect((await byKey("ail pele")).densityKgPerL).toBeNull();
+
+    // Une densité saisie à la main n'est jamais remplacée.
+    const vinegar = await byKey("vinaigre de vin");
+    await t.db.update(s.products).set({ densityKgPerL: 1.02 }).where(eq(s.products.id, vinegar.id));
+    expect((await buildMaterialsFromTomes(t.db, admin)).densities).toBe(0);
+    expect((await byKey("vinaigre de vin")).densityKgPerL).toBe(1.02);
+
+    // Ingrédient de la semaine saisi en litres : la densité de la matière du référentiel sert à la conversion.
+    const [current] = await t.db
+      .select({ id: s.weeklyImports.id })
+      .from(s.weeklyImports)
+      .innerJoin(s.productionWeeks, eq(s.weeklyImports.productionWeekId, s.productionWeeks.id))
+      .where(and(eq(s.productionWeeks.startDate, S45), eq(s.weeklyImports.status, "validee")));
+    const [oil] = await t.db.select().from(s.weekRecipeLines).where(and(eq(s.weekRecipeLines.importId, current!.id), eq(s.weekRecipeLines.key, "huile colza")));
+    expect(await findWeekItem(t.db, "ingredient", oil!.id)).toMatchObject({ densityKgPerL: 0.915 });
+    const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const d = await createDeclaration(
+      t.db,
+      teamD,
+      { occurredOn: "2026-11-02", subzoneId: sub, product: { weekItem: { kind: "ingredient", id: oil!.id } }, method: "estimation_manuelle", quantity: 2, unitCode: "l", causeId: cause, destinations: [{ destinationId: bin, quantity: 2, binNumber: "1" }] },
+      NOW,
+    );
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
+    expect(row).toMatchObject({ netKg: 1.83, kgStatus: "converti" });
   });
 });

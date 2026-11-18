@@ -4,11 +4,12 @@
  * - équipes de cuisine : les plats de leur équipe (plan de production) ;
  * - encas (codes EN…, règle R9) : proposés en conditionnement, réception et stockage uniquement.
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { dishUnitCost, ingredientUnitCost, mouldCostOf, subRecipeUnitCost, type UnitCost } from "@/domain/couts";
 import type { PortionKind } from "@/modules/admin/packaging-labels";
+import { melbaExternalId } from "@/domain/matieres";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
@@ -28,6 +29,19 @@ export interface CatalogLine {
   mould: boolean;
   /** Coût de l'ingrédient d'après le tome (pour une sous-recette, voir la sous-recette). */
   cost: UnitCost;
+  /** Densité de la matière du référentiel (liquide saisi en litres), sinon null. */
+  densityKgPerL: number | null;
+}
+
+/** Densités des matières du référentiel, par clé d'ingrédient du tome. */
+async function densitiesByKey(db: Db, keys: readonly string[]): Promise<Map<string, number>> {
+  const ids = [...new Set(keys)].filter(Boolean).map(melbaExternalId);
+  if (!ids.length) return new Map();
+  const rows = await db
+    .select({ externalId: s.products.externalId, density: s.products.densityKgPerL })
+    .from(s.products)
+    .where(and(inArray(s.products.externalId, ids), isNotNull(s.products.densityKgPerL)));
+  return new Map(rows.map((r) => [r.externalId!.slice(melbaExternalId("").length), r.density!]));
 }
 
 export interface WeekCatalog {
@@ -77,6 +91,10 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
       db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.importId, current.id)),
       db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.importId, current.id)),
     ]);
+    const densities = await densitiesByKey(
+      db,
+      lines.filter((l) => !l.isSubRecipe).map((l) => l.key),
+    );
     const toLine = (l: (typeof lines)[number]): CatalogLine => ({
       id: l.id,
       label: displayLabel(l.label),
@@ -84,6 +102,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
       unitWeightG: l.unitWeightG,
       mould: isMouldLabel(l.label),
       cost: ingredientUnitCost(l),
+      densityKgPerL: l.isSubRecipe ? null : (densities.get(l.key) ?? null),
     });
     const linesOf = (owner: { recipeId?: string; subRecipeId?: string }) =>
       lines
@@ -176,6 +195,8 @@ export interface ResolvedWeekItem {
   name: string;
   code: string | null;
   unitWeightKg: number | null;
+  /** Densité de la matière du référentiel (ingrédient liquide), sinon null. */
+  densityKgPerL: number | null;
   refs: { weekRecipeId: string | null; weekSubRecipeId: string | null; weekLineId: string | null };
   importId: string;
   teamId: string | null;
@@ -214,6 +235,7 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
       // Hypothèse à valider (docs/POINTS_A_VALIDER.md) : une barquette (ou un encas) = une portion du tome. Le tome
       // raisonne pour une recette = une portion : sans poids de portion imprimé, on prend la « Recette totale ».
       unitWeightKg: gramsToKg(portionWeightG(r)),
+      densityKgPerL: null,
       refs: { ...none, weekRecipeId: r.id },
       importId: r.importId,
       teamId: r.teamId,
@@ -230,7 +252,7 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
   if (kind === "sous_recette") {
     const [sr] = await db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.id, id));
     if (!sr) return null;
-    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false, cost: itemCost(subRecipeCost(sr), isMouldLabel(sr.name)) };
+    return { category: isMouldLabel(sr.name) ? "moule_plat_gratin" : "sous_recette", name: sr.name, code: null, unitWeightKg: null, densityKgPerL: null, refs: { ...none, weekSubRecipeId: sr.id }, importId: sr.importId, teamId: null, snack: false, cost: itemCost(subRecipeCost(sr), isMouldLabel(sr.name)) };
   }
   const [l] = await db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.id, id));
   if (!l || l.isSubRecipe) return null;
@@ -244,5 +266,6 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
     teamId: null,
     snack: false,
     cost: itemCost(ingredientUnitCost(l), isMouldLabel(l.label)),
+    densityKgPerL: (await densitiesByKey(db, [l.key])).get(l.key) ?? null,
   };
 }

@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { contentGrams, purchaseLinePrice } from "@/domain/bons-commande";
+import { contentGrams, contentLitres, purchaseLinePrice } from "@/domain/bons-commande";
 import { type ParsedPurchaseOrder, parsePackaging, parsePurchaseOrder } from "@/modules/imports/bons-commande/parse-bon";
 import type { PdfItem } from "@/modules/imports/tome/pdf-items";
 
@@ -107,7 +107,15 @@ describe("conditionnement et prix au kg", () => {
     expect(price(12, "Barquette", "Barquette (20.00 Merguez)")).toEqual({ perKgEur: null, perUnitEur: 0.6 });
   });
 
-  it("aucun prix inventé : litre ou unité inconnue", () => {
+  it("prix au litre ramené au kg avec la densité de la matière", () => {
+    const line = (unitPriceEur: number, priceUnit: string, packaging: string) => ({ unitPriceEur, priceUnit, packaging: parsePackaging(packaging) });
+    expect(purchaseLinePrice(line(5.07, "Bouteille 64cl", "Bouteille 64cl (64.00 cL)"), 0.92)).toEqual({ perKgEur: 8.6107, perUnitEur: null });
+    expect(purchaseLinePrice(line(2.3, "L", "Bidon 5L (5.00 L)"), 1.15)).toEqual({ perKgEur: 2, perUnitEur: null });
+    expect(contentLitres(64, "cL")).toBe(0.64);
+    expect(contentLitres(5, "kg")).toBeNull();
+  });
+
+  it("aucun prix inventé : litre sans densité ou unité inconnue", () => {
     expect(price(5.07, "Bouteille 64cl", "Bouteille 64cl (64.00 cL)")).toEqual({ perKgEur: null, perUnitEur: null });
     expect(price(3, "Palette", "Carton (5.00 kg)")).toEqual({ perKgEur: null, perUnitEur: null });
   });

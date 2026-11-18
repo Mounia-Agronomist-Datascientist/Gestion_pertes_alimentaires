@@ -60,10 +60,15 @@ describe("bons de commande fournisseurs", () => {
     expect((await materialPriceAt(t.db, garlic.id, "2026-11-10"))).toMatchObject({ source: "bon_commande", perKgEur: 9.5 });
     expect(await materialPriceAt(t.db, garlic.id, "2026-11-09")).toBeNull();
 
-    // Prix au colis ramené au kg ; préparation d'encas achetée = matière première ; prix au litre jamais inventé.
+    // Prix au colis ramené au kg ; préparation d'encas achetée = matière première  ; prix au litre ramené au kg avec la densité.
     expect(await materialPriceAt(t.db, (await product("pave de saumon du pacifique msg sauvage keta a p s a 150gr"))!.id, "2026-11-10")).toMatchObject({ perKgEur: 6.5 });
     expect(await product("rue traversette preparation pomme fraise")).toMatchObject({ category: "matiere_premiere" });
-    expect(await materialPriceAt(t.db, (await product("huile de sesame"))!.id, "2026-12-01")).toBeNull();
+    // Prix au litre : ramené au kg avec la densité de référence de l'huile de sésame (0,92 kg/L).
+    const sesame = (await product("huile de sesame"))!;
+    expect(sesame.densityKgPerL).toBe(0.92);
+    expect(await materialPriceAt(t.db, sesame.id, "2026-12-01")).toMatchObject({ source: "bon_commande", perKgEur: 8.6107 });
+    // Lait de coco : pas dans le tableau, pas de densité ; prix à la poche seulement.
+    expect((await product("lait de coco thai kitchen poche"))!.densityKgPerL).toBeNull();
 
     const weeks = await t.db
       .select({ number: s.purchaseOrders.number, week: s.productionWeeks.number, year: s.productionWeeks.year })

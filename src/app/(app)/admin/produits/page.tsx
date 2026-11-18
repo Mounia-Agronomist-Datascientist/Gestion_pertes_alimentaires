@@ -6,7 +6,14 @@ import { listProductsForAdmin, listUnlistedGroups } from "@/modules/admin/produc
 import { toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { pricesInForce } from "@/modules/matieres/referentiel";
+import { referenceDensity, referenceDensityLabel } from "@/domain/densites";
 import { ProductsAdmin } from "./products-admin";
+
+/** Densité tirée du tableau de référence des liquides (et non saisie à la main) : son origine. */
+const densityReferenceOf = (name: string, density: number | null) => {
+  const ref = density == null ? null : referenceDensity(name);
+  return ref && ref.densityKgPerL === density ? referenceDensityLabel(ref) : null;
+};
 
 export const metadata = { title: "Produits — Administration" };
 
@@ -37,6 +44,7 @@ export default async function ProductsPage() {
           defaultUnit: p.defaultUnit,
           unitWeightKg: p.unitWeightKg,
           densityKgPerL: p.densityKgPerL,
+          densityReference: densityReferenceOf(p.name, p.densityKgPerL),
           source: p.source,
           active: p.active,
           melba: p.externalId?.startsWith("melba:") ?? false,
