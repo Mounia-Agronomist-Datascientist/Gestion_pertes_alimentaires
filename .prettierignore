@@ -1,0 +1,18 @@
+# Prettier ne formate que le code : la documentation, les données et les fichiers générés restent tels quels.
+*.md
+*.yaml
+*.yml
+*.json
+*.html
+*.css
+docs/
+public/
+src/db/migrations/
+tests/fixtures/
+imports-local/
+.next/
+.netlify/
+coverage/
+playwright-report/
+test-results/
+next-env.d.ts

@@ -153,6 +153,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   useEffect(() => {
     const local = toProductionLocalDate(new Date());
     if (local <= options.today) return;
+    // Date de l'appareil, connue seulement dans le navigateur (pas au rendu serveur) : lue après l'hydratation.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setToday(local);
     if (!init?.occurredOn) setOccurredOn(local);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,6 +171,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [lastSubzoneId, setLastSubzoneId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  // Stockage du navigateur, absent au rendu serveur : lu après l'hydratation.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setLastSubzoneId(readStorage(LAST_SUBZONE_KEY)), []);
 
   const zone = options.zones.find((z) => z.id === zoneId) ?? null;

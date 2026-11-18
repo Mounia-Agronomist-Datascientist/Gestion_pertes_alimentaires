@@ -69,6 +69,8 @@ export function OfflineProvider({ userId, children }: { userId: string; children
   }, [userId, refresh]);
 
   useEffect(() => {
+    // État du réseau, connu seulement dans le navigateur : lu après l'hydratation, puis suivi par les événements.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOffline(!navigator.onLine);
     void flush();
     const goOnline = () => {

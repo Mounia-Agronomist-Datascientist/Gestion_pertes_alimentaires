@@ -375,7 +375,6 @@ describe("déclaration de perte", () => {
   describe("corrections, annulations et historique", () => {
     let teamA: AuthUser;
     // Perte du 12/11 : dernier jour du délai le 19/11, hors délai le 20/11.
-    const DAY_7 = new Date("2026-11-19T15:00:00Z");
     const DAY_8 = new Date("2026-11-20T08:00:00Z");
 
     beforeAll(async () => {

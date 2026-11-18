@@ -52,6 +52,8 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
 
   useEffect(() => {
     const saved = loadLines(userId);
+    // Lignes gardées dans le stockage du navigateur, absent au rendu serveur : lues après l'hydratation.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLines(saved);
     setLoaded(true);
     if (saved.length === 0) setView({ kind: "wizard", key: 0, startStep: "zone", editIndex: null });

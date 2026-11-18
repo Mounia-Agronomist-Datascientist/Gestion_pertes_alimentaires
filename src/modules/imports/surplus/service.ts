@@ -14,7 +14,6 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
-import { ImportError } from "../service";
 import { parseLot, SURPLUS_SOURCE_LABELS, type SurplusSource } from "./parse-surplus";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
