@@ -87,7 +87,7 @@ describe("CO2e des pertes", () => {
         NOW,
       );
     // 10 barquettes de VI01 (6 compostées, 4 données) et 2 kg de carottes hors liste.
-    await declare({ weekItem: { kind: "plat", id: ref.vi01 } }, "comptage", 10, "barquette", [
+    await declare({ weekItem: { kind: "plat", id: ref.vi01 } }, "comptage", 10, "piece", [
       { destinationId: ref.compost, quantity: 6 },
       { destinationId: ref.don, quantity: 4 },
     ]);

@@ -204,6 +204,13 @@
       "when": 1795005888798,
       "tag": "0028_colis_saisis",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795012351443,
+      "tag": "0029_colis_de_la_perte",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "loss_declarations" ADD COLUMN "packaging_label" text;

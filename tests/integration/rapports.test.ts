@@ -72,7 +72,7 @@ describe("rapports PDF", () => {
         product: { weekItem: { kind: "plat", id: vi01 } },
         method: "comptage",
         quantity: 10,
-        unitCode: "barquette",
+        unitCode: "piece",
         causeId: ref.cause,
         destinations: [
           { destinationId: ref.tgtg, quantity: 6, recoveredAmountEur: 4.5 },

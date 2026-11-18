@@ -103,7 +103,9 @@ export function summarize(facts: readonly LossFact[], withCosts: boolean): Stats
       nonFood.events++;
       nonFood.quantities[f.netUnitCode] = (nonFood.quantities[f.netUnitCode] ?? 0) + f.netQuantity;
     }
-    if (f.netUnitCode === "barquette") barquettes += f.netQuantity;
+    // Une portion = une barquette (R10) : un plat fini compté en pièces (en cuisine, règle R25) compte aussi.
+    if (f.netUnitCode === "barquette" || (f.netUnitCode === "piece" && f.category === "produit_fini"))
+      barquettes += f.netQuantity;
     if (withCosts && f.cost) {
       cost.valued++;
       for (const k of COST_KEYS) cost[k] += f.cost[k];

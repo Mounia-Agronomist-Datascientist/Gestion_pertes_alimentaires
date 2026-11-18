@@ -9,6 +9,7 @@ import type { Period } from "@/domain/periodes";
 import { summarize } from "@/domain/statistiques";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { adjacentOf, loadFacts, type StatsFilters } from "./facts";
+import { zoneFlowTiles } from "./flux-zones";
 
 /** Types de destination du tableau de bord, dans l'ordre du cahier des charges (§19.1), puis les autres. */
 export const DESTINATION_KIND_STATS = [
@@ -36,6 +37,8 @@ export async function generalDashboard(db: Db, user: AuthUser, period: Period, f
     previous: previousFacts ? summarize(previousFacts, withCosts) : null,
     previousPeriod: previous,
     nextPeriod: next,
+    /** Une case par zone, dans le sens de la marche en avant. */
+    zoneFlow: await zoneFlowTiles(db, user, filters, facts, previousFacts, withCosts),
   };
 }
 

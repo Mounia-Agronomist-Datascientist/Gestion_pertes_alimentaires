@@ -332,3 +332,23 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   référence.
 - Sert à convertir en kg une perte saisie en litres (matière de la liste ou ingrédient de la semaine) et à ramener
   au kg un prix d'achat au litre.
+
+## R25 — Façons de mesurer selon le lieu (Phase 6, 18/11/2026)
+
+- **Partout** : kg (ou g) et unités du produit (pièces, converties avec le poids d'une pièce : « 10 hauts de cuisse
+  à 120 g ») ; litres pour un liquide (densité, R24).
+- **Gastros et contenants** (estimation par contenant, pesée dans des gastros) : seulement en **Cuisine** (dont le
+  Déboîtage) et en **Conditionnement**.
+- **Barquettes** : seulement en **Conditionnement** (et un futur poste de post-conditionnement de cette zone). En
+  cuisine, un plat perdu se compte en pièces : une pièce = une portion (R10), comptée aussi dans les « barquettes
+  perdues » des statistiques.
+- **Colis du fournisseur** (« sachet de 2 kg », « Bouteille 64 cl ») : seulement en **Réception** et en **Stockage**,
+  pour une matière du référentiel. Poids du colis lu dans le dernier bon de chaque fournisseur ou saisi à la main
+  (fiche produit) : contenu en kg ou g, en volume avec la densité, en pièces avec le poids d'une pièce ; sinon le
+  colis n'est pas proposé. « (KG) » est un produit vendu au kg, pas un colis. Le colis utilisé est gardé sur la
+  perte.
+- **Pièces en Réception et en Stockage** : proposées seulement si le poids d'une pièce est connu (jamais de perte à
+  0 kg) ; un consommable se compte toujours en pièces.
+- **Coût** : poids total × prix au kg en vigueur à la date de la perte (R23), affiché pendant la saisie.
+- Le serveur refait le contrôle : une unité non permise dans le lieu est refusée, aussi pour une correction.
+

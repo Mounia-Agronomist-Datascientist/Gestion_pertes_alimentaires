@@ -82,6 +82,7 @@ export default async function DeclarationDetailPage({
         <dt className="text-slate-500">Quantité</dt>
         <dd className="font-semibold">
           {fmtQuantity(d.netQuantity, d.netUnitCode, d.netKg)}
+          {d.packagingLabel && <span className="block text-sm font-normal text-slate-600">{d.packagingLabel}</span>}
           {d.kgStatus === "non_converti" && (
             <span className="block text-sm font-normal text-amber-700">Non convertie en kg</span>
           )}

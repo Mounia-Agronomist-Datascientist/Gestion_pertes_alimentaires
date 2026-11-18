@@ -42,9 +42,9 @@ export const METHOD_LABELS: Record<InputMethod, string> = {
 /** Unités proposées pour chaque méthode. */
 export const METHOD_UNITS: Record<InputMethod, readonly string[]> = {
   pesee: ["kg", "g"],
-  comptage: ["piece", "barquette", "contenant"],
+  comptage: ["piece", "colis", "barquette", "contenant"],
   estimation_contenant: ["gastro", "contenant"],
-  estimation_manuelle: ["kg", "g", "l", "ml", "piece", "barquette", "contenant", "gastro"],
+  estimation_manuelle: ["kg", "g", "l", "ml", "piece", "colis", "barquette", "contenant", "gastro"],
 };
 
 const uuid = z.uuid({ message: "Identifiant invalide" });
@@ -77,6 +77,12 @@ export const declarationInputSchema = z
     method: z.enum(INPUT_METHODS),
     quantity: positive.nullable().optional(),
     unitCode: z.string().nullable().optional(),
+    /** Colis fournisseur choisi (unité « colis ») : « bon_commande:<fournisseur> » ou « manuel:<fournisseur> ». */
+    packagingKey: z
+      .string()
+      .regex(/^(bon_commande|manuel):[0-9a-f-]{36}$/, "Colis invalide")
+      .nullable()
+      .optional(),
     tare: tareInput.nullable().optional(),
     causeId: uuid,
     destinations: z
@@ -118,6 +124,9 @@ export const declarationInputSchema = z
       if (v.quantity == null) ctx.addIssue({ code: "custom", message: "Indiquez la quantité", path: ["quantity"] });
       if (!v.unitCode || !METHOD_UNITS[v.method].includes(v.unitCode)) {
         ctx.addIssue({ code: "custom", message: "Unité non proposée pour cette méthode", path: ["unitCode"] });
+      }
+      if (v.unitCode === "colis" && !v.packagingKey) {
+        ctx.addIssue({ code: "custom", message: "Choisissez le colis", path: ["packagingKey"] });
       }
     }
   });

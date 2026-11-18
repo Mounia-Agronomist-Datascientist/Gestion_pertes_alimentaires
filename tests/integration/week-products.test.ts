@@ -80,7 +80,7 @@ describe("saisie à partir des produits de la semaine", () => {
         product,
         method: "comptage",
         quantity: 10,
-        unitCode: "barquette",
+        unitCode: "piece",
         causeId: ref.cause,
         destinations: [{ destinationId: ref.compost, quantity: 10, binNumber: "1" }],
         ...extra,

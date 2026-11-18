@@ -6,6 +6,13 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
 import { materialsForPlace } from "@/domain/matieres";
+import {
+  gastroTareAllowed,
+  type MeasureContext,
+  methodsFor,
+  packagingChoiceLabel,
+  unitsFor,
+} from "@/domain/saisie-mesure";
 import { computeProductionWeek, formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { computeNetWeight } from "@/domain/tares";
 import { convertToKg, type UnitKind } from "@/domain/unites";
@@ -14,7 +21,6 @@ import {
   type InputMethod,
   isNonFoodCategory,
   METHOD_LABELS,
-  METHOD_UNITS,
   PRODUCT_CATEGORIES,
   PRODUCT_CATEGORY_LABELS,
 } from "@/modules/declarations/input";
@@ -54,6 +60,8 @@ export interface WizardInitial {
   method: InputMethod;
   quantity: string;
   unitCode: string | null;
+  /** Colis fournisseur choisi (unité « colis »). */
+  packagingKey?: string | null;
   useTare: boolean;
   grossKg: string;
   gastroCounts: Record<string, number>;
@@ -138,6 +146,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [method, setMethod] = useState<InputMethod | null>(init?.method ?? null);
   const [quantity, setQuantity] = useState(init?.quantity ?? "");
   const [unitCode, setUnitCode] = useState<string | null>(init?.unitCode ?? null);
+  const [packagingKey, setPackagingKey] = useState<string | null>(init?.packagingKey ?? null);
   const [useTare, setUseTare] = useState(init?.useTare ?? false);
   const [grossKg, setGrossKg] = useState(init?.grossKg ?? "");
   const [gastroCounts, setGastroCounts] = useState<Record<string, number>>(init?.gastroCounts ?? {});
@@ -244,13 +253,26 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
   const listedProduct = product?.kind === "listed" ? options.products.find((p) => p.id === product.id) : undefined;
   const unit = options.units.find((u) => u.code === unitCode);
-  const net = useMemo((): { quantity: number; unitCode: string; kg: number | null; note?: string } | null => {
+  // Façons de mesurer permises dans ce lieu pour ce produit (règle R25 ; le serveur refait le contrôle).
+  const productPackagings = listedProduct ? (options.packagings[listedProduct.id] ?? []) : [];
+  const packaging = unitCode === "colis" ? (productPackagings.find((k) => k.key === packagingKey) ?? null) : null;
+  const measureContext: MeasureContext = {
+    zoneCode: zone?.code ?? "",
+    isConsumable,
+    pieceWeightKnown: (product?.kind === "week" ? product.unitWeightKg : listedProduct?.unitWeightKg) != null,
+    hasPackaging: productPackagings.length > 0,
+  };
+  const methods = methodsFor(INPUT_METHODS, measureContext);
+  const net = ((): { quantity: number; unitCode: string; kg: number | null; note?: string } | null => {
     if (useTare) {
       const r = tarePreview?.result;
       return r ? { quantity: r.netKg, unitCode: "kg", kg: r.netKg } : null;
     }
     const q = parseNumber(quantity);
     if (q == null || q <= 0 || !unit) return null;
+    if (unit.code === "colis") {
+      return packaging ? { quantity: q, unitCode: "colis", kg: Math.round(q * packaging.kg * 10_000) / 10_000 } : null;
+    }
     const conversion = convertToKg(
       q,
       { code: unit.code, kind: unit.kind as UnitKind, toBaseFactor: unit.toBaseFactor },
@@ -261,12 +283,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       },
     );
     return { quantity: q, unitCode: unit.code, kg: conversion.netKg, note: conversion.reason };
-  }, [useTare, tarePreview, quantity, unit, isConsumable, listedProduct, product]);
+  })();
 
   const unitLabel = (code: string) => options.units.find((u) => u.code === code)?.label ?? code;
   const netLabel = net ? `${fmt(net.quantity)} ${unitLabel(net.unitCode)}` : "";
 
-  const split = useMemo(() => {
+  const split = (() => {
     if (!net || destinationLines.length === 0) return null;
     const lines = destinationLines
       .map((l) => ({ destinationId: l.destinationId, quantity: parseNumber(l.quantity) ?? 0 }))
@@ -277,7 +299,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     } catch {
       return null;
     }
-  }, [net, destinationLines]);
+  })();
 
   const causes = options.causes.filter(
     (c) =>
@@ -293,10 +315,16 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       : false;
 
   // Coût matière estimé d'après le tome de la semaine (le serveur refait le calcul et le fige).
+  const listedPrice = listedProduct ? (options.prices[listedProduct.id] ?? null) : null;
   const costPreview =
     product?.kind === "week" && net
       ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost)
-      : null;
+      : listedPrice && net && listedProduct?.category !== "moule_plat_gratin"
+        ? lossCostBreakdown(
+            { netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode },
+            { food: listedPrice, packagingPerPortionEur: null, portionWeightKg: null },
+          )
+        : null;
 
   const isSale = (destinationId: string) =>
     options.destinations.find((d) => d.id === destinationId)?.financialRecovery ?? false;
@@ -350,8 +378,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   function chooseMethod(m: InputMethod) {
     setMethod(m);
     setUseTare(false);
-    const units = METHOD_UNITS[m];
-    setUnitCode(units[0] ?? null);
+    chooseUnit(unitsFor(m, measureContext)[0] ?? null);
+  }
+
+  function chooseUnit(code: string | null) {
+    setUnitCode(code);
+    setPackagingKey(code === "colis" ? (productPackagings[0]?.key ?? null) : null);
   }
 
   function chooseSingleDestination(destinationId: string) {
@@ -367,6 +399,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     setMethod(null);
     setQuantity("");
     setUnitCode(null);
+    setPackagingKey(null);
     setUseTare(false);
     setGrossKg("");
     setGastroCounts({});
@@ -406,6 +439,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       method,
       quantity: useTare ? null : net.quantity,
       unitCode: useTare ? null : unitCode,
+      packagingKey: !useTare && unitCode === "colis" ? packagingKey : null,
       tare: useTare
         ? {
             grossKg: parseNumber(grossKg),
@@ -438,6 +472,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           method,
           quantity,
           unitCode,
+          packagingKey,
           useTare,
           grossKg,
           gastroCounts,
@@ -725,14 +760,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       {step === "quantity" && (
         <Section title="Quelle quantité ?">
           <TileGrid>
-            {INPUT_METHODS.map((m) => (
+            {methods.map((m) => (
               <Tile key={m} onClick={() => chooseMethod(m)} selected={m === method} compact>
                 {METHOD_LABELS[m]}
               </Tile>
             ))}
           </TileGrid>
 
-          {method === "pesee" && !isConsumable && (
+          {method === "pesee" && gastroTareAllowed(measureContext) && (
             <label className="flex items-center gap-3 rounded-xl bg-white p-3 text-lg">
               <input
                 type="checkbox"
@@ -759,15 +794,32 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 className="field"
                 aria-label="Unité"
                 value={unitCode ?? ""}
-                onChange={(e) => setUnitCode(e.target.value)}
+                onChange={(e) => chooseUnit(e.target.value)}
               >
-                {METHOD_UNITS[method].map((code) => (
+                {unitsFor(method, measureContext).map((code) => (
                   <option key={code} value={code}>
                     {unitLabel(code)}
                   </option>
                 ))}
               </select>
             </div>
+          )}
+
+          {method && !useTare && unitCode === "colis" && (
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">Colis du fournisseur</span>
+              <select className="field" value={packagingKey ?? ""} onChange={(e) => setPackagingKey(e.target.value)}>
+                {productPackagings.map((k) => (
+                  <option key={k.key} value={k.key}>
+                    {packagingChoiceLabel(
+                      { packagingLabel: k.label, contentQuantity: null, contentUnit: null, supplier: k.supplier },
+                      k.kg,
+                    )}
+                    {k.source === "manuel" ? " · saisi à la main" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
 
           {method && useTare && (
@@ -823,7 +875,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               {net.kg != null && net.unitCode !== "kg" ? (
                 <>
                   Soit <strong>{fmt(net.kg)} kg</strong>
+                  {listedProduct && costPreview?.grossEur != null && <> · ≈ {fmtEuro(costPreview.grossEur)}</>}
                 </>
+              ) : net.kg != null && listedProduct && costPreview?.grossEur != null ? (
+                <>≈ {fmtEuro(costPreview.grossEur)}</>
               ) : (
                 (net.note ?? (isConsumable ? "Consommable : compté en unités, pas en kg alimentaires." : null))
               )}
@@ -983,6 +1038,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 tarePreview?.result &&
                 ` (brut ${fmt(tarePreview.result.grossKg)} kg − tare ${fmt(tarePreview.result.tareTotalKg)} kg)`}
               {!useTare && net.kg != null && net.unitCode !== "kg" && ` = ${fmt(net.kg)} kg`}
+              {packaging && (
+                <span className="block text-sm text-slate-500">
+                  {packaging.label ?? "Colis"} — {packaging.supplier}
+                </span>
+              )}
             </dd>
             <EditLink onClick={() => setStep("quantity")} />
             {product?.kind === "week" && (
@@ -1010,6 +1070,19 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                       de la perte.
                     </span>
                   )}
+                </dd>
+                <span />
+              </>
+            )}
+            {listedProduct && listedPrice && (
+              <>
+                <dt className="text-slate-500">Coût brut</dt>
+                <dd>
+                  {costPreview?.grossEur != null ? `≈ ${fmtEuro(costPreview.grossEur)}` : "non calculable"}
+                  <span className="block text-sm text-slate-500">
+                    {listedPrice.perKgEur != null && `${fmtEuro(listedPrice.perKgEur)} / kg aujourd'hui ; `}
+                    l&apos;enregistrement prend le prix en vigueur à la date de la perte.
+                  </span>
                 </dd>
                 <span />
               </>

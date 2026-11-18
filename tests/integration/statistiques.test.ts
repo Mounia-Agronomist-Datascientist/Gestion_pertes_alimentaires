@@ -92,7 +92,7 @@ describe("lecture des pertes pour les statistiques", () => {
     await createDeclaration(
       t.db,
       teamD,
-      input("2026-11-02", dish, "comptage", 10, "barquette", [
+      input("2026-11-02", dish, "comptage", 10, "piece", [
         { destinationId: tgtg, quantity: 10, recoveredAmountEur: 6 },
       ]),
       NOW,
@@ -100,23 +100,21 @@ describe("lecture des pertes pour les statistiques", () => {
     const corrected = await createDeclaration(
       t.db,
       teamD,
-      input("2026-11-02", dish, "comptage", 2, "barquette", [{ destinationId: compost, quantity: 2, binNumber: "1" }]),
+      input("2026-11-02", dish, "comptage", 2, "piece", [{ destinationId: compost, quantity: 2, binNumber: "1" }]),
       NOW,
     );
     await correctDeclaration(
       t.db,
       teamD,
       corrected.id,
-      input("2026-11-02", dish, "comptage", 3, "barquette", [{ destinationId: don, quantity: 3 }]),
+      input("2026-11-02", dish, "comptage", 3, "piece", [{ destinationId: don, quantity: 3 }]),
       { reason: "Recompté", expectedRevision: 1 },
       NOW,
     );
     const cancelled = await createDeclaration(
       t.db,
       teamD,
-      input("2026-11-02", dish, "comptage", 50, "barquette", [
-        { destinationId: compost, quantity: 50, binNumber: "1" },
-      ]),
+      input("2026-11-02", dish, "comptage", 50, "piece", [{ destinationId: compost, quantity: 50, binNumber: "1" }]),
       NOW,
     );
     await cancelDeclaration(t.db, admin, cancelled.id, { reason: "Doublon", expectedRevision: 1 }, NOW);

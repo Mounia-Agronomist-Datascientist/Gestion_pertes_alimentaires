@@ -23,6 +23,8 @@ import {
   setProductPlacement,
 } from "@/modules/matieres/fiche";
 import { materialPriceAt } from "@/modules/matieres/referentiel";
+import { packagingOptions } from "@/modules/matieres/colis";
+import { createDeclaration } from "@/modules/declarations/service";
 import { materialsOfWeek } from "@/modules/matieres/semaine";
 import { createTestDb } from "../helpers/test-db";
 
@@ -257,7 +259,92 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     );
     expect((await productSheet(t.db, admin, product.id, "2026-12-31"))!.manualPackagings).toHaveLength(1);
     expect(
-      (await t.db.select().from(s.auditLog).where(eq(s.auditLog.entity, "manual_packaging"))).map((x) => x.action),
-    ).toEqual(["create", "update", "create", "update", "delete"]);
+      (await t.db.select().from(s.auditLog).where(eq(s.auditLog.entity, "manual_packaging")))
+        .map((x) => x.action)
+        .sort(),
+    ).toEqual(["create", "create", "delete", "update", "update"]);
+  });
+
+  it("perte en colis en Réception : poids du colis, coût au prix en vigueur ; unités refusées hors de leur lieu", async () => {
+    const NOW = new Date("2026-11-13T10:00:00Z");
+    const sub = async (code: string) => (await t.db.select().from(s.subzones).where(eq(s.subzones.code, code)))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const options = await packagingOptions(t.db);
+    // Une matière dont le colis est en kg (« Sachet 5kg ») et qui a un prix au kg.
+    let chosen: { productId: string; key: string; kg: number; label: string | null; supplier: string } | null = null;
+    for (const [productId, list] of options) {
+      const k = list.find((o) => o.source === "bon_commande");
+      if (k && (await materialPriceAt(t.db, productId, "2026-11-12"))?.perKgEur != null) {
+        chosen = { productId, ...k };
+        break;
+      }
+    }
+    expect(chosen).not.toBeNull();
+    const c = chosen!;
+    const base = {
+      occurredOn: "2026-11-12",
+      subzoneId: await sub("REC_RECEPTION"),
+      product: { productId: c.productId },
+      causeId: cause,
+      destinations: [{ destinationId: bin, quantity: 2, binNumber: "1" }],
+    };
+    const d = await createDeclaration(
+      t.db,
+      admin,
+      { ...base, method: "comptage", quantity: 2, unitCode: "colis", packagingKey: c.key },
+      NOW,
+    );
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
+    const price = (await materialPriceAt(t.db, c.productId, "2026-11-12"))!.perKgEur!;
+    expect(row).toMatchObject({
+      unitCode: "colis",
+      netKg: Math.round(2 * c.kg * 10_000) / 10_000,
+      kgStatus: "converti",
+      conversionFactorUsed: c.kg,
+      packagingLabel: `${c.label ?? "Colis"} — ${c.supplier}`,
+      measurementMethod: "conversion_reference",
+    });
+    expect(row!.materialCostEur).toBeCloseTo(2 * c.kg * price, 2);
+
+    // Colis inconnu, gastros et contenants en Réception, barquettes hors Conditionnement : refusés.
+    await expect(
+      createDeclaration(
+        t.db,
+        admin,
+        { ...base, method: "comptage", quantity: 1, unitCode: "colis", packagingKey: `manuel:${c.productId}` },
+        NOW,
+      ),
+    ).rejects.toThrow(/Colis inconnu/);
+    await expect(
+      createDeclaration(t.db, admin, { ...base, method: "estimation_contenant", quantity: 1, unitCode: "gastro" }, NOW),
+    ).rejects.toThrow(/Unité non proposée dans ce lieu/);
+    await expect(
+      createDeclaration(t.db, admin, { ...base, method: "comptage", quantity: 1, unitCode: "barquette" }, NOW),
+    ).rejects.toThrow(/Unité non proposée dans ce lieu/);
+    // Pièces en Réception : seulement si le poids d'une pièce est connu.
+    const [noWeight] = await t.db.select().from(s.products).where(eq(s.products.id, c.productId));
+    if (noWeight!.unitWeightKg == null) {
+      await expect(
+        createDeclaration(t.db, admin, { ...base, method: "comptage", quantity: 1, unitCode: "piece" }, NOW),
+      ).rejects.toThrow(/Unité non proposée dans ce lieu/);
+    }
+    // Le colis n'est pas proposé en Cuisine.
+    await expect(
+      createDeclaration(
+        t.db,
+        admin,
+        {
+          ...base,
+          subzoneId: await sub("CUI_CUISINE"),
+          teamId: (await t.db.select().from(s.teams).limit(1))[0]!.id,
+          method: "comptage",
+          quantity: 1,
+          unitCode: "colis",
+          packagingKey: c.key,
+        },
+        NOW,
+      ),
+    ).rejects.toThrow(/Unité non proposée dans ce lieu/);
   });
 });

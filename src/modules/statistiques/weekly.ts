@@ -12,6 +12,7 @@ import { type LossFact, type RankBy, rankGroups, type StatsSummary, summarize } 
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { weekComparison } from "./evolution";
 import { adjacentOf, loadFacts, type StatsFilters } from "./facts";
+import { zoneFlowTiles } from "./flux-zones";
 
 export interface WeeklyRow {
   key: string;
@@ -121,6 +122,8 @@ export async function weeklySummary(
     withCosts,
     by,
     summary,
+    /** Une case par zone, dans le sens de la marche en avant. */
+    zoneFlow: await zoneFlowTiles(db, user, filters, current, previousPeriod ? previous : null, withCosts),
     comparison,
     previousPeriod,
     byZone,

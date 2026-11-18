@@ -78,7 +78,7 @@ describe("recettes récupérées et coût net", () => {
         product: { weekItem: { kind: "plat", id: vi01 } },
         method: "comptage",
         quantity: 10,
-        unitCode: "barquette",
+        unitCode: "piece",
         causeId: ref.cause,
         destinations,
       },

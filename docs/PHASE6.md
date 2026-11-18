@@ -439,3 +439,31 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
   le journal d'audit. Migration **0028** (`manual_packagings`) ; 1 test d'intégration (bons redéposés : les deux
   colis restent) et parcours vérifié en local (ajout, remplacement, refus d'un contenu sans unité, retrait).
 
+## Saisie par lieu et pertes par zone (18/11/2026)
+
+**Constat** : une perte simulée en Réception (farce bœuf/veau, « 50 contenants » en estimation par contenant)
+était enregistrée sans kg ni coût : un gastro ou un contenant n'a pas de poids de référence. Même chose pour
+5 pièces de câpres en Stockage (poids d'une pièce inconnu).
+
+**Décisions du 18/11/2026** : règle R25 (unités selon le lieu, colis fournisseur en Réception et Stockage, pièces
+seulement avec un poids connu dans ces deux zones) ; et dans les statistiques, une case par zone dans le sens de la
+marche en avant, en tête de « Vue générale » et de « Synthèse de la semaine ».
+
+- **Saisie** : l'étape « Quelle quantité ? » ne propose que les façons de mesurer et les unités permises dans le lieu
+  pour le produit choisi. En Réception et Stockage, l'unité **colis** avec le choix du colis (« sachet de 2kg —
+  Guasch (2 kg) ») ; aperçu « Soit 4 kg · ≈ 38,00 € » (prix en vigueur aujourd'hui ; l'enregistrement prend celui
+  de la date de la perte). Le récapitulatif montre aussi le coût d'une matière du référentiel. Le colis est gardé
+  sur la perte (détail, correction). Migration **0029** (`loss_declarations.packaging_label`) ; unité « colis »
+  ajoutée aux référentiels (`db:setup`).
+- **Statistiques** : une case par zone (Réception → Stockage → Cuisine → Conditionnement → Plonge) avec une jauge =
+  **part de la zone dans les kg perdus**, les kg, le coût brut (profils qui voient les euros), l'évolution des kg
+  (hausse, baisse, stable, nouveau) par rapport à la période précédente et les pertes non converties. Un profil
+  limité à ses zones ne voit que celles où il a des pertes.
+- **Tests existants adaptés** : les plats perdus en cuisine étaient comptés en barquettes dans les jeux d'essai ;
+  ils le sont en pièces (même poids, même coût).
+- **Vérifié** : 2 tests unitaires (règle, poids d'un colis) + 2 (cases par zone) et 1 test d'intégration (perte en
+  colis en Réception, refus des gastros, barquettes, colis en Cuisine, pièces sans poids) ; en local (Chrome) :
+  farce bœuf/veau en Réception, 2 colis = 4 kg ≈ 38,00 €, sans gastros ; synthèse S47 avec les 5 cases.
+- **En local, seuls 8 bons sont déposés** : 48 matières ont un colis. Le dépôt du ZIP de tous les bons du Drive (en
+  local comme en ligne) donnera le colis de toutes les matières commandées.
+

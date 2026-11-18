@@ -19,7 +19,7 @@ Accueil → **Déclarer une perte**, puis répondre aux questions :
 | **Où a eu lieu la perte ?** | La zone, puis le poste (cuisine, déboîtage…) |
 | **Quelle équipe ?** | Seulement pour les comptes sans équipe |
 | **Quel produit ?** | Le plat de la semaine, une sous-recette ou un ingrédient. Taper quelques lettres ou le code (VI01) pour chercher. Absent ? « Produit absent de la liste » |
-| **Quelle quantité ?** | **Pesée** (kg ; cocher « Pesé dans des gastros » pour retirer la tare), **Comptage** (barquettes, pièces), **Estimation par contenant** ou **Estimation manuelle** |
+| **Quelle quantité ?** | **Pesée** (kg), **Comptage** ou **Estimation**. Partout : kg ou pièces du produit. Réception et Stockage : aussi le **colis du fournisseur** (« sachet de 2 kg »), converti en kg. Cuisine et Conditionnement : aussi les **gastros** (et « Pesé dans des gastros » pour retirer la tare). Conditionnement : aussi les **barquettes** |
 | **Pourquoi ?** | La cause. Aucune ne convient : « Autres pertes » + un commentaire, ou « Proposer une nouvelle cause » |
 | **Où part la perte ?** | Compost (Les Alchimistes), ordures ménagères, personnel, don, réutilisation… Plusieurs destinations : « Répartir entre plusieurs destinations ». N° de poubelle des Alchimistes : à noter s'il est demandé |
 | **Vérifier et valider** | Relire, corriger avec « Modifier », puis **Valider la perte** |

@@ -13,6 +13,8 @@ export const UNITS = [
   { code: "barquette", label: "barquette(s)", kind: "comptage", toBaseFactor: 1 },
   { code: "contenant", label: "contenant(s)", kind: "comptage", toBaseFactor: 1 },
   { code: "gastro", label: "gastro(s)", kind: "comptage", toBaseFactor: 1 },
+  // Colis fournisseur (Réception, Stockage ; règle R25) : converti avec le poids du colis, jamais avec un facteur fixe.
+  { code: "colis", label: "colis", kind: "comptage", toBaseFactor: 1 },
 ] as const;
 
 export const TEAMS = [

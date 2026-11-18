@@ -12,6 +12,7 @@ import { PeriodFields } from "./period-fields";
 export const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 export const num = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
 export const pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
+import type { ZoneFlowTile } from "@/domain/flux-zones";
 export { isUuid, type Params, type StatsContext } from "@/modules/statistiques/context";
 
 /** Période et filtres de la page, lus dans l'adresse. */
@@ -496,5 +497,80 @@ export function ExportLinks({
         {note ?? "Les tableaux de cet onglet, avec la même période et les mêmes filtres."}
       </p>
     </section>
+  );
+}
+
+/**
+ * Une case par zone dans le sens de la marche en avant (décision du 18/11/2026) : jauge = part de la zone dans les
+ * kg perdus, coût brut, kg, évolution des kg par rapport à la période précédente.
+ */
+export function ZoneFlow({ tiles, previousLabel }: { tiles: ZoneFlowTile[]; previousLabel: string | null }) {
+  if (tiles.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2" aria-label="Pertes par zone, dans le sens de la marche en avant">
+      <h2 className="text-lg font-semibold">Pertes par zone, dans le sens de la marche en avant</h2>
+      <ol className="flex flex-col gap-1 lg:flex-row lg:items-stretch lg:gap-0">
+        {tiles.map((t, i) => (
+          <li key={t.zoneId} className="flex min-w-0 flex-col items-stretch lg:flex-1 lg:flex-row lg:items-center">
+            {i > 0 && (
+              <span aria-hidden className="self-center px-1 text-xl text-slate-400 lg:py-0">
+                <span className="lg:hidden">↓</span>
+                <span className="hidden lg:inline">→</span>
+              </span>
+            )}
+            <ZoneTile tile={t} previousLabel={previousLabel} />
+          </li>
+        ))}
+      </ol>
+      <p className="text-sm text-slate-500">
+        Jauge : part de la zone dans les kg perdus de la période. Évolution : kg perdus par rapport à{" "}
+        {previousLabel ?? "la période précédente"}.
+      </p>
+    </section>
+  );
+}
+
+function ZoneTile({ tile: t, previousLabel }: { tile: ZoneFlowTile; previousLabel: string | null }) {
+  const share = Math.round(t.share * 100);
+  const change =
+    t.previousKg == null
+      ? null
+      : t.change == null
+        ? t.kg > 0
+          ? { text: "nouveau", tone: "text-amber-800" }
+          : { text: "= stable", tone: "text-slate-600" }
+        : t.change > 0.005
+          ? { text: `▲ hausse +${pct.format(t.change)}`, tone: "text-amber-800" }
+          : t.change < -0.005
+            ? { text: `▼ baisse −${pct.format(-t.change)}`, tone: "text-teal-800" }
+            : { text: "= stable", tone: "text-slate-600" };
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-sm">
+      <span className="font-semibold">{t.name}</span>
+      <div
+        className="h-3 w-full overflow-hidden rounded-full bg-slate-100"
+        role="meter"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={share}
+        aria-label={`Part des kg perdus : ${share} %`}
+      >
+        <div className="h-full rounded-full bg-teal-600" style={{ width: `${share}%` }} />
+      </div>
+      <span className="text-sm text-slate-600">{share} % des kg perdus</span>
+      <span className="text-2xl font-bold">{num.format(t.kg)} kg</span>
+      {t.grossEur != null && <span className="text-lg font-semibold text-slate-700">{euro.format(t.grossEur)}</span>}
+      {change && (
+        <span className={`text-sm font-medium ${change.tone}`}>
+          {change.text}
+          {previousLabel && <span className="font-normal text-slate-500"> vs {previousLabel}</span>}
+        </span>
+      )}
+      {t.notConverted > 0 && (
+        <span className="text-xs text-amber-800">
+          + {t.notConverted} perte{t.notConverted > 1 ? "s" : ""} non convertie{t.notConverted > 1 ? "s" : ""} en kg
+        </span>
+      )}
+    </div>
   );
 }

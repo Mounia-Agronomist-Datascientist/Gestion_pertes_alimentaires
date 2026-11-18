@@ -2,7 +2,7 @@
 # Détail historique : docs/SUIVI.md. Mettre à jour à chaque commit d'étape.
 
 mise_a_jour: 2026-11-18
-dernier_commit: "Qualité du code : ESLint et Prettier (formatage, git blame)"
+dernier_commit: "Saisie par lieu (colis en Réception et Stockage) et pertes par zone"
 
 en_cours:
   phase: 6
@@ -33,9 +33,9 @@ etapes_phase_6:
   - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: faite, date: 2026-11-18 }
 
 base_de_donnees:
-  derniere_migration: "0028_colis_saisis"
+  derniere_migration: "0029_colis_de_la_perte"
   production:
-    a_appliquer: "0014 à 0028"
+    a_appliquer: "0014 à 0029"
     puis:
       - "Compléter depuis les tomes importés (Administration → Produits)"
       - "Dépôt du ZIP des bons de commande"

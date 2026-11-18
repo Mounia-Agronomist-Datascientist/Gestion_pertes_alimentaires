@@ -303,7 +303,7 @@ describe("ventes et dons des surplus (fichiers de l'entreprise)", () => {
       product: { weekItem: { kind: "plat" as const, id: vi01Id } },
       method: "comptage" as const,
       quantity: 10,
-      unitCode: "barquette",
+      unitCode: "piece",
       causeId: cause,
       destinations,
     });

@@ -17,6 +17,7 @@ import {
   statsContext,
   SummaryNotes,
   SummaryTiles,
+  ZoneFlow,
 } from "./shared";
 
 export const metadata = { title: "Statistiques — Pertes" };
@@ -46,6 +47,10 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
         withCosts={dashboard.withCosts}
       />
       <SummaryNotes summary={dashboard.current} withCosts={dashboard.withCosts} />
+      <ZoneFlow
+        tiles={dashboard.zoneFlow}
+        previousLabel={dashboard.previousPeriod ? periodLabel(dashboard.previousPeriod) : null}
+      />
 
       <Card title="Devenir des pertes alimentaires">
         <DestinationBars summary={dashboard.current} />

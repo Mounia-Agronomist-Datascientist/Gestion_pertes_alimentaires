@@ -23,6 +23,7 @@ import {
   statsContext,
   SummaryNotes,
   SummaryTiles,
+  ZoneFlow,
 } from "../shared";
 import { PrintButton } from "./print-button";
 
@@ -95,6 +96,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         previousLabel={previousLabel}
         withCosts={withCosts}
       />
+      <ZoneFlow tiles={data.zoneFlow} previousLabel={previousLabel} />
       {comparison.average && (
         <p className="text-sm text-slate-600">
           Moyenne des {comparison.average.weeks} semaines d&apos;avant : {num.format(comparison.average.foodKg ?? 0)} kg

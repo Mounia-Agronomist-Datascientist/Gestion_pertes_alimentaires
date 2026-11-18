@@ -10,7 +10,9 @@ import { DestinationError, validateDestinationSplit } from "@/domain/destination
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
 import { computeNetWeight, type GastroLine, type SupportTare, TareError } from "@/domain/tares";
+import { gastroTareAllowed, type MeasureContext, unitsFor } from "@/domain/saisie-mesure";
 import { convertToKg, type KgStatus, QuantityError, type UnitKind } from "@/domain/unites";
+import { packagingOptions } from "@/modules/matieres/colis";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules/auth/permissions";
 import { portionPackagingCost } from "@/modules/admin/packaging";
@@ -221,6 +223,27 @@ async function prepareDeclaration(
   }
   const isConsumable = isNonFoodCategory(product.category);
 
+  // ─── Façon de mesurer permise dans ce lieu pour ce produit (règle R25) ──────
+  const packaging =
+    !input.tare && input.unitCode === "colis" && product.id
+      ? ((await packagingOptions(db, [product.id])).get(product.id)?.find((o) => o.key === input.packagingKey) ?? null)
+      : null;
+  if (!input.tare && input.unitCode === "colis" && !packaging) {
+    throw new DeclarationError("Colis inconnu pour ce produit : choisissez un colis de la liste");
+  }
+  const measureContext: MeasureContext = {
+    zoneCode: place.zone.code,
+    isConsumable,
+    pieceWeightKnown: product.unitWeightKg != null,
+    hasPackaging: packaging != null,
+  };
+  if (input.tare && !gastroTareAllowed(measureContext)) {
+    throw new DeclarationError("Les gastros ne sont proposés qu'en cuisine et en conditionnement");
+  }
+  if (!input.tare && !unitsFor(input.method, measureContext).includes(input.unitCode!)) {
+    throw new DeclarationError("Unité non proposée dans ce lieu pour ce produit");
+  }
+
   // ─── Quantité ───────────────────────────────────────────────────────────
   let measurement: {
     quantity: number;
@@ -292,15 +315,18 @@ async function prepareDeclaration(
     const [unit] = await db.select().from(s.units).where(eq(s.units.code, input.unitCode!));
     if (!unit || !unit.active) throw new DeclarationError("Unité inconnue");
     const quantity = roundQuantity(input.quantity!);
-    const conversion = convertToKg(
-      quantity,
-      { code: unit.code, kind: unit.kind as UnitKind, toBaseFactor: unit.toBaseFactor },
-      {
-        isConsumable,
-        unitWeightKg: product.unitWeightKg,
-        densityKgPerL: product.densityKgPerL,
-      },
-    );
+    // Colis fournisseur : poids du colis choisi (lu dans les bons ou saisi à la main).
+    const conversion = packaging
+      ? { netKg: roundQuantity(quantity * packaging.kg), kgStatus: "converti" as const, factorUsed: packaging.kg }
+      : convertToKg(
+          quantity,
+          { code: unit.code, kind: unit.kind as UnitKind, toBaseFactor: unit.toBaseFactor },
+          {
+            isConsumable,
+            unitWeightKg: product.unitWeightKg,
+            densityKgPerL: product.densityKgPerL,
+          },
+        );
     measurement = {
       quantity,
       unitCode: unit.code,
@@ -457,6 +483,7 @@ async function prepareDeclaration(
       netKg: measurement.netKg,
       kgStatus: measurement.kgStatus,
       conversionFactorUsed: measurement.factorUsed,
+      packagingLabel: packaging ? `${packaging.label ?? "Colis"} — ${packaging.supplier}` : null,
       causeId: cause.id,
       causeName: cause.name,
       comment: input.comment || null,

@@ -115,6 +115,8 @@ export const lossDeclarations = pgTable(
     netKg: numeric("net_kg", { precision: 12, scale: 4, mode: "number" }),
     kgStatus: kgStatusEnum("kg_status").notNull(),
     conversionFactorUsed: numeric("conversion_factor_used", { precision: 12, scale: 4, mode: "number" }),
+    /** Colis fournisseur utilisé pour une perte comptée en colis (« Sachet 5kg — Pro à Pro »), règle R25. */
+    packagingLabel: text("packaging_label"),
 
     /**
      * Coût matière figé à la saisie (docs/PHASE2.md, étape 2.6) : coûts du tome Melba de la semaine pour un

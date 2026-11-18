@@ -7,6 +7,7 @@ import { requireUser } from "@/modules/auth/next-session";
 import { INPUT_METHODS, type InputMethod } from "@/modules/declarations/input";
 import { getDeclarationOptions } from "@/modules/declarations/options";
 import { getDeclarationDetail } from "@/modules/declarations/queries";
+import { packagingOptions } from "@/modules/matieres/colis";
 import { DeclarationWizard, type WizardInitial } from "../../../declarer/declaration-wizard";
 
 export const metadata = { title: "Corriger une perte — Pertes" };
@@ -25,6 +26,13 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     ? (d.measurementMethod as InputMethod)
     : "comptage";
   const support = detail.containers.find((c) => c.kind === "support");
+  // Colis de la perte d'origine, retrouvé par son libellé (« Sachet 5kg — Pro à Pro ») parmi les colis du produit.
+  const packagingKey =
+    d.unitCode === "colis" && d.productId
+      ? ((await packagingOptions(db, [d.productId]))
+          .get(d.productId)
+          ?.find((k) => `${k.label ?? "Colis"} — ${k.supplier}` === d.packagingLabel)?.key ?? null)
+      : null;
 
   // Produit choisi dans l'import de la semaine : il reste valable tant que la date de la perte ne change pas de semaine.
   const weekItem = d.weekRecipeId
@@ -64,6 +72,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     method,
     quantity: useTare ? "" : String(d.quantity),
     unitCode: useTare ? null : d.unitCode,
+    packagingKey,
     useTare,
     grossKg: useTare ? String(d.quantity) : "",
     gastroCounts: Object.fromEntries(

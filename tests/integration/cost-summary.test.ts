@@ -85,7 +85,7 @@ describe("synthèse des coûts d'une semaine", () => {
           product,
           method: "comptage",
           quantity,
-          unitCode: "barquette",
+          unitCode: "piece",
           causeId: cause,
           destinations,
         },

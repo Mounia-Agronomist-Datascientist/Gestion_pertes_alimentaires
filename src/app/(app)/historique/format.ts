@@ -23,6 +23,7 @@ export const UNIT_LABELS: Record<string, string> = {
   barquette: "barquette(s)",
   contenant: "contenant(s)",
   gastro: "gastro(s)",
+  colis: "colis",
 };
 
 export const STATUS_LABELS = {
