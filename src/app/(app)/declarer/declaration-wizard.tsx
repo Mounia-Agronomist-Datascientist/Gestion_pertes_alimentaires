@@ -680,10 +680,16 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
         <Section title="Où a eu lieu la perte ?">
           <TileGrid>
             {options.zones.map((z) => (
-              <Tile key={z.id} onClick={() => chooseZone(z.id)} selected={z.id === zoneId}>
+              <Tile
+                key={z.id}
+                onClick={() => chooseZone(z.id)}
+                selected={z.id === zoneId}
+                disabled={z.allowed === false}
+              >
                 {z.number ? `${z.number}. ` : ""}
                 {z.name}
                 {z.id === lastZoneId && <small className="font-normal opacity-80">Dernière utilisée</small>}
+                {z.allowed === false && <small className="font-normal">Pas dans vos zones</small>}
               </Tile>
             ))}
           </TileGrid>
@@ -1264,20 +1270,30 @@ function Tile({
   onClick,
   selected = false,
   compact = false,
+  disabled = false,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   selected?: boolean;
   compact?: boolean;
+  /** Visible mais pas choisissable (zone d'un autre responsable). */
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-pressed={selected}
       className={`flex flex-col items-start justify-center gap-0.5 rounded-2xl border-2 p-4 text-left font-semibold ${
         compact ? "min-h-14 text-lg" : "min-h-20 text-xl"
-      } ${selected ? "border-teal-700 bg-teal-50" : "border-transparent bg-white shadow-sm"}`}
+      } ${
+        disabled
+          ? "cursor-not-allowed border-transparent bg-slate-100 text-slate-400"
+          : selected
+            ? "border-teal-700 bg-teal-50"
+            : "border-transparent bg-white shadow-sm"
+      }`}
     >
       {children}
     </button>

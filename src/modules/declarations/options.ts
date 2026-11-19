@@ -106,11 +106,13 @@ export async function getDeclarationOptions(
   // Numéro de la zone dans le sens de la marche en avant (1 Réception … 5 Plonge), le même pour tous, même pour un
   // responsable qui ne voit que ses zones.
   const zoneNumber = new Map(zoneRows.map((z, i) => [z.id, i + 1]));
+  // Toutes les zones sont montrées, pour que chacun sache où il se situe ; un responsable de zone ne peut choisir que
+  // les siennes (les autres sont grisées ; le serveur refuse aussi une perte hors de ses zones).
   const zones = zoneRows
-    .filter((z) => !limitedToOwnZones || user.zoneIds.includes(z.id))
     .map((z) => ({
       id: z.id,
       number: zoneNumber.get(z.id)!,
+      allowed: !limitedToOwnZones || user.zoneIds.includes(z.id),
       code: z.code,
       name: z.name,
       subzones: subzoneRows
