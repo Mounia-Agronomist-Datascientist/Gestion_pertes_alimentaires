@@ -93,11 +93,13 @@ function headerColumns(items: readonly PdfItem[]): { columns: Column[]; y: numbe
   // En-tête sur une à trois lignes (« Prix / unitaire / HT »).
   const near = items.filter((i) => Math.abs(i.y - designation.y) <= 13);
   const at = (re: RegExp) => near.find((i) => re.test(clean(i.text)));
-  const code = at(/^Code$/i);
+  // « Code » seul (en-tête sur deux lignes) ou « Code fournisseur » (en-tête sur une ligne, bons courts).
+  const code = at(/^Code( fournisseur)?$/i);
   const category = at(/^Catégorie$/i);
   const quantity = at(/^Qté$/i);
   const packaging = at(/^Conditionnement$/i);
-  const total = at(/^Total HT$/i);
+  // « Total HT » en un morceau, ou « Total » au-dessus de « HT » (en-tête sur deux lignes).
+  const total = at(/^Total HT$/i) ?? at(/^Total$/i);
   // « Prix unitaire HT » : en un ou plusieurs morceaux ; son bord droit est celui du morceau le plus à droite avant « Total HT ».
   const priceParts = near.filter((i) => /prix|unitaire|^HT$/i.test(clean(i.text)) && (!total || i.x < total.x));
   if (!code || !category || !quantity || !packaging || !total || !priceParts.length) return null;
@@ -152,10 +154,16 @@ const supplierOfFileName = (fileName: string) =>
     .match(/^\d{8}_(.+?)_S\d{1,2}_BC\b/i)?.[1]
     ?.trim() || null;
 
-/** « S47 » dans le nom du fichier (« 20261110_APO_S47_BC 20261104036.pdf »), à défaut dans l'objet. */
+/**
+ * « S47 » dans le nom du fichier (« 20261110_APO_S47_BC 20261104036.pdf »), à défaut dans l'objet. Une semaine
+ * impossible (« S00 ») n'est pas gardée : on prend celle de l'objet, sinon le bon reste sans semaine de production.
+ */
 const weekOf = (fileName: string, subject: string | null) => {
-  const m = fileName.match(/_S(\d{1,2})_/i) ?? subject?.match(/\bS\s?(\d{1,2})\b/i);
-  return m ? Number(m[1]) : null;
+  const valid = (m: RegExpMatchArray | null | undefined) => {
+    const n = m ? Number(m[1]) : null;
+    return n != null && n >= 1 && n <= 53 ? n : null;
+  };
+  return valid(fileName.match(/_S(\d{1,2})_/i)) ?? valid(subject?.match(/\bS\s?(\d{1,2})\b/i));
 };
 
 export function parsePurchaseOrder(fileName: string, allItems: readonly PdfItem[]): PurchaseOrderParse {
@@ -256,7 +264,8 @@ export function parsePurchaseOrder(fileName: string, allItems: readonly PdfItem[
       const position = lines.length + 1;
       const designation = text("designation", idx);
       const priceText = text("price", idx);
-      const price = priceText.match(/^(\d[\d,]*(?:\.\d+)?)\s*€\s*\/\s*(.+)$/);
+      // « 9.59 € / kg » ; les bons du printemps 2026 n'écrivent pas le symbole (« 0.45 / sachet »).
+      const price = priceText.match(/^(\d[\d,]*(?:\.\d+)?)\s*€?\s*\/\s*(.+)$/);
       if (!designation || !price) {
         warnings.push(`Ligne ${position} illisible (${designation || "désignation absente"}) : ignorée`);
         return;

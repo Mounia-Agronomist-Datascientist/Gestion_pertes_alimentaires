@@ -10,12 +10,14 @@ import type { PdfItem } from "@/modules/imports/tome/pdf-items";
 
 // Bons de commande réels (adresses e-mail remplacées), lus avec pdfjs puis gardés en texte positionné.
 const DIR = "tests/fixtures/bons-commande";
-const fixture = (name: string): PdfItem[] =>
+// Mises en page rares retrouvées dans le dossier du Drive (19/11/2026), à part pour ne pas changer les autres essais.
+const DRIVE_DIR = "tests/fixtures/bons-commande-drive";
+const fixture = (name: string, dir = DIR): PdfItem[] =>
   (
-    JSON.parse(readFileSync(`${DIR}/${name}.items.json`, "utf8")) as [number, number, number, number, number, string][]
+    JSON.parse(readFileSync(`${dir}/${name}.items.json`, "utf8")) as [number, number, number, number, number, string][]
   ).map(([page, x, y, width, size, text]) => ({ page, x, y, width, size, text }));
-const order = (name: string): ParsedPurchaseOrder => {
-  const r = parsePurchaseOrder(`${name}.pdf`, fixture(name));
+const order = (name: string, dir = DIR): ParsedPurchaseOrder => {
+  const r = parsePurchaseOrder(`${name}.pdf`, fixture(name, dir));
   if (!r.ok) throw new Error(r.error);
   return r.order;
 };
@@ -114,6 +116,26 @@ describe("lecture d'un bon de commande Melba", () => {
       packaging: { label: "Carton 12l", contentQuantity: 4, contentUnit: "poche 3l" },
       priceUnit: "poche 3l",
     });
+  });
+
+  it("lit les mises en page rencontrées dans le Drive (19/11/2026)", () => {
+    // En-tête sur une ligne (« Code fournisseur » d'un bloc).
+    expect(order("20261103_Aromandise_S46_BC 20261029025", DRIVE_DIR).lines[0]).toMatchObject({
+      designation: "erythritol",
+      quantity: 10,
+      packaging: { label: "Sac 25kg", contentQuantity: 25, contentUnit: "kg" },
+      unitPriceEur: 9.59,
+      priceUnit: "kg",
+    });
+    // Prix sans le symbole € (« 0.45 / sachet »), printemps 2026.
+    const bonVivant = order("20260430_Bon Vivant_S20_BC 20260420004", DRIVE_DIR);
+    expect(bonVivant.lines[0]).toMatchObject({ quantity: 1200, unitPriceEur: 0.45, priceUnit: "sachet" });
+    // « Total » au-dessus de « HT ».
+    const apo = order("20260424_APO_S18_BC 20260421002", DRIVE_DIR);
+    expect(apo.lines.length).toBeGreaterThan(0);
+    expect(apo.lines.reduce((n, l) => n + (l.totalEur ?? 0), 0)).toBeCloseTo(apo.totalEur ?? 0, 0);
+    // Semaine impossible dans le nom (« S00 ») : celle de l'objet (« S02 »).
+    expect(order("20260107_Agriviva_S00_BC 20260105030", DRIVE_DIR).week).toBe(2);
   });
 
   it("refuse un PDF qui n'est pas un bon de commande", () => {

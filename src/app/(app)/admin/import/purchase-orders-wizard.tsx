@@ -97,6 +97,7 @@ export function PurchaseOrdersWizard() {
       newSuppliers: 0,
       outsideCalendar: 0,
     };
+    const skipped: { fileName: string; reason: string }[] = [];
     for (let i = 0; i < orders.length; i += BATCH) {
       setSaving({ status: "saving", done: i, total: orders.length });
       const r = await savePurchaseOrdersAction(orders.slice(i, i + BATCH));
@@ -108,6 +109,7 @@ export function PurchaseOrdersWizard() {
         return;
       }
       for (const k of Object.keys(total) as (keyof typeof total)[]) total[k] += r.result[k];
+      skipped.push(...r.result.skipped);
     }
     const details = [
       plural(total.orders, "bon", "bons"),
@@ -118,6 +120,9 @@ export function PurchaseOrdersWizard() {
       `${plural(total.newPrices, "prix d'achat enregistré", "prix d'achat enregistrés")}`,
       total.outsideCalendar
         ? `${plural(total.outsideCalendar, "bon hors du calendrier de production", "bons hors du calendrier de production")}`
+        : null,
+      skipped.length
+        ? `${plural(skipped.length, "bon écarté", "bons écartés")} (${skipped.map((s) => `${s.fileName} : ${s.reason}`).join(" ; ")})`
         : null,
     ].filter(Boolean);
     setSaving({ status: "done", message: `Enregistré : ${details.join(" · ")}.` });

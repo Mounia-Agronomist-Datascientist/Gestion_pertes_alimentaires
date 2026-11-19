@@ -102,8 +102,8 @@ const fold = (t: string) =>
     .toLowerCase()
     .trim();
 
-/** « (KG) » : produit vendu au kg (vrac), pas un colis. */
-export const isLooseByKg = (p: PackagingContent) => /^\(?\s*kg\s*\)?$/.test(fold(p.packagingLabel ?? ""));
+/** « (KG) », « kg » ou « g » : produit vendu au poids (vrac), pas un colis. */
+export const isLooseByKg = (p: PackagingContent) => /^\(?\s*k?g\s*\)?$/.test(fold(p.packagingLabel ?? ""));
 
 /** Mesures écrites (« 2,5kg », « 120 gr », « 3l », « 975ml ») : [quantité, unité] ; un poids en fourchette (« 140/160g ») est ignoré. */
 const MEASURE = /(?<![\d/.,])(\d+(?:[.,]\d+)?)\s*(kg|grs|gr|g|cl|ml|l)(?![a-z])/gi;

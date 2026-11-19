@@ -55,7 +55,8 @@ export const purchaseOrderSchema = z.object({
     .min(1)
     .max(300),
 });
-export const purchaseOrdersPayloadSchema = z.array(purchaseOrderSchema).min(1).max(60);
+/** Lot envoyé par l'écran d'import : chaque bon est vérifié à part (un bon inattendu ne bloque pas les autres). */
+export const purchaseOrdersPayloadSchema = z.array(z.unknown()).min(1).max(60);
 export type PurchaseOrderPayload = z.infer<typeof purchaseOrderSchema>;
 
 export interface PurchaseOrdersResult {
@@ -67,6 +68,8 @@ export interface PurchaseOrdersResult {
   newSuppliers: number;
   /** Bons dont la semaine n'est pas dans le calendrier de production. */
   outsideCalendar: number;
+  /** Bons écartés car leurs données sont inattendues (les autres sont enregistrés). */
+  skipped: { fileName: string; reason: string }[];
 }
 
 /** Semaine de production d'un bon : le numéro lu, dans l'année la plus proche de la livraison. */
@@ -89,10 +92,20 @@ export async function savePurchaseOrders(
   const parsed = purchaseOrdersPayloadSchema.safeParse(raw);
   if (!parsed.success)
     throw new PurchaseOrderError("Données de bons de commande inattendues : déposez à nouveau les fichiers");
+  const skipped: PurchaseOrdersResult["skipped"] = [];
+  const valid: z.infer<typeof purchaseOrderSchema>[] = [];
+  for (const item of parsed.data) {
+    const one = purchaseOrderSchema.safeParse(item);
+    if (one.success) valid.push(one.data);
+    else {
+      const issue = one.error.issues[0];
+      const fileName =
+        item && typeof item === "object" && "fileName" in item ? String(item.fileName).slice(0, 300) : "Bon sans nom";
+      skipped.push({ fileName, reason: `${issue?.path.join(".") || "bon"} : ${issue?.message ?? "inattendu"}` });
+    }
+  }
   // Du plus ancien au plus récent : le dernier prix d'achat est celui du dernier bon livré.
-  const orders = [...parsed.data].sort(
-    (a, b) => a.deliveryDate.localeCompare(b.deliveryDate) || a.number.localeCompare(b.number),
-  );
+  const orders = valid.sort((a, b) => a.deliveryDate.localeCompare(b.deliveryDate) || a.number.localeCompare(b.number));
   const result: PurchaseOrdersResult = {
     orders: 0,
     replaced: 0,
@@ -101,6 +114,7 @@ export async function savePurchaseOrders(
     newPrices: 0,
     newSuppliers: 0,
     outsideCalendar: 0,
+    skipped,
   };
 
   await db.transaction(async (tx) => {

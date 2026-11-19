@@ -187,8 +187,10 @@ describe("bons de commande fournisseurs", () => {
       from: "2026-03-02",
       to: "2026-11-10",
     });
-    await expect(savePurchaseOrders(t.db, admin, [{ ...orders[0], number: "abc" }])).rejects.toBeInstanceOf(
-      PurchaseOrderError,
-    );
+    await expect(savePurchaseOrders(t.db, admin, [])).rejects.toBeInstanceOf(PurchaseOrderError);
+    // Un bon inattendu est écarté et signalé ; les autres du même lot sont enregistrés (décision du 19/11/2026).
+    const r = await savePurchaseOrders(t.db, admin, [{ ...orders[0], number: "abc" }, orders[1]]);
+    expect(r.orders).toBe(1);
+    expect(r.skipped).toEqual([{ fileName: orders[0]!.fileName, reason: expect.stringMatching(/^number/) }]);
   });
 });

@@ -349,7 +349,9 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   « 4 Sac 2,5kg » ; colis imbriqué, « Palette (80 Carton (10KG)) » ; pièces avec le poids écrit dans le nom du produit,
   « Escalope de dinde 120g »). Si l'intitulé et le contenu donnent deux poids différents, rien n'est retenu. Ce qui
   manque est listé dans Administration → « Matières à compléter » et se saisit sur la fiche produit ; le dernier colis
-  de chaque fournisseur reste valable d'une semaine à l'autre, jusqu'à un bon qui le change.
+  de chaque fournisseur reste valable d'une semaine à l'autre, jusqu'à un bon qui le change. Stocks tampons (palettes
+  pour plusieurs semaines) : l'information vient du bon le plus récent qui contient la matière, quelle que soit sa
+  semaine. Vendu au poids : libellé « kg », « (KG) » ou « g ».
 
 ## R26 — Zones de chaque compte (Phase 6, 19/11/2026)
 
