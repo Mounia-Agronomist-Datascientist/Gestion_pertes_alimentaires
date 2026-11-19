@@ -49,4 +49,37 @@ describe("tome imprimé pour la production avec deux colonnes de quantité (S48)
     const sub = r.subRecipes.find((x) => x.key === "viande boulette de volaille")!;
     expect(sub.reference).toEqual({ quantity: 2496, unit: "recette(s) (23.1 g)" });
   });
+
+  it("sous-recette partagée par des déclinaisons de plats : imprimée sur des bases différentes, pas signalée", () => {
+    // Colin : « 11990 g » sous un plat (page 16), « 486 recette(s) (77 g) » sous un autre (page 91) ; extrait limité
+    // à ces deux impressions.
+    const colinItems = (
+      JSON.parse(readFileSync("tests/fixtures/s48/tome-S48-colin.items.json", "utf8")) as [
+        number,
+        number,
+        number,
+        number,
+        number,
+        string,
+      ][]
+    ).map(([page, x, y, width, size, text]): PdfItem => ({ page, x, y, width, size, text }));
+    const c = parseTome(colinItems);
+    expect(c.anomalies.filter((a) => /deux fois/.test(a.message))).toEqual([]);
+    const colin = c.subRecipes.find((x) => /colin alaska/.test(x.key))!;
+    expect(colin.reference).toEqual({ quantity: 11990, unit: "g" });
+  });
+
+  it("une vraie différence de composition reste signalée", () => {
+    // Seconde impression de la boulette (page 24) avec un coût doublé.
+    const changed = items.map((i) =>
+      i.page === 24 && Math.round(i.y) === 67 && i.text === "277.30 €" ? { ...i, text: "554.60 €" } : i,
+    );
+    expect(
+      parseTome(changed)
+        .anomalies.map((a) => a.message)
+        .filter((m) => /deux fois/.test(m)),
+    ).toEqual([
+      "Sous-recette « Viande: Boulette de volaille » imprimée deux fois avec des contenus différents (pages 1 et 24)",
+    ]);
+  });
 });

@@ -175,3 +175,27 @@ n'est plus pris pour un moule (seuls les libellés qui commencent par « Moule �
 
 Tome S46 réel : 59 recettes, 110 sous-recettes, 675 lignes, aucune anomalie ; avec l'onglet S46 du plan :
 8 équipes, 2 points à vérifier (PJ05 prévu au plan mais absent du tome ; QD09 à 380,3 g).
+
+## Trois mises en page du tome (19/11/2026, tome S48)
+
+Le lecteur comprend les trois impressions de Melba, quelle que soit la semaine :
+
+| Impression | En-tête des colonnes | Exemple |
+|---|---|---|
+| Pour une recette | « Quantité pour 1 recette(s) » | S45, S47 |
+| Pour la production, une colonne | « Quantité pour 2792 recette(s) » | S46 |
+| Pour la production, deux colonnes | « Quantité pour 832 recette(s) » et « Quantité pour 1 recette(s) » | S48 |
+
+- **Deux colonnes** : la colonne du lot est lue (les coûts imprimés sont ceux du lot), puis ramenée à une portion
+  comme d'habitude ; la colonne « pour 1 » est ignorée. Un en-tête coupé en deux lignes (« Quantité pour » puis
+  « 151.63 portion(s) ») est ignoré.
+- **Nom coupé par un saut de page** : en haut d'une page, les morceaux de nom séparés du premier ingrédient par un
+  écart d'ingrédient sont la fin du dernier ingrédient de la page précédente.
+- **Sous-recettes partagées** : une même sous-recette sert à plusieurs déclinaisons d'un plat (formules plus riches en
+  fibres, en protéines…, avec à peu près les mêmes grammages) ; elle est donc imprimée plusieurs fois, pour des
+  quantités et parfois des bases différentes (« 11990 g » sous un plat, « 486 recette(s) (77 g) » sous un autre).
+  C'est normal : les impressions sont comparées pour un gramme de sous-recette (kg ramenés en g, L et cL en mL), ou
+  par recette quand le poids n'est pas connu (moules « (0 g) »). Seule une vraie différence de composition est
+  signalée ; sans base commune, rien n'est signalé.
+- Tome S48 réel : 66 recettes, 131 sous-recettes, **aucun point à vérifier** (860 avant) ; S45 : 82 recettes,
+  aucun point. Extraits de test : tests/fixtures/s48 (tableaux seulement, sans commentaires).

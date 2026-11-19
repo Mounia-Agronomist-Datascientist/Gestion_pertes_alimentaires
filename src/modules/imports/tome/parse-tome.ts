@@ -196,29 +196,63 @@ function readValues(
   return { quantity: parseNumber(quantityText), unit, cost: cost ? parseNumber(cost[1]!) : null };
 }
 
+/** Quantité dans une unité commune : kg → g, L et cL → mL ; les autres unités restent telles quelles. */
+function toBase(quantity: number, unit: string): { quantity: number; unit: string } {
+  const u = unit.trim().toLowerCase();
+  if (u === "kg") return { quantity: quantity * 1000, unit: "g" };
+  if (u === "l") return { quantity: quantity * 1000, unit: "ml" };
+  if (u === "cl") return { quantity: quantity * 10, unit: "ml" };
+  return { quantity, unit: u };
+}
+
+/** Base d'une impression en grammes : « 11990 g », « 1.2 kg », « 486 recette(s) (77 g) » ; null sinon. */
+function referenceGrams(r: TomeSubRecipe): number | null {
+  if (!r.reference) return null;
+  const base = toBase(r.reference.quantity, r.reference.unit);
+  // Un poids nul (moules : « 939 recette(s) (0 g) ») ne sert pas de base : on compare alors par recette.
+  if (base.unit === "g") return base.quantity > 0 ? base.quantity : null;
+  const each = r.reference.unit.match(/^(?:recette|portion)\(s\)\s*\((\d+(?:\.\d+)?)\s*g\)$/i);
+  const grams = each ? r.reference.quantity * Number(each[1]) : 0;
+  return grams > 0 ? grams : null;
+}
+
 /**
- * Deux impressions d'une même sous-recette ont-elles le même contenu ? Un tome imprimé pour la production donne
- * chaque sous-recette pour la quantité d'un plat (« 2496 recette(s) », puis « 1248 recette(s) » pour un autre plat) :
- * on compare donc pour une unité de référence, à l'arrondi près (coûts du lot imprimés au centime).
+ * Deux impressions d'une même sous-recette ont-elles la même composition ? Une sous-recette sert souvent à plusieurs
+ * déclinaisons d'un plat (formules plus riches en fibres, en protéines…) : elle est alors imprimée plusieurs fois, pour
+ * des quantités et parfois des bases différentes (« 11990 g » sous un plat, « 486 recette(s) (77 g) » sous un autre).
+ * On compare donc pour un gramme de sous-recette (ou pour une unité de référence quand les deux bases sont dans la même
+ * unité), quantités en unité commune, à l'arrondi près. Sans base commune, rien n'est signalé (pas de preuve).
  */
 function sameSubRecipe(a: TomeSubRecipe, b: TomeSubRecipe): boolean {
-  const ra = a.reference?.quantity || 1;
-  const rb = b.reference?.quantity || 1;
-  const unitOf = (r: TomeSubRecipe) => r.reference?.unit ?? null;
-  const close = (x: number | null, y: number | null, scale: number) =>
+  const ga = referenceGrams(a);
+  const gb = referenceGrams(b);
+  const sameUnit = a.reference && b.reference && a.reference.unit === b.reference.unit;
+  const [ra, rb] =
+    ga != null && gb != null
+      ? [ga, gb]
+      : sameUnit
+        ? [a.reference!.quantity || 1, b.reference!.quantity || 1]
+        : !a.reference && !b.reference
+          ? [1, 1]
+          : [null, null];
+  if (ra == null || rb == null) return true;
+  const close = (x: number | null, y: number | null) =>
     x == null || y == null
       ? x === y
-      : Math.abs(x - y) <= Math.max(0.005 * Math.max(Math.abs(x), Math.abs(y)), 0.01 / scale);
-  const sameQuantity = (x: TomeQuantity | null, y: TomeQuantity | null) =>
-    x == null || y == null
-      ? x === y
-      : x.unit === y.unit &&
-        close(x.quantity / ra, y.quantity / rb, Math.min(ra, rb)) &&
-        close(x.cost != null ? x.cost / ra : null, y.cost != null ? y.cost / rb : null, Math.min(ra, rb));
+      : Math.abs(x - y) <= Math.max(0.01 * Math.max(Math.abs(x), Math.abs(y)), 0.01 / Math.min(ra, rb));
+  const sameQuantity = (x: TomeQuantity | null, y: TomeQuantity | null) => {
+    if (x == null || y == null) return x === y;
+    const bx = toBase(x.quantity, x.unit);
+    const by = toBase(y.quantity, y.unit);
+    return (
+      bx.unit === by.unit &&
+      close(bx.quantity / ra, by.quantity / rb) &&
+      close(x.cost != null ? x.cost / ra : null, y.cost != null ? y.cost / rb : null)
+    );
+  };
   return (
-    unitOf(a) === unitOf(b) &&
     a.lines.length === b.lines.length &&
-    a.lines.every((l, i) => l.label === b.lines[i]!.label && sameQuantity(l, b.lines[i]!)) &&
+    a.lines.every((l, i) => l.key === b.lines[i]!.key && sameQuantity(l, b.lines[i]!)) &&
     sameQuantity(a.total, b.total) &&
     sameQuantity(a.net, b.net)
   );
