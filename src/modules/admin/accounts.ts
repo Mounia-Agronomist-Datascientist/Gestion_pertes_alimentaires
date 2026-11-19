@@ -2,7 +2,7 @@
  * Gestion des comptes par l'administrateur (permission « user.manage »).
  * Les mots de passe générés sont renvoyés une seule fois pour être communiqués ; seul leur hachage est stocké.
  */
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
@@ -33,9 +33,10 @@ export async function listAccounts(db: Db, admin: AuthUser) {
       .leftJoin(s.teams, eq(s.users.teamId, s.teams.id))
       .orderBy(asc(s.users.roleCode), asc(s.users.login)),
     db
-      .select({ userId: s.userZones.userId, zoneName: s.zones.name })
+      .select({ userId: s.userZones.userId, zoneId: s.zones.id, zoneName: s.zones.name })
       .from(s.userZones)
-      .innerJoin(s.zones, eq(s.userZones.zoneId, s.zones.id)),
+      .innerJoin(s.zones, eq(s.userZones.zoneId, s.zones.id))
+      .orderBy(asc(s.zones.displayOrder)),
     db.select().from(s.roles),
   ]);
   const roleLabel = new Map(roles.map((r) => [r.code, r.label]));
@@ -43,6 +44,7 @@ export async function listAccounts(db: Db, admin: AuthUser) {
     ...r,
     roleLabel: roleLabel.get(r.roleCode) ?? r.roleCode,
     zones: zoneLinks.filter((z) => z.userId === r.id).map((z) => z.zoneName),
+    zoneIds: zoneLinks.filter((z) => z.userId === r.id).map((z) => z.zoneId),
   }));
 }
 
@@ -63,9 +65,7 @@ export const newAccountSchema = z
       ctx.addIssue({ code: "custom", message: "Choisissez l'équipe du compte" });
     if (v.roleCode !== "equipe" && v.teamId)
       ctx.addIssue({ code: "custom", message: "Seul un compte équipe est rattaché à une équipe" });
-    if (v.roleCode === "resp_zone" && v.zoneIds.length === 0) {
-      ctx.addIssue({ code: "custom", message: "Choisissez au moins une zone pour un responsable de zone" });
-    }
+    if (v.zoneIds.length === 0) ctx.addIssue({ code: "custom", message: "Cochez au moins une zone" });
   });
 
 /** Crée un compte avec un mot de passe provisoire, à changer à la première connexion. */
@@ -88,13 +88,45 @@ export async function createAccountByAdmin(
       displayName: input.displayName,
       roleCode: input.roleCode,
       teamId: input.roleCode === "equipe" ? input.teamId : null,
-      zoneIds: input.roleCode === "resp_zone" ? input.zoneIds : [],
+      zoneIds: input.zoneIds,
       password,
       mustChangePassword: true,
     },
     admin.id,
   );
   return { id, password };
+}
+
+/**
+ * Zones cochées d'un compte (décision du 19/11/2026) : il ne saisit et ne voit les pertes que de ces zones. Au moins
+ * une zone ; seules les zones actives sont acceptées. Effet à la page suivante du compte (droits relus à chaque page).
+ */
+export async function setAccountZones(db: Db, admin: AuthUser, userId: string, raw: unknown): Promise<void> {
+  requirePermission(admin, "user.manage");
+  const parsed = z.array(z.uuid()).max(50).safeParse(raw);
+  if (!parsed.success) throw new AdminError("Zones illisibles");
+  const zoneIds = [...new Set(parsed.data)];
+  if (!zoneIds.length) throw new AdminError("Cochez au moins une zone");
+  const active = await db
+    .select({ id: s.zones.id })
+    .from(s.zones)
+    .where(and(eq(s.zones.active, true), inArray(s.zones.id, zoneIds)));
+  if (active.length !== zoneIds.length) throw new AdminError("Zone inconnue ou désactivée");
+  const [account] = await db.select({ id: s.users.id }).from(s.users).where(eq(s.users.id, userId));
+  if (!account) throw new AdminError("Compte introuvable");
+  await db.transaction(async (tx) => {
+    const before = (await tx.select().from(s.userZones).where(eq(s.userZones.userId, userId))).map((r) => r.zoneId);
+    await tx.delete(s.userZones).where(eq(s.userZones.userId, userId));
+    await tx.insert(s.userZones).values(zoneIds.map((zoneId) => ({ userId, zoneId })));
+    await writeAudit(tx, {
+      userId: admin.id,
+      action: "set_zones",
+      entity: "user",
+      entityId: userId,
+      before: { zoneIds: before },
+      after: { zoneIds },
+    });
+  });
 }
 
 /** Nouveau mot de passe provisoire ; tous les appareils connectés sont déconnectés. */

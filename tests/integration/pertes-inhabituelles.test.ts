@@ -4,6 +4,7 @@ import * as s from "@/db/schema";
 import { seed } from "@/db/seed/seed";
 import { evaluateLossAlerts, loadAlertSettings } from "@/modules/alertes/analyse";
 import { createAccount } from "@/modules/auth/accounts";
+import { allZoneIds } from "../helpers/zones";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
 import { correctDeclaration, createDeclaration } from "@/modules/declarations/service";
@@ -38,6 +39,7 @@ describe("alertes : pertes inhabituelles", () => {
           roleCode: "equipe",
           teamId,
           password: "mot-de-passe-test",
+          zoneIds: await allZoneIds(t.db),
         }),
       );
     teamC = await mk("equipe-c", team.C!);

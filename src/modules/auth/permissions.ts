@@ -28,6 +28,7 @@ export interface AuthUser {
   roleCode: string;
   teamId: string | null;
   team: { letter: string; colorName: string; colorHex: string } | null;
+  /** Zones cochées pour ce compte : saisie et résultats limités à ces zones (décision du 19/11/2026). */
   zoneIds: readonly string[];
   permissions: ReadonlySet<string>;
   mustChangePassword: boolean;
@@ -49,18 +50,24 @@ export function requirePermission(user: AuthUser, permission: PermissionCode): v
   }
 }
 
-/** Périmètre de lecture des déclarations, appliqué par les requêtes côté serveur. */
+/**
+ * Périmètre de lecture des déclarations, appliqué par les requêtes côté serveur. Toujours limité aux zones cochées
+ * du compte (décision du 19/11/2026) ; une équipe ne lit en plus que ses propres pertes.
+ */
 export type DeclarationScope =
-  | { kind: "all" }
   | { kind: "zones"; zoneIds: readonly string[] }
-  | { kind: "team"; teamId: string; userId: string }
+  | { kind: "team"; teamId: string; userId: string; zoneIds: readonly string[] }
   | { kind: "none" };
 
 export function declarationReadScope(user: AuthUser): DeclarationScope {
-  if (can(user, "declaration.read.all")) return { kind: "all" };
-  if (can(user, "declaration.read.zone")) return { kind: "zones", zoneIds: user.zoneIds };
+  if (!user.zoneIds.length) return { kind: "none" };
+  if (can(user, "declaration.read.all") || can(user, "declaration.read.zone"))
+    return { kind: "zones", zoneIds: user.zoneIds };
   if (can(user, "declaration.read.team") && user.teamId) {
-    return { kind: "team", teamId: user.teamId, userId: user.id };
+    return { kind: "team", teamId: user.teamId, userId: user.id, zoneIds: user.zoneIds };
   }
   return { kind: "none" };
 }
+
+/** Le compte peut-il saisir (et voir) les pertes de cette zone ? */
+export const hasZone = (user: AuthUser, zoneId: string) => user.zoneIds.includes(zoneId);

@@ -7,9 +7,9 @@ Stockée en base (`roles`, `permissions`, `role_permissions`), initialisée par 
 
 | Permission | Équipe | Resp. zone | Resp. prod. | Admin | Direction |
 |---|:-:|:-:|:-:|:-:|:-:|
-| Déclarer une perte | ✅ (toutes zones, attribuée à l'équipe en cuisine) | ✅ (ses zones) | ✅ | ✅ | — |
-| Lire le détail des déclarations | celles attribuées à son équipe + celles qu'elle a saisies | ses zones | toutes | toutes | — |
-| Corriger / annuler une déclaration | son équipe, jusqu'à une semaine après la fin de la semaine de production | ses zones | ✅ | ✅ | — |
+| Déclarer une perte | ✅ (ses zones, attribuée à l'équipe en cuisine) | ✅ (ses zones) | ✅ (ses zones) | ✅ (ses zones) | — |
+| Lire le détail des déclarations | celles attribuées à son équipe + celles qu'elle a saisies, dans ses zones | ses zones | ses zones | ses zones | — |
+| Corriger / annuler une déclaration | son équipe dans ses zones, jusqu'à une semaine après la fin de la semaine de production | ses zones | ses zones | ses zones | — |
 | Proposer une cause | ✅ | ✅ | ✅ | ✅ | — |
 | Valider une cause proposée | — | — | — | ✅ | — |
 | Statistiques globales simplifiées (sans détail par équipe) | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -18,6 +18,13 @@ Stockée en base (`roles`, `permissions`, `role_permissions`), initialisée par 
 | Gérer les comptes | — | — | — | ✅ | — |
 | Consulter le journal d'audit | — | — | ✅ (lecture) | ✅ | — |
 | Indicateurs économiques / environnementaux (Phases 3–5) | — | — | ✅ | ✅ | ✅ |
+
+**Zones d'un compte (décision du 19/11/2026)** : chaque compte a ses zones cochées (Administration → Comptes, table
+`user_zones`, au moins une). Saisie, historique, corrections et statistiques (y compris pour les profils qui comparent
+les équipes) sont limités à ces zones ; les autres zones restent visibles à la saisie, grisées. Par défaut : une équipe
+en Cuisine/production, un responsable de zone les zones choisies à la création, les autres profils toutes les zones
+(migration 0031 pour les comptes existants). Chaque changement est journalisé (`set_zones`). L'analyse de nuit des
+alertes lit toutes les zones.
 
 ## 2. Application côté serveur
 

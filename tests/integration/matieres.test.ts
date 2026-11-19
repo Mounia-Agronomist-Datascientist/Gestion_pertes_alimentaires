@@ -4,6 +4,7 @@ import * as s from "@/db/schema";
 import { seed } from "@/db/seed/seed";
 import { createProduct, setProductActive, updateProduct } from "@/modules/admin/products";
 import { createAccount } from "@/modules/auth/accounts";
+import { allZoneIds } from "../helpers/zones";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
 import { createDeclaration } from "@/modules/declarations/service";
@@ -80,6 +81,7 @@ describe("référentiel des matières premières tiré des tomes", () => {
         roleCode: "equipe",
         teamId: teamDId,
         password: "mot-de-passe-equipe",
+        zoneIds: await allZoneIds(t.db),
       }),
     );
     s45 = buildWeekImport(parseTome(s45TomeItems()), parsePlan("S45", s45PlanGrid()));

@@ -24,6 +24,7 @@ describe("authentification et droits", () => {
   let teamAId: string;
   let teamBId: string;
   let condZoneId: string;
+  let cuisineZoneId: string;
 
   beforeAll(async () => {
     t = await createTestDb();
@@ -32,6 +33,7 @@ describe("authentification et droits", () => {
     teamAId = teams.find((x) => x.letter === "A")!.id;
     teamBId = teams.find((x) => x.letter === "B")!.id;
     condZoneId = await zoneIdByCode(t.db, "CONDITIONNEMENT");
+    cuisineZoneId = await zoneIdByCode(t.db, "CUISINE");
     await createAccount(t.db, {
       login: "equipe-a",
       displayName: "Équipe A",
@@ -194,7 +196,13 @@ describe("authentification et droits", () => {
 
     it("une équipe ne lit que son équipe et ses propres saisies", async () => {
       const a = await userOf("equipe-a");
-      expect(declarationReadScope(a)).toEqual({ kind: "team", teamId: teamAId, userId: a.id });
+      // Une équipe n'a que Cuisine/production par défaut (décision du 19/11/2026).
+      expect(declarationReadScope(a)).toEqual({
+        kind: "team",
+        teamId: teamAId,
+        userId: a.id,
+        zoneIds: [cuisineZoneId],
+      });
       expect(can(a, "declaration.read.all")).toBe(false);
       expect(can(a, "stats.compare_teams")).toBe(false);
       expect(can(a, "declaration.create")).toBe(true);
@@ -204,8 +212,10 @@ describe("authentification et droits", () => {
       expect(declarationReadScope(await userOf("resp-cond"))).toEqual({ kind: "zones", zoneIds: [condZoneId] });
     });
 
-    it("l'administrateur voit tout ; la direction consulte sans saisir", async () => {
-      expect(declarationReadScope(await userOf("admin"))).toEqual({ kind: "all" });
+    it("l'administrateur voit toutes les zones ; la direction consulte sans saisir", async () => {
+      const admin = await userOf("admin");
+      expect(declarationReadScope(admin)).toEqual({ kind: "zones", zoneIds: admin.zoneIds });
+      expect(admin.zoneIds).toHaveLength(5);
       const direction = await userOf("direction");
       expect(can(direction, "declaration.create")).toBe(false);
       expect(can(direction, "indicators.read")).toBe(true);

@@ -62,7 +62,7 @@ export const users = pgTable(
   ],
 );
 
-/** Zones dont un responsable de zone a la charge. */
+/** Zones cochées pour un compte : il ne saisit et ne voit les pertes que de ces zones (décision du 19/11/2026). */
 export const userZones = pgTable(
   "user_zones",
   {

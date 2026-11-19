@@ -1,9 +1,10 @@
 /**
  * Lecture des pertes pour les statistiques (docs/PHASE4.md, étape 4.1).
  *
- * Toujours filtrée par le périmètre du compte connecté, comme l'historique (docs/SECURITE.md §2) : une équipe ne
- * lit que ses pertes, un responsable de zone ses zones ; les profils qui comparent les équipes (production,
- * direction, administration) voient toute l'entreprise, même sans accès à l'historique (direction). Les déclarations annulées et les brouillons sont exclus ;
+ * Toujours filtrée par le périmètre du compte connecté, comme l'historique (docs/SECURITE.md §2), et toujours limitée
+ * aux zones cochées du compte (décision du 19/11/2026) : une équipe ne lit que ses pertes, un responsable de zone ses
+ * zones ; les profils qui comparent les équipes (production, direction, administration) voient toutes les équipes,
+ * même sans accès à l'historique (direction). Les déclarations annulées et les brouillons sont exclus ;
  * une perte corrigée compte pour sa dernière version (destinations de cette version). Les euros ne sont transmis
  * qu'aux profils `indicators.read`.
  */
@@ -14,7 +15,7 @@ import { adjacentPeriod, monthBounds, type Period } from "@/domain/periodes";
 import type { LossFact } from "@/domain/statistiques";
 import { type AuthUser, can, ForbiddenError } from "@/modules/auth/permissions";
 import { isNonFoodCategory } from "@/modules/declarations/input";
-import { scopeCondition } from "@/modules/declarations/queries";
+import { scopeCondition, zonesCondition } from "@/modules/declarations/queries";
 import { tomeKey } from "@/modules/imports/tome/parse-tome";
 
 export interface StatsFilters {
@@ -86,7 +87,7 @@ export async function loadFacts(
   filters: StatsFilters = {},
 ): Promise<LossFact[]> {
   if (!canReadStats(user)) throw new ForbiddenError();
-  const scope = can(user, "stats.compare_teams") ? undefined : scopeCondition(user);
+  const scope = can(user, "stats.compare_teams") ? zonesCondition(user) : scopeCondition(user);
   const inPeriod = await periodCondition(db, period);
   if (scope === null || inPeriod === null) return [];
   const d = s.lossDeclarations;

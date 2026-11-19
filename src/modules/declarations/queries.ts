@@ -12,15 +12,21 @@ import { canModifyDeclaration, canReadDeclaration } from "./access";
 export function scopeCondition(user: AuthUser): SQL | undefined | null {
   const scope = declarationReadScope(user);
   switch (scope.kind) {
-    case "all":
-      return undefined;
     case "zones":
-      return scope.zoneIds.length ? inArray(s.lossDeclarations.zoneId, [...scope.zoneIds]) : null;
+      return inArray(s.lossDeclarations.zoneId, [...scope.zoneIds]);
     case "team":
-      return or(eq(s.lossDeclarations.teamId, scope.teamId), eq(s.lossDeclarations.createdBy, scope.userId));
+      return and(
+        inArray(s.lossDeclarations.zoneId, [...scope.zoneIds]),
+        or(eq(s.lossDeclarations.teamId, scope.teamId), eq(s.lossDeclarations.createdBy, scope.userId)),
+      )!;
     case "none":
       return null;
   }
+}
+
+/** Condition SQL des seules zones cochées du compte (profils qui comparent les équipes) ; `null` : aucune zone. */
+export function zonesCondition(user: AuthUser): SQL | null {
+  return user.zoneIds.length ? inArray(s.lossDeclarations.zoneId, [...user.zoneIds]) : null;
 }
 
 export interface DeclarationFilters {

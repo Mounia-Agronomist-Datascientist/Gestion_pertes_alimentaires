@@ -30,7 +30,7 @@ const LOOKBACK_DAYS = 21;
 
 /**
  * Lecteur interne des statistiques pour la tâche de nuit : toute l'entreprise, sans euros. Il n'existe pas en base
- * et ne sert qu'à lire les pertes.
+ * et ne sert qu'à lire les pertes ; il reçoit toutes les zones au moment de lire (`systemReader`).
  */
 const SYSTEM_READER: AuthUser = {
   id: "00000000-0000-0000-0000-000000000000",
@@ -43,6 +43,11 @@ const SYSTEM_READER: AuthUser = {
   permissions: new Set(["stats.global", "stats.compare_teams"]),
   mustChangePassword: false,
 };
+
+async function systemReader(db: Db): Promise<AuthUser> {
+  const zones = await db.select({ id: s.zones.id }).from(s.zones);
+  return { ...SYSTEM_READER, zoneIds: zones.map((z) => z.id) };
+}
 
 type Week = { id: string; year: number; number: number; startDate: string; endDate: string };
 
@@ -154,7 +159,7 @@ async function loadAnalysis(db: Db, week: Week, size: number) {
   const ids = window.map((w) => w.id);
   const [facts, production, teams, zones] = await Promise.all([
     window.length
-      ? loadFacts(db, SYSTEM_READER, { kind: "periode", from: window[0]!.startDate, to: week.endDate })
+      ? loadFacts(db, await systemReader(db), { kind: "periode", from: window[0]!.startDate, to: week.endDate })
       : Promise.resolve([]),
     productionOf(db, ids),
     db.select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName }).from(s.teams),

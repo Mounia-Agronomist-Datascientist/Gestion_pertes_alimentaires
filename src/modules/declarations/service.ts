@@ -14,7 +14,7 @@ import { gastroTareAllowed, type MeasureContext, unitsFor } from "@/domain/saisi
 import { convertToKg, type KgStatus, QuantityError, type UnitKind } from "@/domain/unites";
 import { packagingOptions } from "@/modules/matieres/colis";
 import { writeAudit } from "@/modules/audit/audit";
-import { type AuthUser, can, ForbiddenError, requirePermission } from "@/modules/auth/permissions";
+import { type AuthUser, ForbiddenError, hasZone, requirePermission } from "@/modules/auth/permissions";
 import { portionPackagingCost } from "@/modules/admin/packaging";
 import { findWeekItem, type ResolvedWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
 import { currentWeekImport } from "@/modules/imports/service";
@@ -80,8 +80,7 @@ async function prepareDeclaration(
   if (!place || !place.subzone.active || !place.zone.active) {
     throw new DeclarationError("Sous-zone inconnue ou désactivée");
   }
-  const limitedToOwnZones = can(user, "declaration.read.zone") && !can(user, "declaration.read.all");
-  if (limitedToOwnZones && !user.zoneIds.includes(place.zone.id)) {
+  if (!hasZone(user, place.zone.id)) {
     throw new DeclarationError("Vous ne pouvez déclarer que dans vos zones");
   }
 

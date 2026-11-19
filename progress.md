@@ -44,7 +44,7 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Saisie par lieu (c
 ## Bloquants et en attente
 
 - **Mise en ligne en attente** : crédits Netlify épuisés jusqu'au **08/12/2026**. Ensuite, dans l'ordre et après
-  une sauvegarde : migrations 0014 à 0030 → « Compléter depuis les tomes importés » (Administration → Produits)
+  une sauvegarde : migrations 0014 à 0031 → « Compléter depuis les tomes importés » (Administration → Produits)
   → dépôt du ZIP des bons de commande ([docs/pilote/PLAN_PILOTE.md](docs/pilote/PLAN_PILOTE.md)).
 - **Lieux de stockage des matières** : les 20 catégories Melba sont rangées en local (18/11) ; à refaire en ligne
   après la mise en ligne et le dépôt des bons (Administration → Lieux de stockage des matières).

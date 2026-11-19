@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as s from "@/db/schema";
 import { seed } from "@/db/seed/seed";
 import { createAccount } from "@/modules/auth/accounts";
+import { allZoneIds } from "../helpers/zones";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
@@ -77,7 +78,7 @@ describe("déclaration de perte", () => {
         t.db,
         await createAccount(t.db, { login, displayName: login, roleCode, password: PASSWORD, ...extra }),
       );
-    teamC = await mk("equipe-c", "equipe", { teamId: ref("team:C") });
+    teamC = await mk("equipe-c", "equipe", { teamId: ref("team:C"), zoneIds: await allZoneIds(t.db) });
     respCond = await mk("resp-cond", "resp_zone", { zoneIds: [ref("zone:CONDITIONNEMENT")] });
     respPlonge = await mk("resp-plonge", "resp_zone", { zoneIds: [ref("zone:PLONGE")] });
     admin = await mk("admin", "admin");

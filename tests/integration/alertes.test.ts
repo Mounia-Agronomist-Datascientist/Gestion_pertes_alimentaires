@@ -4,6 +4,7 @@ import * as s from "@/db/schema";
 import { seed } from "@/db/seed/seed";
 import { cancelAlert, evaluateMissingDeclarations, listAlerts } from "@/modules/alertes/service";
 import { createAccount } from "@/modules/auth/accounts";
+import { allZoneIds } from "../helpers/zones";
 import { ForbiddenError, type AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
 import { createDeclaration } from "@/modules/declarations/service";
@@ -38,7 +39,14 @@ describe("alerte « rien de noté »", () => {
     const mk = async (login: string, roleCode: string, teamId?: string) =>
       loadAuthUser(
         t.db,
-        await createAccount(t.db, { login, displayName: login, roleCode, teamId, password: "mot-de-passe-test" }),
+        await createAccount(t.db, {
+          login,
+          displayName: login,
+          roleCode,
+          teamId,
+          password: "mot-de-passe-test",
+          zoneIds: await allZoneIds(t.db),
+        }),
       );
     teamC = await mk("equipe-c", "equipe", team.C);
     teamA = await mk("equipe-a", "equipe", team.A);
@@ -139,6 +147,7 @@ describe("alerte « rien de noté »", () => {
         roleCode: "equipe",
         teamId: team.D,
         password: "mot-de-passe-test",
+        zoneIds: await allZoneIds(t.db),
       }),
     );
     await declare(teamD, "2026-11-05", new Date("2026-11-09T09:00:00Z"));

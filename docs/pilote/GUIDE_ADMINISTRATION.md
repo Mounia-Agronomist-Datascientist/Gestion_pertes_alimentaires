@@ -25,7 +25,9 @@ Application **Pertes** · semaine de production du **jeudi au mercredi**.
 - **Comptes** (Administration → Comptes) : un compte par équipe et par fonction, **sans prénom**. Réinitialiser le
   mot de passe d'une équipe à chaque départ : toutes ses sessions sont fermées et le nouveau mot de passe doit être
   changé à la première connexion. Attention : les pertes encore en attente sur une tablette partiront après la
-  reconnexion de l'équipe.
+  reconnexion de l'équipe. **Zones** : sous chaque compte, cocher les zones où il saisit ses pertes et dont il voit
+  les résultats (les autres zones restent visibles, grisées). Par défaut : une équipe en Cuisine/production, un
+  responsable de zone ses zones, les autres profils toutes les zones.
 - **Seuils des alertes** (Administration → Seuils des alertes) : dépassement (50 %), minimum (5 kg), semaines de
   suite (3), tendance stable (10 %).
 - **Facteurs CO2e** (Administration → Facteurs d'émission) : valider les familles, rattacher les nouveaux

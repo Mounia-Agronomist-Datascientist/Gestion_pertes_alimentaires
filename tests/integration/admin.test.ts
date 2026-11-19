@@ -77,7 +77,12 @@ describe("administration", () => {
 
     it("refuse un identifiant déjà pris, un compte équipe sans équipe, un responsable sans zone", async () => {
       await expect(
-        createAccountByAdmin(t.db, admin, { login: "admin", displayName: "Doublon", roleCode: "admin" }),
+        createAccountByAdmin(t.db, admin, {
+          login: "admin",
+          displayName: "Doublon",
+          roleCode: "admin",
+          zoneIds: [await zoneIdByCode(t.db, "CUISINE")],
+        }),
       ).rejects.toThrow(/existe déjà/);
       await expect(
         createAccountByAdmin(t.db, admin, { login: "equipe-x", displayName: "Équipe X", roleCode: "equipe" }),

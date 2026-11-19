@@ -42,21 +42,19 @@ export function isWithinTeamCorrectionDelay(occurredOn: LocalDate, today: LocalD
 export function canReadDeclaration(user: AuthUser, d: DeclarationAccessFields): boolean {
   const scope = declarationReadScope(user);
   switch (scope.kind) {
-    case "all":
-      return true;
     case "zones":
       return scope.zoneIds.includes(d.zoneId);
     case "team":
-      return d.teamId === scope.teamId || d.createdBy === scope.userId;
+      return scope.zoneIds.includes(d.zoneId) && (d.teamId === scope.teamId || d.createdBy === scope.userId);
     case "none":
       return false;
   }
 }
 
-/** Droit de corriger ou d'annuler une déclaration existante. */
+/** Droit de corriger ou d'annuler une déclaration existante (toujours dans une zone cochée du compte). */
 export function canModifyDeclaration(user: AuthUser, d: DeclarationAccessFields, today: LocalDate): boolean {
-  if (can(user, "declaration.correct.all")) return true;
-  if (can(user, "declaration.correct.zone")) return user.zoneIds.includes(d.zoneId);
+  if (!user.zoneIds.includes(d.zoneId)) return false;
+  if (can(user, "declaration.correct.all") || can(user, "declaration.correct.zone")) return true;
   if (can(user, "declaration.correct.team")) {
     const own = d.teamId === user.teamId || d.createdBy === user.id;
     return own && isWithinTeamCorrectionDelay(d.occurredOn, today);

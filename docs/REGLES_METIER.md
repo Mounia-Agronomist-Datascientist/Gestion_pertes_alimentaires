@@ -333,6 +333,17 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Sert à convertir en kg une perte saisie en litres (matière de la liste ou ingrédient de la semaine) et à ramener
   au kg un prix d'achat au litre.
 
+## R26 — Zones de chaque compte (Phase 6, 19/11/2026)
+
+- Chaque compte a des **zones cochées** (Administration → Comptes) : il ne saisit des pertes et ne voit les résultats
+  (historique, statistiques) que de ces zones. Toutes les zones restent affichées à la saisie, les autres grisées.
+- Une **équipe** voit ses propres pertes dans ses zones (pas celles des autres équipes) ; les profils qui comparent les
+  équipes voient toutes les équipes, dans leurs zones.
+- Par défaut : équipe → Cuisine/production ; responsable de zone → zones choisies ; production, administration,
+  direction → toutes les zones. Au moins une zone par compte.
+- Une perte d'une zone décochée reste en base et dans les résultats des autres comptes ; elle n'est plus visible ni
+  corrigeable par ce compte.
+
 ## R25 — Façons de mesurer selon le lieu (Phase 6, 18/11/2026)
 
 - **Partout** : kg (ou g) et unités du produit (pièces, converties avec le poids d'une pièce : « 10 hauts de cuisse

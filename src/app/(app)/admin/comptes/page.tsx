@@ -17,7 +17,7 @@ export default async function AccountsPage() {
       .from(s.teams)
       .orderBy(asc(s.teams.displayOrder)),
     db
-      .select({ id: s.zones.id, name: s.zones.name })
+      .select({ id: s.zones.id, code: s.zones.code, name: s.zones.name })
       .from(s.zones)
       .where(eq(s.zones.active, true))
       .orderBy(asc(s.zones.displayOrder)),

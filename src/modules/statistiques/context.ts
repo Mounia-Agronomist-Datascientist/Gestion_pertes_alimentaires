@@ -19,6 +19,8 @@ export interface StatsContext {
   /** Filtres actifs, à reporter dans les liens. */
   filterParams: Record<string, string>;
   compareTeams: boolean;
+  /** Zones cochées du compte : seules proposées dans le filtre de zone. */
+  zoneIds: readonly string[];
 }
 
 /** Période (semaine en cours par défaut) et filtres lus dans l'adresse, validés. */
@@ -45,7 +47,7 @@ export async function statsContext(db: Db, user: AuthUser, params: Params): Prom
       (e): e is [string, string] => !!e[1],
     ),
   );
-  return { today, period, filters, filterParams, compareTeams };
+  return { today, period, filters, filterParams, compareTeams, zoneIds: user.zoneIds };
 }
 
 /** Semaine des écrans « par semaine » (synthèse, évolution, ratios) : celle choisie, sinon la semaine en cours. */

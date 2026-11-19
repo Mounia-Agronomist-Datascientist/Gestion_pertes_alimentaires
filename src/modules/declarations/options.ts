@@ -11,7 +11,7 @@ import { weekCatalogs } from "@/modules/imports/catalog";
 import { materialCategoriesWithStorage, recentWeekMaterials } from "@/modules/matieres/semaine";
 import { packagingOptions } from "@/modules/matieres/colis";
 import { pricesInForce } from "@/modules/matieres/referentiel";
-import { type AuthUser, can } from "@/modules/auth/permissions";
+import { type AuthUser, hasZone } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 
 /** Dernier n° de poubelle noté dans chaque zone, par destination (déclarations non annulées, plus récente d'abord). */
@@ -56,8 +56,6 @@ export async function getDeclarationOptions(
   today: LocalDate,
   keepDestinationIds: readonly string[] = [],
 ) {
-  const limitedToOwnZones = can(user, "declaration.read.zone") && !can(user, "declaration.read.all");
-
   const [
     zoneRows,
     subzoneRows,
@@ -106,13 +104,13 @@ export async function getDeclarationOptions(
   // Numéro de la zone dans le sens de la marche en avant (1 Réception … 5 Plonge), le même pour tous, même pour un
   // responsable qui ne voit que ses zones.
   const zoneNumber = new Map(zoneRows.map((z, i) => [z.id, i + 1]));
-  // Toutes les zones sont montrées, pour que chacun sache où il se situe ; un responsable de zone ne peut choisir que
-  // les siennes (les autres sont grisées ; le serveur refuse aussi une perte hors de ses zones).
+  // Toutes les zones sont montrées, pour que chacun sache où il se situe ; chaque compte ne peut choisir que ses zones
+  // cochées (les autres sont grisées ; le serveur refuse aussi une perte hors de ses zones).
   const zones = zoneRows
     .map((z) => ({
       id: z.id,
       number: zoneNumber.get(z.id)!,
-      allowed: !limitedToOwnZones || user.zoneIds.includes(z.id),
+      allowed: hasZone(user, z.id),
       code: z.code,
       name: z.name,
       subzones: subzoneRows

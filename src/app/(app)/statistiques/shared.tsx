@@ -31,7 +31,7 @@ export function statsHref(
 export function scopeNote(user: AuthUser, compareTeams: boolean): string | null {
   if (compareTeams) return null;
   return user.team
-    ? `Équipe ${user.team.letter} – ${user.team.colorName} : vos pertes uniquement.`
+    ? `Équipe ${user.team.letter} – ${user.team.colorName} : vos pertes, dans vos zones.`
     : "Vos zones uniquement.";
 }
 
@@ -214,11 +214,13 @@ export async function FilterForm({
             Zone
             <select name="zone" defaultValue={filters.zoneId ?? ""} className="field w-full min-w-0">
               <option value="">Toutes</option>
-              {options.zones.map((z) => (
-                <option key={z.id} value={z.id}>
-                  {z.name}
-                </option>
-              ))}
+              {options.zones
+                .filter((z) => ctx.zoneIds.includes(z.id))
+                .map((z) => (
+                  <option key={z.id} value={z.id}>
+                    {z.name}
+                  </option>
+                ))}
             </select>
           </label>
         )}

@@ -3,7 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { toProductionLocalDate } from "@/domain/semaine-production";
-import { AdminError, createAccountByAdmin, resetPassword, setAccountActive } from "@/modules/admin/accounts";
+import {
+  AdminError,
+  createAccountByAdmin,
+  resetPassword,
+  setAccountActive,
+  setAccountZones,
+} from "@/modules/admin/accounts";
 import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
 import { setContainerActive, setContainerMaxCount, setContainerTare } from "@/modules/admin/containers";
 import { setLabourRate } from "@/modules/admin/labour";
@@ -79,6 +85,11 @@ export async function accountAction(_prev: AccountActionState, formData: FormDat
         password,
         login,
       };
+    }
+    if (intent === "zones") {
+      await setAccountZones(db, admin, userId, formData.getAll("zoneIds").map(String));
+      revalidatePath("/admin/comptes");
+      return { message: `Zones de « ${login} » enregistrées.` };
     }
     if (intent === "activate" || intent === "deactivate") {
       await setAccountActive(db, admin, userId, intent === "activate");

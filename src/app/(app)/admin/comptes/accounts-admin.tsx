@@ -15,13 +15,14 @@ interface Account {
   teamLetter: string | null;
   teamColorHex: string | null;
   zones: string[];
+  zoneIds: string[];
 }
 
 interface Props {
   adminId: string;
   accounts: Account[];
   teams: { id: string; letter: string; colorName: string }[];
-  zones: { id: string; name: string }[];
+  zones: { id: string; code: string; name: string }[];
 }
 
 const ROLES = [
@@ -31,6 +32,29 @@ const ROLES = [
   { code: "admin", label: "Administrateur" },
   { code: "direction", label: "Direction" },
 ];
+
+/** Zones cochées par défaut à la création (comme le serveur, décision du 19/11/2026). */
+function defaultChecked(roleCode: string, zoneCode: string) {
+  if (roleCode === "equipe") return zoneCode === "CUISINE";
+  if (roleCode === "resp_zone") return false;
+  return true;
+}
+
+/** Cases des zones : le compte ne saisit et ne voit les pertes que des zones cochées. */
+function ZoneBoxes({ zones, isChecked }: { zones: Props["zones"]; isChecked: (z: Props["zones"][number]) => boolean }) {
+  return (
+    <fieldset className="flex flex-col gap-1">
+      <legend className="font-medium">Zones</legend>
+      <span className="text-sm text-slate-500">Saisie des pertes et résultats limités aux zones cochées.</span>
+      {zones.map((z, i) => (
+        <label key={z.id} className="flex items-center gap-2">
+          <input type="checkbox" name="zoneIds" value={z.id} defaultChecked={isChecked(z)} className="size-5" /> {i + 1}
+          . {z.name}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -96,16 +120,7 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
               </select>
             </label>
           )}
-          {roleCode === "resp_zone" && (
-            <fieldset className="flex flex-col gap-1">
-              <legend className="font-medium">Zone(s)</legend>
-              {zones.map((z) => (
-                <label key={z.id} className="flex items-center gap-2">
-                  <input type="checkbox" name="zoneIds" value={z.id} className="size-5" /> {z.name}
-                </label>
-              ))}
-            </fieldset>
-          )}
+          <ZoneBoxes key={roleCode} zones={zones} isChecked={(z) => defaultChecked(roleCode, z.code)} />
           <label className="flex flex-col gap-1">
             <span className="font-medium">Intitulé affiché</span>
             <input
@@ -152,8 +167,21 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
             </span>
             <span className="text-sm text-slate-600">
               {a.login} · {a.roleLabel}
-              {a.zones.length > 0 && ` · ${a.zones.join(", ")}`}
             </span>
+            <details className="text-sm">
+              <summary className="cursor-pointer text-slate-700">
+                Zones : {a.zones.length ? a.zones.join(", ") : <strong className="text-red-800">aucune</strong>}
+              </summary>
+              <form action={action} className="mt-2 flex flex-col gap-2 rounded-xl bg-slate-50 p-3">
+                <input type="hidden" name="intent" value="zones" />
+                <input type="hidden" name="userId" value={a.id} />
+                <input type="hidden" name="login" value={a.login} />
+                <ZoneBoxes zones={zones} isChecked={(z) => a.zoneIds.includes(z.id)} />
+                <button type="submit" className="btn-secondary self-start" disabled={pending}>
+                  Enregistrer les zones
+                </button>
+              </form>
+            </details>
             <span className="text-sm text-slate-500">
               {a.lastLoginAt ? `Dernière connexion : ${dateFormat.format(new Date(a.lastLoginAt))}` : "Jamais connecté"}
               {a.mustChangePassword && " · mot de passe provisoire"}
