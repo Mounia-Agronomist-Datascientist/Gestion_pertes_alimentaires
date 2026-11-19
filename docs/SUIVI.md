@@ -118,7 +118,9 @@
 - **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0029 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
-- TypeScript 7 (nouvelle version native) fait `tsc` (paquet `@typescript/native`) ; TypeScript 6 est installé sous le nom
+- TypeScript 7 (nouvelle version native) fait la vérification des types (`npm run typecheck`, paquet `typescript7`, nom
+  choisi pour ne pas heurter la dépendance facultative `@typescript/native` de typescript-eslint, qui faisait échouer
+  `npm ci` sur GitHub le 19/11/2026) ; TypeScript 6 est installé sous le nom
   `typescript` pour les outils qui en lisent l'API (typescript-eslint, vérification de types de `next build`), comme le
   recommande l'annonce de TypeScript 7. À retirer quand typescript-eslint gérera TypeScript 7.
 - ESLint et Prettier configurés le 18/11/2026 ; `lint` et `format:check` font partie des tests GitHub. Le commit de
