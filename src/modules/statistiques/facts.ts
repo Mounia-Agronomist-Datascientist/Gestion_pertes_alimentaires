@@ -10,6 +10,7 @@
  */
 import { and, asc, desc, eq, gt, gte, inArray, lt, lte, type SQL } from "drizzle-orm";
 import * as s from "@/db/schema";
+import { splitSupplierReturns } from "@/domain/retours-fournisseur";
 import type { Db } from "@/db/types";
 import { adjacentPeriod, monthBounds, type Period } from "@/domain/periodes";
 import type { LossFact } from "@/domain/statistiques";
@@ -80,12 +81,24 @@ export async function adjacentOf(db: Db, period: Period, step: -1 | 1): Promise<
   return adjacentPeriod(period, step, next ?? null);
 }
 
+/**
+ * Pertes de la période. Par défaut **sans les retours fournisseur** (décision du 19/11/2026 : ils ne comptent pas dans
+ * le total perdu) ; `"retours"` donne seulement la part renvoyée, `"tout"` les pertes telles que saisies (valorisation).
+ */
 export async function loadFacts(
   db: Db,
   user: AuthUser,
   period: Period,
   filters: StatsFilters = {},
+  part: "pertes" | "retours" | "tout" = "pertes",
 ): Promise<LossFact[]> {
+  const all = await loadAllFacts(db, user, period, filters);
+  if (part === "tout") return all;
+  const { losses, returns } = splitSupplierReturns(all);
+  return part === "pertes" ? losses : returns;
+}
+
+async function loadAllFacts(db: Db, user: AuthUser, period: Period, filters: StatsFilters): Promise<LossFact[]> {
   if (!canReadStats(user)) throw new ForbiddenError();
   const scope = can(user, "stats.compare_teams") ? zonesCondition(user) : scopeCondition(user);
   const inPeriod = await periodCondition(db, period);

@@ -29,7 +29,8 @@ Cela couvre :
 ## Principes
 
 - La valorisation **ne fait jamais disparaître** une quantité des pertes (§10.3). Un plat vendu, donné ou
-  composté reste une perte. La valorisation dit seulement ce qu'il est devenu.
+  composté reste une perte. La valorisation dit seulement ce qu'il est devenu. Exception décidée le 19/11/2026 : un
+  **retour fournisseur** sort du total perdu et est compté à part (règle R27) ; il reste visible ici, « à part ».
 - Une **association** ou le **personnel** ne sont jamais comptés comme une recette (§10.4).
 - Le poids mesuré par Les Alchimistes est une **mesure de contrôle**. Il n'est **jamais ajouté** aux pertes
   déclarées (§21).

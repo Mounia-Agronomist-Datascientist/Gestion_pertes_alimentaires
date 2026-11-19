@@ -6,7 +6,8 @@
  * - sans recette : ordures ménagères, compost (Les Alchimistes), don, personnel, autre ;
  * - à part : réutilisation dans une autre préparation et retours fournisseurs.
  *
- * La valorisation ne retire rien des pertes (§10.3) : elle dit seulement ce qu'elles sont devenues. Le coût des
+ * La valorisation ne retire rien des pertes (§10.3) : elle dit seulement ce qu'elles sont devenues (sauf les retours
+ * fournisseur, hors du total perdu depuis le 19/11/2026 mais montrés ici « à part »). Le coût des
  * produits d'une ligne de destination est le coût brut figé de la perte au prorata de la quantité affectée à
  * cette destination.
  */

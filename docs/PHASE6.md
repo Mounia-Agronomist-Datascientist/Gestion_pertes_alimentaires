@@ -387,8 +387,8 @@ centaines de PDF, le plus ancien en S11). Lu en lecture seule ; le sous-dossier 
 
 - **Matières de la semaine d'abord** : à l'étape « Quel produit ? » en Réception et en Stockage, la liste propose les
   matières de la semaine de production — ingrédients du tome en vigueur et matières commandées dans les bons de la
-  semaine, une fois chacune — regroupées par catégorie Melba, avec « Commandée cette semaine » ou « Ingrédient du
-  tome ». Semaine en cours et précédente au choix, comme les plats. Puis les encas de la semaine (règle R9).
+  semaine, une fois chacune — regroupées par catégorie Melba, avec « Ingrédient du tome » le cas échéant (« Commandée
+  cette semaine » retiré le 19/11/2026), puis le fournisseur et le colis. Semaine en cours et précédente au choix, comme les plats. Puis les encas de la semaine (règle R9).
 - **Par lieu** : en **Réception**, toutes les matières de la semaine (la marchandise n'est pas encore rangée). En
   **Stockage**, celles dont la catégorie Melba est rangée dans la sous-zone choisie (Chambre BOF, Légumerie…) ; celles
   dont le lieu n'est pas réglé (pas de catégorie, catégorie sans lieu) sont proposées à part, repliées. Les matières

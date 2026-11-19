@@ -382,7 +382,7 @@ async function recovery(
   setTitle("Rapport de valorisation", label);
   const pdf = await r();
   pdf.cover(
-    `${await scopeText(db, user, ctx)} La valorisation ne retire rien des pertes : un plat vendu, donné ou composté reste une perte.`,
+    `${await scopeText(db, user, ctx)} La valorisation ne retire rien des pertes : un plat vendu, donné ou composté reste une perte (seuls les retours fournisseur sont hors du total perdu).`,
   );
 
   // Ventes et dons des surplus d'après les fichiers de l'entreprise (étape 5.8) : vues d'entreprise seulement.

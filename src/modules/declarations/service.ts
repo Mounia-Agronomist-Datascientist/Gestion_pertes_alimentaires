@@ -6,6 +6,7 @@ import { and, eq, gte, inArray, isNull, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { COST_METHOD, lossCostBreakdown } from "@/domain/couts";
+import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
 import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
@@ -386,6 +387,8 @@ async function prepareDeclaration(
   for (const d of input.destinations) {
     const row = destinationRows.find((r) => r.id === d.destinationId);
     if (!row || !row.active) throw new DeclarationError("Destination inconnue ou désactivée");
+    if (!destinationAllowedIn(row.kind, place.zone.code) && !keptDestinationIds.includes(row.id))
+      throw new DeclarationError(`« ${row.name} » n'est pas proposée dans la zone ${place.zone.name}`);
     if (!row.declarable && !keptDestinationIds.includes(row.id)) {
       throw new DeclarationError(
         `« ${row.name} » n'est plus déclarée par les équipes : ses chiffres viennent des fichiers de l'entreprise`,
@@ -399,6 +402,13 @@ async function prepareDeclaration(
     if (row.binNumberMode === "obligatoire" && !d.binNumber)
       throw new DeclarationError(`Indiquez le n° de la poubelle pour « ${row.name} »`);
   }
+  if (
+    commentRequiredFor(
+      destinationRows.filter((r) => input.destinations.some((d) => d.destinationId === r.id)).map((r) => r.kind),
+    ) &&
+    !input.comment?.trim()
+  )
+    throw new DeclarationError("Précisez en commentaire où part la perte (« Autre destination »)");
   const binAsked = new Set(destinationRows.filter((r) => r.binNumberMode !== "aucun").map((r) => r.id));
   const { justification } = validateDestinationSplit(
     measurement.netQuantity,

@@ -21,7 +21,7 @@ Accueil → **Déclarer une perte**, puis répondre aux questions :
 | **Quel produit ?** | Le plat de la semaine, une sous-recette ou un ingrédient. Taper quelques lettres ou le code (VI01) pour chercher. Absent ? « Produit absent de la liste », juste sous la recherche. En Réception : semaines S-1, en cours et S+1, avec le fournisseur et le colis de chaque matière |
 | **Quelle quantité ?** | **Pesée** (kg), **Comptage** ou **Estimation**. Partout : kg ou pièces du produit. Réception et Stockage : aussi le **colis du fournisseur** (« sachet de 2 kg »), converti en kg ; son poids se corrige s'il est différent cette fois. Cuisine et Conditionnement : aussi les **gastros** (et « Pesé dans des gastros » pour retirer la tare). Conditionnement : aussi les **barquettes** |
 | **Pourquoi ?** | La cause. Aucune ne convient : « Autres pertes » + un commentaire, ou « Proposer une nouvelle cause » |
-| **Où part la perte ?** | Compost (Les Alchimistes), ordures ménagères, personnel, don, réutilisation… Plusieurs destinations : « Répartir entre plusieurs destinations ». N° de poubelle des Alchimistes : à noter s'il est demandé |
+| **Où part la perte ?** | Compost (Les Alchimistes), ordures ménagères, personnel, don, réutilisation… En Réception : « Retour fournisseur » (pas de réutilisation). « Autre destination » : la préciser en commentaire. Plusieurs destinations : « Répartir entre plusieurs destinations ». N° de poubelle des Alchimistes : à noter s'il est demandé |
 | **Vérifier et valider** | Relire, corriger avec « Modifier », puis **Valider la perte** |
 
 ✓ **Perte enregistrée** : « Nouvelle perte — même endroit » pour enchaîner.
@@ -48,7 +48,8 @@ La liste reste sur la tablette tant qu'elle n'est pas validée.
 - **Déclarer** une perte : au plus tard **7 jours** après. Au-delà, demander à un responsable.
 - **Corriger ou annuler** : Accueil → **Pertes déclarées et corrections** → la perte → **Corriger**, jusqu'à **une
   semaine après la fin de la semaine de production** (le mercredi + 7 jours). Chaque correction est gardée.
-- Une perte compostée, jetée, donnée au personnel ou réutilisée **reste une perte** : on la déclare toujours.
+- Une perte compostée, jetée, donnée au personnel ou réutilisée **reste une perte** : on la déclare toujours. Un retour
+  fournisseur se déclare aussi : il est compté à part, hors pertes.
 - Les barquettes parties en **Too Good To Go**, **vente flash** ou chez **Linkee** ne se déclarent pas :
   l'administration reprend leurs fichiers.
 

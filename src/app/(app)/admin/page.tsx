@@ -21,6 +21,11 @@ const SECTIONS = [
     title: "Produits",
     text: "Matières, prix et leurs versions, lieu de stockage, saisies « hors liste »",
   },
+  {
+    href: "/admin/produits/a-completer",
+    title: "Matières à compléter",
+    text: "Matières de la semaine sans fournisseur ou sans poids de colis",
+  },
   { href: "/admin/fournisseurs", title: "Fournisseurs", text: "Fournisseurs des bons de commande, colis et matières" },
   {
     href: "/admin/emballages",

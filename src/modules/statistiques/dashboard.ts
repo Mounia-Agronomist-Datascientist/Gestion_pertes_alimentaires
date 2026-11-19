@@ -25,8 +25,9 @@ export const DESTINATION_KIND_STATS = [
 
 export async function generalDashboard(db: Db, user: AuthUser, period: Period, filters: StatsFilters) {
   const withCosts = can(user, "indicators.read");
-  const [facts, previous, next] = await Promise.all([
+  const [facts, returns, previous, next] = await Promise.all([
     loadFacts(db, user, period, filters),
+    loadFacts(db, user, period, filters, "retours"),
     adjacentOf(db, period, -1),
     adjacentOf(db, period, 1),
   ]);
@@ -38,7 +39,9 @@ export async function generalDashboard(db: Db, user: AuthUser, period: Period, f
     previousPeriod: previous,
     nextPeriod: next,
     /** Une case par zone, dans le sens de la marche en avant. */
-    zoneFlow: await zoneFlowTiles(db, user, filters, facts, previousFacts, withCosts),
+    zoneFlow: await zoneFlowTiles(db, user, filters, facts, previousFacts, withCosts, returns),
+    /** Retours fournisseur, hors du total perdu (décision du 19/11/2026). */
+    supplierReturns: summarize(returns, withCosts),
   };
 }
 

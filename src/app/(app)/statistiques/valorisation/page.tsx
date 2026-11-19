@@ -99,7 +99,8 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
       <FilterForm path={path} ctx={ctx} />
       <p className="text-sm text-slate-600">
         La valorisation ne retire rien des pertes : un plat vendu, donné ou composté reste une perte. Cet onglet dit
-        seulement ce qu&apos;il est devenu.
+        seulement ce qu&apos;il est devenu. Seuls les retours fournisseur sont hors du total perdu (un avoir est
+        attendu) : ils figurent ici « à part ».
       </p>
 
       {surplus && <SurplusSection data={surplus} anchor={anchor} isAdmin={can(user, "referentiel.manage")} />}

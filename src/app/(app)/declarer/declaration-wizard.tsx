@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
+import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
 import { materialsForPlace } from "@/domain/matieres";
 import {
   gastroTareAllowed,
@@ -395,12 +396,25 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     setPackagingKgText(first ? String(first.kg).replace(".", ",") : "");
   }
 
+  // Devenirs de la zone (décision du 19/11/2026) ; une correction garde ceux déjà sur la perte.
+  const keptDestinationIds = init?.destinationLines?.map((l) => l.destinationId) ?? [];
+  const zoneDestinations = options.destinations.filter(
+    (d) => destinationAllowedIn(d.kind, zone?.code ?? "") || keptDestinationIds.includes(d.id),
+  );
+  const commentNeeded = commentRequiredFor(
+    destinationLines
+      .filter((l) => l.quantity)
+      .map((l) => options.destinations.find((d) => d.id === l.destinationId)?.kind ?? ""),
+  );
+  const commentMissing = commentNeeded && !comment.trim();
+
   function chooseSingleDestination(destinationId: string) {
     if (!net) return;
     setSplitMode(false);
     setDestinationLines([{ destinationId, quantity: String(net.quantity) }]);
     setJustification("");
-    setStep("recap");
+    // « Autre destination » : on reste ici pour écrire le commentaire qui la précise.
+    if (options.destinations.find((d) => d.id === destinationId)?.kind !== "autre") setStep("recap");
   }
 
   function resetForNext(keepPlace: boolean) {
@@ -763,6 +777,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           catalogs={options.weekCatalogs}
           weekMaterials={options.weekMaterials}
           packagings={options.packagings}
+          suppliers={options.suppliers}
           materialCategories={options.materialCategories}
           materialPlace={
             zone && subzone && MATERIAL_ZONE_CODES.includes(zone.code)
@@ -1013,12 +1028,30 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           {!splitMode ? (
             <>
               <TileGrid>
-                {options.destinations.map((d) => (
-                  <Tile key={d.id} compact onClick={() => chooseSingleDestination(d.id)}>
+                {zoneDestinations.map((d) => (
+                  <Tile
+                    key={d.id}
+                    compact
+                    selected={destinationLines.length === 1 && destinationLines[0]!.destinationId === d.id}
+                    onClick={() => chooseSingleDestination(d.id)}
+                  >
                     {d.name}
                   </Tile>
                 ))}
               </TileGrid>
+              {commentNeeded && (
+                <div className="flex flex-col gap-2 rounded-xl bg-white p-3">
+                  <OtherDestinationComment value={comment} onChange={setComment} />
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    disabled={commentMissing}
+                    onClick={() => setStep("recap")}
+                  >
+                    Continuer
+                  </button>
+                </div>
+              )}
               <button
                 type="button"
                 className="btn-secondary"
@@ -1032,7 +1065,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             </>
           ) : (
             <div className="flex flex-col gap-3">
-              {options.destinations.map((d) => {
+              {zoneDestinations.map((d) => {
                 const line = destinationLines.find((l) => l.destinationId === d.id);
                 return (
                   <label key={d.id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3">
@@ -1069,10 +1102,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                   <input className="field" value={justification} onChange={(e) => setJustification(e.target.value)} />
                 </label>
               )}
+              {commentNeeded && <OtherDestinationComment value={comment} onChange={setComment} />}
               <button
                 type="button"
                 className="btn-primary"
-                disabled={!split || (split.status === "ecart" && !justification.trim())}
+                disabled={!split || (split.status === "ecart" && !justification.trim()) || commentMissing}
                 onClick={() => setStep("recap")}
               >
                 Continuer
@@ -1261,7 +1295,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             </p>
           )}
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Commentaire (facultatif)</span>
+            <span className="font-medium">
+              {commentNeeded
+                ? "Commentaire (obligatoire : précisez « Autre destination »)"
+                : "Commentaire (facultatif)"}
+            </span>
             <textarea className="field min-h-20 py-2" value={comment} onChange={(e) => setComment(e.target.value)} />
           </label>
 
@@ -1285,7 +1323,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             type="button"
             className="btn-primary"
             disabled={
-              pending || !occurredOn || productWeekMismatch || missingBin || (!!correction && reason.trim().length < 3)
+              pending ||
+              !occurredOn ||
+              productWeekMismatch ||
+              missingBin ||
+              commentMissing ||
+              (!!correction && reason.trim().length < 3)
             }
             onClick={submit}
           >
@@ -1484,6 +1527,7 @@ function ProductStep({
   catalogs,
   weekMaterials,
   packagings,
+  suppliers,
   materialCategories,
   materialPlace,
   initialWeek,
@@ -1501,6 +1545,7 @@ function ProductStep({
   weekMaterials: DeclarationOptions["weekMaterials"];
   /** Colis fournisseur par produit : fournisseur et colis affichés sous chaque matière. */
   packagings: DeclarationOptions["packagings"];
+  suppliers: DeclarationOptions["suppliers"];
   materialCategories: DeclarationOptions["materialCategories"];
   /** Réception ou Stockage : matières de la semaine d'abord, filtrées par sous-zone en Stockage. */
   materialPlace: { zoneCode: string; subzoneId: string; subzoneName: string } | null;
@@ -1526,11 +1571,15 @@ function ProductStep({
   const [path, setPath] = useState<{ kind: "plat" | "sous_recette"; id: string }[]>([]);
   const [catalogId, setCatalogId] = useState(initialCatalog?.weekId ?? catalogs[0]?.weekId ?? null);
   const catalog = catalogs.find((c) => c.weekId === catalogId) ?? null;
+  // Fournisseur et colis sous chaque matière : le colis pesé s'il est connu, sinon le fournisseur seul (vrac au kg, ou
+  // poids du colis à compléter sur la fiche produit).
   const supplierOf = (productId: string) => {
     const k = packagings[productId]?.[0];
-    return k
-      ? `${k.supplier} · ${k.label ?? "colis"} (${k.kg.toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg)`
-      : null;
+    if (k)
+      return `${k.supplier} · ${k.label ?? "colis"} (${k.kg.toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg)`;
+    const s = suppliers[productId];
+    if (!s) return null;
+    return s.looseByKg ? `${s.supplier} · vendu au kg` : `${s.supplier} · ${s.label ?? "colis"} (poids à compléter)`;
   };
   // S+1 seulement en Réception (les bons de la semaine suivante arrivent dès le jeudi) ; S-1 et S partout.
   const shownWeeks = weekMaterials.filter((w) => w.relative !== 1 || materialPlace?.zoneCode === "RECEPTION");
@@ -1904,9 +1953,7 @@ function MaterialGroups({
           {list.map((m) => (
             <Tile key={m.productId} compact onClick={() => onChoose(m)}>
               {m.name}
-              <small className="font-normal opacity-70">
-                {m.ordered ? "Commandée cette semaine" : "Ingrédient du tome"}
-              </small>
+              {m.inTome && <small className="font-normal opacity-70">Ingrédient du tome</small>}
               {supplierOf?.(m.productId) && (
                 <small className="font-normal text-slate-500">{supplierOf(m.productId)}</small>
               )}
@@ -1969,4 +2016,20 @@ function searchWeek(catalog: WeekCatalog, dishes: WeekCatalog["dishes"], term: s
   };
   for (const d of dishes) visit(d.lines);
   return matches.slice(0, 30);
+}
+
+/** Commentaire demandé quand la perte part vers « Autre destination » (décision du 19/11/2026). */
+function OtherDestinationComment({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="font-medium">Précisez « Autre destination » (commentaire obligatoire)</span>
+      <textarea
+        className="field min-h-24 py-2"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={1000}
+        placeholder="Où part la perte"
+      />
+    </label>
+  );
 }

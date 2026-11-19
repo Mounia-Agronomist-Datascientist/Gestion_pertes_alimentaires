@@ -28,7 +28,8 @@ export async function recoveryDashboard(
 ) {
   const withCosts = can(user, "indicators.read");
   const [facts, destinations, weeks] = await Promise.all([
-    loadFacts(db, user, period, filters),
+    // Ce que deviennent les pertes, retours fournisseur compris (groupe « à part »).
+    loadFacts(db, user, period, filters, "tout"),
     db
       .select({ id: s.destinations.id, name: s.destinations.name })
       .from(s.destinations)
@@ -45,6 +46,7 @@ export async function recoveryDashboard(
       user,
       { kind: "periode", from: weeks[0]!.startDate, to: weeks.at(-1)!.endDate },
       filters,
+      "tout",
     );
     const byWeek = new Map<string, LossFact[]>();
     for (const f of weekFacts)

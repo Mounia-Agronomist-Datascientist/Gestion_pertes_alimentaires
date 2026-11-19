@@ -6,6 +6,7 @@ import { requireUser } from "@/modules/auth/next-session";
 import { generalDashboard } from "@/modules/statistiques/dashboard";
 import { canReadStats } from "@/modules/statistiques/facts";
 import {
+  SupplierReturns,
   Card,
   DestinationBars,
   ExportLinks,
@@ -47,6 +48,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
         withCosts={dashboard.withCosts}
       />
       <SummaryNotes summary={dashboard.current} withCosts={dashboard.withCosts} />
+      <SupplierReturns summary={dashboard.supplierReturns} withCosts={dashboard.withCosts} />
       <ZoneFlow
         tiles={dashboard.zoneFlow}
         previousLabel={dashboard.previousPeriod ? periodLabel(dashboard.previousPeriod) : null}

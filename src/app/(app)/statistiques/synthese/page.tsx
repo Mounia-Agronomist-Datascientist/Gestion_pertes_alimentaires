@@ -10,6 +10,7 @@ import { type WeeklyRow, weeklySummary } from "@/modules/statistiques/weekly";
 import { ColumnChart } from "../evolution/column-chart";
 import { TrendTable } from "../evolution/trend-table";
 import {
+  SupplierReturns,
   BarTable,
   Card,
   euro,
@@ -96,6 +97,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         previousLabel={previousLabel}
         withCosts={withCosts}
       />
+      <SupplierReturns summary={data.supplierReturns} withCosts={withCosts} />
       <ZoneFlow tiles={data.zoneFlow} previousLabel={previousLabel} />
       {comparison.average && (
         <p className="text-sm text-slate-600">

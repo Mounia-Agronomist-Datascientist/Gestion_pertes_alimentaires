@@ -18,15 +18,16 @@ export async function zoneFlowTiles(
   current: readonly LossFact[],
   previous: readonly LossFact[] | null,
   withCosts: boolean,
+  returns: readonly LossFact[] = [],
 ) {
   const zones = await db
     .select({ id: s.zones.id, name: s.zones.name })
     .from(s.zones)
     .where(eq(s.zones.active, true))
     .orderBy(asc(s.zones.displayOrder));
-  const tiles = zoneFlow(zones, current, previous, withCosts);
+  const tiles = zoneFlow(zones, current, previous, withCosts, returns);
   if (can(user, "stats.compare_teams") && !filters.zoneId && !filters.subzoneId)
     return tiles.filter((t) => user.zoneIds.includes(t.zoneId));
-  const seen = new Set([...current, ...(previous ?? [])].map((f) => f.zoneId));
+  const seen = new Set([...current, ...(previous ?? []), ...returns].map((f) => f.zoneId));
   return tiles.filter((t) => seen.has(t.zoneId) || t.zoneId === filters.zoneId);
 }

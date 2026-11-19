@@ -73,9 +73,10 @@ export async function weeklySummary(
     db.select({ id: s.zones.id, name: s.zones.name }).from(s.zones).orderBy(asc(s.zones.displayOrder)),
   ]);
   if (!comparison) return null;
-  const [current, previous] = await Promise.all([
+  const [current, previous, returns] = await Promise.all([
     loadFacts(db, user, week, filters),
     previousPeriod ? loadFacts(db, user, previousPeriod, filters) : Promise.resolve([]),
+    loadFacts(db, user, week, filters, "retours"),
   ]);
   const zoneName = new Map(zones.map((z) => [z.id, z.name]));
   const summary = summarize(current, withCosts);
@@ -123,7 +124,9 @@ export async function weeklySummary(
     by,
     summary,
     /** Une case par zone, dans le sens de la marche en avant. */
-    zoneFlow: await zoneFlowTiles(db, user, filters, current, previousPeriod ? previous : null, withCosts),
+    zoneFlow: await zoneFlowTiles(db, user, filters, current, previousPeriod ? previous : null, withCosts, returns),
+    /** Retours fournisseur, hors du total perdu (décision du 19/11/2026). */
+    supplierReturns: summarize(returns, withCosts),
     comparison,
     previousPeriod,
     byZone,

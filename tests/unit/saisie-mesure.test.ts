@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { gastroTareAllowed, isLooseByKg, methodLabel, methodsFor, packagingKg, unitsFor } from "@/domain/saisie-mesure";
+import {
+  gastroTareAllowed,
+  isLooseByKg,
+  methodLabel,
+  methodsFor,
+  packagingKg,
+  pieceKgFromName,
+  unitsFor,
+} from "@/domain/saisie-mesure";
 import { INPUT_METHODS } from "@/modules/declarations/input";
 
 const ctx = (zoneCode: string, over: Partial<Parameters<typeof unitsFor>[1]> = {}) => ({
@@ -71,12 +79,54 @@ describe("poids d'un colis", () => {
         { unitWeightKg: 0.07, densityKgPerL: null },
       ),
     ).toBe(1.4);
+  });
+
+  it("poids écrits dans le contenu, le colis imbriqué ou le nom (décision du 19/11/2026)", () => {
+    const liquid = { unitWeightKg: null, densityKgPerL: 1.03 };
+    // Sous-colis pesés.
+    expect(packagingKg({ packagingLabel: "Carton 10 kg", contentQuantity: 4, contentUnit: "Sac 2,5kg" }, product)).toBe(
+      10,
+    );
     expect(
       packagingKg(
-        { packagingLabel: "Carton 12l", contentQuantity: 4, contentUnit: "poche 3l" },
-        { unitWeightKg: 1, densityKgPerL: 1 },
+        { packagingLabel: "sachet ( 12 pièce )", contentQuantity: 12, contentUnit: "pièces de 125 gr" },
+        product,
       ),
+    ).toBe(1.5);
+    expect(packagingKg({ packagingLabel: "Carton 12l", contentQuantity: 4, contentUnit: "poche 3l" }, liquid)).toBe(
+      12.36,
+    );
+    expect(
+      packagingKg({ packagingLabel: "Carton 12l", contentQuantity: 4, contentUnit: "poche 3l" }, product),
     ).toBeNull();
+    // L'intitulé dit un autre poids que le contenu : rien n'est retenu.
+    expect(
+      packagingKg({ packagingLabel: "Carton de 5kg", contentQuantity: 4, contentUnit: "Sac 2.5 kg" }, product),
+    ).toBeNull();
+    // Colis imbriqué dans l'intitulé, sans contenu.
+    expect(
+      packagingKg(
+        { packagingLabel: "Palette (80.00 Carton (10KG))", contentQuantity: null, contentUnit: null },
+        product,
+      ),
+    ).toBe(800);
+    // Pièces : poids écrit dans le nom du produit.
+    expect(
+      packagingKg(
+        { packagingLabel: "Barquette", contentQuantity: 20, contentUnit: "saucisse" },
+        { ...product, name: "saucisse de volaille 60G" },
+      ),
+    ).toBe(1.2);
+    // Rien d'écrit : à compléter sur la fiche produit.
+    expect(packagingKg({ packagingLabel: "Carton", contentQuantity: 10, contentUnit: "Sachet" }, product)).toBeNull();
+  });
+
+  it("poids d'une pièce lu dans le nom : le dernier en masse, jamais une fourchette ni un pourcentage", () => {
+    expect(pieceKgFromName("Escalope de dinde 120g")).toBe(0.12);
+    expect(pieceKgFromName("Carré de seitan pomme de terre , oignon , fromage BIO 100gr")).toBe(0.1);
+    expect(pieceKgFromName("Haut de cuisse poulet 140/160G")).toBeNull();
+    expect(pieceKgFromName("crème liquide 35% MG")).toBeNull();
+    expect(pieceKgFromName("sauce soja 1L")).toBeNull();
   });
 
   it("« (KG) » est un produit vendu au kg, pas un colis", () => {

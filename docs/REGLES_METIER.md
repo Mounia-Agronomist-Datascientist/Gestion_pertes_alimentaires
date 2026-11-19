@@ -68,7 +68,8 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
 - La somme des lignes est comparée à la quantité nette déclarée, **dans la même unité** :
   - écart nul (tolérance d'arrondi 0,001) → OK ;
   - écart non nul → alerte ; l'enregistrement exige soit une correction, soit une **justification** saisie.
-- La destination ne modifie jamais la quantité de perte/surplus comptabilisée (§10.3).
+- La destination ne modifie jamais la quantité de perte/surplus comptabilisée (§10.3), **sauf le retour fournisseur**
+  (R27, 19/11/2026) : la part renvoyée sort du total perdu et est comptée à part.
 - Seules les destinations marquées « récupération financière » (Too Good To Go, vente flash) peuvent porter un
   montant récupéré (Phase 3). Don et personnel : jamais de recette financière.
 
@@ -332,6 +333,23 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   référence.
 - Sert à convertir en kg une perte saisie en litres (matière de la liste ou ingrédient de la semaine) et à ramener
   au kg un prix d'achat au litre.
+
+## R27 — Retours fournisseur et devenirs de la Réception (Phase 6, 19/11/2026)
+
+- Une perte (ou la part d'une perte) **renvoyée au fournisseur** n'est **pas comptée dans le total perdu** : ni kg, ni
+  euros, ni cases par zone, classements, ratios, alertes ou coûts des pertes. Elle repart et un avoir est attendu.
+- Elle est donnée **à part** : « Retours fournisseur (hors pertes) » dans la vue générale et la synthèse de la semaine
+  (kg, coût brut, nombre), et une ligne « + retours fournisseur » dans la case de la zone. Valorisation : toujours dans
+  le groupe « à part ».
+- Perte répartie (ex. 3 kg renvoyés, 2 kg au compost) : coupée au prorata des quantités de chaque destination.
+- Devenir **« Retour fournisseur »** proposé seulement en **Réception** ; **« Réutilisation dans une autre préparation »**
+  n'est pas proposée en Réception. Le serveur refait le contrôle (une correction garde un devenir déjà saisi).
+- **« Autre destination »** demande un commentaire qui la précise (comme le motif « Autres pertes »).
+- **Matières de la semaine complètes** : fournisseur et poids du colis lus dans les bons (contenu en sous-colis pesés,
+  « 4 Sac 2,5kg » ; colis imbriqué, « Palette (80 Carton (10KG)) » ; pièces avec le poids écrit dans le nom du produit,
+  « Escalope de dinde 120g »). Si l'intitulé et le contenu donnent deux poids différents, rien n'est retenu. Ce qui
+  manque est listé dans Administration → « Matières à compléter » et se saisit sur la fiche produit ; le dernier colis
+  de chaque fournisseur reste valable d'une semaine à l'autre, jusqu'à un bon qui le change.
 
 ## R26 — Zones de chaque compte (Phase 6, 19/11/2026)
 

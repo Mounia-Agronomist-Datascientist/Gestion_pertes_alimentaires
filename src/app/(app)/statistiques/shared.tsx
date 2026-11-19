@@ -503,6 +503,33 @@ export function ExportLinks({
 }
 
 /**
+ * Retours fournisseur, à part du total perdu (décision du 19/11/2026) : ils repartent chez le fournisseur et
+ * donnent normalement un avoir.
+ */
+export function SupplierReturns({ summary, withCosts }: { summary: StatsSummary; withCosts: boolean }) {
+  if (summary.events === 0) return null;
+  return (
+    <section
+      className="flex flex-col gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+      aria-label="Retours fournisseur"
+    >
+      <h2 className="font-semibold">Retours fournisseur (hors pertes)</h2>
+      <p className="text-2xl font-bold">
+        {num.format(summary.foodKg)} kg
+        {withCosts && summary.cost && (
+          <span className="text-lg font-semibold text-slate-700"> · {euro.format(summary.cost.grossEur)}</span>
+        )}
+      </p>
+      <p className="text-sm text-slate-600">
+        {summary.events} retour{summary.events > 1 ? "s" : ""} : non compté{summary.events > 1 ? "s" : ""} dans le total
+        perdu, un avoir du fournisseur est attendu.
+        {summary.foodNotConverted > 0 && ` Dont ${summary.foodNotConverted} sans poids en kg.`}
+      </p>
+    </section>
+  );
+}
+
+/**
  * Une case par zone dans le sens de la marche en avant (décision du 18/11/2026) : jauge = part de la zone dans les
  * kg perdus, coût brut, kg, évolution des kg par rapport à la période précédente.
  */
@@ -566,6 +593,13 @@ function ZoneTile({ tile: t, previousLabel }: { tile: ZoneFlowTile; previousLabe
         <span className={`text-sm font-medium ${change.tone}`}>
           {change.text}
           {previousLabel && <span className="font-normal text-slate-500"> vs {previousLabel}</span>}
+        </span>
+      )}
+      {t.returned && (
+        <span className="text-sm text-slate-600">
+          + retours fournisseur : {num.format(t.returned.kg)} kg
+          {t.returned.grossEur != null && ` · ${euro.format(t.returned.grossEur)}`}
+          <span className="block text-xs text-slate-500">hors pertes (avoir attendu)</span>
         </span>
       )}
       {t.notConverted > 0 && (

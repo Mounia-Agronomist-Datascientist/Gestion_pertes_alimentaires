@@ -9,7 +9,7 @@ import type { LocalDate } from "@/domain/semaine-production";
 import { portionPackagingCost } from "@/modules/admin/packaging";
 import { weekCatalogs } from "@/modules/imports/catalog";
 import { materialCategoriesWithStorage, recentWeekMaterials } from "@/modules/matieres/semaine";
-import { packagingOptions } from "@/modules/matieres/colis";
+import { packagingOptions, productSuppliers } from "@/modules/matieres/colis";
 import { pricesInForce } from "@/modules/matieres/referentiel";
 import { type AuthUser, hasZone } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
@@ -148,6 +148,8 @@ export async function getDeclarationOptions(
     materialCategories: await materialCategoriesWithStorage(db),
     /** Colis fournisseur convertibles en kg, par produit du référentiel (Réception, Stockage ; règle R25). */
     packagings: Object.fromEntries(await packagingOptions(db)),
+    /** Fournisseur habituel de chaque produit (dernier bon, sinon fiche produit), même sans poids de colis. */
+    suppliers: Object.fromEntries(await productSuppliers(db)),
     /** Prix en vigueur aujourd'hui des produits du référentiel (aperçu ; le serveur prend la date de la perte). */
     prices: Object.fromEntries(
       [...(await pricesInForce(db, today))].map(([id, p]) => [
