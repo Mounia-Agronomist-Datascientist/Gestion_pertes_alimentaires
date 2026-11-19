@@ -103,10 +103,14 @@ export async function getDeclarationOptions(
     db.select().from(s.products).where(eq(s.products.active, true)).orderBy(asc(s.products.name)),
   ]);
 
+  // Numéro de la zone dans le sens de la marche en avant (1 Réception … 5 Plonge), le même pour tous, même pour un
+  // responsable qui ne voit que ses zones.
+  const zoneNumber = new Map(zoneRows.map((z, i) => [z.id, i + 1]));
   const zones = zoneRows
     .filter((z) => !limitedToOwnZones || user.zoneIds.includes(z.id))
     .map((z) => ({
       id: z.id,
+      number: zoneNumber.get(z.id)!,
       code: z.code,
       name: z.name,
       subzones: subzoneRows

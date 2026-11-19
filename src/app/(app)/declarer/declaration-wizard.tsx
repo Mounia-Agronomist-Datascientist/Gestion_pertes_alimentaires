@@ -216,9 +216,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     if (previous) setStep(previous);
   };
 
-  // Zone la plus récemment utilisée en premier.
+  // Zones toujours dans le même ordre (marche en avant, numérotées) ; la dernière utilisée est seulement signalée.
   const lastZoneId = options.zones.find((z) => z.subzones.some((sz) => sz.id === lastSubzoneId))?.id;
-  const orderedZones = [...options.zones].sort((a, b) => Number(b.id === lastZoneId) - Number(a.id === lastZoneId));
 
   // ─── Calculs en direct (le serveur refait tous les contrôles) ───────────────
   const gastros = options.containers.filter((c) => c.kind === "gastro");
@@ -680,8 +679,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       {step === "zone" && (
         <Section title="Où a eu lieu la perte ?">
           <TileGrid>
-            {orderedZones.map((z) => (
+            {options.zones.map((z) => (
               <Tile key={z.id} onClick={() => chooseZone(z.id)} selected={z.id === zoneId}>
+                {z.number ? `${z.number}. ` : ""}
                 {z.name}
                 {z.id === lastZoneId && <small className="font-normal opacity-80">Dernière utilisée</small>}
               </Tile>
@@ -914,7 +914,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 selected={c.id === causeId}
                 onClick={() => {
                   setCauseId(c.id);
-                  setStep("destination");
+                  // « Autres pertes » : on reste ici pour écrire le commentaire qui explique la perte.
+                  if (!c.isOther) setStep("destination");
                 }}
               >
                 {c.name}
@@ -922,6 +923,24 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               </Tile>
             ))}
           </div>
+          {causes.find((c) => c.id === causeId)?.isOther && (
+            <div className="flex flex-col gap-2 rounded-xl bg-white p-3">
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Expliquez la perte (commentaire)</span>
+                <textarea
+                  className="field min-h-24 py-2"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  maxLength={1000}
+                  placeholder="Ce qui s'est passé"
+                  autoFocus
+                />
+              </label>
+              <button type="button" className="btn-primary" onClick={() => setStep("destination")}>
+                Continuer
+              </button>
+            </div>
+          )}
           <p className="text-sm text-slate-500">
             Aucune cause ne correspond ? Choisissez « Autres pertes » et expliquez en commentaire.
           </p>
