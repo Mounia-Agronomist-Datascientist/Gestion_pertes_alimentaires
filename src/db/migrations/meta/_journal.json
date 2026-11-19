@@ -211,6 +211,13 @@
       "when": 1795012351443,
       "tag": "0029_colis_de_la_perte",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795085977651,
+      "tag": "0030_reception_un_seul_poste",
+      "breakpoints": true
     }
   ]
 }

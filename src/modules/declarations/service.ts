@@ -224,12 +224,29 @@ async function prepareDeclaration(
   const isConsumable = isNonFoodCategory(product.category);
 
   // ─── Façon de mesurer permise dans ce lieu pour ce produit (règle R25) ──────
-  const packaging =
-    !input.tare && input.unitCode === "colis" && product.id
-      ? ((await packagingOptions(db, [product.id])).get(product.id)?.find((o) => o.key === input.packagingKey) ?? null)
+  // Colis fournisseur (Réception, Stockage) : le colis connu choisi, dont le poids peut être corrigé à la saisie
+  // (cartons de 2 kg reçus au lieu de 3 kg), ou un colis dont on indique le poids (« Autre colis »).
+  let packaging: { kg: number; label: string } | null = null;
+  if (!input.tare && input.unitCode === "colis") {
+    const known = input.packagingKey
+      ? product.id
+        ? ((await packagingOptions(db, [product.id])).get(product.id)?.find((o) => o.key === input.packagingKey) ??
+          null)
+        : null
       : null;
-  if (!input.tare && input.unitCode === "colis" && !packaging) {
-    throw new DeclarationError("Colis inconnu pour ce produit : choisissez un colis de la liste");
+    if (input.packagingKey && !known) {
+      throw new DeclarationError("Colis inconnu pour ce produit : choisissez un colis de la liste");
+    }
+    const fmtKg = (n: number) => `${n.toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg`;
+    const kg = roundQuantity(input.packagingKg ?? known!.kg);
+    packaging = known
+      ? {
+          kg,
+          label: `${known.label ?? "Colis"} — ${known.supplier}${
+            Math.abs(kg - known.kg) > 0.0005 ? ` (reçu : ${fmtKg(kg)} au lieu de ${fmtKg(known.kg)})` : ""
+          }`,
+        }
+      : { kg, label: `Colis de ${fmtKg(kg)} (poids indiqué à la saisie)` };
   }
   const measureContext: MeasureContext = {
     zoneCode: place.zone.code,
@@ -483,7 +500,7 @@ async function prepareDeclaration(
       netKg: measurement.netKg,
       kgStatus: measurement.kgStatus,
       conversionFactorUsed: measurement.factorUsed,
-      packagingLabel: packaging ? `${packaging.label ?? "Colis"} — ${packaging.supplier}` : null,
+      packagingLabel: packaging?.label ?? null,
       causeId: cause.id,
       causeName: cause.name,
       comment: input.comment || null,

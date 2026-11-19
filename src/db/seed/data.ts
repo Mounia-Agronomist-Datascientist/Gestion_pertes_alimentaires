@@ -37,10 +37,7 @@ export const ZONES = [
     code: "RECEPTION",
     name: "Réception",
     teamMode: "zone",
-    subzones: [
-      { code: "REC_RECEPTION", name: "Réception des marchandises" },
-      { code: "REC_CONTROLE", name: "Contrôle des marchandises" },
-    ],
+    subzones: [{ code: "REC_RECEPTION", name: "Réception des marchandises" }],
   },
   {
     code: "STOCKAGE",

@@ -56,6 +56,7 @@
 | 2026-11-12 | Synthèse de la semaine (montants, zones, causes, produits, plus fortes hausses, 12 semaines), version imprimable et exports CSV | 1 test unitaire + 1 test d'intégration ; page et exports vérifiés dans le navigateur |
 | 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
+| 2026-11-19 | Réception : un seul poste (« Contrôle des marchandises » désactivé, migration 0030) ; semaines S-1, S, S+1 ; « Produit absent de la liste » sous la recherche (tous les postes) ; fournisseur et colis sous chaque matière ; méthodes « 1. Comptage en nombre de colis, sachets ou unités », « 2. Pesée à la balance », « 3. Estimation » ; kg seulement ; poids du colis corrigeable et « Autre colis » (Réception, Stockage) | 437 tests ; parcours Réception vérifié en local (Chrome piloté) |
 | 2026-11-19 | Saisie : toutes les zones visibles par tous ; un responsable de zone ne peut choisir que les siennes, les autres sont grisées (« Pas dans vos zones ») ; le serveur refuse toujours une perte hors de ses zones | 2 tests d'intégration ; vérifié en local avec le compte Responsable Stockage (Chrome piloté) |
 | 2026-11-19 | Saisie : zones numérotées (1 Réception … 5 Plonge, même numéro pour tous) et toujours dans le même ordre (la dernière utilisée est seulement signalée) ; « Autres pertes » ouvre un champ commentaire avant de continuer | Vérifié en local (Chrome piloté) ; 434 tests |
 | 2026-11-19 | Tome : sous-recettes partagées par les déclinaisons d'un plat comparées pour un gramme (kg → g, L → mL ; par recette sans poids) : plus d'avertissement pour une même sous-recette imprimée sur des bases différentes ; S48 : 0 point à vérifier | 2 tests unitaires (dont une vraie différence toujours signalée) ; 434 tests |
@@ -119,7 +120,7 @@
 
 ## Anomalies connues / points de vigilance
 
-- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0029 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
+- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0030 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
 - TypeScript 7 (nouvelle version native) fait la vérification des types (`npm run typecheck`, paquet `typescript7`, nom

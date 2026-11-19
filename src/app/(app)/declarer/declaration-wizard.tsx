@@ -9,6 +9,7 @@ import { materialsForPlace } from "@/domain/matieres";
 import {
   gastroTareAllowed,
   type MeasureContext,
+  methodLabel,
   methodsFor,
   packagingChoiceLabel,
   unitsFor,
@@ -62,6 +63,8 @@ export interface WizardInitial {
   unitCode: string | null;
   /** Colis fournisseur choisi (unité « colis »). */
   packagingKey?: string | null;
+  /** Poids d'un colis indiqué ou corrigé à la saisie (texte, clavier français). */
+  packagingKg?: string;
   useTare: boolean;
   grossKg: string;
   gastroCounts: Record<string, number>;
@@ -147,6 +150,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [quantity, setQuantity] = useState(init?.quantity ?? "");
   const [unitCode, setUnitCode] = useState<string | null>(init?.unitCode ?? null);
   const [packagingKey, setPackagingKey] = useState<string | null>(init?.packagingKey ?? null);
+  const [packagingKgText, setPackagingKgText] = useState(init?.packagingKg ?? "");
   const [useTare, setUseTare] = useState(init?.useTare ?? false);
   const [grossKg, setGrossKg] = useState(init?.grossKg ?? "");
   const [gastroCounts, setGastroCounts] = useState<Record<string, number>>(init?.gastroCounts ?? {});
@@ -255,6 +259,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   // Façons de mesurer permises dans ce lieu pour ce produit (règle R25 ; le serveur refait le contrôle).
   const productPackagings = listedProduct ? (options.packagings[listedProduct.id] ?? []) : [];
   const packaging = unitCode === "colis" ? (productPackagings.find((k) => k.key === packagingKey) ?? null) : null;
+  // Poids d'un colis : celui du colis choisi, corrigeable (cartons de 2 kg reçus au lieu de 3 kg), ou indiqué.
+  const packagingKg = unitCode === "colis" ? parseNumber(packagingKgText) : null;
   const measureContext: MeasureContext = {
     zoneCode: zone?.code ?? "",
     isConsumable,
@@ -270,7 +276,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     const q = parseNumber(quantity);
     if (q == null || q <= 0 || !unit) return null;
     if (unit.code === "colis") {
-      return packaging ? { quantity: q, unitCode: "colis", kg: Math.round(q * packaging.kg * 10_000) / 10_000 } : null;
+      return packagingKg != null && packagingKg > 0
+        ? { quantity: q, unitCode: "colis", kg: Math.round(q * packagingKg * 10_000) / 10_000 }
+        : null;
     }
     const conversion = convertToKg(
       q,
@@ -382,7 +390,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
   function chooseUnit(code: string | null) {
     setUnitCode(code);
-    setPackagingKey(code === "colis" ? (productPackagings[0]?.key ?? null) : null);
+    const first = code === "colis" ? (productPackagings[0] ?? null) : null;
+    setPackagingKey(first?.key ?? null);
+    setPackagingKgText(first ? String(first.kg).replace(".", ",") : "");
   }
 
   function chooseSingleDestination(destinationId: string) {
@@ -439,6 +449,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       quantity: useTare ? null : net.quantity,
       unitCode: useTare ? null : unitCode,
       packagingKey: !useTare && unitCode === "colis" ? packagingKey : null,
+      // Poids envoyé seulement s'il diffère du colis choisi, ou s'il n'y a pas de colis connu.
+      packagingKg:
+        !useTare &&
+        unitCode === "colis" &&
+        packagingKg != null &&
+        (!packaging || Math.abs(packagingKg - packaging.kg) > 0.0005)
+          ? packagingKg
+          : null,
       tare: useTare
         ? {
             grossKg: parseNumber(grossKg),
@@ -472,6 +490,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           quantity,
           unitCode,
           packagingKey,
+          packagingKg: packagingKgText,
           useTare,
           grossKg,
           gastroCounts,
@@ -743,6 +762,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           products={options.products}
           catalogs={options.weekCatalogs}
           weekMaterials={options.weekMaterials}
+          packagings={options.packagings}
           materialCategories={options.materialCategories}
           materialPlace={
             zone && subzone && MATERIAL_ZONE_CODES.includes(zone.code)
@@ -768,7 +788,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           <TileGrid>
             {methods.map((m) => (
               <Tile key={m} onClick={() => chooseMethod(m)} selected={m === method} compact>
-                {METHOD_LABELS[m]}
+                {methodLabel(m, zone?.code ?? "", METHOD_LABELS[m], methods.indexOf(m))}
               </Tile>
             ))}
           </TileGrid>
@@ -812,20 +832,54 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           )}
 
           {method && !useTare && unitCode === "colis" && (
-            <label className="flex flex-col gap-1">
-              <span className="font-medium">Colis du fournisseur</span>
-              <select className="field" value={packagingKey ?? ""} onChange={(e) => setPackagingKey(e.target.value)}>
-                {productPackagings.map((k) => (
-                  <option key={k.key} value={k.key}>
-                    {packagingChoiceLabel(
-                      { packagingLabel: k.label, contentQuantity: null, contentUnit: null, supplier: k.supplier },
-                      k.kg,
-                    )}
-                    {k.source === "manuel" ? " · saisi à la main" : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="flex flex-col gap-2 rounded-xl bg-white p-3">
+              {productPackagings.length > 0 && (
+                <label className="flex flex-col gap-1">
+                  <span className="font-medium">Colis du fournisseur</span>
+                  <select
+                    className="field"
+                    value={packagingKey ?? ""}
+                    onChange={(e) => {
+                      const k = productPackagings.find((x) => x.key === e.target.value) ?? null;
+                      setPackagingKey(k?.key ?? null);
+                      if (k) setPackagingKgText(String(k.kg).replace(".", ","));
+                    }}
+                  >
+                    {productPackagings.map((k) => (
+                      <option key={k.key} value={k.key}>
+                        {packagingChoiceLabel(
+                          { packagingLabel: k.label, contentQuantity: null, contentUnit: null, supplier: k.supplier },
+                          k.kg,
+                        )}
+                        {k.source === "manuel" ? " · saisi à la main" : ""}
+                      </option>
+                    ))}
+                    <option value="">Autre colis (poids à indiquer)</option>
+                  </select>
+                </label>
+              )}
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Poids d&apos;un colis (kg)</span>
+                <input
+                  className="field"
+                  inputMode="decimal"
+                  value={packagingKgText}
+                  onChange={(e) => setPackagingKgText(e.target.value)}
+                  placeholder="ex. 2"
+                />
+              </label>
+              {packaging && packagingKg != null && Math.abs(packagingKg - packaging.kg) > 0.0005 && (
+                <p className="text-sm text-amber-800">
+                  Colis différent de l&apos;habitude : {fmt(packagingKg)} kg au lieu de {fmt(packaging.kg)} kg.
+                </p>
+              )}
+              {!packaging && (
+                <p className="text-sm text-slate-500">
+                  {productPackagings.length ? "" : "Aucun colis connu pour ce produit : "}indiquez le poids d&apos;un
+                  colis.
+                </p>
+              )}
+            </div>
           )}
 
           {method && useTare && (
@@ -1063,9 +1117,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 tarePreview?.result &&
                 ` (brut ${fmt(tarePreview.result.grossKg)} kg − tare ${fmt(tarePreview.result.tareTotalKg)} kg)`}
               {!useTare && net.kg != null && net.unitCode !== "kg" && ` = ${fmt(net.kg)} kg`}
-              {packaging && (
+              {unitCode === "colis" && !useTare && packagingKg != null && (
                 <span className="block text-sm text-slate-500">
-                  {packaging.label ?? "Colis"} — {packaging.supplier}
+                  {packaging ? `${packaging.label ?? "Colis"} — ${packaging.supplier}, ` : "Colis de "}
+                  {fmt(packagingKg)} kg
                 </span>
               )}
             </dd>
@@ -1428,6 +1483,7 @@ function ProductStep({
   products,
   catalogs,
   weekMaterials,
+  packagings,
   materialCategories,
   materialPlace,
   initialWeek,
@@ -1443,6 +1499,8 @@ function ProductStep({
   catalogs: WeekCatalog[];
   /** Matières de la semaine (tome et bons de commande), en cours et précédente. */
   weekMaterials: DeclarationOptions["weekMaterials"];
+  /** Colis fournisseur par produit : fournisseur et colis affichés sous chaque matière. */
+  packagings: DeclarationOptions["packagings"];
   materialCategories: DeclarationOptions["materialCategories"];
   /** Réception ou Stockage : matières de la semaine d'abord, filtrées par sous-zone en Stockage. */
   materialPlace: { zoneCode: string; subzoneId: string; subzoneName: string } | null;
@@ -1468,17 +1526,28 @@ function ProductStep({
   const [path, setPath] = useState<{ kind: "plat" | "sous_recette"; id: string }[]>([]);
   const [catalogId, setCatalogId] = useState(initialCatalog?.weekId ?? catalogs[0]?.weekId ?? null);
   const catalog = catalogs.find((c) => c.weekId === catalogId) ?? null;
+  const supplierOf = (productId: string) => {
+    const k = packagings[productId]?.[0];
+    return k
+      ? `${k.supplier} · ${k.label ?? "colis"} (${k.kg.toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg)`
+      : null;
+  };
+  // S+1 seulement en Réception (les bons de la semaine suivante arrivent dès le jeudi) ; S-1 et S partout.
+  const shownWeeks = weekMaterials.filter((w) => w.relative !== 1 || materialPlace?.zoneCode === "RECEPTION");
   const initialMaterialsWeek =
-    weekMaterials.find((w) => initialWeek && w.year === initialWeek.year && w.number === initialWeek.number) ?? null;
+    shownWeeks.find((w) => initialWeek && w.year === initialWeek.year && w.number === initialWeek.number) ?? null;
   const [materialsWeekId, setMaterialsWeekId] = useState(
-    initialMaterialsWeek?.weekId ?? weekMaterials[0]?.weekId ?? null,
+    initialMaterialsWeek?.weekId ?? shownWeeks.find((w) => w.relative === 0)?.weekId ?? shownWeeks[0]?.weekId ?? null,
   );
-  const materialsWeek = materialPlace ? (weekMaterials.find((w) => w.weekId === materialsWeekId) ?? null) : null;
-  const placed = useMemo(() => {
-    if (!materialsWeek || !materialPlace) return null;
-    const storageOf = new Map(materialCategories.map((c) => [c.id, c.storageSubzoneId]));
-    return materialsForPlace(materialsWeek.materials, storageOf, materialPlace);
-  }, [materialsWeek, materialPlace, materialCategories]);
+  const materialsWeek = materialPlace ? (shownWeeks.find((w) => w.weekId === materialsWeekId) ?? null) : null;
+  const placed =
+    materialsWeek && materialPlace
+      ? materialsForPlace(
+          materialsWeek.materials,
+          new Map(materialCategories.map((c) => [c.id, c.storageSubzoneId])),
+          materialPlace,
+        )
+      : null;
   const categoryName = (id: string | null) => (id ? (materialCategories.find((c) => c.id === id)?.name ?? null) : null);
   const chooseMaterial = (m: { productId: string; name: string }) => {
     const p = products.find((x) => x.id === m.productId);
@@ -1621,6 +1690,13 @@ function ProductStep({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      <button
+        type="button"
+        className="self-start font-medium text-teal-800 underline"
+        onClick={() => setFreeMode(true)}
+      >
+        Produit absent de la liste
+      </button>
       {term ? (
         <div className="flex flex-col gap-2">
           {weekMatches.map((m) => (
@@ -1665,9 +1741,9 @@ function ProductStep({
         </div>
       ) : placed && materialsWeek ? (
         <>
-          {(weekMaterials.length > 1 || materialsWeek !== initialMaterialsWeek) && (
+          {(shownWeeks.length > 1 || materialsWeek !== initialMaterialsWeek) && (
             <nav aria-label="Semaine" className="flex flex-wrap gap-2">
-              {weekMaterials.map((w) => (
+              {shownWeeks.map((w) => (
                 <button
                   key={w.weekId}
                   type="button"
@@ -1675,7 +1751,7 @@ function ProductStep({
                   className={`rounded-full px-4 py-2 text-sm font-medium ${w.weekId === materialsWeek.weekId ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
                 >
                   S{w.number}
-                  {w === initialMaterialsWeek ? " (cette semaine)" : ""}
+                  {w.relative === -1 ? " (S-1)" : w.relative === 1 ? " (S+1)" : " (cette semaine)"}
                 </button>
               ))}
             </nav>
@@ -1688,6 +1764,7 @@ function ProductStep({
             }
             materials={placed.here}
             categoryName={categoryName}
+            supplierOf={supplierOf}
             onChoose={chooseMaterial}
             empty={
               materialPlace!.zoneCode === "STOCKAGE"
@@ -1701,7 +1778,12 @@ function ProductStep({
                 Matières de la semaine sans lieu de stockage réglé ({placed.unplaced.length})
               </summary>
               <div className="mt-2">
-                <MaterialGroups materials={placed.unplaced} categoryName={categoryName} onChoose={chooseMaterial} />
+                <MaterialGroups
+                  materials={placed.unplaced}
+                  categoryName={categoryName}
+                  supplierOf={supplierOf}
+                  onChoose={chooseMaterial}
+                />
               </div>
             </details>
           )}
@@ -1783,9 +1865,6 @@ function ProductStep({
           )}
         </div>
       )}
-      <button type="button" className="btn-secondary" onClick={() => setFreeMode(true)}>
-        Produit absent de la liste
-      </button>
     </Section>
   );
 }
@@ -1797,12 +1876,15 @@ function MaterialGroups({
   categoryName,
   onChoose,
   empty,
+  supplierOf,
 }: {
   title?: string;
   materials: DeclarationOptions["weekMaterials"][number]["materials"];
   categoryName: (id: string | null) => string | null;
   onChoose: (m: { productId: string; name: string }) => void;
   empty?: string;
+  /** Fournisseur et colis d'une matière (« Pro à Pro · Sachet 5kg »), ou null. */
+  supplierOf?: (productId: string) => string | null;
 }) {
   const groups = new Map<string, typeof materials>();
   for (const m of materials) {
@@ -1825,6 +1907,9 @@ function MaterialGroups({
               <small className="font-normal opacity-70">
                 {m.ordered ? "Commandée cette semaine" : "Ingrédient du tome"}
               </small>
+              {supplierOf?.(m.productId) && (
+                <small className="font-normal text-slate-500">{supplierOf(m.productId)}</small>
+              )}
             </Tile>
           ))}
         </div>

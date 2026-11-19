@@ -103,7 +103,11 @@ describe("matières de la semaine en Réception et en Stockage", () => {
 
     // La saisie reçoit les matières de la semaine et le lieu de chaque catégorie.
     const options = await getDeclarationOptions(t.db, admin, "2026-11-13");
-    expect(options.weekMaterials.map((w) => w.number)).toEqual([47, 46]);
+    expect(options.weekMaterials.map((w) => [w.number, w.relative])).toEqual([
+      [46, -1],
+      [47, 0],
+      [48, 1],
+    ]);
     expect(options.materialCategories.find((c) => c.id === legume.id)?.storageSubzoneId).toBe(legumerie.id);
   });
 });

@@ -28,6 +28,8 @@ export interface WeekMaterial {
 
 export interface WeekMaterials {
   weekId: string;
+  /** Par rapport à la semaine en cours : -1 (S-1), 0, 1 (S+1). */
+  relative: -1 | 0 | 1;
   year: number;
   number: number;
   materials: WeekMaterial[];
@@ -89,18 +91,29 @@ export async function materialsOfWeek(db: Db, weekId: string): Promise<WeekMater
     .sort((a, b) => a.name.localeCompare(b.name, "fr"));
 }
 
-/** Matières de la semaine en cours et de la précédente (comme les produits de la semaine à la saisie). */
+/**
+ * Matières de la semaine précédente, de la semaine en cours et de la suivante, dans l'ordre (S-1, S, S+1). La semaine
+ * suivante sert à la Réception : ses bons arrivent dès le jeudi de la semaine en cours (décision du 19/11/2026).
+ */
 export async function recentWeekMaterials(db: Db, today: LocalDate): Promise<WeekMaterials[]> {
   const thisWeek = await findStoredProductionWeek(db, today);
   if (!thisWeek) return [];
-  const previous = await findStoredProductionWeek(db, addDays(thisWeek.startDate, -1));
-  const weeks = [thisWeek, previous].filter((w) => w != null);
+  const [previous, next] = await Promise.all([
+    findStoredProductionWeek(db, addDays(thisWeek.startDate, -1)),
+    findStoredProductionWeek(db, addDays(thisWeek.endDate, 1)),
+  ]);
+  const weeks = [
+    { week: previous, relative: -1 as const },
+    { week: thisWeek, relative: 0 as const },
+    { week: next, relative: 1 as const },
+  ].filter((w) => w.week != null);
   return Promise.all(
-    weeks.map(async (w) => ({
-      weekId: w.id,
-      year: w.year,
-      number: w.number,
-      materials: await materialsOfWeek(db, w.id),
+    weeks.map(async ({ week, relative }) => ({
+      weekId: week!.id,
+      relative,
+      year: week!.year,
+      number: week!.number,
+      materials: await materialsOfWeek(db, week!.id),
     })),
   );
 }

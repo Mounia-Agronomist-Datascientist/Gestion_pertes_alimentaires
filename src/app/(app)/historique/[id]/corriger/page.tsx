@@ -31,7 +31,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     d.unitCode === "colis" && d.productId
       ? ((await packagingOptions(db, [d.productId]))
           .get(d.productId)
-          ?.find((k) => `${k.label ?? "Colis"} — ${k.supplier}` === d.packagingLabel)?.key ?? null)
+          ?.find((k) => d.packagingLabel?.startsWith(`${k.label ?? "Colis"} — ${k.supplier}`))?.key ?? null)
       : null;
 
   // Produit choisi dans l'import de la semaine : il reste valable tant que la date de la perte ne change pas de semaine.
@@ -73,6 +73,9 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     quantity: useTare ? "" : String(d.quantity),
     unitCode: useTare ? null : d.unitCode,
     packagingKey,
+    // Poids d'un colis réellement utilisé (corrigé à la saisie ou « Autre colis »).
+    packagingKg:
+      d.unitCode === "colis" && d.conversionFactorUsed != null ? String(d.conversionFactorUsed).replace(".", ",") : "",
     useTare,
     grossKg: useTare ? String(d.quantity) : "",
     gastroCounts: Object.fromEntries(

@@ -137,10 +137,12 @@ describe("destinations, zones et postes", () => {
       await expect(renameZone(t.db, admin, reception, "Stockage")).rejects.toThrow(/existe déjà/);
       const zone = (await listZonesForAdmin(t.db, admin)).find((z) => z.id === reception)!;
       expect(zone.name).toBe("Réception marchandises");
-      const [first, second] = zone.subzones;
+      // Postes : une zone qui en a plusieurs (la Réception n'en a plus qu'un depuis le 19/11/2026).
+      const conditionnement = await zoneIdByCode(t.db, "CONDITIONNEMENT");
+      const [first, second] = (await listZonesForAdmin(t.db, admin)).find((z) => z.id === conditionnement)!.subzones;
       await updateSubzone(t.db, admin, first!.id, { name: "Quai de réception", description: "Déchargement" });
       await moveSubzone(t.db, admin, second!.id, "up");
-      const reordered = (await listZonesForAdmin(t.db, admin)).find((z) => z.id === reception)!.subzones;
+      const reordered = (await listZonesForAdmin(t.db, admin)).find((z) => z.id === conditionnement)!.subzones;
       expect(reordered.map((sz) => sz.id).slice(0, 2)).toEqual([second!.id, first!.id]);
       expect(reordered[1]).toMatchObject({ name: "Quai de réception", description: "Déchargement" });
 

@@ -351,4 +351,11 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   0 kg) ; un consommable se compte toujours en pièces.
 - **Coût** : poids total × prix au kg en vigueur à la date de la perte (R23), affiché pendant la saisie.
 - Le serveur refait le contrôle : une unité non permise dans le lieu est refusée, aussi pour une correction.
+- **Réception (19/11/2026)** : un seul poste, « Réception des marchandises » (« Contrôle des marchandises » désactivé,
+  migration 0030). Façons de mesurer, dans cet ordre : « 1. Comptage en nombre de colis, sachets ou unités »,
+  « 2. Pesée à la balance », « 3. Estimation » ; poids en **kg** seulement (ni g ni mL). Matières des semaines S-1, S
+  et **S+1** (les bons de la semaine suivante arrivent dès le jeudi).
+- **Poids du colis modifiable** (Réception, Stockage) : le poids du colis choisi est prérempli et se corrige à la saisie
+  (cartons de 2 kg reçus au lieu de 3 kg ; la perte garde « reçu : 2 kg au lieu de 3 kg ») ; « Autre colis » quand
+  aucun colis n'est connu, avec son poids. Le colis est donc toujours proposé en Réception et en Stockage.
 

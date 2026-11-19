@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gastroTareAllowed, isLooseByKg, methodsFor, packagingKg, unitsFor } from "@/domain/saisie-mesure";
+import { gastroTareAllowed, isLooseByKg, methodLabel, methodsFor, packagingKg, unitsFor } from "@/domain/saisie-mesure";
 import { INPUT_METHODS } from "@/modules/declarations/input";
 
 const ctx = (zoneCode: string, over: Partial<Parameters<typeof unitsFor>[1]> = {}) => ({
@@ -14,13 +14,23 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
   it("Réception et Stockage : kg, colis ; pièces seulement avec un poids connu ; ni gastros ni barquettes", () => {
     expect(unitsFor("comptage", ctx("RECEPTION"))).toEqual(["colis"]);
     expect(unitsFor("comptage", ctx("STOCKAGE", { pieceWeightKnown: true }))).toEqual(["piece", "colis"]);
-    expect(unitsFor("comptage", ctx("RECEPTION", { hasPackaging: false }))).toEqual([]);
-    expect(methodsFor(INPUT_METHODS, ctx("RECEPTION", { hasPackaging: false }))).toEqual([
-      "pesee",
-      "estimation_manuelle",
-    ]);
-    expect(unitsFor("estimation_manuelle", ctx("RECEPTION"))).toEqual(["kg", "g", "l", "ml", "colis"]);
+    // Sans colis connu, le colis reste proposé : son poids s'indique à la saisie.
+    expect(unitsFor("comptage", ctx("RECEPTION", { hasPackaging: false }))).toEqual(["colis"]);
     expect(gastroTareAllowed(ctx("RECEPTION"))).toBe(false);
+  });
+
+  it("Réception : comptage, pesée, estimation dans cet ordre, numérotés ; ni g ni mL", () => {
+    expect(methodsFor(INPUT_METHODS, ctx("RECEPTION"))).toEqual(["comptage", "pesee", "estimation_manuelle"]);
+    expect(methodsFor(INPUT_METHODS, ctx("RECEPTION")).map((m, i) => methodLabel(m, "RECEPTION", m, i))).toEqual([
+      "1. Comptage en nombre de colis, sachets ou unités",
+      "2. Pesée à la balance",
+      "3. Estimation",
+    ]);
+    expect(unitsFor("pesee", ctx("RECEPTION"))).toEqual(["kg"]);
+    expect(unitsFor("estimation_manuelle", ctx("RECEPTION"))).toEqual(["kg", "l", "colis"]);
+    // Ailleurs, rien ne change.
+    expect(unitsFor("pesee", ctx("STOCKAGE"))).toEqual(["kg", "g"]);
+    expect(methodLabel("pesee", "CUISINE", "Pesée", 0)).toBe("Pesée");
   });
 
   it("Cuisine : gastros et pièces, ni colis ni barquettes ; Conditionnement : barquettes et gastros", () => {

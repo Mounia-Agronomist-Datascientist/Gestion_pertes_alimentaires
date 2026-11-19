@@ -307,6 +307,39 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     });
     expect(row!.materialCostEur).toBeCloseTo(2 * c.kg * price, 2);
 
+    // Poids corrigé à la saisie (cartons de 1 kg reçus au lieu du colis habituel) ; colis non connu, poids indiqué.
+    const fmt = (n: number) => `${n.toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg`;
+    const corrected = await createDeclaration(
+      t.db,
+      admin,
+      { ...base, method: "comptage", quantity: 2, unitCode: "colis", packagingKey: c.key, packagingKg: 1.25 },
+      NOW,
+    );
+    const [rowCorrected] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, corrected.id));
+    expect(rowCorrected).toMatchObject({
+      netKg: 2.5,
+      conversionFactorUsed: 1.25,
+      packagingLabel: `${c.label ?? "Colis"} — ${c.supplier} (reçu : ${fmt(1.25)} au lieu de ${fmt(c.kg)})`,
+    });
+    const other = await createDeclaration(
+      t.db,
+      admin,
+      {
+        ...base,
+        method: "comptage",
+        quantity: 3,
+        unitCode: "colis",
+        packagingKg: 2,
+        destinations: [{ destinationId: bin, quantity: 3, binNumber: "1" }],
+      },
+      NOW,
+    );
+    const [rowOther] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, other.id));
+    expect(rowOther).toMatchObject({ netKg: 6, packagingLabel: "Colis de 2 kg (poids indiqué à la saisie)" });
+    await expect(
+      createDeclaration(t.db, admin, { ...base, method: "comptage", quantity: 1, unitCode: "colis" }, NOW),
+    ).rejects.toThrow(/colis ou indiquez son poids/);
+
     // Colis inconnu, gastros et contenants en Réception, barquettes hors Conditionnement : refusés.
     await expect(
       createDeclaration(

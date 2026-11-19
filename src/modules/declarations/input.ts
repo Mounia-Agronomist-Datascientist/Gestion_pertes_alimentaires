@@ -83,6 +83,13 @@ export const declarationInputSchema = z
       .regex(/^(bon_commande|manuel):[0-9a-f-]{36}$/, "Colis invalide")
       .nullable()
       .optional(),
+    /** Poids d'un colis en kg, quand il diffère du colis habituel ou qu'aucun colis n'est connu (« Autre colis »). */
+    packagingKg: z
+      .number({ message: "Poids du colis invalide" })
+      .positive("Le poids du colis doit être positif")
+      .max(1000)
+      .nullable()
+      .optional(),
     tare: tareInput.nullable().optional(),
     causeId: uuid,
     destinations: z
@@ -125,8 +132,8 @@ export const declarationInputSchema = z
       if (!v.unitCode || !METHOD_UNITS[v.method].includes(v.unitCode)) {
         ctx.addIssue({ code: "custom", message: "Unité non proposée pour cette méthode", path: ["unitCode"] });
       }
-      if (v.unitCode === "colis" && !v.packagingKey) {
-        ctx.addIssue({ code: "custom", message: "Choisissez le colis", path: ["packagingKey"] });
+      if (v.unitCode === "colis" && !v.packagingKey && v.packagingKg == null) {
+        ctx.addIssue({ code: "custom", message: "Choisissez le colis ou indiquez son poids", path: ["packagingKey"] });
       }
     }
   });
