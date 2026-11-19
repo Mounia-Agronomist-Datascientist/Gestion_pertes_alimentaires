@@ -181,8 +181,10 @@ function readValues(
   items: readonly PdfItem[],
   nameMaxX: number,
   unitX: number,
+  /** Début de la colonne « Quantité pour 1 » quand le tome a aussi la colonne du lot (ignorée : le lot fait foi). */
+  perOneX: number | null = null,
 ): Omit<ValueRow, "page" | "y" | "fragments"> | null {
-  const values = items.filter((i) => i.x >= nameMaxX);
+  const values = items.filter((i) => i.x >= nameMaxX && !(perOneX != null && i.x >= perOneX - 5 && i.x < unitX - 2));
   if (values.length === 0) return null;
   // Le coût est aligné à droite et peut déborder vers la gauche (« 2,911.43 € ») : on le reconnaît à son « € ».
   const isCost = (i: PdfItem) => /€\s*$/.test(i.text);
@@ -192,6 +194,34 @@ function readValues(
   if (!NUMBER.test(quantityText)) return null; // en-tête de colonne (« Quantité pour 1 », « recette(s) », « g »)
   const cost = costText.match(/^(-?\d[\d,]*(?:\.\d+)?)\s*€$/);
   return { quantity: parseNumber(quantityText), unit, cost: cost ? parseNumber(cost[1]!) : null };
+}
+
+/**
+ * Deux impressions d'une même sous-recette ont-elles le même contenu ? Un tome imprimé pour la production donne
+ * chaque sous-recette pour la quantité d'un plat (« 2496 recette(s) », puis « 1248 recette(s) » pour un autre plat) :
+ * on compare donc pour une unité de référence, à l'arrondi près (coûts du lot imprimés au centime).
+ */
+function sameSubRecipe(a: TomeSubRecipe, b: TomeSubRecipe): boolean {
+  const ra = a.reference?.quantity || 1;
+  const rb = b.reference?.quantity || 1;
+  const unitOf = (r: TomeSubRecipe) => r.reference?.unit ?? null;
+  const close = (x: number | null, y: number | null, scale: number) =>
+    x == null || y == null
+      ? x === y
+      : Math.abs(x - y) <= Math.max(0.005 * Math.max(Math.abs(x), Math.abs(y)), 0.01 / scale);
+  const sameQuantity = (x: TomeQuantity | null, y: TomeQuantity | null) =>
+    x == null || y == null
+      ? x === y
+      : x.unit === y.unit &&
+        close(x.quantity / ra, y.quantity / rb, Math.min(ra, rb)) &&
+        close(x.cost != null ? x.cost / ra : null, y.cost != null ? y.cost / rb : null, Math.min(ra, rb));
+  return (
+    unitOf(a) === unitOf(b) &&
+    a.lines.length === b.lines.length &&
+    a.lines.every((l, i) => l.label === b.lines[i]!.label && sameQuantity(l, b.lines[i]!)) &&
+    sameQuantity(a.total, b.total) &&
+    sameQuantity(a.net, b.net)
+  );
 }
 
 // ─── Lecture ─────────────────────────────────────────────────────────────────
@@ -213,12 +243,38 @@ export function parseTome(items: readonly PdfItem[]): TomeParseResult {
   let unitX = DEFAULT_UNIT_X;
   let nameMaxX = NAME_COLUMN_MAX_X;
   let quantityHeaderX: number | null = null;
+  /**
+   * Tome imprimé pour la production avec deux colonnes (« Quantité pour 832 » et « Quantité pour 1 », S48) : position
+   * de la seconde. Les coûts sont ceux du lot ; on lit donc la colonne du lot, ramenée à une portion comme d'habitude.
+   */
+  let perOneX: number | null = null;
   let titleOpen = false;
   /** Lignes de la portion de tableau en cours (une page) : valeurs et morceaux de nom. */
   let pending: { values: ValueRow[]; names: { y: number; text: string }[] } = { values: [], names: [] };
 
   const flushTable = () => {
-    const { values, names } = pending;
+    const { values } = pending;
+    let { names } = pending;
+    // Nom coupé par un saut de page : en haut de la page, les morceaux séparés du premier ingrédient par un écart
+    // d'ingrédient (plus de 16 points) sont la fin du dernier ingrédient de la page précédente.
+    const previousRow = section?.rows.filter((r) => !values.includes(r)).at(-1);
+    if (previousRow && values.length && previousRow.page !== values[0]!.page) {
+      const first = values.reduce((top, row) => (row.y > top.y ? row : top));
+      let edge = first.y;
+      const above = names.filter((n) => n.y > first.y).sort((x, y) => x.y - y.y);
+      const orphans = above.filter((n) => {
+        if (n.y - edge <= 16) {
+          edge = n.y;
+          return false;
+        }
+        return true;
+      });
+      // Toujours au-dessus du bloc du premier ingrédient : un écart les en sépare.
+      const cut = orphans.length ? Math.min(...orphans.map((o) => o.y)) : Infinity;
+      const carried = names.filter((n) => n.y >= cut);
+      for (const n of carried) previousRow.fragments.push({ y: n.y - 10_000, text: n.text });
+      names = names.filter((n) => n.y < cut);
+    }
     if (names.length && values.length === 0 && section) {
       anomalies.push({
         page: section.page,
@@ -265,7 +321,10 @@ export function parseTome(items: readonly PdfItem[]): TomeParseResult {
         const text = joinItems(line.items);
         // « Quantité pour 722 » (au-dessus de l'en-tête) : début de la colonne des quantités.
         if (/^Quantité pour\b/.test(joinItems(line.items.filter((i) => i.x > 150)))) {
-          quantityHeaderX = line.items.find((i) => /^Quantité pour/.test(i.text.trim()))?.x ?? null;
+          const headers = line.items.filter((i) => /^Quantité pour/.test(i.text.trim()));
+          quantityHeaderX = headers[0]?.x ?? null;
+          perOneX =
+            headers.length > 1 && /^Quantité pour 1$/.test(headers.at(-1)!.text.trim()) ? headers.at(-1)!.x : null;
         }
         if (/^Ingrédients\b/.test(joinItems(line.items.filter((i) => i.x < 150)))) {
           // En-tête de tableau, répété en haut de chaque page : il donne la position de la colonne « Unité ».
@@ -278,10 +337,12 @@ export function parseTome(items: readonly PdfItem[]): TomeParseResult {
         if (!inTable) break; // allergènes
         // En-tête de colonne répété en haut de page (« Quantité pour 1 », « recette(s) », « g »).
         if (line.items.every((i) => i.x >= 240 && i.x < unitX - 2) || /^Quantité pour\b/.test(text)) break;
+        // Suite de l'en-tête quand le nombre de recettes passe à la ligne (« 151.63 portion(s) | portion(s) »).
+        if (line.items.every((i) => /^(\d[\d,]*(\.\d+)?\s+)?(recette|portion)\(s\)$/.test(i.text.trim()))) break;
         // Consigne glissée dans la liste des ingrédients (« saupoudrer de parmesan | - | 0.00 € ») : pas une quantité.
         if (joinItems(line.items.filter((i) => i.x >= nameMaxX && i.x < unitX - 2)) === "-") break;
         if (pending.values.length && pending.values[0]!.page !== line.page) flushTable();
-        const values = readValues(line.items, nameMaxX, unitX);
+        const values = readValues(line.items, nameMaxX, unitX, perOneX);
         const nameText = joinItems(line.items.filter((i) => i.x < nameMaxX));
         if (values) {
           const row: ValueRow = {
@@ -388,10 +449,7 @@ function assemble(sections: Section[], anomalies: TomeAnomaly[]): TomeParseResul
     const existing = subRecipes.get(key);
     if (!existing) {
       subRecipes.set(key, subRecipe);
-    } else if (
-      JSON.stringify([existing.lines, existing.total, existing.net]) !==
-      JSON.stringify([subRecipe.lines, subRecipe.total, subRecipe.net])
-    ) {
+    } else if (!sameSubRecipe(existing, subRecipe)) {
       anomalies.push({
         page: section.page,
         message: `Sous-recette « ${subRecipe.name} » imprimée deux fois avec des contenus différents (pages ${existing.page} et ${section.page})`,
