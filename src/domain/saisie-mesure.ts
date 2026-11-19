@@ -31,8 +31,8 @@ const BASE_UNITS: Record<InputMethod, readonly string[]> = {
   estimation_manuelle: ["kg", "g", "l", "ml", "piece", "colis", "barquette", "contenant", "gastro"],
 };
 
-/** Zones où l'on n'utilise que le kg (ni g ni mL) : Réception (décision du 19/11/2026). */
-const KG_ONLY_ZONE_CODES: readonly string[] = ["RECEPTION"];
+/** Zones où l'on n'utilise que le kg (ni g ni mL) : Réception et Stockage (décisions du 19/11/2026). */
+const KG_ONLY_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"];
 
 function unitAllowed(code: string, c: MeasureContext): boolean {
   switch (code) {
@@ -65,9 +65,10 @@ export function unitsFor(method: InputMethod, c: MeasureContext): string[] {
 /** Pesée dans des gastros (tare) : seulement là où les gastros existent. */
 export const gastroTareAllowed = (c: MeasureContext) => GASTRO_ZONE_CODES.includes(c.zoneCode) && !c.isConsumable;
 
-/** Ordre et libellés des façons de mesurer en Réception (décision du 19/11/2026). */
-const RECEPTION_METHODS: readonly InputMethod[] = ["comptage", "pesee", "estimation_manuelle"];
-const RECEPTION_LABELS: Partial<Record<InputMethod, string>> = {
+/** Ordre et libellés des façons de mesurer des matières reçues et stockées (décisions du 19/11/2026). */
+const MATERIAL_METHOD_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"];
+const MATERIAL_METHODS: readonly InputMethod[] = ["comptage", "pesee", "estimation_manuelle"];
+const MATERIAL_METHOD_LABELS: Partial<Record<InputMethod, string>> = {
   comptage: "Comptage en nombre de colis, sachets ou unités",
   pesee: "Pesée à la balance",
   estimation_manuelle: "Estimation",
@@ -75,13 +76,15 @@ const RECEPTION_LABELS: Partial<Record<InputMethod, string>> = {
 
 /** Façons de mesurer proposées, dans l'ordre du lieu : celles qui ont au moins une unité. */
 export function methodsFor(methods: readonly InputMethod[], c: MeasureContext): InputMethod[] {
-  const ordered = c.zoneCode === "RECEPTION" ? RECEPTION_METHODS.filter((m) => methods.includes(m)) : methods;
+  const ordered = MATERIAL_METHOD_ZONE_CODES.includes(c.zoneCode)
+    ? MATERIAL_METHODS.filter((m) => methods.includes(m))
+    : methods;
   return ordered.filter((m) => unitsFor(m, c).length > 0);
 }
 
-/** Libellé d'une façon de mesurer dans ce lieu (numéroté en Réception), sinon le libellé général. */
+/** Libellé d'une façon de mesurer dans ce lieu (numéroté en Réception et en Stockage), sinon le libellé général. */
 export function methodLabel(method: InputMethod, zoneCode: string, fallback: string, index: number): string {
-  const label = zoneCode === "RECEPTION" ? RECEPTION_LABELS[method] : undefined;
+  const label = MATERIAL_METHOD_ZONE_CODES.includes(zoneCode) ? MATERIAL_METHOD_LABELS[method] : undefined;
   return label ? `${index + 1}. ${label}` : fallback;
 }
 

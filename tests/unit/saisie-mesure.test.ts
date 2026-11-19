@@ -36,9 +36,26 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
     ]);
     expect(unitsFor("pesee", ctx("RECEPTION"))).toEqual(["kg"]);
     expect(unitsFor("estimation_manuelle", ctx("RECEPTION"))).toEqual(["kg", "l", "colis"]);
-    // Ailleurs, rien ne change.
-    expect(unitsFor("pesee", ctx("STOCKAGE"))).toEqual(["kg", "g"]);
+    // Ailleurs qu'en Réception et en Stockage, rien ne change.
+    expect(unitsFor("pesee", ctx("CUISINE"))).toEqual(["kg", "g"]);
     expect(methodLabel("pesee", "CUISINE", "Pesée", 0)).toBe("Pesée");
+  });
+
+  it("Stockage : les mêmes façons de mesurer qu'en Réception (décision du 19/11/2026)", () => {
+    expect(methodsFor(INPUT_METHODS, ctx("STOCKAGE"))).toEqual(["comptage", "pesee", "estimation_manuelle"]);
+    expect(methodsFor(INPUT_METHODS, ctx("STOCKAGE")).map((m, i) => methodLabel(m, "STOCKAGE", m, i))).toEqual([
+      "1. Comptage en nombre de colis, sachets ou unités",
+      "2. Pesée à la balance",
+      "3. Estimation",
+    ]);
+    expect(unitsFor("pesee", ctx("STOCKAGE"))).toEqual(["kg"]);
+    expect(unitsFor("estimation_manuelle", ctx("STOCKAGE"))).toEqual(["kg", "l", "colis"]);
+    expect(unitsFor("estimation_manuelle", ctx("STOCKAGE", { pieceWeightKnown: true }))).toEqual([
+      "kg",
+      "l",
+      "piece",
+      "colis",
+    ]);
   });
 
   it("Cuisine : gastros et pièces, ni colis ni barquettes ; Conditionnement : barquettes et gastros", () => {
@@ -52,7 +69,7 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
 
   it("consommable : toujours en pièces, jamais en colis ni en litres", () => {
     expect(unitsFor("comptage", ctx("RECEPTION", { isConsumable: true }))).toEqual(["piece"]);
-    expect(unitsFor("estimation_manuelle", ctx("STOCKAGE", { isConsumable: true }))).toEqual(["kg", "g", "piece"]);
+    expect(unitsFor("estimation_manuelle", ctx("STOCKAGE", { isConsumable: true }))).toEqual(["kg", "piece"]);
   });
 });
 

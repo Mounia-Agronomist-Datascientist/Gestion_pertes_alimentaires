@@ -388,6 +388,9 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   migration 0030). Façons de mesurer, dans cet ordre : « 1. Comptage en nombre de colis, sachets ou unités »,
   « 2. Pesée à la balance », « 3. Estimation » ; poids en **kg** seulement (ni g ni mL). Matières des semaines S-1, S
   et **S+1** (les bons de la semaine suivante arrivent dès le jeudi).
+- **Stockage (19/11/2026)** : mêmes façons de mesurer qu'en Réception, dans le même ordre et avec les mêmes noms
+  (« 1. Comptage en nombre de colis, sachets ou unités », « 2. Pesée à la balance », « 3. Estimation ») ; poids en **kg**
+  seulement (ni g ni mL). Matières des semaines S-1 et S.
 - **Poids du colis modifiable** (Réception, Stockage) : le poids du colis choisi est prérempli et se corrige à la saisie
   (cartons de 2 kg reçus au lieu de 3 kg ; la perte garde « reçu : 2 kg au lieu de 3 kg ») ; « Autre colis » quand
   aucun colis n'est connu, avec son poids. Le colis est donc toujours proposé en Réception et en Stockage.
