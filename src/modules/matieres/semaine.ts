@@ -1,13 +1,13 @@
 /**
  * Matières de la semaine proposées en premier en Réception et en Stockage (docs/PHASE6.md, étape 6.10) : les
  * ingrédients du tome en vigueur et les matières commandées dans les bons de la même semaine de production, une
- * fois chacune. Le reste du référentiel reste accessible par la recherche.
+ * fois chacune, sauf l'eau du robinet. Le reste du référentiel reste accessible par la recherche.
  */
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { melbaExternalId } from "@/domain/matieres";
+import { isTapWater, melbaExternalId } from "@/domain/matieres";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
@@ -80,6 +80,7 @@ export async function materialsOfWeek(db: Db, weekId: string): Promise<WeekMater
   const inTome = new Set(fromTome.map((p) => p.id));
   const byId = new Map([...fromTome, ...fromOrders].map((p) => [p.id, p]));
   return [...byId.values()]
+    .filter((p) => !isTapWater(p.name))
     .map((p) => ({
       productId: p.id,
       name: p.name,

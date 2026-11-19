@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as s from "@/db/schema";
+import { isTapWater } from "@/domain/matieres";
 import { seed } from "@/db/seed/seed";
 import { createAccount } from "@/modules/auth/accounts";
 import type { AuthUser } from "@/modules/auth/permissions";
@@ -76,7 +77,9 @@ describe("matières de la semaine en Réception et en Stockage", () => {
       .selectDistinct({ key: s.weekRecipeLines.key })
       .from(s.weekRecipeLines)
       .where(eq(s.weekRecipeLines.isSubRecipe, false));
-    expect(s45.length).toBe(keys.length);
+    // Toutes, sauf l'eau du robinet (jamais livrée par un fournisseur).
+    expect(s45.length).toBe(keys.filter((k) => !/^eau( au poids)?$/.test(k.key)).length);
+    expect(s45.some((m) => isTapWater(m.name))).toBe(false);
     expect(new Set(s45.map((m) => m.productId)).size).toBe(s45.length);
     const ordered = s45.filter((m) => m.ordered);
     expect(ordered).toHaveLength(4); // bon Passion Froid de S45

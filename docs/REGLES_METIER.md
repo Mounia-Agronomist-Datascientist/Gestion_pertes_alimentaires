@@ -352,6 +352,8 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   de chaque fournisseur reste valable d'une semaine à l'autre, jusqu'à un bon qui le change. Stocks tampons (palettes
   pour plusieurs semaines) : l'information vient du bon le plus récent qui contient la matière, quelle que soit sa
   semaine. Vendu au poids : libellé « kg », « (KG) » ou « g ».
+- **Eau du robinet** (« eau », « eau au poids » du tome) : jamais proposée parmi les matières de la semaine ni à
+  compléter, car elle n'est pas livrée par un fournisseur.
 
 ## R26 — Zones de chaque compte (Phase 6, 19/11/2026)
 

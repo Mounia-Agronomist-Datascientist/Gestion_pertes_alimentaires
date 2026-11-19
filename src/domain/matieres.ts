@@ -23,6 +23,20 @@ export interface TomeMaterial {
 
 const MELBA_PREFIX = "melba:";
 /** Identifiant externe d'une matière Melba : la clé de rapprochement du tome. */
+/**
+ * Eau du robinet (« eau », « eau au poids » dans le tome) : jamais reçue d'un fournisseur, donc ni proposée parmi les
+ * matières de la semaine ni à compléter (décision du 19/11/2026). « Eau de cuisson poisson » n'en fait pas partie.
+ */
+export const isTapWater = (name: string) =>
+  /^eau( au poids)?$/.test(
+    name
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
+
 export const melbaExternalId = (key: string) => `${MELBA_PREFIX}${key}`;
 export const isMelbaExternalId = (externalId: string | null | undefined) => !!externalId?.startsWith(MELBA_PREFIX);
 

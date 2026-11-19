@@ -82,3 +82,11 @@ describe("devenirs selon la zone", () => {
     expect(commentRequiredFor(["compost"])).toBe(false);
   });
 });
+
+describe("eau du robinet", () => {
+  it("« eau » et « eau au poids » seulement", async () => {
+    const { isTapWater } = await import("@/domain/matieres");
+    expect(["eau", "Eau au poids", " eau "].every(isTapWater)).toBe(true);
+    expect(["Eau de cuisson poisson", "eau de fleur d'oranger", "Eau gazeuse"].some(isTapWater)).toBe(false);
+  });
+});
