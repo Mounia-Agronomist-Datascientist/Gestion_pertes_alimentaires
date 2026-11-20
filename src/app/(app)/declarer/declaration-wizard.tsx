@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
+import { type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { materialsForPlace } from "@/domain/matieres";
 import {
   gastroTareAllowed,
@@ -36,7 +37,7 @@ import { proposeCauseAction, submitCorrection, submitDeclaration, type SubmitRes
 type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "cause" | "destination" | "recap" | "done";
 export type ProductChoice =
   | { kind: "listed"; id: string; name: string; category: string }
-  | { kind: "free"; name: string; category: (typeof PRODUCT_CATEGORIES)[number] }
+  | { kind: "free"; name: string; category: (typeof PRODUCT_CATEGORIES)[number]; price?: FreePrice | null }
   | {
       /** Produit de l'import de la semaine (plat, sous-recette ou ingrédient). */
       kind: "week";
@@ -323,11 +324,17 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       : false;
 
   // Coût matière estimé d'après le tome de la semaine (le serveur refait le calcul et le fige).
-  const listedPrice = listedProduct ? (options.prices[listedProduct.id] ?? null) : null;
+  // Produit absent de la liste : le prix d'achat indiqué (décision du 20/11/2026).
+  const listedPrice = listedProduct
+    ? (options.prices[listedProduct.id] ?? null)
+    : product?.kind === "free" && product.price
+      ? freeUnitCost(product.price)
+      : null;
+  const pricedProduct = !!listedProduct || (product?.kind === "free" && !!product.price);
   const costPreview =
     product?.kind === "week" && net
       ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost)
-      : listedPrice && net && listedProduct?.category !== "moule_plat_gratin"
+      : listedPrice && net && product?.category !== "moule_plat_gratin"
         ? lossCostBreakdown(
             { netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode },
             { food: listedPrice, packagingPerPortionEur: null, portionWeightKg: null },
@@ -458,7 +465,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           ? { productId: product.id }
           : product.kind === "week"
             ? { weekItem: { kind: product.itemKind, id: product.id } }
-            : { freeLabel: product.name, category: product.category },
+            : { freeLabel: product.name, category: product.category, price: product.price ?? null },
       method,
       quantity: useTare ? null : net.quantity,
       unitCode: useTare ? null : unitCode,
@@ -779,6 +786,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           packagings={options.packagings}
           suppliers={options.suppliers}
           materialCategories={options.materialCategories}
+          zoneCode={zone?.code ?? ""}
           materialPlace={
             zone && subzone && MATERIAL_ZONE_CODES.includes(zone.code)
               ? { zoneCode: zone.code, subzoneId: subzone.id, subzoneName: subzone.name }
@@ -950,9 +958,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               {net.kg != null && net.unitCode !== "kg" ? (
                 <>
                   Soit <strong>{fmt(net.kg)} kg</strong>
-                  {listedProduct && costPreview?.grossEur != null && <> · ≈ {fmtEuro(costPreview.grossEur)}</>}
+                  {pricedProduct && costPreview?.grossEur != null && <> · ≈ {fmtEuro(costPreview.grossEur)}</>}
                 </>
-              ) : net.kg != null && listedProduct && costPreview?.grossEur != null ? (
+              ) : net.kg != null && pricedProduct && costPreview?.grossEur != null ? (
                 <>≈ {fmtEuro(costPreview.grossEur)}</>
               ) : (
                 (net.note ?? (isConsumable ? "Consommable : compté en unités, pas en kg alimentaires." : null))
@@ -1529,6 +1537,7 @@ function ProductStep({
   packagings,
   suppliers,
   materialCategories,
+  zoneCode,
   materialPlace,
   initialWeek,
   initialCatalog,
@@ -1547,6 +1556,8 @@ function ProductStep({
   packagings: DeclarationOptions["packagings"];
   suppliers: DeclarationOptions["suppliers"];
   materialCategories: DeclarationOptions["materialCategories"];
+  /** Zone de la perte : types proposés pour un produit absent de la liste. */
+  zoneCode: string;
   /** Réception ou Stockage : matières de la semaine d'abord, filtrées par sous-zone en Stockage. */
   materialPlace: { zoneCode: string; subzoneId: string; subzoneName: string } | null;
   /** Semaine de la date de la perte. */
@@ -1567,6 +1578,11 @@ function ProductStep({
   const [freeMode, setFreeMode] = useState(false);
   const [freeName, setFreeName] = useState("");
   const [freeCategory, setFreeCategory] = useState<(typeof PRODUCT_CATEGORIES)[number] | null>(null);
+  const [freePriceText, setFreePriceText] = useState("");
+  const [freePricePer, setFreePricePer] = useState<FreePrice["per"]>("kg");
+  const freeCategories = freeCategoriesFor(zoneCode, PRODUCT_CATEGORIES);
+  const freePriceValue = Number(freePriceText.replace(",", ".").trim());
+  const freePriceInvalid = freePriceText.trim() !== "" && !(freePriceValue > 0);
   /** Chemin parcouru : un plat, puis des sous-recettes. */
   const [path, setPath] = useState<{ kind: "plat" | "sous_recette"; id: string }[]>([]);
   const [catalogId, setCatalogId] = useState(initialCatalog?.weekId ?? catalogs[0]?.weekId ?? null);
@@ -1662,18 +1678,52 @@ function ProductStep({
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 font-medium">Type de produit</legend>
           <TileGrid>
-            {PRODUCT_CATEGORIES.map((c) => (
+            {freeCategories.map((c) => (
               <Tile key={c} compact selected={freeCategory === c} onClick={() => setFreeCategory(c)}>
                 {PRODUCT_CATEGORY_LABELS[c]}
               </Tile>
             ))}
           </TileGrid>
         </fieldset>
+        <div className="flex flex-col gap-1">
+          <span className="font-medium">Prix d&apos;achat HT (facultatif)</span>
+          <span className="flex gap-2">
+            <input
+              className="field w-32"
+              inputMode="decimal"
+              aria-label="Prix d'achat HT"
+              placeholder="ex. 3,50"
+              value={freePriceText}
+              onChange={(e) => setFreePriceText(e.target.value)}
+            />
+            <select
+              className="field"
+              aria-label="Prix par"
+              value={freePricePer}
+              onChange={(e) => setFreePricePer(e.target.value as FreePrice["per"])}
+            >
+              <option value="kg">€ / kg</option>
+              <option value="piece">€ / pièce</option>
+            </select>
+          </span>
+          <span className="text-sm text-slate-500">
+            {freePriceInvalid
+              ? "Prix invalide."
+              : "Pour chiffrer la perte. Sinon, l'administration pourra l'indiquer plus tard."}
+          </span>
+        </div>
         <button
           type="button"
           className="btn-primary"
-          disabled={freeName.trim().length < 2 || !freeCategory}
-          onClick={() => onChoose({ kind: "free", name: freeName.trim(), category: freeCategory! })}
+          disabled={freeName.trim().length < 2 || !freeCategory || freePriceInvalid}
+          onClick={() =>
+            onChoose({
+              kind: "free",
+              name: freeName.trim(),
+              category: freeCategory!,
+              price: freePriceText.trim() ? { amountEur: freePriceValue, per: freePricePer } : null,
+            })
+          }
         >
           Continuer
         </button>

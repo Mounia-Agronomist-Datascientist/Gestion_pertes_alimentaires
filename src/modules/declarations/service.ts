@@ -7,6 +7,7 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { COST_METHOD, lossCostBreakdown } from "@/domain/couts";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
+import { type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
@@ -29,7 +30,13 @@ import {
   isWithinTeamDelay,
   TEAM_DELAY_DAYS,
 } from "./access";
-import { declarationInputSchema, isNonFoodCategory } from "./input";
+import {
+  declarationInputSchema,
+  freePriceSchema,
+  isNonFoodCategory,
+  PRODUCT_CATEGORIES,
+  PRODUCT_CATEGORY_LABELS,
+} from "./input";
 
 /** Erreur de saisie, affichable telle quelle à l'utilisateur. */
 export class DeclarationError extends Error {}
@@ -143,6 +150,8 @@ async function prepareDeclaration(
       item: ResolvedWeekItem["cost"];
       importId: string | null;
       priceVersion?: { id: string; source: string; validFrom: string };
+      /** Prix d'achat indiqué pour un produit absent de la liste (décision du 20/11/2026). */
+      freePrice?: FreePrice;
     };
   };
   if ("weekItem" in input.product) {
@@ -220,6 +229,11 @@ async function prepareDeclaration(
       unitWeightKg: null,
       densityKgPerL: null,
     };
+    if (!freeCategoriesFor(place.zone.code, PRODUCT_CATEGORIES).includes(input.product.category))
+      throw new DeclarationError(
+        `Type de produit non proposé dans la zone ${place.zone.name} : ${PRODUCT_CATEGORY_LABELS[input.product.category]}`,
+      );
+    if (input.product.price) product.cost = freeCost(product.category, input.product.price);
   }
   const isConsumable = isNonFoodCategory(product.category);
 
@@ -466,6 +480,7 @@ async function prepareDeclaration(
         packagingLines: packaging?.lines ?? [],
         packagingItself: c.packagingItself,
         priceVersion: product.cost.priceVersion ?? null,
+        freePrice: product.cost.freePrice ?? null,
         labour: "non imputée : méthode d'affectation à définir (cahier des charges §18.2)",
       },
     };
@@ -524,6 +539,75 @@ async function prepareDeclaration(
       recoveredAmount: d.recoveredAmountEur ?? null,
       binNumber: binAsked.has(d.destinationId) ? d.binNumber || null : null,
     })),
+  };
+}
+
+/** Coût d'un produit absent de la liste à partir du prix indiqué (un moule ou plat à gratin est un emballage). */
+function freeCost(category: string, price: FreePrice) {
+  const unitCost = freeUnitCost(price);
+  const mould = category === "moule_plat_gratin";
+  return {
+    item: {
+      food: mould ? { perKgEur: null, perUnitEur: null } : unitCost,
+      mouldPerPortionEur: null,
+      portionKind: null,
+      portionWeightKg: null,
+      packagingItself: mould ? unitCost : null,
+    },
+    importId: null,
+    freePrice: price,
+  } satisfies NonNullable<NonNullable<Parameters<typeof costColumns>[1]>>;
+}
+
+/**
+ * Colonnes de coût d'une perte déjà enregistrée, recalculées à partir d'un coût unitaire (prix indiqué après coup,
+ * ou prix du produit auquel la saisie « hors liste » est rattachée). Le coût net garde les recettes encaissées.
+ */
+function costColumns(
+  d: typeof s.lossDeclarations.$inferSelect,
+  cost: {
+    item: {
+      food: { perKgEur: number | null; perUnitEur: number | null };
+      mouldPerPortionEur: null;
+      portionKind: null;
+      portionWeightKg: null;
+      packagingItself: { perKgEur: number | null; perUnitEur: number | null } | null;
+    };
+    importId: string | null;
+    freePrice?: FreePrice;
+    priceVersion?: { id: string; source: string; validFrom: string };
+  },
+  lines: readonly { recoveredAmount?: number | null }[],
+  now: Date,
+) {
+  const breakdown = lossCostBreakdown(
+    { netKg: d.netKg, quantity: d.netQuantity, unitCode: d.netUnitCode },
+    {
+      food: cost.item.food,
+      packagingPerPortionEur: null,
+      portionWeightKg: null,
+      packagingItself: cost.item.packagingItself ?? undefined,
+    },
+  );
+  return {
+    costPerKgEur: cost.item.food.perKgEur,
+    costPerUnitEur: cost.item.food.perUnitEur,
+    materialCostEur: breakdown.foodEur,
+    packagingCostEur: breakdown.packagingEur,
+    labourCostEur: breakdown.labourEur,
+    indirectCostEur: breakdown.indirectEur,
+    grossCostEur: breakdown.grossEur,
+    costImportId: cost.importId,
+    costMethod: COST_METHOD,
+    costComputedAt: now,
+    costDetails: {
+      portions: breakdown.portions,
+      packagingItself: cost.item.packagingItself,
+      priceVersion: cost.priceVersion ?? null,
+      freePrice: cost.freePrice ?? null,
+      labour: "non imputée : méthode d'affectation à définir (cahier des charges §18.2)",
+    },
+    ...netCost(breakdown.grossEur, lines),
   };
 }
 
@@ -983,10 +1067,36 @@ export async function linkDeclarationsToProduct(
         throw new DeclarationError("Une pesée en gastros ne peut pas être rattachée à un consommable");
       }
 
+      // Coût recalculé au prix du produit en vigueur à la date de la perte ; sans prix, le coût déjà connu (prix
+      // indiqué pour la saisie « hors liste ») est gardé.
+      const price = await materialPriceAt(tx, product.id, existing.occurredOn);
+      const mould = product.category === "moule_plat_gratin";
+      const priced = price
+        ? costColumns(
+            { ...existing, ...measurement },
+            {
+              item: {
+                food: mould
+                  ? { perKgEur: null, perUnitEur: null }
+                  : { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur },
+                mouldPerPortionEur: null,
+                portionKind: null,
+                portionWeightKg: null,
+                packagingItself: mould ? { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur } : null,
+              },
+              importId: price.weeklyImportId,
+              priceVersion: { id: price.id, source: price.source, validFrom: price.validFrom },
+            },
+            before.destinations,
+            now,
+          )
+        : {};
+
       const revision = existing.revision + 1;
       const [declaration] = await tx
         .update(s.lossDeclarations)
         .set({
+          ...priced,
           productId: product.id,
           productUnlisted: false,
           productCategory: product.category,
@@ -1030,6 +1140,81 @@ export async function linkDeclarationsToProduct(
       await writeAudit(tx, {
         userId: user.id,
         action: "link_product",
+        entity: "loss_declaration",
+        entityId: existing.id,
+        before,
+        after,
+        reason,
+        occurredAt: now,
+      });
+    }
+    return rows.length;
+  });
+}
+
+/**
+ * Prix d'achat indiqué après coup pour des saisies « hors liste » (décision du 20/11/2026) : chaque perte reçoit une
+ * nouvelle version, au coût recalculé (poids ou nombre de la perte × prix). Le nom saisi ne change pas.
+ */
+export async function priceUnlistedDeclarations(
+  db: Db,
+  user: AuthUser,
+  input: { declarationIds: string[]; price: unknown },
+  now: Date = new Date(),
+): Promise<number> {
+  requirePermission(user, "referentiel.manage");
+  const parsed = freePriceSchema.safeParse(input.price);
+  if (!parsed.success) throw new DeclarationError(parsed.error.issues[0]?.message ?? "Prix invalide");
+  const price = parsed.data;
+  const ids = [...new Set(input.declarationIds)];
+  if (ids.length === 0) throw new DeclarationError("Aucune déclaration à chiffrer");
+  const reason = `Prix d'achat indiqué : ${price.amountEur.toLocaleString("fr-FR")} € / ${price.per === "kg" ? "kg" : "pièce"}`;
+
+  return db.transaction(async (tx) => {
+    const rows = await tx.select().from(s.lossDeclarations).where(inArray(s.lossDeclarations.id, ids));
+    if (rows.length !== ids.length || rows.some((d) => !d.productUnlisted || d.status === "annulee")) {
+      throw new DeclarationConflictError();
+    }
+    for (const existing of rows) {
+      const before = await currentSnapshot(tx, existing);
+      const revision = existing.revision + 1;
+      const [declaration] = await tx
+        .update(s.lossDeclarations)
+        .set({
+          ...costColumns(existing, freeCost(existing.productCategory, price), before.destinations, now),
+          status: "corrigee",
+          revision,
+          updatedAt: now,
+        })
+        .where(and(eq(s.lossDeclarations.id, existing.id), eq(s.lossDeclarations.revision, existing.revision)))
+        .returning();
+      if (!declaration) throw new DeclarationConflictError();
+      const after = await writeVersionLines(tx, declaration, {
+        containers: before.containers.map((c) => ({
+          containerTareId: c.containerTareId,
+          count: c.count,
+          tareKg: c.tareKgSnapshot,
+        })),
+        destinations: before.destinations.map((d) => ({
+          destinationId: d.destinationId,
+          quantity: d.quantity,
+          netKg: d.netKg,
+          recoveredAmount: d.recoveredAmount,
+          binNumber: d.binNumber,
+        })),
+      });
+      await tx.insert(s.declarationRevisions).values({
+        declarationId: existing.id,
+        revision,
+        status: "corrigee",
+        data: after,
+        changedBy: user.id,
+        changedAt: now,
+        reason,
+      });
+      await writeAudit(tx, {
+        userId: user.id,
+        action: "price_unlisted",
         entity: "loss_declaration",
         entityId: existing.id,
         before,

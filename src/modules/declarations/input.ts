@@ -14,12 +14,18 @@ export const PRODUCT_CATEGORIES = [
   "moule_plat_gratin",
 ] as const;
 
+/** Prix d'achat d'un produit absent de la liste : montant HT, au kg ou à la pièce. */
+export const freePriceSchema = z.object({
+  amountEur: z.number({ message: "Prix invalide" }).positive("Le prix doit être positif").max(100_000),
+  per: z.enum(["kg", "piece"]),
+});
+
 export const PRODUCT_CATEGORY_LABELS: Record<(typeof PRODUCT_CATEGORIES)[number], string> = {
   matiere_premiere: "Matière première",
   sous_recette: "Sous-recette",
   recette: "Recette",
   produit_fini: "Produit fini",
-  produit_externe: "Produit externe",
+  produit_externe: "Encas",
   consommable: "Consommable / emballage",
   moule_plat_gratin: "Moules et plats à gratin",
 };
@@ -72,6 +78,8 @@ export const declarationInputSchema = z
       z.object({
         freeLabel: z.string().trim().min(2, "Indiquez le nom du produit").max(200),
         category: z.enum(PRODUCT_CATEGORIES),
+        /** Prix d'achat facultatif (décision du 20/11/2026), au kg ou à la pièce. */
+        price: freePriceSchema.nullable().optional(),
       }),
     ]),
     method: z.enum(INPUT_METHODS),

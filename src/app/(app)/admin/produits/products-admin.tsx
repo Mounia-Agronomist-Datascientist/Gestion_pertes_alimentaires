@@ -58,6 +58,34 @@ interface Group {
   category: Category;
   count: number;
   lastOccurredOn: string;
+  priced: number;
+  freePrice: { amountEur: number; per: "kg" | "piece" } | null;
+}
+
+const fmtPrice = (p: { amountEur: number; per: "kg" | "piece" }) =>
+  `${p.amountEur.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })} / ${p.per === "kg" ? "kg" : "pièce"}`;
+
+/** Prix d'achat d'une saisie « hors liste » : montant et unité (au kg ou à la pièce). */
+function PriceFields({ required = false, defaults }: { required?: boolean; defaults?: Group["freePrice"] }) {
+  return (
+    <span className="flex flex-wrap items-end gap-2">
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium">Prix d&apos;achat HT{required ? "" : " (facultatif)"}</span>
+        <input
+          name="priceAmount"
+          inputMode="decimal"
+          className="field w-32"
+          required={required}
+          defaultValue={defaults ? String(defaults.amountEur).replace(".", ",") : ""}
+          placeholder="ex. 3,50"
+        />
+      </label>
+      <select name="pricePer" className="field" defaultValue={defaults?.per ?? "kg"} aria-label="Prix par">
+        <option value="kg">€ / kg</option>
+        <option value="piece">€ / pièce</option>
+      </select>
+    </span>
+  );
 }
 
 interface Props {
@@ -117,8 +145,9 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">Saisies « hors liste » à revoir ({groups.length})</h2>
           <p className="text-sm text-slate-600">
-            Rattachez chaque nom saisi à un produit de la liste, ou créez le produit. Chaque déclaration reçoit une
-            nouvelle version : le nom saisi reste visible dans son historique.
+            Indiquez le prix d&apos;achat pour chiffrer ces pertes, rattachez chaque nom à un produit de la liste, ou
+            créez le produit. Chaque déclaration reçoit une nouvelle version : le nom saisi reste visible dans son
+            historique.
           </p>
           {groups.map((g) => (
             <div key={g.key} className="flex flex-col gap-2 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
@@ -126,14 +155,28 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                 <span className="font-semibold">« {g.label} »</span>{" "}
                 <span className="text-sm text-amber-900">
                   {PRODUCT_CATEGORY_LABELS[g.category]} · {g.count} saisie{g.count > 1 && "s"} · dernière le{" "}
-                  {fmtDay(g.lastOccurredOn)}
+                  {fmtDay(g.lastOccurredOn)} ·{" "}
+                  {g.priced === g.count
+                    ? `chiffrée${g.count > 1 ? "s" : ""}${g.freePrice ? ` (${fmtPrice(g.freePrice)})` : ""}`
+                    : g.priced
+                      ? `${g.priced} chiffrée${g.priced > 1 ? "s" : ""} sur ${g.count}`
+                      : "sans prix (0 €)"}
                 </span>
               </p>
+              <form action={action} className="flex flex-wrap items-end gap-2">
+                <input type="hidden" name="intent" value="price_group" />
+                <input type="hidden" name="groupKey" value={g.key} />
+                <PriceFields required defaults={g.freePrice} />
+                <button type="submit" disabled={pending} className="btn-secondary">
+                  {g.priced ? "Changer le prix" : "Indiquer le prix"}
+                </button>
+              </form>
               {creatingFrom === g.key ? (
                 <form action={action} className="flex flex-col gap-2">
                   <input type="hidden" name="intent" value="create_link" />
                   <input type="hidden" name="groupKey" value={g.key} />
                   <ProductFields units={units} defaults={{ name: g.label, category: g.category }} />
+                  <PriceFields defaults={g.freePrice} />
                   <div className="flex gap-2">
                     <button type="submit" disabled={pending} className="btn-primary flex-1">
                       Créer et rattacher

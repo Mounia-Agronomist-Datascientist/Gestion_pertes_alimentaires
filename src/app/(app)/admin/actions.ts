@@ -32,7 +32,14 @@ import {
   updateSubzone,
 } from "@/modules/admin/places";
 import { setProductionDay } from "@/modules/admin/production-days";
-import { createProduct, linkUnlistedGroup, setProductActive, updateProduct } from "@/modules/admin/products";
+import {
+  createProduct,
+  linkUnlistedGroup,
+  listUnlistedGroups,
+  priceUnlistedGroup,
+  setProductActive,
+  updateProduct,
+} from "@/modules/admin/products";
 import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
@@ -198,6 +205,18 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
     unitWeightKg: String(formData.get("unitWeightKg") ?? ""),
     densityKgPerL: String(formData.get("densityKgPerL") ?? ""),
   });
+  // Prix d'achat d'une saisie « hors liste » (texte au clavier français, « 3,50 »).
+  const priceFields = () => {
+    const amount = Number(
+      String(formData.get("priceAmount") ?? "")
+        .replace(",", ".")
+        .trim(),
+    );
+    const per = formData.get("pricePer") === "piece" ? "piece" : "kg";
+    return String(formData.get("priceAmount") ?? "").trim() && Number.isFinite(amount)
+      ? { amountEur: amount, per: per as "kg" | "piece" }
+      : null;
+  };
   let message: string;
   try {
     switch (intent) {
@@ -226,15 +245,38 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
       }
       case "create_link": {
         const product = await createProduct(db, admin, fields());
+        // Prix d'achat facultatif : versionné sur la fiche, à partir de la plus ancienne saisie du groupe.
+        const price = priceFields();
+        if (price) {
+          const group = (await listUnlistedGroups(db, admin)).find((g) => g.key === groupKey);
+          await addManualPrice(db, admin, product.id, {
+            validFrom: group?.firstOccurredOn ?? toProductionLocalDate(new Date()),
+            perKgEur: price.per === "kg" ? price.amountEur : null,
+            perUnitEur: price.per === "piece" ? price.amountEur : null,
+            unit: price.per === "piece" ? "pièce" : null,
+          });
+        }
         const n = await linkUnlistedGroup(db, admin, groupKey, product.id);
-        message = `Produit « ${product.name} » créé ; ${n} saisie${n > 1 ? "s rattachées" : " rattachée"}.`;
+        message = `Produit « ${product.name} » créé ; ${n} saisie${n > 1 ? "s rattachées" : " rattachée"}${price ? ", coût recalculé" : ""}.`;
+        break;
+      }
+      case "price_group": {
+        const price = priceFields();
+        if (!price) return { error: "Indiquez le prix d'achat" };
+        const n = await priceUnlistedGroup(db, admin, groupKey, price);
+        message = `Prix enregistré : ${n} saisie${n > 1 ? "s chiffrées" : " chiffrée"} (nouvelle version).`;
         break;
       }
       default:
         return { error: "Action inconnue" };
     }
   } catch (e) {
-    if (e instanceof AdminError || e instanceof ForbiddenError || e instanceof DeclarationError)
+    if (
+      e instanceof AdminError ||
+      e instanceof ForbiddenError ||
+      e instanceof DeclarationError ||
+      e instanceof ProductSheetError
+    )
       return { error: e.message };
     throw e;
   }

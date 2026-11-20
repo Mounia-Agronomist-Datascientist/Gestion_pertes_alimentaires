@@ -334,6 +334,19 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Sert à convertir en kg une perte saisie en litres (matière de la liste ou ingrédient de la semaine) et à ramener
   au kg un prix d'achat au litre.
 
+## R28 — Produit absent de la liste : types et prix (Phase 6, 20/11/2026)
+
+- En **Stockage**, un produit absent de la liste est une **matière première** ou un **encas** (les sous-recettes,
+  recettes, produits finis, consommables et plats à gratin concernent la cuisine et le conditionnement). Le serveur
+  refuse les autres types dans cette zone.
+- « Produit externe » s'appelle désormais **« Encas »** partout.
+- **Prix d'achat** facultatif (HT, au kg ou à la pièce) : à la saisie, la perte est chiffrée tout de suite (poids ou
+  nombre × prix) ; après coup, Administration → Produits → saisies « hors liste » : « Indiquer le prix » chiffre
+  toutes les saisies du même nom (nouvelle version de chaque perte, motif gardé dans l'historique).
+- Rattachement à un produit de la liste, ou création du produit (avec un prix facultatif, daté de la plus ancienne
+  saisie) : le coût est recalculé au prix du produit en vigueur à la date de chaque perte ; sans prix du produit, le
+  prix indiqué est gardé.
+
 ## R27 — Retours fournisseur et devenirs de la Réception (Phase 6, 19/11/2026)
 
 - Une perte (ou la part d'une perte) **renvoyée au fournisseur** n'est **pas comptée dans le total perdu** : ni kg, ni

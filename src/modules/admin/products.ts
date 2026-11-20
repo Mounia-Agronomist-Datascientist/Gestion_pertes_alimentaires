@@ -10,7 +10,7 @@ import type { Db } from "@/db/types";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORIES } from "@/modules/declarations/input";
-import { linkDeclarationsToProduct } from "@/modules/declarations/service";
+import { linkDeclarationsToProduct, priceUnlistedDeclarations } from "@/modules/declarations/service";
 import { AdminError } from "./accounts";
 import { normalizeCauseName as normalizeLabel } from "./causes";
 
@@ -120,7 +120,13 @@ export interface UnlistedGroup {
   category: (typeof PRODUCT_CATEGORIES)[number];
   count: number;
   lastOccurredOn: string;
+  /** Plus ancienne saisie du groupe (date d'effet d'un prix créé avec le produit). */
+  firstOccurredOn: string;
   declarationIds: string[];
+  /** Saisies chiffrées (prix indiqué à la saisie ou après coup). */
+  priced: number;
+  /** Dernier prix indiqué, s'il y en a un. */
+  freePrice: { amountEur: number; per: "kg" | "piece" } | null;
 }
 
 /** Saisies « hors liste » à revoir, regroupées par nom (sans accents ni majuscules) et type de produit. */
@@ -132,6 +138,8 @@ export async function listUnlistedGroups(db: Db, admin: AuthUser): Promise<Unlis
       name: s.lossDeclarations.productName,
       category: s.lossDeclarations.productCategory,
       occurredOn: s.lossDeclarations.occurredOn,
+      grossCostEur: s.lossDeclarations.grossCostEur,
+      costDetails: s.lossDeclarations.costDetails,
     })
     .from(s.lossDeclarations)
     .where(
@@ -141,10 +149,14 @@ export async function listUnlistedGroups(db: Db, admin: AuthUser): Promise<Unlis
   const groups = new Map<string, UnlistedGroup>();
   for (const r of rows) {
     const key = `${r.category}:${normalizeLabel(r.name)}`;
+    const freePrice = (r.costDetails as { freePrice?: UnlistedGroup["freePrice"] } | null)?.freePrice ?? null;
     const group = groups.get(key);
     if (group) {
       group.count++;
       group.declarationIds.push(r.id);
+      group.firstOccurredOn = r.occurredOn;
+      if (r.grossCostEur != null) group.priced++;
+      group.freePrice ??= freePrice;
     } else {
       groups.set(key, {
         key,
@@ -152,7 +164,10 @@ export async function listUnlistedGroups(db: Db, admin: AuthUser): Promise<Unlis
         category: r.category,
         count: 1,
         lastOccurredOn: r.occurredOn,
+        firstOccurredOn: r.occurredOn,
         declarationIds: [r.id],
+        priced: r.grossCostEur != null ? 1 : 0,
+        freePrice,
       });
     }
   }
@@ -167,6 +182,13 @@ export async function countUnlistedDeclarations(db: Db): Promise<number> {
       and(eq(s.lossDeclarations.productUnlisted, true), inArray(s.lossDeclarations.status, ["validee", "corrigee"])),
     );
   return row?.n ?? 0;
+}
+
+/** Prix d'achat indiqué après coup pour toutes les saisies d'un groupe « hors liste » (décision du 20/11/2026). */
+export async function priceUnlistedGroup(db: Db, admin: AuthUser, groupKey: string, price: unknown, now = new Date()) {
+  const group = (await listUnlistedGroups(db, admin)).find((g) => g.key === groupKey);
+  if (!group) throw new AdminError("Ces saisies ont déjà été rattachées");
+  return priceUnlistedDeclarations(db, admin, { declarationIds: group.declarationIds, price }, now);
 }
 
 /** Rattache toutes les saisies d'un groupe « hors liste » à un produit existant. */

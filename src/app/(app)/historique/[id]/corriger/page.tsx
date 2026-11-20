@@ -9,6 +9,7 @@ import { getDeclarationOptions } from "@/modules/declarations/options";
 import { getDeclarationDetail } from "@/modules/declarations/queries";
 import { packagingOptions } from "@/modules/matieres/colis";
 import { DeclarationWizard, type WizardInitial } from "../../../declarer/declaration-wizard";
+import type { FreePrice } from "@/domain/produit-absent";
 
 export const metadata = { title: "Corriger une perte — Pertes" };
 
@@ -68,7 +69,13 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
         }
       : d.productId
         ? { kind: "listed", id: d.productId, name: d.productName, category: d.productCategory }
-        : { kind: "free", name: d.productName, category: d.productCategory },
+        : {
+            kind: "free",
+            name: d.productName,
+            category: d.productCategory,
+            // Prix d'achat indiqué (à la saisie ou après coup), gardé à la correction.
+            price: (d.costDetails as { freePrice?: FreePrice | null } | null)?.freePrice ?? null,
+          },
     method,
     quantity: useTare ? "" : String(d.quantity),
     unitCode: useTare ? null : d.unitCode,
