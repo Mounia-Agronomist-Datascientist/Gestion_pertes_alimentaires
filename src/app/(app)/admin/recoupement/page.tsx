@@ -42,7 +42,7 @@ export default async function ReconciliationPage({ searchParams }: { searchParam
       <p className="text-slate-600">
         Les ingrédients du tome face aux bons de commande de la même semaine de production. Les bons de la semaine
         suivante arrivent au plus tôt le jeudi : déposez-les dans{" "}
-        <Link href="/admin/import" className="text-teal-800 underline">
+        <Link href="/admin/import" className="text-rouge-700 underline">
           Import
         </Link>
         .

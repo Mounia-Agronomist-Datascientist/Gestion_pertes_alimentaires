@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="text-white print:hidden" style={{ backgroundColor: user.team?.colorHex ?? "#0f766e" }}>
+      <header className="text-white print:hidden" style={{ backgroundColor: user.team?.colorHex ?? "#e8001c" }}>
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 p-4">
           <Link href="/" className="flex items-center gap-3">
             {user.team && (

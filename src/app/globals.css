@@ -1,25 +1,54 @@
 @import "tailwindcss";
 
+/*
+ * Charte de La Brigade de Véro (site labrigadedevero.com, relevée le 20/11/2026) : rouge du logo, brun foncé du texte,
+ * crème des fonds, police Nunito. Les rouges plus foncés servent au texte et à l'en-tête pour rester lisibles
+ * (contraste ≥ 4,5:1 avec le blanc).
+ */
+@theme {
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+
+  --color-rouge-50: #fff1f1;
+  --color-rouge-100: #ffe0e0;
+  --color-rouge-500: #ff1526; /* rouge du logo */
+  --color-rouge-600: #e8001c; /* en-tête */
+  --color-rouge-700: #d90019; /* liens, titres */
+  --color-rouge-800: #b80018;
+
+  --color-brun-50: #fbf4ef;
+  --color-brun-100: #f5e6dc;
+  --color-brun-600: #4a1a16;
+  --color-brun-700: #280606; /* boutons, texte */
+  --color-brun-800: #160202;
+
+  --color-creme-50: #fff8f0;
+  --color-creme-100: #feeacf;
+}
+
 :root {
   color-scheme: light;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-creme-50 text-brun-700 antialiased;
+}
+
+h1 {
+  @apply text-rouge-700;
 }
 
 /* Champs et boutons dimensionnés pour une utilisation au doigt, en atelier (≥ 48 px). */
 @layer components {
   .field {
-    @apply min-h-12 rounded-xl border border-slate-300 bg-white px-4 text-lg outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/30;
+    @apply min-h-12 rounded-xl border border-slate-300 bg-white px-4 text-lg outline-none focus:border-brun-700 focus:ring-2 focus:ring-brun-700/30;
   }
 
   .btn-primary {
-    @apply min-h-14 rounded-xl bg-teal-700 px-4 text-lg font-semibold text-white hover:bg-teal-800 disabled:opacity-60;
+    @apply min-h-14 rounded-xl bg-brun-700 px-4 text-lg font-semibold text-white hover:bg-brun-800 disabled:opacity-60;
   }
 
   .btn-secondary {
-    @apply min-h-14 rounded-xl border-2 border-teal-700 bg-white px-4 text-lg font-semibold text-teal-800 hover:bg-teal-50 disabled:opacity-60;
+    @apply min-h-14 rounded-xl border-2 border-brun-700 bg-white px-4 text-lg font-semibold text-brun-700 hover:bg-creme-100 disabled:opacity-60;
   }
 
   /** Petit bouton carré pour changer l'ordre d'une liste (↑ ↓). */
@@ -28,7 +57,7 @@ body {
   }
 
   .btn-tile {
-    @apply flex min-h-24 flex-col items-start justify-center gap-1 rounded-2xl bg-teal-700 p-4 text-xl font-semibold text-white;
+    @apply flex min-h-24 flex-col items-start justify-center gap-1 rounded-2xl bg-brun-700 p-4 text-xl font-semibold text-white;
   }
 }
 

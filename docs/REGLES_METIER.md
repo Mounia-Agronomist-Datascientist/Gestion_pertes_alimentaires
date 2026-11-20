@@ -441,3 +441,14 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   un graphique, une tuile ou une ligne de tableau n'est jamais coupée, un titre reste avec ce qui le suit ; les
   cartes à plusieurs graphiques (« Semaine après semaine ») peuvent continuer sur la page suivante entre deux
   graphiques. Couleurs gardées même sans « graphiques d'arrière-plan ».
+
+## R31 — Charte graphique de La Brigade de Véro (20/11/2026)
+
+- Couleurs et police du site labrigadedevero.com : **rouge** du logo (#FF1526 ; #E8001C pour l'en-tête et #D90019
+  pour les titres et les liens, plus foncés pour rester lisibles), **brun foncé** #280606 pour le texte et les
+  boutons d'action, fond **crème**, police **Nunito** (servie par l'application ; les polices de titre du site sont
+  sous licence Adobe et ne sont pas reprises).
+- **Logo** sur la page de connexion **uniquement** (fichier `public/marque/logo-brigade-de-vero.svg`, copié du site).
+- L'en-tête garde la **couleur de l'équipe** pour un compte équipe ; rouge pour les autres comptes.
+- Les erreurs gardent leur encadré rouge clair ; les couleurs des graphiques ne changent pas (palette vérifiée pour
+  les daltonismes), sauf les colonnes semaine après semaine, en brun (semaine choisie en brun foncé).

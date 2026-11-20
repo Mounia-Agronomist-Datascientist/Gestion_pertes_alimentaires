@@ -186,7 +186,7 @@ export function ShareDonut({
               <span className="size-3 shrink-0 rounded-sm" style={{ backgroundColor: s.color }} aria-hidden />
               <span className="min-w-0 flex-1 truncate">
                 {s.href ? (
-                  <Link href={s.href} className="font-medium text-teal-800 underline">
+                  <Link href={s.href} className="font-medium text-rouge-700 underline">
                     {s.label}
                   </Link>
                 ) : (
@@ -209,7 +209,7 @@ export function ShareDonut({
 
       {children && (
         <details className="text-sm print:hidden">
-          <summary className="cursor-pointer font-medium text-teal-800">Voir le détail</summary>
+          <summary className="cursor-pointer font-medium text-rouge-700">Voir le détail</summary>
           <div className="mt-2">{children}</div>
         </details>
       )}

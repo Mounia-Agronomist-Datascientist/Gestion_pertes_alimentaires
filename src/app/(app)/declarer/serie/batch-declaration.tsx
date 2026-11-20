@@ -254,7 +254,7 @@ export function BatchDeclaration({ options, userTeam, userId }: Props) {
               <span className="flex gap-4">
                 <button
                   type="button"
-                  className="text-sm font-medium text-teal-800 underline"
+                  className="text-sm font-medium text-rouge-700 underline"
                   onClick={() => openWizard(line.initial, "recap", i)}
                 >
                   Modifier

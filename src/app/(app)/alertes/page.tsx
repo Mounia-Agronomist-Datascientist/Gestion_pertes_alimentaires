@@ -36,13 +36,13 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
       <nav className="flex gap-2">
         <Link
           href="/alertes"
-          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-teal-700 text-white"}`}
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-brun-700 text-white"}`}
         >
           En cours
         </Link>
         <Link
           href="/alertes?toutes=1"
-          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-teal-700 text-white" : "bg-white shadow-sm"}`}
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-brun-700 text-white" : "bg-white shadow-sm"}`}
         >
           Historique
         </Link>

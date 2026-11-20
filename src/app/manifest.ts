@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Déclaration et suivi des pertes alimentaires et matières",
     start_url: "/",
     display: "standalone",
-    background_color: "#f8fafc",
-    theme_color: "#0f766e",
+    background_color: "#fff8f0",
+    theme_color: "#e8001c",
     lang: "fr",
   };
 }

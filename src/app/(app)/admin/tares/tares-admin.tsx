@@ -119,7 +119,7 @@ export function TaresAdmin({ containers, today }: { containers: Container[]; tod
                   <input type="hidden" name="name" value={c.name} />
                   <button
                     type="button"
-                    className="text-sm font-medium text-teal-800 underline"
+                    className="text-sm font-medium text-rouge-700 underline"
                     onClick={() => setEditing(c.id)}
                   >
                     Modifier
@@ -128,7 +128,7 @@ export function TaresAdmin({ containers, today }: { containers: Container[]; tod
                     type="submit"
                     name="intent"
                     value={c.active ? "deactivate" : "activate"}
-                    className={`text-sm font-medium underline ${c.active ? "text-red-800" : "text-teal-800"}`}
+                    className={`text-sm font-medium underline ${c.active ? "text-red-800" : "text-rouge-700"}`}
                   >
                     {c.active ? "Désactiver" : "Réactiver"}
                   </button>

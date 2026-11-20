@@ -234,7 +234,7 @@ export function FactorsAdmin({ families, missing }: { families: FamilyView[]; mi
                   ) : (
                     <button
                       type="button"
-                      className="self-start text-sm font-medium text-teal-800 underline"
+                      className="self-start text-sm font-medium text-rouge-700 underline"
                       onClick={() => setEditing(f.id)}
                     >
                       Proposer une autre valeur

@@ -110,7 +110,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
               {e.entity === "loss_declaration" && e.entityId && (
                 <>
                   {" · "}
-                  <Link href={`/historique/${e.entityId}`} className="text-teal-800 underline">
+                  <Link href={`/historique/${e.entityId}`} className="text-rouge-700 underline">
                     voir la déclaration
                   </Link>
                 </>

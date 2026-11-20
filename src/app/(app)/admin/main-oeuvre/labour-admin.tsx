@@ -70,7 +70,7 @@ export function LabourAdmin({ zones, today }: { zones: Zone[]; today: string }) 
             ) : (
               <button
                 type="button"
-                className="self-start text-sm font-medium text-teal-800 underline"
+                className="self-start text-sm font-medium text-rouge-700 underline"
                 onClick={() => setEditing(z.id)}
               >
                 {z.current ? "Nouveau coût horaire" : "Saisir le coût horaire"}

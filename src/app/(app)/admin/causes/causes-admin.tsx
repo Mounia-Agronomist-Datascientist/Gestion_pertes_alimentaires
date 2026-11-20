@@ -112,7 +112,7 @@ export function CausesAdmin({ causes, zones }: Props) {
             key={z.id}
             type="button"
             onClick={() => setZoneFilter(z.id)}
-            className={`rounded-full px-4 py-2 text-sm font-medium ${zoneFilter === z.id ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+            className={`rounded-full px-4 py-2 text-sm font-medium ${zoneFilter === z.id ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
           >
             {z.name}
           </button>
@@ -161,7 +161,7 @@ export function CausesAdmin({ causes, zones }: Props) {
                   <input type="hidden" name="causeId" value={c.id} />
                   <button
                     type="button"
-                    className="text-sm font-medium text-teal-800 underline"
+                    className="text-sm font-medium text-rouge-700 underline"
                     onClick={() => setEditing(c.id)}
                   >
                     Modifier
@@ -171,7 +171,7 @@ export function CausesAdmin({ causes, zones }: Props) {
                       type="submit"
                       name="intent"
                       value={c.status === "active" ? "deactivate" : "activate"}
-                      className={`text-sm font-medium underline ${c.status === "active" ? "text-red-800" : "text-teal-800"}`}
+                      className={`text-sm font-medium underline ${c.status === "active" ? "text-red-800" : "text-rouge-700"}`}
                     >
                       {c.status === "active" ? "Désactiver" : "Réactiver"}
                     </button>

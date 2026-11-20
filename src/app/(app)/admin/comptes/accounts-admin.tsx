@@ -193,7 +193,7 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
                 type="submit"
                 name="intent"
                 value="reset"
-                className="text-sm font-medium text-teal-800 underline"
+                className="text-sm font-medium text-rouge-700 underline"
                 onClick={(e) => {
                   if (
                     !window.confirm(
@@ -210,7 +210,7 @@ export function AccountsAdmin({ adminId, accounts, teams, zones }: Props) {
                   type="submit"
                   name="intent"
                   value={a.active ? "deactivate" : "activate"}
-                  className={`text-sm font-medium underline ${a.active ? "text-red-800" : "text-teal-800"}`}
+                  className={`text-sm font-medium underline ${a.active ? "text-red-800" : "text-rouge-700"}`}
                   onClick={(e) => {
                     if (a.active && !window.confirm(`Désactiver « ${a.login} » ? Il sera déconnecté partout.`))
                       e.preventDefault();

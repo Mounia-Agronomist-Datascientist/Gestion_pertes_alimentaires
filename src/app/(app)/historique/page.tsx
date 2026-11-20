@@ -26,7 +26,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Para
   const link = (p: Record<string, string>) =>
     `/historique?${new URLSearchParams({ periode, ...(includeCancelled ? { annulees: "1" } : {}), ...p })}`;
   const chip = (active: boolean) =>
-    `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
+    `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
 
   return (
     <div className="flex flex-col gap-4">

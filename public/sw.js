@@ -39,7 +39,7 @@ async function trim(cache) {
 
 const OFFLINE_HTML = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hors ligne — Pertes</title>
 <style>body{font-family:system-ui,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:24px}main{max-width:40rem;margin:auto;display:flex;flex-direction:column;gap:16px}
-a{display:block;text-align:center;background:#0f766e;color:#fff;padding:14px;border-radius:12px;text-decoration:none;font-weight:600}p{line-height:1.5}</style></head>
+a{display:block;text-align:center;background:#280606;color:#fff;padding:14px;border-radius:12px;text-decoration:none;font-weight:600}p{line-height:1.5}</style></head>
 <body><main><h1>Hors ligne</h1><p>Cette page n'est pas disponible sans réseau. La saisie des pertes reste possible : elles seront gardées sur cet appareil et envoyées au retour du réseau.</p>
 <a href="/declarer">Déclarer une perte</a><a href="/declarer/serie">Déclarer plusieurs pertes</a></main></body></html>`;
 

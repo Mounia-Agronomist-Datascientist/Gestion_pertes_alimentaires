@@ -49,7 +49,7 @@ export function ColumnChart({
       {average && (
         <p className="flex items-center gap-3 text-xs text-slate-600">
           <span className="flex items-center gap-1">
-            <span className="inline-block size-2.5 rounded-sm bg-[#0f766e]" aria-hidden /> Semaine
+            <span className="inline-block size-2.5 rounded-sm bg-[#8c5a52]" aria-hidden /> Semaine
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-0.5 w-4" style={{ background: AVERAGE_COLOR }} aria-hidden />{" "}
@@ -80,7 +80,7 @@ export function ColumnChart({
                   width={bar}
                   height={h}
                   rx={3}
-                  fill={c.highlight ? "#0f4f4a" : "#0f766e"}
+                  fill={c.highlight ? "#280606" : "#8c5a52"}
                   opacity={c.highlight ? 1 : 0.75}
                 />
               )}

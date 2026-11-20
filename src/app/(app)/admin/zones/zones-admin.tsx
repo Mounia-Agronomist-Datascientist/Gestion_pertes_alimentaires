@@ -35,7 +35,7 @@ export function ZonesAdmin({ zones }: { zones: Zone[] }) {
               setZoneId(z.id);
               setEditing(null);
             }}
-            className={`rounded-full px-4 py-2 text-sm font-medium ${zoneId === z.id ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+            className={`rounded-full px-4 py-2 text-sm font-medium ${zoneId === z.id ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
           >
             {z.name}
           </button>
@@ -68,7 +68,7 @@ export function ZonesAdmin({ zones }: { zones: Zone[] }) {
               </span>
               <button
                 type="button"
-                className="text-sm font-medium text-teal-800 underline"
+                className="text-sm font-medium text-rouge-700 underline"
                 onClick={() => setEditing(zone.id)}
               >
                 Renommer la zone
@@ -106,7 +106,7 @@ export function ZonesAdmin({ zones }: { zones: Zone[] }) {
                       <input type="hidden" name="id" value={sz.id} />
                       <button
                         type="button"
-                        className="text-sm font-medium text-teal-800 underline"
+                        className="text-sm font-medium text-rouge-700 underline"
                         onClick={() => setEditing(sz.id)}
                       >
                         Modifier
@@ -115,7 +115,7 @@ export function ZonesAdmin({ zones }: { zones: Zone[] }) {
                         type="submit"
                         name="intent"
                         value={sz.active ? "deactivate" : "activate"}
-                        className={`text-sm font-medium underline ${sz.active ? "text-red-800" : "text-teal-800"}`}
+                        className={`text-sm font-medium underline ${sz.active ? "text-red-800" : "text-rouge-700"}`}
                       >
                         {sz.active ? "Désactiver" : "Réactiver"}
                       </button>

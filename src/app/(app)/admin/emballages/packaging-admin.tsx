@@ -173,7 +173,7 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
                 <input type="hidden" name="id" value={i.id} />
                 <button
                   type="button"
-                  className="text-sm font-medium text-teal-800 underline"
+                  className="text-sm font-medium text-rouge-700 underline"
                   onClick={() => setEditing(i.id)}
                 >
                   Modifier
@@ -182,7 +182,7 @@ export function PackagingAdmin({ items, today }: { items: Item[]; today: string 
                   type="submit"
                   name="intent"
                   value={i.active ? "deactivate" : "activate"}
-                  className={`text-sm font-medium underline ${i.active ? "text-red-800" : "text-teal-800"}`}
+                  className={`text-sm font-medium underline ${i.active ? "text-red-800" : "text-rouge-700"}`}
                 >
                   {i.active ? "Désactiver" : "Réactiver"}
                 </button>

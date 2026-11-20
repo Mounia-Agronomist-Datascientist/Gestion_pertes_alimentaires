@@ -50,7 +50,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         ← Administration
       </Link>
       <h1 className="text-2xl font-bold">Produits</h1>
-      <Link href="/admin/produits/a-completer" className="self-start font-medium text-teal-800 underline">
+      <Link href="/admin/produits/a-completer" className="self-start font-medium text-rouge-700 underline">
         Matières de la semaine à compléter (fournisseur, poids du colis)
       </Link>
       <ProductsAdmin

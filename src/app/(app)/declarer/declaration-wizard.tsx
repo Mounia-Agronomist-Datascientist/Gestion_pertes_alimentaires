@@ -1406,7 +1406,7 @@ function Tile({
         disabled
           ? "cursor-not-allowed border-transparent bg-slate-100 text-slate-400"
           : selected
-            ? "border-teal-700 bg-teal-50"
+            ? "border-brun-700 bg-creme-100"
             : "border-transparent bg-white shadow-sm"
       }`}
     >
@@ -1434,7 +1434,7 @@ function ProposeCause({ zoneId, zoneName }: { zoneId: string; zoneName: string }
     return (
       <button
         type="button"
-        className="self-start text-sm font-medium text-teal-800 underline"
+        className="self-start text-sm font-medium text-rouge-700 underline"
         onClick={() => setOpen(true)}
       >
         Proposer une nouvelle cause
@@ -1479,7 +1479,7 @@ function ProposeCause({ zoneId, zoneName }: { zoneId: string; zoneName: string }
 
 function EditLink({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="text-sm font-medium text-teal-800 underline">
+    <button type="button" onClick={onClick} className="text-sm font-medium text-rouge-700 underline">
       Modifier
     </button>
   );
@@ -1809,7 +1809,7 @@ function ProductStep({
       />
       <button
         type="button"
-        className="self-start font-medium text-teal-800 underline"
+        className="self-start font-medium text-rouge-700 underline"
         onClick={() => setFreeMode(true)}
       >
         Produit absent de la liste
@@ -1865,7 +1865,7 @@ function ProductStep({
                   key={w.weekId}
                   type="button"
                   onClick={() => pickWeek(w.weekId)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium ${w.weekId === materialsWeek.weekId ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+                  className={`rounded-full px-4 py-2 text-sm font-medium ${w.weekId === materialsWeek.weekId ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
                 >
                   S{w.number}
                   {w.relative === -1 ? " (S-1)" : w.relative === 1 ? " (S+1)" : " (cette semaine)"}
@@ -1931,7 +1931,7 @@ function ProductStep({
                   key={c.weekId}
                   type="button"
                   onClick={() => setCatalogId(c.weekId)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium ${c.weekId === catalogId ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+                  className={`rounded-full px-4 py-2 text-sm font-medium ${c.weekId === catalogId ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
                 >
                   S{c.number}
                   {c === initialCatalog ? " (cette semaine)" : ""}

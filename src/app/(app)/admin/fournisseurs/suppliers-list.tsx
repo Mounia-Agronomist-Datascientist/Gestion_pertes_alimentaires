@@ -68,13 +68,13 @@ export function SuppliersList({ suppliers }: { suppliers: Supplier[] }) {
                 <div className="flex flex-wrap gap-4">
                   <Link
                     href={`/admin/produits?fournisseur=${x.id}`}
-                    className="text-sm font-medium text-teal-800 underline"
+                    className="text-sm font-medium text-rouge-700 underline"
                   >
                     Voir ses matières
                   </Link>
                   <button
                     type="button"
-                    className="text-sm font-medium text-teal-800 underline"
+                    className="text-sm font-medium text-rouge-700 underline"
                     onClick={() => setEditing(x.id)}
                   >
                     Renommer

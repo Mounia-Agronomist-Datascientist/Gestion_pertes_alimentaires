@@ -30,7 +30,7 @@ export default async function AlertSettingsPage() {
           stablePercent: Math.round(settings.trendStableRate * 1000) / 10,
         }}
       />
-      <Link href="/alertes/analyse" className="text-teal-800 underline">
+      <Link href="/alertes/analyse" className="text-rouge-700 underline">
         Voir les alertes d&apos;analyse
       </Link>
     </>

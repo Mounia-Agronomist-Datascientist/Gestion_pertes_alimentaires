@@ -85,7 +85,7 @@ export function MappingAdmin({ rows, families }: { rows: MappingRow[]; families:
               type="button"
               aria-pressed={filter === f.value}
               onClick={() => setFilter(f.value)}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${filter === f.value ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+              className={`rounded-full px-4 py-2 text-sm font-medium ${filter === f.value ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
             >
               {f.label}
               {f.value === "a_revoir" && reviewCount > 0 && ` (${reviewCount})`}

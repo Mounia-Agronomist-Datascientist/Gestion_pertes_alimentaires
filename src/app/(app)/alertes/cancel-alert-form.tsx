@@ -11,7 +11,7 @@ export function CancelAlertForm({ alertId }: { alertId: string }) {
     return (
       <button
         type="button"
-        className="self-start text-sm font-medium text-teal-800 underline"
+        className="self-start text-sm font-medium text-rouge-700 underline"
         onClick={() => setOpen(true)}
       >
         Lever l&apos;alerte

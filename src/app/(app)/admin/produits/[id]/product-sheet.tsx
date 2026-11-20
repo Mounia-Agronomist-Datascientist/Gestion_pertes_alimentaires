@@ -163,7 +163,7 @@ export function ProductSheet({
               <input type="hidden" name="productId" value={p.id} />
               <button
                 type="button"
-                className="text-sm font-medium text-teal-800 underline"
+                className="text-sm font-medium text-rouge-700 underline"
                 onClick={() => setEditing(true)}
               >
                 Modifier
@@ -172,7 +172,7 @@ export function ProductSheet({
                 type="submit"
                 name="intent"
                 value={p.active ? "deactivate" : "activate"}
-                className={`text-sm font-medium underline ${p.active ? "text-red-800" : "text-teal-800"}`}
+                className={`text-sm font-medium underline ${p.active ? "text-red-800" : "text-rouge-700"}`}
               >
                 {p.active ? "Désactiver" : "Réactiver"}
               </button>
@@ -379,7 +379,7 @@ export function ProductSheet({
                       .filter(Boolean)
                       .join(" · ")}
                     {v.inForce && (
-                      <span className="ml-2 rounded-full bg-teal-100 px-2 text-sm font-normal text-teal-900">
+                      <span className="ml-2 rounded-full bg-creme-100 px-2 text-sm font-normal text-brun-700">
                         En vigueur
                       </span>
                     )}

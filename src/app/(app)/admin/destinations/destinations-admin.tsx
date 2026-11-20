@@ -87,7 +87,7 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
                   <input type="hidden" name="id" value={d.id} />
                   <button
                     type="button"
-                    className="text-sm font-medium text-teal-800 underline"
+                    className="text-sm font-medium text-rouge-700 underline"
                     onClick={() => setEditing(d.id)}
                   >
                     Modifier
@@ -96,7 +96,7 @@ export function DestinationsAdmin({ destinations }: { destinations: Destination[
                     type="submit"
                     name="intent"
                     value={d.active ? "deactivate" : "activate"}
-                    className={`text-sm font-medium underline ${d.active ? "text-red-800" : "text-teal-800"}`}
+                    className={`text-sm font-medium underline ${d.active ? "text-red-800" : "text-rouge-700"}`}
                   >
                     {d.active ? "Désactiver" : "Réactiver"}
                   </button>

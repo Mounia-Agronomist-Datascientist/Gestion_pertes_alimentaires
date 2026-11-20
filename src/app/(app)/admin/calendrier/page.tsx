@@ -64,7 +64,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               <button
                 type="submit"
                 className={
-                  d.isProductionDay ? "font-medium text-red-800 underline" : "font-medium text-teal-800 underline"
+                  d.isProductionDay ? "font-medium text-red-800 underline" : "font-medium text-rouge-700 underline"
                 }
               >
                 {d.isProductionDay ? "Retirer" : "Ajouter"}

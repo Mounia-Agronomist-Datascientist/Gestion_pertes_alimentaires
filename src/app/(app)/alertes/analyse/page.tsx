@@ -44,13 +44,13 @@ export default async function LossAlertsPage({ searchParams }: { searchParams: P
       <nav className="flex flex-wrap items-center gap-2">
         <Link
           href="/alertes/analyse"
-          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-teal-700 text-white"}`}
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-white shadow-sm" : "bg-brun-700 text-white"}`}
         >
           À voir
         </Link>
         <Link
           href="/alertes/analyse?toutes=1"
-          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-teal-700 text-white" : "bg-white shadow-sm"}`}
+          className={`rounded-full px-4 py-2 text-sm font-medium ${all ? "bg-brun-700 text-white" : "bg-white shadow-sm"}`}
         >
           Toutes
         </Link>

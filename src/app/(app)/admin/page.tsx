@@ -69,7 +69,7 @@ export default function AdminPage() {
           </Link>
         ))}
       </div>
-      <Link href="/journal" className="text-teal-800 underline">
+      <Link href="/journal" className="text-rouge-700 underline">
         Consulter le journal d&apos;audit
       </Link>
     </>

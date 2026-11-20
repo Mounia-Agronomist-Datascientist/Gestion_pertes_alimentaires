@@ -18,7 +18,7 @@ export default async function TeamsWeekPage({ searchParams }: { searchParams: Pr
   const teams = await listTeamsForWeek(db, admin, week.id);
 
   const chip = (active: boolean) =>
-    `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
+    `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
 
   return (
     <>
@@ -71,7 +71,7 @@ export default async function TeamsWeekPage({ searchParams }: { searchParams: Pr
               <button
                 type="submit"
                 className={
-                  t.activeThisWeek ? "font-medium text-red-800 underline" : "font-medium text-teal-800 underline"
+                  t.activeThisWeek ? "font-medium text-red-800 underline" : "font-medium text-rouge-700 underline"
                 }
               >
                 {t.activeThisWeek ? "Désactiver" : "Réactiver"}

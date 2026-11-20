@@ -214,7 +214,7 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                   </button>
                   <button
                     type="button"
-                    className="font-medium text-teal-800 underline"
+                    className="font-medium text-rouge-700 underline"
                     onClick={() => setCreatingFrom(g.key)}
                   >
                     Créer ce produit
@@ -282,7 +282,7 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
               key={c}
               type="button"
               onClick={() => setCategory(c)}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${category === c ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+              className={`rounded-full px-4 py-2 text-sm font-medium ${category === c ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
             >
               {c === "toutes" ? "Tous" : PRODUCT_CATEGORY_LABELS[c]}
             </button>
@@ -380,12 +380,12 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                   )}
                   <form action={action} className="flex flex-wrap gap-4">
                     <input type="hidden" name="productId" value={p.id} />
-                    <Link href={`/admin/produits/${p.id}`} className="text-sm font-medium text-teal-800 underline">
+                    <Link href={`/admin/produits/${p.id}`} className="text-sm font-medium text-rouge-700 underline">
                       Fiche : prix, colis, lieu
                     </Link>
                     <button
                       type="button"
-                      className="text-sm font-medium text-teal-800 underline"
+                      className="text-sm font-medium text-rouge-700 underline"
                       onClick={() => setEditing(p.id)}
                     >
                       Modifier
@@ -394,7 +394,7 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                       type="submit"
                       name="intent"
                       value={p.active ? "deactivate" : "activate"}
-                      className={`text-sm font-medium underline ${p.active ? "text-red-800" : "text-teal-800"}`}
+                      className={`text-sm font-medium underline ${p.active ? "text-red-800" : "text-rouge-700"}`}
                     >
                       {p.active ? "Désactiver" : "Réactiver"}
                     </button>

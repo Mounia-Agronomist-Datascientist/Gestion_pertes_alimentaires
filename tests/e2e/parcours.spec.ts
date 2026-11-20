@@ -12,10 +12,13 @@ const accounts = (): Record<"admin" | "equipeC" | "equipeA", Account> =>
 async function login(page: Page, who: keyof ReturnType<typeof accounts>) {
   const account = accounts()[who];
   await page.goto("/connexion");
+  // Logo de La Brigade de Véro : sur la page de connexion seulement.
+  await expect(page.getByRole("img", { name: "La Brigade de Véro" })).toBeVisible();
   await page.getByLabel("Identifiant").fill(account.login);
   await page.getByLabel("Mot de passe").fill(account.password);
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("img", { name: "La Brigade de Véro" })).toHaveCount(0);
 }
 
 /** Répond aux questions de la saisie, de la zone jusqu'au récapitulatif (produit hors liste, pesée). */

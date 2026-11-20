@@ -38,7 +38,7 @@ export function scopeNote(user: AuthUser, compareTeams: boolean): string | null 
 }
 
 const chip = (active: boolean) =>
-  `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-teal-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
+  `rounded-full px-4 py-2 text-sm font-medium ${active ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`;
 
 /** Onglets des statistiques (vue générale, par zone, par équipe). */
 export function StatsTabs({
@@ -416,7 +416,7 @@ export function BarTable({
           <div className="flex items-baseline justify-between gap-3">
             <span className="min-w-0">
               {r.href ? (
-                <Link href={r.href} className="font-medium text-teal-800 underline">
+                <Link href={r.href} className="font-medium text-rouge-700 underline">
                   {r.label}
                 </Link>
               ) : (
@@ -434,7 +434,7 @@ export function BarTable({
           </div>
           <div className="h-2.5 rounded-r bg-slate-100" aria-hidden>
             {r.value > 0 && (
-              <div className="h-2.5 rounded-r bg-teal-700" style={{ width: `${(r.value / max) * 100}%` }} />
+              <div className="h-2.5 rounded-r bg-brun-700" style={{ width: `${(r.value / max) * 100}%` }} />
             )}
           </div>
           {r.detail && <span className="text-xs text-slate-500">{r.detail}</span>}
@@ -626,7 +626,7 @@ function ZoneTile({ tile: t, previousLabel }: { tile: ZoneFlowTile; previousLabe
         : t.change > 0.005
           ? { text: `▲ hausse +${pct.format(t.change)}`, tone: "text-amber-800" }
           : t.change < -0.005
-            ? { text: `▼ baisse −${pct.format(-t.change)}`, tone: "text-teal-800" }
+            ? { text: `▼ baisse −${pct.format(-t.change)}`, tone: "text-rouge-700" }
             : { text: "= stable", tone: "text-slate-600" };
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-sm">
@@ -639,7 +639,7 @@ function ZoneTile({ tile: t, previousLabel }: { tile: ZoneFlowTile; previousLabe
         aria-valuenow={share}
         aria-label={`Part des kg perdus : ${share} %`}
       >
-        <div className="h-full rounded-full bg-teal-600" style={{ width: `${share}%` }} />
+        <div className="h-full rounded-full bg-rouge-500" style={{ width: `${share}%` }} />
       </div>
       <span className="text-sm text-slate-600">{share} % des kg perdus</span>
       <span className="text-2xl font-bold">{num.format(t.kg)} kg</span>
