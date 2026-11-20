@@ -115,7 +115,13 @@ export async function getDeclarationOptions(
       name: z.name,
       subzones: subzoneRows
         .filter((sz) => sz.zoneId === z.id)
-        .map((sz) => ({ id: sz.id, name: sz.name, description: sz.description, teamMode: sz.teamMode })),
+        .map((sz) => ({
+          id: sz.id,
+          code: sz.code,
+          name: sz.name,
+          description: sz.description,
+          teamMode: sz.teamMode,
+        })),
     }))
     .filter((z) => z.subzones.length > 0);
 

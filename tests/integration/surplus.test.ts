@@ -295,7 +295,7 @@ describe("ventes et dons des surplus (fichiers de l'entreprise)", () => {
     );
 
     const vi01Id = (await weekCatalogs(t.db, teamD, "2026-11-02"))[0]!.dishes.find((d) => d.code === "VI01")!.id;
-    const cuisine = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE")))[0]!.id;
+    const cuisine = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_DEBOITAGE")))[0]!.id;
     const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION")))[0]!.id;
     const input = (destinations: { destinationId: string; quantity: number }[]) => ({
       occurredOn: "2026-11-02",

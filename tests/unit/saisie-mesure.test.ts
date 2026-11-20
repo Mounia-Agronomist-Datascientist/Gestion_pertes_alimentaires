@@ -19,6 +19,15 @@ const ctx = (zoneCode: string, over: Partial<Parameters<typeof unitsFor>[1]> = {
 });
 
 describe("façons de mesurer selon le lieu et le produit (R25)", () => {
+  it("Cuisine/production : pesée seule (gastros), sauf au Déboîtage ; un consommable s'y compte", () => {
+    const poste = (subzoneCode: string, over = {}) => ctx("CUISINE", { subzoneCode, ...over });
+    expect(methodsFor(INPUT_METHODS, poste("CUI_CUISINE"))).toEqual(["pesee"]);
+    expect(unitsFor("estimation_manuelle", poste("CUI_PREP_FROIDE"))).toEqual([]);
+    expect(gastroTareAllowed(poste("CUI_CUISINE"))).toBe(true);
+    expect(methodsFor(INPUT_METHODS, poste("CUI_CUISINE", { isConsumable: true }))).toEqual(["comptage"]);
+    expect(methodsFor(INPUT_METHODS, poste("CUI_DEBOITAGE")).length).toBeGreaterThan(1);
+  });
+
   it("Réception et Stockage : kg, colis ; pièces seulement avec un poids connu ; ni gastros ni barquettes", () => {
     expect(unitsFor("comptage", ctx("RECEPTION"))).toEqual(["colis"]);
     expect(unitsFor("comptage", ctx("STOCKAGE", { pieceWeightKnown: true }))).toEqual(["piece", "colis"]);
@@ -58,10 +67,11 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
     ]);
   });
 
-  it("Cuisine : gastros et pièces, ni colis ni barquettes ; Conditionnement : barquettes et gastros", () => {
-    expect(unitsFor("comptage", ctx("CUISINE"))).toEqual(["piece", "contenant"]);
-    expect(unitsFor("estimation_contenant", ctx("CUISINE"))).toEqual(["gastro", "contenant"]);
-    expect(gastroTareAllowed(ctx("CUISINE"))).toBe(true);
+  it("Déboîtage : gastros et pièces, ni colis ni barquettes ; Conditionnement : barquettes et gastros", () => {
+    const deboitage = ctx("CUISINE", { subzoneCode: "CUI_DEBOITAGE" });
+    expect(unitsFor("comptage", deboitage)).toEqual(["piece", "contenant"]);
+    expect(unitsFor("estimation_contenant", deboitage)).toEqual(["gastro", "contenant"]);
+    expect(gastroTareAllowed(deboitage)).toBe(true);
     expect(unitsFor("comptage", ctx("CONDITIONNEMENT"))).toEqual(["piece", "barquette", "contenant"]);
     expect(unitsFor("comptage", ctx("PLONGE"))).toEqual(["piece"]);
     expect(methodsFor(INPUT_METHODS, ctx("PLONGE"))).not.toContain("estimation_contenant");

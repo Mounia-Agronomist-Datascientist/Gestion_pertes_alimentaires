@@ -267,6 +267,7 @@ async function prepareDeclaration(
   }
   const measureContext: MeasureContext = {
     zoneCode: place.zone.code,
+    subzoneCode: place.subzone.code,
     isConsumable,
     pieceWeightKnown: product.unitWeightKg != null,
     hasPackaging: packaging != null,

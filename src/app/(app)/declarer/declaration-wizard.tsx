@@ -265,6 +265,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const packagingKg = unitCode === "colis" ? parseNumber(packagingKgText) : null;
   const measureContext: MeasureContext = {
     zoneCode: zone?.code ?? "",
+    subzoneCode: subzone?.code ?? null,
     isConsumable,
     pieceWeightKnown: (product?.kind === "week" ? product.unitWeightKg : listedProduct?.unitWeightKg) != null,
     hasPackaging: productPackagings.length > 0,
@@ -801,6 +802,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           onChoose={(p) => {
             setProduct(p);
             setMethod(null);
+            setUseTare(false);
+            // Une seule façon de mesurer (pesée en Cuisine/production) : déjà choisie.
+            const ctx = { ...measureContext, isConsumable: isNonFoodCategory(p.category) };
+            const only = methodsFor(INPUT_METHODS, ctx);
+            if (only.length === 1) {
+              setMethod(only[0]!);
+              setUnitCode(unitsFor(only[0]!, ctx)[0] ?? null);
+            }
             setStep("quantity");
           }}
         />

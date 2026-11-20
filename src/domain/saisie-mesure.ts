@@ -5,7 +5,9 @@
  * - barquettes : seulement en Conditionnement ;
  * - colis fournisseur (« sachet de 3 kg ») : seulement en Réception et en Stockage ;
  * - en Réception et en Stockage, les pièces ne sont proposées que si le poids d'une pièce est connu (jamais une
- *   perte à 0 kg) ; un consommable se compte toujours en pièces.
+ *   perte à 0 kg) ; un consommable se compte toujours en pièces ;
+ * - en Cuisine/production, sauf au Déboîtage : pesée à la balance seulement, avec la tare des gastros (décision du
+ *   20/11/2026) ; un consommable, un moule ou un plat à gratin s'y compte toujours en pièces.
  */
 import type { InputMethod } from "@/modules/declarations/input";
 
@@ -15,6 +17,8 @@ export const PACKAGING_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"]
 
 export interface MeasureContext {
   zoneCode: string;
+  /** Poste (sous-zone) : le Déboîtage garde toutes les façons de mesurer. */
+  subzoneCode?: string | null;
   /** Consommable, emballage, moule : compté, jamais converti en kg alimentaires. */
   isConsumable: boolean;
   /** Poids d'une pièce connu pour ce produit. */
@@ -30,6 +34,14 @@ const BASE_UNITS: Record<InputMethod, readonly string[]> = {
   estimation_contenant: ["gastro", "contenant"],
   estimation_manuelle: ["kg", "g", "l", "ml", "piece", "colis", "barquette", "contenant", "gastro"],
 };
+
+/** Cuisine/production : pesée seule, sauf aux postes listés (décision du 20/11/2026). */
+const WEIGH_ONLY_ZONE_CODES: readonly string[] = ["CUISINE"];
+const WEIGH_ONLY_EXCEPT_SUBZONES: readonly string[] = ["CUI_DEBOITAGE"];
+
+/** Lieu où les denrées se pèsent seulement (les consommables s'y comptent). */
+export const weighOnly = (c: MeasureContext) =>
+  WEIGH_ONLY_ZONE_CODES.includes(c.zoneCode) && !WEIGH_ONLY_EXCEPT_SUBZONES.includes(c.subzoneCode ?? "");
 
 /** Zones où l'on n'utilise que le kg (ni g ni mL) : Réception et Stockage (décisions du 19/11/2026). */
 const KG_ONLY_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"];
@@ -59,6 +71,7 @@ function unitAllowed(code: string, c: MeasureContext): boolean {
 
 /** Unités proposées pour une façon de mesurer, dans ce lieu et pour ce produit. */
 export function unitsFor(method: InputMethod, c: MeasureContext): string[] {
+  if (weighOnly(c) && method !== (c.isConsumable ? "comptage" : "pesee")) return [];
   return BASE_UNITS[method].filter((u) => unitAllowed(u, c));
 }
 

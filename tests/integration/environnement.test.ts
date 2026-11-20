@@ -65,7 +65,7 @@ describe("CO2e des pertes", () => {
     });
     ref = {
       vi01: (await weekCatalogs(t.db, teamD, "2026-11-02"))[0]!.dishes.find((d) => d.code === "VI01")!.id,
-      cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE"))),
+      cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_DEBOITAGE"))),
       cause: await id(t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION"))),
       compost: await id(t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES"))),
       don: await id(t.db.select().from(s.destinations).where(eq(s.destinations.code, "DON"))),

@@ -280,11 +280,46 @@ describe("déclaration de perte", () => {
       expect(dest.map((d) => d.netKg).sort()).toEqual([1.4, 2.8]);
     });
 
+    it("Cuisine/production : pesée seule (gastros possibles), sauf au Déboîtage ; consommables comptés", async () => {
+      await expect(
+        createDeclaration(t.db, teamC, cuisine({ method: "estimation_manuelle", quantity: 2, unitCode: "kg" }), NOW),
+      ).rejects.toThrow(/Unité non proposée/);
+      await expect(
+        createDeclaration(
+          t.db,
+          teamC,
+          cuisine({
+            subzoneId: ref("sz:CUI_DEBOITAGE"),
+            method: "estimation_manuelle",
+            quantity: 2,
+            unitCode: "kg",
+            destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }],
+          }),
+          NOW,
+        ),
+      ).resolves.toBeTruthy();
+      await expect(
+        createDeclaration(
+          t.db,
+          teamC,
+          cuisine({
+            product: { freeLabel: "Film étirable", category: "consommable" },
+            method: "comptage",
+            quantity: 2,
+            unitCode: "piece",
+            destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }],
+          }),
+          NOW,
+        ),
+      ).resolves.toBeTruthy();
+    });
+
     it("convertit les litres avec la densité, jamais 1 L = 1 kg", async () => {
       const withDensity = await createDeclaration(
         t.db,
         teamC,
         cuisine({
+          subzoneId: ref("sz:CUI_DEBOITAGE"),
           product: { productId: ref("product:T-SAUCE") },
           method: "estimation_manuelle",
           quantity: 2,
@@ -298,6 +333,7 @@ describe("déclaration de perte", () => {
         t.db,
         teamC,
         cuisine({
+          subzoneId: ref("sz:CUI_DEBOITAGE"),
           product: { freeLabel: "Jus inconnu", category: "matiere_premiere" },
           method: "estimation_manuelle",
           quantity: 2,
@@ -667,7 +703,7 @@ describe("déclaration groupée", () => {
 
   const line = (quantity: number, causeCode = "ERREUR_PREPARATION") => ({
     occurredOn: "2026-11-12",
-    subzoneId: ref["sz:CUI_CUISINE"],
+    subzoneId: ref["sz:CUI_DEBOITAGE"],
     product: { freeLabel: "Produit test", category: "sous_recette" },
     method: "pesee",
     quantity,

@@ -65,7 +65,7 @@ describe("lecture des pertes pour les statistiques", () => {
       planSheetName: "S45",
     });
     const vi01 = (await weekCatalogs(t.db, teamD, "2026-11-02"))[0]!.dishes.find((d) => d.code === "VI01")!.id;
-    const cuisine = await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE")));
+    const cuisine = await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_DEBOITAGE")));
     const cause = await id(t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION")));
     const dest = (code: string) => id(t.db.select().from(s.destinations).where(eq(s.destinations.code, code)));
     const tgtg = await dest("TGTG");

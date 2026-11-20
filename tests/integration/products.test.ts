@@ -30,7 +30,7 @@ describe("référentiel des produits", () => {
     t = await createTestDb();
     await seed(t.db);
     const teamC = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "C")))[0]!.id;
-    cuisine = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE")))[0]!.id;
+    cuisine = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_DEBOITAGE")))[0]!.id;
     cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION")))[0]!.id;
     compost = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
     admin = await loadAuthUser(

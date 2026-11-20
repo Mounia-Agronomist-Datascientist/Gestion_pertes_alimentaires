@@ -57,7 +57,7 @@ describe("saisie à partir des produits de la semaine", () => {
       planSheetName: "S45",
     });
     ref = {
-      cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_CUISINE"))),
+      cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_DEBOITAGE"))),
       conditionnement: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CON_BARQUETTES"))),
       cause: await id(t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION"))),
       condCause: await id(t.db.select().from(s.causes).where(eq(s.causes.code, "CON_SCELLAGE"))),
