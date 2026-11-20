@@ -190,7 +190,10 @@ async function weekly(
     pdf.bars(bars(data.byCause));
   }
   if (data.byProduct.length) {
-    pdf.heading("Produits qui pèsent le plus", barsHeight(data.byProduct.length));
+    pdf.heading(
+      inEuros ? "Produits qui ont le plus gros impact économique" : "Produits les plus perdus en poids",
+      barsHeight(data.byProduct.length),
+    );
     pdf.bars(bars(data.byProduct));
   }
   const trends = data.comparison.trends;
@@ -328,7 +331,10 @@ async function periodic(
     );
   }
   if (products.rows.length) {
-    pdf.heading("Produits qui pèsent le plus", barsHeight(products.rows.length));
+    pdf.heading(
+      by === "cout" ? "Produits qui ont le plus gros impact économique" : "Produits les plus perdus en poids",
+      barsHeight(products.rows.length),
+    );
     pdf.bars(
       products.rows.slice(0, 10).map((p) => ({
         label: p.label,
@@ -628,7 +634,7 @@ async function environment(
     pdf.bars(co2Bars(data.byDestination));
   }
   if (data.byProduct.length) {
-    pdf.heading("Produits qui pèsent le plus", barsHeight(data.byProduct.length));
+    pdf.heading("Produits au plus fort impact carbone", barsHeight(data.byProduct.length));
     pdf.bars(co2Bars(data.byProduct.slice(0, 10)));
   }
   if (data.series.length) {

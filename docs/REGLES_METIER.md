@@ -437,6 +437,11 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - **Légende toujours écrite** : nom, valeur (kg, €, kg CO2e ou nombre de pertes) et part. Au survol, au toucher ou
   au clavier, la part est mise en avant et son détail s'affiche (nombre de pertes, coût, évolution…). La liste
   complète s'ouvre avec « Voir le détail ».
+- **Synthèse de la semaine** : zones, causes et produits en **deux anneaux**, en euros (« impact économique », dont
+  « Produits qui ont le plus gros impact économique ») et en kg (« poids perdu », « Produits les plus perdus en
+  poids ») ; un même élément garde la même couleur dans les deux anneaux. Sans droit aux coûts, seulement les kg.
+- **Zones en logigramme vertical**, de haut en bas dans le sens de la marche en avant (1. Réception → 5. Plonge),
+  dans les statistiques, la synthèse et le choix de la zone à la saisie.
 - **Impression** : texte plus petit, pleine largeur de la page, sans onglets, filtres ni listes repliées ; une carte,
   un graphique, une tuile ou une ligne de tableau n'est jamais coupée, un titre reste avec ce qui le suit ; les
   cartes à plusieurs graphiques (« Semaine après semaine ») peuvent continuer sur la page suivante entre deux

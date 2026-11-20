@@ -453,18 +453,27 @@ export function ShareChart({
   caption,
   unit,
   keepOrder,
+  colorOrder,
   detailLimit = 30,
 }: {
   rows: BarRow[];
   caption: string;
   unit: DonutUnit;
   keepOrder?: boolean;
+  colorOrder?: readonly string[];
   detailLimit?: number;
 }) {
   const total = rows.reduce((a, r) => a + Math.max(0, r.value), 0);
   const totalText = formatDonutValue(unit, total);
   return (
-    <ShareDonut rows={rows} caption={caption} unit={unit} keepOrder={keepOrder} totalText={totalText}>
+    <ShareDonut
+      rows={rows}
+      caption={caption}
+      unit={unit}
+      keepOrder={keepOrder}
+      colorOrder={colorOrder}
+      totalText={totalText}
+    >
       {rows.length > 1 && (
         <>
           <BarTable caption={caption} rows={rows.slice(0, detailLimit)} />
@@ -585,24 +594,25 @@ export function SupplierReturns({ summary, withCosts }: { summary: StatsSummary;
  * Une case par zone dans le sens de la marche en avant (décision du 18/11/2026) : jauge = part de la zone dans les
  * kg perdus, coût brut, kg, évolution des kg par rapport à la période précédente.
  */
+/**
+ * Pertes par zone en logigramme vertical, de haut en bas dans le sens de la marche en avant (décision du 20/11/2026) :
+ * une étape par zone, reliées par une flèche.
+ */
 export function ZoneFlow({ tiles, previousLabel }: { tiles: ZoneFlowTile[]; previousLabel: string | null }) {
   if (tiles.length === 0) return null;
   return (
     <section className="flex flex-col gap-2" aria-label="Pertes par zone, dans le sens de la marche en avant">
       <h2 className="text-lg font-semibold">Pertes par zone, dans le sens de la marche en avant</h2>
-      <ol className="flex flex-col gap-1 lg:flex-row lg:items-stretch lg:gap-0 print:flex-row print:items-stretch print:gap-0">
+      <ol className="flex flex-col items-stretch">
         {tiles.map((t, i) => (
-          <li
-            key={t.zoneId}
-            className="flex min-w-0 flex-col items-stretch lg:flex-1 lg:flex-row lg:items-center print:flex-1 print:flex-row print:items-center"
-          >
+          <li key={t.zoneId} className="flex flex-col items-stretch">
             {i > 0 && (
-              <span aria-hidden className="self-center px-1 text-xl text-slate-400 lg:py-0 print:py-0">
-                <span className="lg:hidden print:hidden">↓</span>
-                <span className="hidden lg:inline print:inline">→</span>
+              <span aria-hidden className="flex h-6 flex-col items-center print:h-4">
+                <span className="w-0.5 flex-1 bg-brun-100" />
+                <span className="-mt-1.5 text-sm leading-none text-brun-600">▼</span>
               </span>
             )}
-            <ZoneTile tile={t} previousLabel={previousLabel} />
+            <ZoneTile tile={t} previousLabel={previousLabel} step={i + 1} />
           </li>
         ))}
       </ol>
@@ -614,7 +624,15 @@ export function ZoneFlow({ tiles, previousLabel }: { tiles: ZoneFlowTile[]; prev
   );
 }
 
-function ZoneTile({ tile: t, previousLabel }: { tile: ZoneFlowTile; previousLabel: string | null }) {
+function ZoneTile({
+  tile: t,
+  previousLabel,
+  step,
+}: {
+  tile: ZoneFlowTile;
+  previousLabel: string | null;
+  step: number;
+}) {
   const share = Math.round(t.share * 100);
   const change =
     t.previousKg == null
@@ -626,42 +644,55 @@ function ZoneTile({ tile: t, previousLabel }: { tile: ZoneFlowTile; previousLabe
         : t.change > 0.005
           ? { text: `▲ hausse +${pct.format(t.change)}`, tone: "text-amber-800" }
           : t.change < -0.005
-            ? { text: `▼ baisse −${pct.format(-t.change)}`, tone: "text-rouge-700" }
+            ? { text: `▼ baisse −${pct.format(-t.change)}`, tone: "text-emerald-800" }
             : { text: "= stable", tone: "text-slate-600" };
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-2xl bg-white p-3 shadow-sm">
-      <span className="font-semibold">{t.name}</span>
-      <div
-        className="h-3 w-full overflow-hidden rounded-full bg-slate-100"
-        role="meter"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={share}
-        aria-label={`Part des kg perdus : ${share} %`}
+    <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 rounded-2xl bg-white p-3 shadow-sm sm:grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)] print:grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)] print:py-2">
+      <span
+        aria-hidden
+        className="row-span-2 flex size-9 items-center justify-center rounded-full bg-brun-700 text-sm font-bold text-white sm:row-span-1"
       >
-        <div className="h-full rounded-full bg-rouge-500" style={{ width: `${share}%` }} />
+        {step}
+      </span>
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="font-semibold">{t.name}</span>
+        <div
+          className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100"
+          role="meter"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={share}
+          aria-label={`Part des kg perdus : ${share} %`}
+        >
+          <div className="h-full rounded-full bg-rouge-500" style={{ width: `${share}%` }} />
+        </div>
+        <span className="text-xs text-slate-600">{share} % des kg perdus</span>
       </div>
-      <span className="text-sm text-slate-600">{share} % des kg perdus</span>
-      <span className="text-2xl font-bold">{num.format(t.kg)} kg</span>
-      {t.grossEur != null && <span className="text-lg font-semibold text-slate-700">{euro.format(t.grossEur)}</span>}
-      {change && (
-        <span className={`text-sm font-medium ${change.tone}`}>
-          {change.text}
-          {previousLabel && <span className="font-normal text-slate-500"> vs {previousLabel}</span>}
+      <div className="col-start-2 flex min-w-0 flex-col gap-0.5 sm:col-start-3 sm:items-end sm:text-right print:col-start-3 print:items-end print:text-right">
+        <span className="flex flex-wrap items-baseline gap-x-2 sm:justify-end">
+          <span className="text-xl font-bold tabular-nums">{num.format(t.kg)} kg</span>
+          {t.grossEur != null && (
+            <span className="font-semibold text-slate-700 tabular-nums">{euro.format(t.grossEur)}</span>
+          )}
         </span>
-      )}
-      {t.returned && (
-        <span className="text-sm text-slate-600">
-          + retours fournisseur : {num.format(t.returned.kg)} kg
-          {t.returned.grossEur != null && ` · ${euro.format(t.returned.grossEur)}`}
-          <span className="block text-xs text-slate-500">hors pertes (avoir attendu)</span>
-        </span>
-      )}
-      {t.notConverted > 0 && (
-        <span className="text-xs text-amber-800">
-          + {t.notConverted} perte{t.notConverted > 1 ? "s" : ""} non convertie{t.notConverted > 1 ? "s" : ""} en kg
-        </span>
-      )}
+        {change && (
+          <span className={`text-sm font-medium ${change.tone}`}>
+            {change.text}
+            {previousLabel && <span className="font-normal text-slate-500"> vs {previousLabel}</span>}
+          </span>
+        )}
+        {t.returned && (
+          <span className="text-xs text-slate-600">
+            + retours fournisseur : {num.format(t.returned.kg)} kg
+            {t.returned.grossEur != null && ` · ${euro.format(t.returned.grossEur)}`} (hors pertes, avoir attendu)
+          </span>
+        )}
+        {t.notConverted > 0 && (
+          <span className="text-xs text-amber-800">
+            + {t.notConverted} perte{t.notConverted > 1 ? "s" : ""} non convertie{t.notConverted > 1 ? "s" : ""} en kg
+          </span>
+        )}
+      </div>
     </div>
   );
 }

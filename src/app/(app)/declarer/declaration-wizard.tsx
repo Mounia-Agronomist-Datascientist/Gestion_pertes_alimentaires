@@ -719,21 +719,25 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
       {step === "zone" && (
         <Section title="Où a eu lieu la perte ?">
-          <TileGrid>
-            {options.zones.map((z) => (
-              <Tile
-                key={z.id}
-                onClick={() => chooseZone(z.id)}
-                selected={z.id === zoneId}
-                disabled={z.allowed === false}
-              >
-                {z.number ? `${z.number}. ` : ""}
-                {z.name}
-                {z.id === lastZoneId && <small className="font-normal opacity-80">Dernière utilisée</small>}
-                {z.allowed === false && <small className="font-normal">Pas dans vos zones</small>}
-              </Tile>
+          {/* Logigramme de haut en bas, dans le sens de la marche en avant (décision du 20/11/2026). */}
+          <ol className="flex flex-col items-stretch" aria-label="Zones, dans le sens de la marche en avant">
+            {options.zones.map((z, i) => (
+              <li key={z.id} className="flex flex-col items-stretch">
+                {i > 0 && (
+                  <span aria-hidden className="flex h-5 flex-col items-center">
+                    <span className="w-0.5 flex-1 bg-brun-100" />
+                    <span className="-mt-1.5 text-sm leading-none text-brun-600">▼</span>
+                  </span>
+                )}
+                <Tile onClick={() => chooseZone(z.id)} selected={z.id === zoneId} disabled={z.allowed === false}>
+                  {z.number ? `${z.number}. ` : ""}
+                  {z.name}
+                  {z.id === lastZoneId && <small className="font-normal opacity-80">Dernière utilisée</small>}
+                  {z.allowed === false && <small className="font-normal">Pas dans vos zones</small>}
+                </Tile>
+              </li>
             ))}
-          </TileGrid>
+          </ol>
         </Section>
       )}
 

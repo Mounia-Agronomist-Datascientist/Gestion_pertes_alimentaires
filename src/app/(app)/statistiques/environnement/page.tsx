@@ -198,7 +198,7 @@ export default async function EnvironmentPage({ searchParams }: { searchParams: 
         </Card>
       )}
       {data.byProduct.length > 0 && (
-        <Card title="Produits qui pèsent le plus">
+        <Card title="Produits au plus fort impact carbone">
           <Co2Bars groups={data.byProduct} caption="CO2e par produit" />
         </Card>
       )}

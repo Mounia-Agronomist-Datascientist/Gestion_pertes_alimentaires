@@ -11,7 +11,7 @@ import { ColumnChart } from "../evolution/column-chart";
 import { TrendTable } from "../evolution/trend-table";
 import {
   SupplierReturns,
-  BarTable,
+  ShareChart,
   Card,
   euro,
   FilterForm,
@@ -26,7 +26,6 @@ import {
   SummaryTiles,
   ZoneFlow,
 } from "../shared";
-import { ShareDonut } from "../share-donut";
 import { PrintButton } from "./print-button";
 
 export const metadata = { title: "Synthèse de la semaine — Pertes" };
@@ -50,29 +49,33 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
   const note = scopeNote(user, ctx.compareTeams);
   const previousLabel = data.previousPeriod ? periodLabel(data.previousPeriod) : null;
   const inEuros = data.by === "cout";
-  const unit = inEuros ? "€" : "kg";
   const fmtValue = (v: number) => (inEuros ? euro.format(v) : `${num.format(v)} kg`);
   const exportHref = (format: "csv" | "xlsx", tableau?: string) =>
     `/statistiques/export?${new URLSearchParams({ ...periodParams(anchor), ...ctx.filterParams, onglet: "synthese", format, ...(tableau ? { tableau } : {}) })}`;
-  const rows = (list: WeeklyRow[], limit: number) =>
-    list.slice(0, limit).map((r) => ({
-      key: r.key,
-      label: r.label,
-      value: r.value,
-      text: fmtValue(r.value),
-      detail: [
-        `${r.summary.events} perte${r.summary.events > 1 ? "s" : ""}`,
-        inEuros && r.summary.foodKg > 0 ? `${num.format(r.summary.foodKg)} kg` : null,
-        !inEuros && r.summary.cost && r.summary.cost.grossEur > 0 ? euro.format(r.summary.cost.grossEur) : null,
-        previousLabel
-          ? r.previous > 0
-            ? `${r.delta > 0 ? "▲ +" : r.delta < 0 ? "▼ −" : "= "}${fmtValue(Math.abs(r.delta))} vs ${previousLabel}`
-            : `nouveau vs ${previousLabel}`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
-    }));
+  // Répartition en euros ou en kg (décision du 20/11/2026 : les deux dans la synthèse) ; l'évolution n'est connue que
+  // dans l'unité du classement.
+  const measureRows = (list: WeeklyRow[], m: "cout" | "kg") =>
+    list.map((r) => {
+      const eur = r.summary.cost?.grossEur ?? 0;
+      const kg = r.summary.foodKg;
+      return {
+        key: r.key,
+        label: r.label,
+        value: m === "cout" ? eur : kg,
+        text: m === "cout" ? euro.format(eur) : `${num.format(kg)} kg`,
+        detail: [
+          `${r.summary.events} perte${r.summary.events > 1 ? "s" : ""}`,
+          m === "cout" ? (kg > 0 ? `${num.format(kg)} kg` : null) : withCosts && eur > 0 ? euro.format(eur) : null,
+          previousLabel && (m === "cout") === inEuros
+            ? r.previous > 0
+              ? `${r.delta > 0 ? "▲ +" : r.delta < 0 ? "▼ −" : "= "}${fmtValue(Math.abs(r.delta))} vs ${previousLabel}`
+              : `nouveau vs ${previousLabel}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      };
+    });
   const series = comparison.series;
   const weekLabel = (n: number) => `S${String(n).padStart(2, "0")}`;
 
@@ -153,42 +156,58 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         </p>
       </Card>
 
-      {data.byZone.length > 0 && (
-        <Card title="Par zone">
-          <ShareDonut
-            caption={`Pertes par zone (${unit})`}
-            rows={rows(data.byZone, Infinity)}
-            totalText={fmtValue(data.byZone.reduce((a, r) => a + r.value, 0))}
-            unit={inEuros ? "euro" : "kg"}
-          >
-            <BarTable caption={`Pertes par zone (${unit})`} rows={rows(data.byZone, 30)} />
-          </ShareDonut>
-        </Card>
-      )}
-      {data.byCause.length > 0 && (
-        <Card title="Par cause">
-          <ShareDonut
-            caption={`Pertes par cause (${unit})`}
-            rows={rows(data.byCause, Infinity)}
-            totalText={fmtValue(data.byCause.reduce((a, r) => a + r.value, 0))}
-            unit={inEuros ? "euro" : "kg"}
-          >
-            <BarTable caption={`Pertes par cause (${unit})`} rows={rows(data.byCause, 30)} />
-          </ShareDonut>
-        </Card>
-      )}
-      {data.byProduct.length > 0 && (
-        <Card title="Produits qui pèsent le plus">
-          <ShareDonut
-            caption={`Pertes par produit (${unit})`}
-            rows={rows(data.byProduct, Infinity)}
-            totalText={fmtValue(data.byProduct.reduce((a, r) => a + r.value, 0))}
-            unit={inEuros ? "euro" : "kg"}
-          >
-            <BarTable caption={`Pertes par produit (${unit})`} rows={rows(data.byProduct, 30)} />
-          </ShareDonut>
-        </Card>
-      )}
+      {(
+        [
+          ["Par zone", data.byZone, "Impact économique (€)", "Poids perdu (kg)"],
+          ["Par cause", data.byCause, "Impact économique (€)", "Poids perdu (kg)"],
+          [
+            "Par produit",
+            data.byProduct,
+            "Produits qui ont le plus gros impact économique (€)",
+            "Produits les plus perdus en poids (kg)",
+          ],
+        ] as const
+      )
+        .filter(([, list]) => list.length > 0)
+        .map(([title, list, euroTitle, kgTitle]) => {
+          // Mêmes couleurs dans les deux anneaux : zones dans le sens de la marche en avant, sinon les plus grosses
+          // parts du classement de la semaine.
+          const colorOrder =
+            title === "Par zone"
+              ? data.zoneFlow.map((z) => z.zoneId)
+              : [...list].sort((a, b) => b.value - a.value).map((r) => r.key);
+          const rowsOf = (m: "cout" | "kg") =>
+            measureRows(
+              title === "Par zone"
+                ? [...list].sort((a, b) => colorOrder.indexOf(a.key) - colorOrder.indexOf(b.key))
+                : list,
+              m,
+            );
+          return (
+            <Card key={title} title={title}>
+              {withCosts && (
+                <>
+                  <h3 className="font-semibold">{euroTitle}</h3>
+                  <ShareChart
+                    unit="euro"
+                    caption={`${title} — ${euroTitle}`}
+                    rows={rowsOf("cout")}
+                    colorOrder={colorOrder}
+                    keepOrder={title === "Par zone"}
+                  />
+                </>
+              )}
+              <h3 className="font-semibold">{kgTitle}</h3>
+              <ShareChart
+                unit="kg"
+                caption={`${title} — ${kgTitle}`}
+                rows={rowsOf("kg")}
+                colorOrder={colorOrder}
+                keepOrder={title === "Par zone"}
+              />
+            </Card>
+          );
+        })}
 
       <Card title="Tendance sur 8 semaines">
         <TrendTable trends={comparison.trends} stableRate={comparison.trendStableRate} />

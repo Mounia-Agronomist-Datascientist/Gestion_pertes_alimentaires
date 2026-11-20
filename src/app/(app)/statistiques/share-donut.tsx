@@ -35,14 +35,25 @@ interface Slice extends DonutRow {
 }
 
 /** Parts affichées : les 6 plus grandes (ou dans l'ordre donné), le reste regroupé. */
-function slicesOf(rows: DonutRow[], keepOrder: boolean, unit: DonutUnit, total: number): Slice[] {
+function slicesOf(
+  rows: DonutRow[],
+  keepOrder: boolean,
+  unit: DonutUnit,
+  total: number,
+  colorOrder: readonly string[] | undefined,
+): Slice[] {
   const positive = rows.filter((r) => r.value > 0);
   const ordered = keepOrder ? positive : [...positive].sort((a, b) => b.value - a.value);
   const shown = ordered.slice(0, MAX_SLICES);
   const rest = ordered.slice(shown.length);
-  const slices: Slice[] = shown.map((r, i) => ({
+  // Couleur fixée par élément (la même zone a la même couleur dans deux anneaux voisins) ; les autres parts prennent
+  // les couleurs restantes, dans l'ordre.
+  const fixed = new Map((colorOrder ?? []).slice(0, COLORS.length).map((k, i) => [k, COLORS[i]!]));
+  const taken = new Set(shown.map((r) => fixed.get(r.key)).filter(Boolean));
+  const pool = COLORS.filter((c) => !taken.has(c));
+  const slices: Slice[] = shown.map((r) => ({
     ...r,
-    color: COLORS[i % COLORS.length]!,
+    color: fixed.get(r.key) ?? pool.shift() ?? OTHER_COLOR,
     share: total > 0 ? r.value / total : 0,
   }));
   const restValue = rest.reduce((a, r) => a + r.value, 0);
@@ -86,6 +97,7 @@ export function ShareDonut({
   totalText,
   unit,
   keepOrder = false,
+  colorOrder,
   children,
 }: {
   rows: DonutRow[];
@@ -96,13 +108,15 @@ export function ShareDonut({
   unit: DonutUnit;
   /** Garder l'ordre donné (zones dans le sens de la marche en avant, devenirs) plutôt que du plus grand au plus petit. */
   keepOrder?: boolean;
+  /** Clés dans l'ordre des couleurs : la même couleur pour le même élément d'un anneau à l'autre. */
+  colorOrder?: readonly string[];
   /** Liste complète, ouverte par « Voir le détail » (jamais imprimée). */
   children?: React.ReactNode;
 }) {
   const [active, setActive] = useState<string | null>(null);
   const total = rows.reduce((a, r) => a + Math.max(0, r.value), 0);
   if (total <= 0) return <p className="text-slate-600">Aucune quantité sur cette période.</p>;
-  const slices = slicesOf(rows, keepOrder, unit, total);
+  const slices = slicesOf(rows, keepOrder, unit, total, colorOrder);
   const current = slices.find((s) => s.key === active) ?? null;
 
   const size = 180;
