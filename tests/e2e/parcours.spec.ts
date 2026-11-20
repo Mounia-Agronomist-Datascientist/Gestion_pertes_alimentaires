@@ -21,7 +21,7 @@ async function login(page: Page, who: keyof ReturnType<typeof accounts>) {
 /** Répond aux questions de la saisie, de la zone jusqu'au récapitulatif (produit hors liste, pesée). */
 async function fillLoss(page: Page, product: string, kg: string, from: "zone" | "product" = "zone") {
   if (from === "zone") {
-    await page.getByRole("button", { name: /^Cuisine \/ Production/ }).click();
+    await page.getByRole("button", { name: /Cuisine \/ Production/ }).click();
     await page.getByRole("button", { name: /^Cuisine(?! \/)/ }).click();
   }
   await page.getByRole("button", { name: "Produit absent de la liste" }).click();
@@ -86,7 +86,7 @@ test("une équipe ne voit pas les pertes d'une autre équipe ni l'administration
   await expect(page).toHaveURL(/\/$/);
   // Too Good To Go, vente flash et Linkee ne sont plus proposés aux équipes.
   await page.goto("/declarer");
-  await page.getByRole("button", { name: /^Cuisine \/ Production/ }).click();
+  await page.getByRole("button", { name: /Cuisine \/ Production/ }).click();
   await page.getByRole("button", { name: /^Cuisine(?! \/)/ }).click();
   await page.getByRole("button", { name: "Produit absent de la liste" }).click();
   await page.getByLabel("Nom du produit").fill("Navets");
