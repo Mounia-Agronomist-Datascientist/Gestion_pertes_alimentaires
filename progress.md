@@ -45,7 +45,7 @@ Dernière mise à jour : **18/11/2026** — dernier commit : `Saisie par lieu (c
 
 - **Mise en ligne en attente** : crédits Netlify épuisés jusqu'au **08/12/2026**. Ensuite, dans l'ordre et après
   une sauvegarde : migrations 0014 à 0032 → « Compléter depuis les tomes importés » (Administration → Produits)
-  → dépôt du ZIP des bons de commande ([docs/pilote/PLAN_PILOTE.md](docs/pilote/PLAN_PILOTE.md)).
+  → réimport des semaines dont le tome a été importé avant le 19/11 10 h (composition des plats manquante) → dépôt du ZIP des bons de commande ([docs/pilote/PLAN_PILOTE.md](docs/pilote/PLAN_PILOTE.md)).
 - **Lieux de stockage des matières** : les 20 catégories Melba sont rangées en local (18/11) ; à refaire en ligne
   après la mise en ligne et le dépôt des bons (Administration → Lieux de stockage des matières).
 - **Essai pilote** avec les équipes : préparé (docs/pilote/), pas encore lancé.

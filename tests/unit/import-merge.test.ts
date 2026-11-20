@@ -30,6 +30,19 @@ describe("rapprochement du tome et du plan S45", () => {
     );
   });
 
+  it("composition des plats non lue : refusée si aucun plat n'en a, signalée sinon", () => {
+    const none = structuredClone(tome);
+    for (const r of none.recipes) r.lines = [];
+    expect(buildWeekImport(none, parsePlan("S45", s45PlanGrid())).errors).toEqual([
+      "La composition des plats n'a pas été lue dans le tome (format non reconnu) : rien n'est enregistré, signalez-le",
+    ]);
+    const one = structuredClone(tome);
+    one.recipes.find((r) => r.code === "VI01")!.lines = [];
+    expect(buildWeekImport(one, parsePlan("S45", s45PlanGrid())).warnings).toEqual([
+      "Plats sans composition lue dans le tome : VI01",
+    ]);
+  });
+
   it("signale une portion de plat en dehors de 300–380 g, pas celle d'un petit-déjeuner", () => {
     const light = structuredClone(tome);
     light.recipes.find((r) => r.code === "VI01")!.portionWeightG = 250;

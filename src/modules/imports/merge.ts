@@ -61,6 +61,13 @@ export function buildWeekImport(tome: TomeParseResult, plan: PlanParseResult): W
     errors.push(`Le tome est celui de la semaine ${week}, l'onglet du plan celui de la semaine ${plan.week}`);
   }
   if (plan.groups.length === 0) errors.push("Aucun plat lu dans l'onglet du plan de production");
+  // Composition des plats (ingrédients, sous-recettes) : sans elle, on ne peut déclarer que le plat entier.
+  const empty = tome.recipes.filter((r) => r.lines.length === 0).map((r) => r.code);
+  if (tome.recipes.length > 0 && empty.length === tome.recipes.length)
+    errors.push(
+      "La composition des plats n'a pas été lue dans le tome (format non reconnu) : rien n'est enregistré, signalez-le",
+    );
+  else if (empty.length) warnings.push(`Plats sans composition lue dans le tome : ${empty.join(", ")}`);
 
   const groupOf = new Map(plan.groups.flatMap((g) => g.codes.map((code) => [code, g] as const)));
   const volumeOf = new Map(plan.volumes.map((v) => [v.code, v]));
