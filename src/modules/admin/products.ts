@@ -35,6 +35,8 @@ const productSchema = z.object({
   category: z.enum(PRODUCT_CATEGORIES, { message: "Choisissez le type de produit" }),
   code: optionalText(40),
   variant: optionalText(120),
+  /** Famille d'un encas (« Fromages »…), pour ranger la liste des encas à la saisie. */
+  snackFamily: optionalText(80),
   defaultUnit: z.string().min(1, "Choisissez l'unité"),
   unitWeightKg: optionalPositive,
   densityKgPerL: optionalPositive,

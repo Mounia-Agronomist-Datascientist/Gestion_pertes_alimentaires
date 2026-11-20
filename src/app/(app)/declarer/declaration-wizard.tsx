@@ -1774,9 +1774,18 @@ function ProductStep({
 
   // ─── Accueil de l'étape : produits de la semaine, recherche, hors liste ───
   const term = search.trim().toLowerCase();
+  // Encas (règle R9) : seulement en conditionnement, réception et stockage.
+  const offered = showSnacks ? products : products.filter((p) => p.category !== "produit_externe");
   const listedMatches = term
-    ? products.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term)))
+    ? offered.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term)))
     : [];
+  const snackList = showSnacks ? (
+    <SnackList
+      snacks={products.filter((p) => p.category === "produit_externe")}
+      supplierOf={supplierOf}
+      onChoose={(p) => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}
+    />
+  ) : null;
   const weekMatches = term.length >= 2 && catalog ? searchWeek(catalog, dishes, term) : [];
 
   return (
@@ -1901,6 +1910,7 @@ function ProductStep({
               </div>
             </>
           )}
+          {snackList}
           <p className="text-sm text-slate-600">Une autre matière : recherchez-la par son nom.</p>
         </>
       ) : hasWeek ? (
@@ -1939,10 +1949,12 @@ function ProductStep({
               </Tile>
             ))}
           </div>
+          {snackList}
         </>
       ) : (
         <div className="flex flex-col gap-2">
-          {products.slice(0, 30).map((p) => (
+          {snackList}
+          {offered.slice(0, 30).map((p) => (
             <Tile
               key={p.id}
               compact
@@ -1956,7 +1968,7 @@ function ProductStep({
               </small>
             </Tile>
           ))}
-          {products.length === 0 && (
+          {offered.length === 0 && (
             <p className="text-slate-500">
               {dishScope && !catalog ? "Les plats de la semaine ne sont pas encore importés : " : ""}recherchez le
               produit ou saisissez son nom.
@@ -1965,6 +1977,52 @@ function ProductStep({
         </div>
       )}
     </Section>
+  );
+}
+
+/**
+ * Tous les encas, quelle que soit la semaine (décision du 20/11/2026) : ils restent longtemps en stock. Rangés par
+ * famille, chaque famille repliée.
+ */
+function SnackList({
+  snacks,
+  supplierOf,
+  onChoose,
+}: {
+  snacks: DeclarationOptions["products"];
+  supplierOf: (productId: string) => string | null;
+  onChoose: (p: DeclarationOptions["products"][number]) => void;
+}) {
+  if (!snacks.length) return null;
+  const families = new Map<string, typeof snacks>();
+  for (const p of snacks) {
+    const f = p.snackFamily ?? "";
+    families.set(f, [...(families.get(f) ?? []), p]);
+  }
+  const ordered = [...families].sort(([a], [b]) => (a === "" ? 1 : b === "" ? -1 : a.localeCompare(b, "fr")));
+  const grams = (kg: number | null) =>
+    kg == null ? null : `${(kg * 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} g`;
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="font-medium text-slate-700">Tous les encas ({snacks.length})</p>
+      {ordered.map(([family, list]) => (
+        <details key={family || "-"} className="rounded-xl bg-white p-3 shadow-sm">
+          <summary className="cursor-pointer font-medium text-slate-700">
+            {family || "Autres encas"} ({list.length})
+          </summary>
+          <div className="mt-2 flex flex-col gap-2">
+            {list.map((p) => (
+              <Tile key={p.id} compact onClick={() => onChoose(p)}>
+                {p.name}
+                {(supplierOf(p.id) ?? grams(p.unitWeightKg)) && (
+                  <small className="font-normal text-slate-500">{supplierOf(p.id) ?? grams(p.unitWeightKg)}</small>
+                )}
+              </Tile>
+            ))}
+          </div>
+        </details>
+      ))}
+    </div>
   );
 }
 

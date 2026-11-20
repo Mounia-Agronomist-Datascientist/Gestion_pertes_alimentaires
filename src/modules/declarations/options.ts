@@ -203,6 +203,7 @@ export async function getDeclarationOptions(
       category: p.category,
       unitWeightKg: p.unitWeightKg,
       densityKgPerL: p.densityKgPerL,
+      snackFamily: p.snackFamily,
     })),
   };
 }

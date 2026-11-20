@@ -347,6 +347,20 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   saisie) : le coût est recalculé au prix du produit en vigueur à la date de chaque perte ; sans prix du produit, le
   prix indiqué est gardé.
 
+
+## R29 — Liste des encas, quelle que soit la semaine (Phase 6, 20/11/2026)
+
+- Les encas restent longtemps en stock : en **Réception, Stockage et Conditionnement** (règle R9), l'étape « Quel
+  produit ? » propose, après les encas de la semaine du tome, **« Tous les encas »**, rangés par famille (Fromages,
+  Crackers, Yaourts…). Ailleurs, un encas n'est ni proposé ni accepté par le serveur.
+- Liste de départ : les 99 encas commandés en 2026 (relevé du 20/11/2026), avec leur prix d'achat HT daté du jour
+  de livraison (une version à chaque changement de prix) et le poids d'une unité quand le bon le donne
+  (migration 0032). Une pièce = l'unité du prix du bon (sachet, pot, assiette, lot de 4 yaourts…).
+- Nouveaux encas : une ligne de bon de commande classée **« ENCAS »** par Melba crée un encas ; l'administration peut
+  aussi passer un produit en type « Encas » et lui donner sa famille (fiche produit).
+- Sans poids d'une unité (smoothies, yaourts « J'achète » vendus au yaourt, granola, mélange Mississipi, noix de
+  cajou Kreeks, Saint-Nectaire en portion, amandes torréfiées FR), le comptage en pièces n'est pas proposé en
+  Réception et en Stockage (règle R25) tant que le poids n'est pas complété sur la fiche produit.
 ## R27 — Retours fournisseur et devenirs de la Réception (Phase 6, 19/11/2026)
 
 - Une perte (ou la part d'une perte) **renvoyée au fournisseur** n'est **pas comptée dans le total perdu** : ni kg, ni

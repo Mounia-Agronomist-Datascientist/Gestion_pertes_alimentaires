@@ -11,7 +11,7 @@ import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { purchaseLinePrice } from "@/domain/bons-commande";
-import { melbaExternalId, priceInForce, samePrice } from "@/domain/matieres";
+import { isSnackCategory, melbaExternalId, priceInForce, samePrice } from "@/domain/matieres";
 import { daysBetween } from "@/domain/semaine-production";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
@@ -207,8 +207,12 @@ export async function savePurchaseOrders(
           [product] = await tx
             .insert(s.products)
             .values({
-              // Une préparation d'encas achetée est aussi un ingrédient du tome : matière première.
-              category: isMouldLabel(line.designation) ? "moule_plat_gratin" : "matiere_premiere",
+              // Ligne classée « ENCAS » par Melba : un encas (décision du 20/11/2026) ; sinon une matière première.
+              category: isMouldLabel(line.designation)
+                ? "moule_plat_gratin"
+                : isSnackCategory(line.category)
+                  ? "produit_externe"
+                  : "matiere_premiere",
               externalId,
               name: line.designation,
               defaultUnit: "kg",

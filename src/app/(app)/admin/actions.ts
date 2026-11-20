@@ -201,6 +201,7 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
     category: String(formData.get("category") ?? "") as never,
     code: String(formData.get("code") ?? ""),
     variant: String(formData.get("variant") ?? ""),
+    snackFamily: String(formData.get("snackFamily") ?? ""),
     defaultUnit: String(formData.get("defaultUnit") ?? ""),
     unitWeightKg: String(formData.get("unitWeightKg") ?? ""),
     densityKgPerL: String(formData.get("densityKgPerL") ?? ""),

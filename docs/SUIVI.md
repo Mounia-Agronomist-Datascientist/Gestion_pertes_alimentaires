@@ -57,6 +57,7 @@
 | 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
 | 2026-11-19 | Réception : un seul poste (« Contrôle des marchandises » désactivé, migration 0030) ; semaines S-1, S, S+1 ; « Produit absent de la liste » sous la recherche (tous les postes) ; fournisseur et colis sous chaque matière ; méthodes « 1. Comptage en nombre de colis, sachets ou unités », « 2. Pesée à la balance », « 3. Estimation » ; kg seulement ; poids du colis corrigeable et « Autre colis » (Réception, Stockage) | 437 tests ; parcours Réception vérifié en local (Chrome piloté) |
+| 2026-11-20 | Liste des encas (R29) : « Tous les encas » par famille en Réception, Stockage et Conditionnement, quelle que soit la semaine ; 99 encas commandés en 2026 avec leurs prix d'achat datés (migration 0032) ; ligne de bon « ENCAS » = encas ; famille d'encas sur la fiche produit ; encas refusés hors de ces zones | 459 tests ; vérifié en local dans Chrome (Chambre BOF : 11 familles, 10 biscuits à la mimolette ≈ 9,00 €) |
 | 2026-11-20 | Stockage, produit absent de la liste (R28) : seulement matière première ou encas ; « Produit externe » renommé « Encas » partout ; prix d'achat facultatif à la saisie (perte chiffrée, aperçu du coût) et après coup dans Administration → Produits (« Indiquer le prix », « Créer ce produit » avec son prix) ; coût recalculé au rattachement à un produit qui a un prix | 456 tests ; vérifié en local dans Chrome (Chambre BOF, Administration → Produits) |
 | 2026-11-19 | Stockage : façons de mesurer comme en Réception (« 1. Comptage en nombre de colis, sachets ou unités », « 2. Pesée à la balance », « 3. Estimation »), kg seulement (ni g ni mL) | 453 tests ; vérifié en local dans Chrome (Chambre BOF) |
 | 2026-11-19 | Eau du robinet (« eau », « eau au poids ») retirée des matières de la semaine et de la liste à compléter | 452 tests |
@@ -126,7 +127,7 @@
 
 ## Anomalies connues / points de vigilance
 
-- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0031 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
+- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0032 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
 - TypeScript 7 (nouvelle version native) fait la vérification des types (`npm run typecheck`, paquet `typescript7`, nom
@@ -151,6 +152,7 @@
 
 | Migration | Contenu | Données existantes |
 |---|---|---|
+| `0032_encas` | Colonne `products.snack_family` ; 99 encas et leurs prix d'achat datés ; produits de catégorie Melba « ENCAS » passés en encas | Un produit déjà connu de même libellé devient un encas (poids existant gardé) ; rien d'ajouté sur une base neuve |
 | `0000_init_production_weeks` | Création de `production_weeks` | Aucune (base vide) |
 | `0001_referentiels_phase1` | Création des 18 tables de référentiels, comptes et audit | Aucune modification de `production_weeks` |
 | `0004_lignes_versionnees` | Colonne `revision` sur les tares et destinations des déclarations | Lignes existantes rattachées à la version 1 |

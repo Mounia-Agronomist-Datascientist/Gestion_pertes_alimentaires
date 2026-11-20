@@ -13,6 +13,7 @@ interface Product {
   category: Category;
   code: string | null;
   variant: string | null;
+  snackFamily?: string | null;
   defaultUnit: string;
   unitWeightKg: number | null;
   densityKgPerL: number | null;
@@ -449,6 +450,15 @@ export function ProductFields({
           />
         </label>
       </div>
+      <label className="flex flex-col gap-1">
+        <span className="font-medium">Famille d&apos;encas (facultatif)</span>
+        <input
+          name="snackFamily"
+          className="field"
+          defaultValue={defaults?.snackFamily ?? ""}
+          placeholder="ex. Fromages, Crackers — encas seulement"
+        />
+      </label>
       <label className="flex flex-col gap-1">
         <span className="font-medium">Unité habituelle</span>
         <select name="defaultUnit" className="field" defaultValue={defaults?.defaultUnit ?? "kg"}>

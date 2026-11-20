@@ -89,6 +89,8 @@ export const products = pgTable(
     materialCategoryId: uuid("material_category_id").references(() => materialCategories.id),
     /** Lieu de stockage propre au produit, à la place de celui de sa catégorie (étape 6.11) ; null = celui de la catégorie. */
     storageSubzoneId: uuid("storage_subzone_id").references(() => subzones.id),
+    /** Famille d'un encas (« Fromages », « Crackers »…), pour ranger la liste des encas (décision du 20/11/2026). */
+    snackFamily: text("snack_family"),
     active: boolean("active").notNull().default(true),
     ...timestamps,
   },

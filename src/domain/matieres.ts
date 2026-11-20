@@ -37,6 +37,15 @@ export const isTapWater = (name: string) =>
       .trim(),
   );
 
+/** Catégorie Melba « ENCAS » d'une ligne de bon de commande : le produit est un encas (décision du 20/11/2026). */
+export const isSnackCategory = (category: string | null | undefined) =>
+  !!category &&
+  category
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim()
+    .toLowerCase() === "encas";
+
 export const melbaExternalId = (key: string) => `${MELBA_PREFIX}${key}`;
 export const isMelbaExternalId = (externalId: string | null | undefined) => !!externalId?.startsWith(MELBA_PREFIX);
 

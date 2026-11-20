@@ -65,6 +65,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           category: p.category,
           code: p.code,
           variant: p.variant,
+          snackFamily: p.snackFamily,
           defaultUnit: p.defaultUnit,
           unitWeightKg: p.unitWeightKg,
           densityKgPerL: p.densityKgPerL,

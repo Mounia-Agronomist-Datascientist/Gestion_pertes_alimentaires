@@ -97,7 +97,7 @@ describe("bons de commande fournisseurs", () => {
     });
     expect(await materialPriceAt(t.db, garlic.id, "2026-11-09")).toBeNull();
 
-    // Prix au colis ramené au kg ; préparation d'encas achetée = matière première  ; prix au litre ramené au kg avec la densité.
+    // Prix au colis ramené au kg ; ligne classée « ENCAS » = encas (décision du 20/11/2026) ; prix au litre ramené au kg.
     expect(
       await materialPriceAt(
         t.db,
@@ -105,7 +105,7 @@ describe("bons de commande fournisseurs", () => {
         "2026-11-10",
       ),
     ).toMatchObject({ perKgEur: 6.5 });
-    expect(await product("rue traversette preparation pomme fraise")).toMatchObject({ category: "matiere_premiere" });
+    expect(await product("rue traversette preparation pomme fraise")).toMatchObject({ category: "produit_externe" });
     // Prix au litre : ramené au kg avec la densité de référence de l'huile de sésame (0,92 kg/L).
     const sesame = (await product("huile de sesame"))!;
     expect(sesame.densityKgPerL).toBe(0.92);

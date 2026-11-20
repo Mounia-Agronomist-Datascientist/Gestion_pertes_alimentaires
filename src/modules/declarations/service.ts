@@ -189,6 +189,9 @@ async function prepareDeclaration(
   } else if ("productId" in input.product) {
     const [row] = await db.select().from(s.products).where(eq(s.products.id, input.product.productId));
     if (!row || !row.active) throw new DeclarationError("Produit inconnu ou désactivé");
+    if (row.category === "produit_externe" && !SNACK_ZONE_CODES.includes(place.zone.code)) {
+      throw new DeclarationError("Les encas se déclarent en conditionnement, réception ou stockage");
+    }
     product = {
       id: row.id,
       unlisted: false,

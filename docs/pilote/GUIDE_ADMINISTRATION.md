@@ -18,7 +18,7 @@ Application **Pertes** · semaine de production du **jeudi au mercredi**.
 | Quand les fichiers sont mis à jour | Administration → **Import** → « Ventes et dons des surplus » | Déposer **VENTES TGTG**, **VENTES FLASH**, **Linkee** (Excel). Un fichier redéposé remplace sa période. |
 | Quand Les Alchimistes l'envoient | Administration → **Import** → « Pesées des Alchimistes » | Déposer leur export (CSV ou Excel). |
 | Au fil de l'eau | Administration → **Causes** | Valider ou refuser les causes proposées par les équipes. |
-| Au fil de l'eau | Administration → **Produits** | Saisies « hors liste » : indiquer le prix d'achat (la perte est chiffrée), rattacher à un produit de la liste ou créer le produit avec son prix. |
+| Au fil de l'eau | Administration → **Produits** | Saisies « hors liste » : indiquer le prix d'achat (la perte est chiffrée), rattacher à un produit de la liste ou créer le produit avec son prix. Encas : type « Encas » et sa famille sur la fiche produit (une ligne de bon « ENCAS » en crée un tout seul). |
 | Lundi ou mardi | Statistiques → **Synthèse de la semaine** · **Rapports PDF** | Rapport hebdomadaire pour la réunion de production. |
 
 ## Ponctuellement
