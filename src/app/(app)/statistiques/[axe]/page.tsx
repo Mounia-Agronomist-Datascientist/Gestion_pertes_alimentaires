@@ -12,6 +12,7 @@ import {
   BarTable,
   Card,
   DestinationBars,
+  ShareChart,
   detailOf,
   euro,
   ExportLinks,
@@ -106,7 +107,9 @@ async function Comparison({
       ) : (
         <>
           <Card title="Kg de pertes alimentaires">
-            <BarTable
+            <ShareChart
+              unit="kg"
+              keepOrder={config.axis === "zone"}
               caption={`Kg par ${config.one}`}
               rows={result.rows.map((r) => ({
                 key: r.id,
@@ -120,7 +123,9 @@ async function Comparison({
           </Card>
           {result.withCosts && (
             <Card title="Coût brut">
-              <BarTable
+              <ShareChart
+                unit="euro"
+                keepOrder={config.axis === "zone"}
                 caption={`Coût brut par ${config.one}`}
                 rows={result.rows.map((r) => ({
                   key: r.id,
@@ -214,32 +219,28 @@ async function Detail({
       ) : (
         <>
           <Card title="Causes principales">
-            <BarTable caption="Kg par cause" rows={rank(detail.causes, 5)} />
-            {detail.causes.length > 5 && (
-              <p className="text-xs text-slate-500">5 premières causes sur {detail.causes.length} (en kg).</p>
-            )}
+            <ShareChart unit="kg" caption="Kg par cause" rows={rank(detail.causes, Infinity)} />
           </Card>
           <Card title="Produits concernés">
-            <BarTable
+            <ShareChart
+              unit="kg"
               caption="Kg par produit"
               rows={rank(
                 detail.products,
-                10,
+                Infinity,
                 (p) => PRODUCT_CATEGORY_LABELS[p.category as keyof typeof PRODUCT_CATEGORY_LABELS] ?? p.category,
               )}
             />
-            {detail.products.length > 10 && (
-              <p className="text-xs text-slate-500">10 premiers produits sur {detail.products.length} (en kg).</p>
-            )}
           </Card>
           <Card title="Par sous-zone">
-            <BarTable caption="Kg par sous-zone" rows={rank(detail.subzones, 20)} />
+            <ShareChart unit="kg" keepOrder caption="Kg par sous-zone" rows={rank(detail.subzones, Infinity)} />
           </Card>
           {detail.teams.length > 0 && (
             <Card title="Par équipe">
-              <BarTable
+              <ShareChart
+                unit="kg"
                 caption="Kg par équipe"
-                rows={rank(detail.teams, 20).map((r) => ({
+                rows={rank(detail.teams, Infinity).map((r) => ({
                   ...r,
                   href: statsHref("/statistiques/equipes", ctx, ctx.period, { id: r.key }),
                 }))}
@@ -253,7 +254,7 @@ async function Detail({
       )}
 
       {detail.weeks.length > 1 && (
-        <Card title="Semaine après semaine">
+        <Card title="Semaine après semaine" breakable>
           <BarTable
             caption="Kg par semaine de production"
             showShare={false}

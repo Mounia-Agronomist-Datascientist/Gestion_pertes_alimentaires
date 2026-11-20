@@ -30,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </form>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 p-4">
+      <main className="mx-auto w-full max-w-3xl flex-1 p-4 print:max-w-none print:p-0">
         <OfflineProvider userId={user.id}>{children}</OfflineProvider>
       </main>
     </div>

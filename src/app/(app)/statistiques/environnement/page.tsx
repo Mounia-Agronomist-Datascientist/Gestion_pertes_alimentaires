@@ -11,7 +11,7 @@ import { type Co2Group, environmentDashboard } from "@/modules/statistiques/envi
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { StackedColumnChart } from "../evolution/stacked-chart";
 import {
-  BarTable,
+  ShareChart,
   Card,
   ExportLinks,
   FilterForm,
@@ -43,7 +43,8 @@ const kindLabel = (k: string) => DESTINATION_KIND_STATS.find((d) => d.kind === k
 
 function Co2Bars({ groups, caption }: { groups: Co2Group[]; caption: string }) {
   return (
-    <BarTable
+    <ShareChart
+      unit="kgco2"
       caption={caption}
       rows={groups.map((g) => ({
         key: g.key,
@@ -203,7 +204,7 @@ export default async function EnvironmentPage({ searchParams }: { searchParams: 
       )}
 
       {data.series.length > 0 && (
-        <Card title="Semaine après semaine">
+        <Card title="Semaine après semaine" breakable>
           <StackedColumnChart
             caption="CO2e des pertes par semaine, mesuré et estimé"
             format={co2}

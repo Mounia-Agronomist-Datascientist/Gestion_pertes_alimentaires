@@ -139,3 +139,18 @@ test("l'administration consulte les alertes et règle les seuils", async ({ page
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByText(/Seuils enregistrés/)).toBeVisible();
 });
+
+test("les répartitions s'affichent en anneau, avec le total au centre et la légende", async ({ page }) => {
+  await login(page, "admin");
+  await page.goto("/statistiques/causes");
+  const donut = page.locator("figure").filter({ has: page.getByRole("img", { name: /Classement des causes/ }) });
+  await expect(donut.getByText("au total")).toBeVisible();
+  const legend = donut.getByRole("list", { name: "Classement des causes" }).getByRole("listitem").first();
+  await expect(legend).toContainText("%");
+  // Toucher une ligne (tablette) : la part est mise en avant et son détail s'affiche.
+  await expect(async () => {
+    await legend.click();
+    await expect(legend).toHaveClass(/bg-slate-100/, { timeout: 1000 });
+  }).toPass();
+  await expect(donut.getByRole("status")).toContainText("Erreur de préparation");
+});

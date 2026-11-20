@@ -186,7 +186,7 @@ export default async function AlchimistesPage({ searchParams }: { searchParams: 
         />
       </section>
 
-      <Card title="Semaine après semaine">
+      <Card title="Semaine après semaine" breakable>
         <PairBars rows={data.weeks} caption="Kg déclarés et pesés par semaine de production" />
         <PeriodTable
           rows={data.weeks}

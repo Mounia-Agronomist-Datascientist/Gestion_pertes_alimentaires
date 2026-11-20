@@ -31,3 +31,54 @@ body {
     @apply flex min-h-24 flex-col items-start justify-center gap-1 rounded-2xl bg-teal-700 p-4 text-xl font-semibold text-white;
   }
 }
+
+/*
+ * Impression (décision du 20/11/2026) : texte plus petit, fond blanc, pas d'ombre ; un graphique, une tuile, un
+ * tableau ou une carte n'est jamais coupé en deux, et un titre reste avec ce qui le suit.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 10mm;
+  }
+
+  html {
+    font-size: 11px;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  /* Pastilles de légende et jauges en couleur, même sans « Graphiques d'arrière-plan » dans Chrome. */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  section:not(.print\:break-inside-auto),
+  figure,
+  li,
+  tr,
+  dl {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  .shadow-sm {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Navigation (onglets, semaines voisines, retour) et filtres : inutiles sur papier. */
+  main nav,
+  main details,
+  main > div > a:first-child {
+    display: none;
+  }
+}

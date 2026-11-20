@@ -1,4 +1,6 @@
 /** Éléments communs des pages de statistiques : paramètres d'adresse, filtres, navigation, tuiles et barres. */
+import { type DonutUnit, formatDonutValue } from "./donut-format";
+import { ShareDonut } from "./share-donut";
 import Link from "next/link";
 import { db } from "@/db/client";
 import { type Period, periodLabel, periodParams } from "@/domain/periodes";
@@ -442,15 +444,54 @@ export function BarTable({
   );
 }
 
+/**
+ * Répartition en anneau (6 parts + « Autres », total au centre) et liste complète repliée sous « Voir le détail »
+ * (décision du 20/11/2026, R30).
+ */
+export function ShareChart({
+  rows,
+  caption,
+  unit,
+  keepOrder,
+  detailLimit = 30,
+}: {
+  rows: BarRow[];
+  caption: string;
+  unit: DonutUnit;
+  keepOrder?: boolean;
+  detailLimit?: number;
+}) {
+  const total = rows.reduce((a, r) => a + Math.max(0, r.value), 0);
+  const totalText = formatDonutValue(unit, total);
+  return (
+    <ShareDonut rows={rows} caption={caption} unit={unit} keepOrder={keepOrder} totalText={totalText}>
+      {rows.length > 1 && (
+        <>
+          <BarTable caption={caption} rows={rows.slice(0, detailLimit)} />
+          {rows.length > detailLimit && (
+            <p className="text-xs text-slate-500">
+              {detailLimit} premiers sur {rows.length}.
+            </p>
+          )}
+        </>
+      )}
+    </ShareDonut>
+  );
+}
+
 /** Devenir des pertes alimentaires (kg par type de destination, §19.1). */
 export function DestinationBars({ summary }: { summary: StatsSummary }) {
   const rows = DESTINATION_KIND_STATS.map((d) => ({ ...d, kg: summary.kgByDestinationKind[d.kind] ?? 0 })).filter(
     (d, i) => i < 5 || d.kg > 0,
   );
   if (rows.every((r) => r.kg === 0)) return <p className="text-slate-600">Aucune quantité en kg sur cette période.</p>;
+  const total = rows.reduce((a, r) => a + r.kg, 0);
   return (
-    <BarTable
+    <ShareDonut
       caption="Kg par destination"
+      keepOrder
+      unit="kg"
+      totalText={`${num.format(total)} kg`}
       rows={rows.map((r) => ({ key: r.kind, label: r.label, value: r.kg, text: `${num.format(r.kg)} kg` }))}
     />
   );
@@ -461,9 +502,20 @@ export function detailOf(summary: StatsSummary): string {
   return `${summary.events} ${plural(summary.events, "perte")}${summary.cost ? ` · ${euro.format(summary.cost.grossEur)}` : ""}`;
 }
 
-export function Card({ title, children }: { title: string; children: React.ReactNode }) {
+/** Carte titrée ; `breakable` : à l'impression, peut s'étaler sur deux pages (plusieurs graphiques à la suite). */
+export function Card({
+  title,
+  children,
+  breakable = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  breakable?: boolean;
+}) {
   return (
-    <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
+    <section
+      className={`flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ${breakable ? "print:break-inside-auto" : ""}`}
+    >
       <h2 className="text-lg font-semibold">{title}</h2>
       {children}
     </section>
@@ -538,13 +590,16 @@ export function ZoneFlow({ tiles, previousLabel }: { tiles: ZoneFlowTile[]; prev
   return (
     <section className="flex flex-col gap-2" aria-label="Pertes par zone, dans le sens de la marche en avant">
       <h2 className="text-lg font-semibold">Pertes par zone, dans le sens de la marche en avant</h2>
-      <ol className="flex flex-col gap-1 lg:flex-row lg:items-stretch lg:gap-0">
+      <ol className="flex flex-col gap-1 lg:flex-row lg:items-stretch lg:gap-0 print:flex-row print:items-stretch print:gap-0">
         {tiles.map((t, i) => (
-          <li key={t.zoneId} className="flex min-w-0 flex-col items-stretch lg:flex-1 lg:flex-row lg:items-center">
+          <li
+            key={t.zoneId}
+            className="flex min-w-0 flex-col items-stretch lg:flex-1 lg:flex-row lg:items-center print:flex-1 print:flex-row print:items-center"
+          >
             {i > 0 && (
-              <span aria-hidden className="self-center px-1 text-xl text-slate-400 lg:py-0">
-                <span className="lg:hidden">↓</span>
-                <span className="hidden lg:inline">→</span>
+              <span aria-hidden className="self-center px-1 text-xl text-slate-400 lg:py-0 print:py-0">
+                <span className="lg:hidden print:hidden">↓</span>
+                <span className="hidden lg:inline print:inline">→</span>
               </span>
             )}
             <ZoneTile tile={t} previousLabel={previousLabel} />

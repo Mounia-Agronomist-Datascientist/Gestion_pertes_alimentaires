@@ -8,7 +8,7 @@ import { can } from "@/modules/auth/permissions";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { causeAndDestinationRanking, RANK_BY_LABELS } from "@/modules/statistiques/rankings";
 import {
-  BarTable,
+  ShareChart,
   Card,
   euro,
   ExportLinks,
@@ -67,7 +67,8 @@ export default async function CausesPage({ searchParams }: { searchParams: Promi
         {ranking.causes.length === 0 ? (
           <p className="text-slate-600">Aucune perte sur cette période.</p>
         ) : (
-          <BarTable
+          <ShareChart
+            unit={by === "kg" ? "kg" : by === "cout" ? "euro" : "pertes"}
             caption="Classement des causes"
             rows={ranking.causes.map((c) => ({
               key: c.key,
@@ -100,7 +101,8 @@ export default async function CausesPage({ searchParams }: { searchParams: Promi
         {ranking.destinations.length === 0 ? (
           <p className="text-slate-600">Aucune destination sur cette période.</p>
         ) : (
-          <BarTable
+          <ShareChart
+            unit="kg"
             caption="Kg par destination"
             rows={ranking.destinations.map((d) => ({
               key: d.id,

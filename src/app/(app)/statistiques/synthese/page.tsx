@@ -26,6 +26,7 @@ import {
   SummaryTiles,
   ZoneFlow,
 } from "../shared";
+import { ShareDonut } from "../share-donut";
 import { PrintButton } from "./print-button";
 
 export const metadata = { title: "Synthèse de la semaine — Pertes" };
@@ -154,17 +155,38 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
 
       {data.byZone.length > 0 && (
         <Card title="Par zone">
-          <BarTable caption={`Pertes par zone (${unit})`} rows={rows(data.byZone, 10)} />
+          <ShareDonut
+            caption={`Pertes par zone (${unit})`}
+            rows={rows(data.byZone, Infinity)}
+            totalText={fmtValue(data.byZone.reduce((a, r) => a + r.value, 0))}
+            unit={inEuros ? "euro" : "kg"}
+          >
+            <BarTable caption={`Pertes par zone (${unit})`} rows={rows(data.byZone, 30)} />
+          </ShareDonut>
         </Card>
       )}
       {data.byCause.length > 0 && (
         <Card title="Par cause">
-          <BarTable caption={`Pertes par cause (${unit})`} rows={rows(data.byCause, 10)} />
+          <ShareDonut
+            caption={`Pertes par cause (${unit})`}
+            rows={rows(data.byCause, Infinity)}
+            totalText={fmtValue(data.byCause.reduce((a, r) => a + r.value, 0))}
+            unit={inEuros ? "euro" : "kg"}
+          >
+            <BarTable caption={`Pertes par cause (${unit})`} rows={rows(data.byCause, 30)} />
+          </ShareDonut>
         </Card>
       )}
       {data.byProduct.length > 0 && (
         <Card title="Produits qui pèsent le plus">
-          <BarTable caption={`Pertes par produit (${unit})`} rows={rows(data.byProduct, 10)} />
+          <ShareDonut
+            caption={`Pertes par produit (${unit})`}
+            rows={rows(data.byProduct, Infinity)}
+            totalText={fmtValue(data.byProduct.reduce((a, r) => a + r.value, 0))}
+            unit={inEuros ? "euro" : "kg"}
+          >
+            <BarTable caption={`Pertes par produit (${unit})`} rows={rows(data.byProduct, 30)} />
+          </ShareDonut>
         </Card>
       )}
 
@@ -172,7 +194,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         <TrendTable trends={comparison.trends} stableRate={comparison.trendStableRate} />
       </Card>
 
-      <Card title="Semaine après semaine">
+      <Card title="Semaine après semaine" breakable>
         {withCosts && (
           <>
             <h3 className="font-medium">Coût brut</h3>

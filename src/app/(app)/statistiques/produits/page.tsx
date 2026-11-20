@@ -9,7 +9,7 @@ import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { PRODUCT_TYPES, type ProductType, productRanking, RANK_BY_LABELS } from "@/modules/statistiques/rankings";
 import {
-  BarTable,
+  ShareChart,
   Card,
   euro,
   ExportLinks,
@@ -108,17 +108,18 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           <p className="text-slate-600">Aucune perte sur cette période.</p>
         ) : (
           <>
-            <BarTable
+            <ShareChart
+              unit={by === "kg" ? "kg" : by === "cout" ? "euro" : "pertes"}
               caption="Classement des produits"
-              rows={ranking.rows
-                .slice(0, LIMIT)
-                .map((r) => ({ key: r.key, label: r.label, value: value(r), text: text(r), detail: detail(r) }))}
+              detailLimit={LIMIT}
+              rows={ranking.rows.map((r) => ({
+                key: r.key,
+                label: r.label,
+                value: value(r),
+                text: text(r),
+                detail: detail(r),
+              }))}
             />
-            {ranking.rows.length > LIMIT && (
-              <p className="text-xs text-slate-500">
-                {LIMIT} premiers sur {ranking.rows.length}.
-              </p>
-            )}
           </>
         )}
       </Card>

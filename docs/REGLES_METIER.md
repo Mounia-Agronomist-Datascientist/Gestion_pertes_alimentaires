@@ -425,3 +425,19 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   (cartons de 2 kg reçus au lieu de 3 kg ; la perte garde « reçu : 2 kg au lieu de 3 kg ») ; « Autre colis » quand
   aucun colis n'est connu, avec son poids. Le colis est donc toujours proposé en Réception et en Stockage.
 
+
+## R30 — Répartitions en anneau et impression des statistiques (20/11/2026)
+
+- Les **répartitions** des statistiques et de la synthèse s'affichent en **anneau**, le total au centre : vue générale
+  (devenir), par zone, par équipe (et le détail d'une zone ou d'une équipe : causes, produits, sous-zones, équipes,
+  devenir), produits, causes et destinations, valorisation, environnement. Les séries semaine après semaine, mois et
+  années restent en colonnes : un anneau ne montre pas une évolution dans le temps.
+- **6 parts au plus**, les plus grandes ; le reste est regroupé dans « + N autres » (gris). Zones, sous-zones et
+  devenirs gardent leur ordre (marche en avant). Couleurs dans un ordre fixe, vérifié pour les daltonismes.
+- **Légende toujours écrite** : nom, valeur (kg, €, kg CO2e ou nombre de pertes) et part. Au survol, au toucher ou
+  au clavier, la part est mise en avant et son détail s'affiche (nombre de pertes, coût, évolution…). La liste
+  complète s'ouvre avec « Voir le détail ».
+- **Impression** : texte plus petit, pleine largeur de la page, sans onglets, filtres ni listes repliées ; une carte,
+  un graphique, une tuile ou une ligne de tableau n'est jamais coupée, un titre reste avec ce qui le suit ; les
+  cartes à plusieurs graphiques (« Semaine après semaine ») peuvent continuer sur la page suivante entre deux
+  graphiques. Couleurs gardées même sans « graphiques d'arrière-plan ».

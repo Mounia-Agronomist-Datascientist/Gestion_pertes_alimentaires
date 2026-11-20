@@ -19,7 +19,7 @@ import { ColumnChart } from "../evolution/column-chart";
 import { StackedColumnChart } from "../evolution/stacked-chart";
 import { SurplusSection } from "./surplus-section";
 import {
-  BarTable,
+  ShareChart,
   Card,
   euro,
   ExportLinks,
@@ -134,7 +134,8 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
             {rows.length === 0 ? (
               <p className="text-slate-600">Aucune perte sur cette période.</p>
             ) : (
-              <BarTable
+              <ShareChart
+                unit="kg"
                 caption={`Kg par destination — ${g.label}`}
                 rows={rows.map((d) => {
                   const s = recoveredShare(d);
@@ -192,7 +193,7 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
       })}
 
       {data.series.length > 0 && (
-        <Card title="Semaine après semaine">
+        <Card title="Semaine après semaine" breakable>
           <h3 className="font-medium">Kg de pertes alimentaires par devenir</h3>
           <StackedColumnChart
             caption="Kg de pertes alimentaires par semaine, répartis par devenir"

@@ -52,7 +52,12 @@ export function StackedColumnChart({
           </li>
         ))}
       </ul>
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label={caption}>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-auto w-full print:mx-auto print:h-44 print:w-auto"
+        role="img"
+        aria-label={caption}
+      >
         <line x1={0} x2={width} y1={height - bottom} y2={height - bottom} stroke="#cbd5e1" strokeWidth={1} />
         {columns.map((c, i) => {
           const x = i * slot + (slot - bar) / 2;
