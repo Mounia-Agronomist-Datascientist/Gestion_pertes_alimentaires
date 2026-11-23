@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
+import { snackAllowedIn } from "@/domain/encas";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { materialsForPlace } from "@/domain/matieres";
 import {
@@ -815,6 +816,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           packagingPerPortion={options.packagingPerPortion}
           dishScope={subzone?.teamMode === "equipe" ? "equipe" : zone?.code === "CONDITIONNEMENT" ? "toutes" : null}
           showSnacks={!!zone && SNACK_ZONE_CODES.includes(zone.code)}
+          subzoneCode={subzone?.code ?? null}
           teamId={teamId}
           onChoose={(p) => {
             setProduct(p);
@@ -1573,6 +1575,7 @@ function ProductStep({
   packagingPerPortion,
   dishScope,
   showSnacks,
+  subzoneCode,
   teamId,
   onChoose,
 }: {
@@ -1601,6 +1604,8 @@ function ProductStep({
   dishScope: "equipe" | "toutes" | null;
   /** Conditionnement, réception, stockage : encas (règle R9). */
   showSnacks: boolean;
+  /** Lieu choisi : au Stockage, les encas frais au local frais, les autres au stockage sec (décision du 23/11/2026). */
+  subzoneCode: string | null;
   /** Équipe choisie par un responsable ; pour un compte équipe, le catalogue ne contient déjà que ses plats. */
   teamId: string | null;
   onChoose: (p: ProductChoice) => void;
@@ -1848,14 +1853,17 @@ function ProductStep({
 
   // ─── Accueil de l'étape : produits de la semaine, recherche, hors liste ───
   const term = search.trim().toLowerCase();
-  // Encas (règle R9) : seulement en conditionnement, réception et stockage.
-  const offered = showSnacks ? products : products.filter((p) => p.category !== "produit_externe");
+  // Encas (règle R9) : seulement en conditionnement, réception et stockage ; au Stockage, là où ils sont rangés.
+  const snackHere = (p: (typeof products)[number]) =>
+    showSnacks && snackAllowedIn(zoneCode, subzoneCode, p.snackFamily);
+  const offered = products.filter((p) => p.category !== "produit_externe" || snackHere(p));
   const listedMatches = term
     ? offered.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term)))
     : [];
-  const snackList = showSnacks ? (
+  const snacksHere = products.filter((p) => p.category === "produit_externe" && snackHere(p));
+  const snackList = snacksHere.length ? (
     <SnackList
-      snacks={products.filter((p) => p.category === "produit_externe")}
+      snacks={snacksHere}
       supplierOf={supplierOf}
       onChoose={(p) => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}
     />

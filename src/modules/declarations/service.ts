@@ -7,6 +7,7 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { COST_METHOD, lossCostBreakdown } from "@/domain/couts";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
+import { snackAllowedIn } from "@/domain/encas";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { normalizeCauseName as normalizeLabel } from "@/modules/admin/causes";
 import { tomeKey } from "@/modules/imports/tome/parse-tome";
@@ -297,6 +298,11 @@ async function prepareDeclaration(
     if (!row || !row.active) throw new DeclarationError("Produit inconnu ou désactivé");
     if (row.category === "produit_externe" && !SNACK_ZONE_CODES.includes(place.zone.code)) {
       throw new DeclarationError("Les encas se déclarent en conditionnement, réception ou stockage");
+    }
+    if (row.category === "produit_externe" && !snackAllowedIn(place.zone.code, place.subzone.code, row.snackFamily)) {
+      throw new DeclarationError(
+        "Au Stockage, un encas se déclare là où il est rangé : yaourts et fromages au « Local encas frais », les autres au « Stockage sec - ENCAS »",
+      );
     }
     product = {
       id: row.id,

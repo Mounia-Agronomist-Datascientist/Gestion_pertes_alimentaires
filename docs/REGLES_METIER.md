@@ -473,3 +473,14 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   retrouvé dans un bon de commande déposé est validé de lui-même.
 - Ailleurs (Cuisine, Conditionnement, Plonge), un produit absent reste une saisie « hors liste » (R28).
 - **N° de poubelle** des Alchimistes : encadré orange vif au récapitulatif, pour ne pas oublier de le vérifier.
+
+
+## R33 — Encas au Stockage : là où ils sont rangés (23/11/2026)
+
+- **Local encas frais** : seulement les encas des familles **Yaourts** et **Fromages**.
+- **Stockage sec - ENCAS** : tous les **autres** encas.
+- Autres lieux du Stockage (chambre BOF, chambre négative, légumerie, épicerie) : aucun encas proposé.
+- Un encas **sans famille** (saisi à la main, ou arrivé d'un bon de commande « ENCAS ») est proposé dans les deux lieux
+  d'encas jusqu'à ce que l'administration lui donne sa famille (fiche produit, « Famille d'encas »).
+- Le serveur refuse un encas déclaré ailleurs que là où il est rangé. En Réception et en Conditionnement, tous les
+  encas restent proposés.

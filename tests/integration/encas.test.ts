@@ -81,9 +81,14 @@ describe("liste des encas, quelle que soit la semaine (décision du 20/11/2026)"
       category: "produit_externe",
       snackFamily: "Biscuits / Gâteaux",
     });
-    const d = await loss("STO_BOF", "STO_PEREMPTION", 10);
+    const d = await loss("STO_SEC_ENCAS", "STO_PEREMPTION", 10);
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
     expect(row).toMatchObject({ netKg: 0.3, grossCostEur: 9, productCategory: "produit_externe" });
+  });
+
+  it("au Stockage, seulement là où il est rangé : biscuit au sec, pas au frais ni en chambre BOF", async () => {
+    await expect(loss("STO_ENCAS_FRAIS", "STO_PEREMPTION", 1)).rejects.toThrow(/là où il est rangé/);
+    await expect(loss("STO_BOF", "STO_PEREMPTION", 1)).rejects.toThrow(/là où il est rangé/);
   });
 
   it("refusé hors conditionnement, réception et stockage (règle R9)", async () => {
