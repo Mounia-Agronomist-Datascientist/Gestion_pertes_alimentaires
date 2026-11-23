@@ -115,7 +115,8 @@ Période (semaine, mois, année, libre) et filtres en haut ; exports Excel et CS
 | Rapports PDF | Hebdomadaire, mensuel, annuel, valorisation, environnemental |
 
 Les répartitions sont en anneaux (6 parts + « autres », même couleur pour le même élément d'un anneau à l'autre) ;
-une baisse des pertes s'affiche en vert. **Coûts des pertes** (menu à part) : brut, recettes, net, par équipe et zone.
+une baisse des pertes s'affiche en vert. **Coûts des pertes** (menu à part) : brut, recettes, net, composantes, par équipe, par zone et semaine par
+semaine, pour la période choisie (semaine, 2 dernières semaines, mois, année ou dates libres), totaux recalculés.
 
 ## Les coûts — d'où viennent les euros
 
@@ -153,6 +154,8 @@ Chaque semaine aussi : lire les alertes (accueil) et la **Synthèse de la semain
   le futur utilisateur (température retirée, étiquetage ajouté, Stockage renuméroté de 1 à 8) ; « Autres pertes »
   devient « Autres causes ».
 - **Import** : un tome sans composition des plats est refusé (S47 et S48 réimportées en local).
+- **Coûts des pertes** : choix de la période (semaine, mois, année, dates libres, raccourcis), totaux et semaine
+  par semaine recalculés.
 - **Administration** : options rangées en 6 familles ; Import de la semaine rangé par jour, avec la semaine concernée (S-1, S, S+1) et l'usage de chaque document.
 
 ## Ce qui reste à faire ou à décider

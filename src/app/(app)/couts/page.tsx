@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/db/client";
-import { addDays, formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
+import { type Period, periodLabel, periodParams } from "@/domain/periodes";
+import { addDays, computeProductionWeek, formatProductionWeek } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { can } from "@/modules/auth/permissions";
-import { COST_COMPONENTS, type CostTotals, weekCostSummary } from "@/modules/couts/summary";
-import { COMPONENT_COLORS } from "./colors";
+import { COST_COMPONENTS, type CostTotals, periodCostSummary } from "@/modules/couts/summary";
+import { statsContext } from "@/modules/statistiques/context";
+import { adjacentOf } from "@/modules/statistiques/facts";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
+import { PeriodFields } from "../statistiques/period-fields";
+import { COMPONENT_COLORS } from "./colors";
 
 export const metadata = { title: "Coûts — Pertes" };
 
@@ -18,36 +22,93 @@ const COMPONENT_NOTES: Partial<Record<(typeof COST_COMPONENTS)[number]["key"], s
   indirectEur: "prévues dans une version ultérieure",
 };
 
-export default async function CostsPage({ searchParams }: { searchParams: Promise<{ jour?: string }> }) {
+const href = (period: Period) => `/couts?${new URLSearchParams(periodParams(period))}`;
+
+/**
+ * Coûts des pertes d'une période au choix (décision du 23/11/2026) : semaine, mois, année ou dates libres, avec
+ * raccourcis ; totaux, composantes, équipes, zones et semaine par semaine recalculés pour la période.
+ */
+export default async function CostsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const user = await requireUser();
   if (!can(user, "indicators.read")) redirect("/");
-  const { jour } = await searchParams;
-  const today = toProductionLocalDate(new Date());
-  const week = await findStoredProductionWeek(db, jour && /^\d{4}-\d{2}-\d{2}$/.test(jour) ? jour : today);
-  if (!week) return <p className="rounded-xl bg-red-50 p-3 text-red-800">Semaine absente du calendrier.</p>;
-  const summary = await weekCostSummary(db, user, week.id);
+  const params = await searchParams;
+  // Ancienne adresse « ?jour=AAAA-MM-JJ » : la semaine de ce jour.
+  if (params.jour && /^\d{4}-\d{2}-\d{2}$/.test(params.jour) && !params.periode) {
+    const week = await findStoredProductionWeek(db, params.jour);
+    if (week) redirect(href({ kind: "semaine", year: week.year, number: week.number }));
+  }
+  const ctx = await statsContext(db, user, params);
+  const { period, today } = ctx;
+  const [summary, previous, next] = await Promise.all([
+    periodCostSummary(db, user, period),
+    adjacentOf(db, period, -1),
+    adjacentOf(db, period, 1),
+  ]);
   const { totals } = summary;
   const chip = "rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm";
+  const current = computeProductionWeek(today);
+  const shortcuts: { label: string; period: Period }[] = [
+    { label: "Semaine en cours", period: { kind: "semaine", year: current.year, number: current.number } },
+    {
+      label: "2 dernières semaines",
+      period: { kind: "periode", from: addDays(current.startDate, -7), to: current.endDate },
+    },
+    {
+      label: "Mois en cours",
+      period: { kind: "mois", year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) },
+    },
+    { label: "Année en cours", period: { kind: "annee", year: current.year } },
+  ];
+  const isActive = (p: Period) => href(p) === href(period);
 
   return (
     <div className="flex flex-col gap-4">
       <Link href="/" className="self-start rounded-xl px-2 py-2 font-medium text-slate-700">
         ← Accueil
       </Link>
-      <h1 className="text-2xl font-bold">Coûts des pertes — {formatProductionWeek(week)}</h1>
-      <nav className="flex flex-wrap gap-2">
-        <Link className={chip} href={`/couts?jour=${addDays(week.startDate, -7)}`}>
-          ← Précédente
-        </Link>
-        <Link className={chip} href="/couts">
-          Semaine en cours
-        </Link>
-        <Link className={chip} href={`/couts?jour=${addDays(week.startDate, 7)}`}>
-          Suivante →
-        </Link>
+      <h1 className="text-2xl font-bold">Coûts des pertes — {periodLabel(period)}</h1>
+      <nav className="flex flex-wrap gap-2" aria-label="Raccourcis de période">
+        {shortcuts.map((x) => (
+          <Link
+            key={x.label}
+            className={isActive(x.period) ? "rounded-full bg-brun-700 px-4 py-2 text-sm font-medium text-white" : chip}
+            href={href(x.period)}
+          >
+            {x.label}
+          </Link>
+        ))}
       </nav>
+      <nav className="flex flex-wrap gap-2" aria-label="Période voisine">
+        {previous && (
+          <Link className={chip} href={href(previous)}>
+            ← {periodLabel(previous)}
+          </Link>
+        )}
+        {next && (
+          <Link className={chip} href={href(next)}>
+            {periodLabel(next)} →
+          </Link>
+        )}
+      </nav>
+      <details className="rounded-2xl bg-white p-4 shadow-sm">
+        <summary className="cursor-pointer font-semibold">Choisir une autre période</summary>
+        <form method="get" action="/couts" className="mt-3 grid gap-3 sm:grid-cols-2">
+          <PeriodFields period={period} today={today} />
+          <button type="submit" className="btn-primary sm:col-span-2">
+            Afficher
+          </button>
+        </form>
+        <p className="mt-2 text-xs text-slate-500">
+          Semaine et année : semaines de production (jeudi → mercredi). Mois et dates libres : date réelle de la perte
+          (un an au plus).
+        </p>
+      </details>
 
-      <section className="grid gap-2 sm:grid-cols-3" aria-label="Totaux de la semaine">
+      <section className="grid gap-2 sm:grid-cols-3" aria-label="Totaux de la période">
         <Stat label="Coût brut" value={euro.format(totals.grossEur)} />
         <Stat
           label="Recettes encaissées"
@@ -57,7 +118,8 @@ export default async function CostsPage({ searchParams }: { searchParams: Promis
       </section>
       <p className="text-sm text-slate-600">
         {summary.declarations} perte{summary.declarations > 1 ? "s" : ""} déclarée{summary.declarations > 1 ? "s" : ""}{" "}
-        ({summary.netKg.toLocaleString("fr-FR")} kg), dont {summary.valued} valorisée{summary.valued > 1 ? "s" : ""}.
+        ({summary.netKg.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} kg), dont {summary.valued} valorisée
+        {summary.valued > 1 ? "s" : ""}.
         {summary.notValued > 0 &&
           ` ${summary.notValued} sans coût connu (produit hors liste ou du référentiel) : non comptée${summary.notValued > 1 ? "s" : ""}, jamais estimée${summary.notValued > 1 ? "s" : ""}.`}
         {summary.packagingIncomplete > 0 &&
@@ -69,18 +131,34 @@ export default async function CostsPage({ searchParams }: { searchParams: Promis
         {totals.grossEur > 0 ? (
           <Breakdown totals={totals} />
         ) : (
-          <p className="text-slate-600">Aucun coût cette semaine.</p>
+          <p className="text-slate-600">Aucun coût sur cette période.</p>
         )}
       </section>
 
+      {summary.byWeek.length > 1 && (
+        <CostTable
+          title="Semaine par semaine"
+          rows={summary.byWeek.map((w) => ({ id: w.id, label: formatProductionWeek(w), totals: w }))}
+          total={totals}
+        />
+      )}
       {summary.byTeam.length > 0 && (
         <CostTable
           title="Par équipe (cuisine)"
-          rows={summary.byTeam.map((t) => ({ id: t.id, label: `Équipe ${t.letter} – ${t.colorName}`, totals: t }))}
+          rows={summary.byTeam.map((t) => ({
+            id: t.id,
+            label: `Équipe ${t.letter} – ${t.colorName}`,
+            color: t.colorHex,
+            totals: t,
+          }))}
         />
       )}
       {summary.byZone.length > 0 && (
-        <CostTable title="Par zone" rows={summary.byZone.map((z) => ({ id: z.id, label: z.name, totals: z }))} />
+        <CostTable
+          title="Par zone"
+          rows={summary.byZone.map((z) => ({ id: z.id, label: z.name, totals: z }))}
+          total={totals}
+        />
       )}
     </div>
   );
@@ -150,7 +228,16 @@ function Breakdown({ totals }: { totals: CostTotals }) {
   );
 }
 
-function CostTable({ title, rows }: { title: string; rows: { id: string; label: string; totals: CostTotals }[] }) {
+function CostTable({
+  title,
+  rows,
+  total,
+}: {
+  title: string;
+  rows: { id: string; label: string; color?: string; totals: CostTotals }[];
+  /** Ligne « Total » (la somme des lignes fait le total de la période). */
+  total?: CostTotals;
+}) {
   return (
     <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm">
       <h2 className="text-lg font-semibold">{title}</h2>
@@ -167,7 +254,16 @@ function CostTable({ title, rows }: { title: string; rows: { id: string; label: 
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-t border-slate-100">
-                <td className="py-2">{r.label}</td>
+                <td className="py-2">
+                  {r.color && (
+                    <span
+                      className="mr-2 inline-block size-3 rounded-sm align-middle"
+                      style={{ backgroundColor: r.color }}
+                      aria-hidden
+                    />
+                  )}
+                  {r.label}
+                </td>
                 <td className="py-2 text-right tabular-nums">{euro.format(r.totals.grossEur)}</td>
                 <td className="py-2 text-right tabular-nums text-slate-600">
                   {r.totals.recoveredEur ? `− ${euro.format(r.totals.recoveredEur)}` : "—"}
@@ -176,6 +272,18 @@ function CostTable({ title, rows }: { title: string; rows: { id: string; label: 
               </tr>
             ))}
           </tbody>
+          {total && rows.length > 1 && (
+            <tfoot>
+              <tr className="border-t-2 border-brun-700 font-semibold">
+                <td className="py-2">Total</td>
+                <td className="py-2 text-right tabular-nums">{euro.format(total.grossEur)}</td>
+                <td className="py-2 text-right tabular-nums">
+                  {total.recoveredEur ? `− ${euro.format(total.recoveredEur)}` : "—"}
+                </td>
+                <td className="py-2 text-right tabular-nums">{euro.format(total.netEur)}</td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </section>

@@ -4,13 +4,15 @@
  * sont exclues ; une perte sans coût connu (hors liste, référentiel sans coût) est comptée à part, jamais estimée.
  * Seulement les zones cochées du compte ; la part renvoyée au fournisseur n'est pas comptée (décision du 19/11/2026).
  */
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, type SQL, sql } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { roundQuantity } from "@/domain/nombres";
 import { SUPPLIER_RETURN_KIND } from "@/domain/retours-fournisseur";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import { zonesCondition } from "@/modules/declarations/queries";
+import type { Period } from "@/domain/periodes";
+import { periodCondition } from "@/modules/statistiques/facts";
 
 export interface CostTotals {
   materialEur: number;
@@ -55,22 +57,45 @@ const rounded = (t: CostTotals): CostTotals =>
   Object.fromEntries(Object.entries(t).map(([k, v]) => [k, Math.round(v * 100) / 100])) as unknown as CostTotals;
 
 export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: string) {
+  return costSummary(db, user, eq(s.lossDeclarations.productionWeekId, productionWeekId));
+}
+
+/**
+ * Coûts d'une période au choix (décision du 23/11/2026) : semaine, mois, année ou dates libres, comptés comme dans
+ * les statistiques (semaine et année : semaine de production ; mois et dates libres : date de la perte).
+ */
+export async function periodCostSummary(db: Db, user: AuthUser, period: Period) {
   requirePermission(user, "indicators.read");
-  const [rows, zones, teams] = await Promise.all([
+  return costSummary(db, user, (await periodCondition(db, period)) ?? sql`false`);
+}
+
+async function costSummary(db: Db, user: AuthUser, inPeriod: SQL) {
+  requirePermission(user, "indicators.read");
+  const [rows, zones, teams, weeks] = await Promise.all([
     db
       .select()
       .from(s.lossDeclarations)
       .where(
-        and(
-          eq(s.lossDeclarations.productionWeekId, productionWeekId),
-          inArray(s.lossDeclarations.status, ["validee", "corrigee"]),
-          zonesCondition(user) ?? sql`false`,
-        ),
+        and(inPeriod, inArray(s.lossDeclarations.status, ["validee", "corrigee"]), zonesCondition(user) ?? sql`false`),
       ),
     db.select({ id: s.zones.id, name: s.zones.name, order: s.zones.displayOrder }).from(s.zones),
     db
-      .select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName, order: s.teams.displayOrder })
+      .select({
+        id: s.teams.id,
+        letter: s.teams.letter,
+        colorName: s.teams.colorName,
+        colorHex: s.teams.colorHex,
+        order: s.teams.displayOrder,
+      })
       .from(s.teams),
+    db
+      .select({
+        id: s.productionWeeks.id,
+        year: s.productionWeeks.year,
+        number: s.productionWeeks.number,
+        startDate: s.productionWeeks.startDate,
+      })
+      .from(s.productionWeeks),
   ]);
 
   // Part renvoyée au fournisseur de chaque perte (dernière version des destinations) : hors du total perdu.
@@ -107,6 +132,7 @@ export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: 
   const totals = empty();
   const byZone = new Map<string, CostTotals>();
   const byTeam = new Map<string, CostTotals>();
+  const byWeek = new Map<string, CostTotals>();
   let valued = 0;
   let packagingIncomplete = 0;
   let kg = 0;
@@ -121,6 +147,7 @@ export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: 
     add(totals, d, kept);
     add(byZone.get(d.zoneId) ?? byZone.set(d.zoneId, empty()).get(d.zoneId)!, d, kept);
     if (d.teamId) add(byTeam.get(d.teamId) ?? byTeam.set(d.teamId, empty()).get(d.teamId)!, d, kept);
+    add(byWeek.get(d.productionWeekId) ?? byWeek.set(d.productionWeekId, empty()).get(d.productionWeekId)!, d, kept);
   }
 
   const counted = rows.filter((d) => keptOf(d.id) > 0).length;
@@ -138,7 +165,18 @@ export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: 
     byTeam: teams
       .filter((t) => byTeam.has(t.id))
       .sort((a, b) => a.order - b.order)
-      .map((t) => ({ id: t.id, letter: t.letter, colorName: t.colorName, ...rounded(byTeam.get(t.id)!) })),
+      .map((t) => ({
+        id: t.id,
+        letter: t.letter,
+        colorName: t.colorName,
+        colorHex: t.colorHex,
+        ...rounded(byTeam.get(t.id)!),
+      })),
+    /** Semaine par semaine (semaine de production de chaque perte), dans l'ordre du calendrier. */
+    byWeek: weeks
+      .filter((w) => byWeek.has(w.id))
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))
+      .map((w) => ({ id: w.id, year: w.year, number: w.number, ...rounded(byWeek.get(w.id)!) })),
   };
 }
 

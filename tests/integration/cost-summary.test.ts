@@ -5,7 +5,7 @@ import { seed } from "@/db/seed/seed";
 import { createAccount } from "@/modules/auth/accounts";
 import { ForbiddenError, type AuthUser } from "@/modules/auth/permissions";
 import { loadAuthUser } from "@/modules/auth/service";
-import { weekCostSummary } from "@/modules/couts/summary";
+import { periodCostSummary, weekCostSummary } from "@/modules/couts/summary";
 import { cancelDeclaration, createDeclaration } from "@/modules/declarations/service";
 import { weekCatalogs } from "@/modules/imports/catalog";
 import { buildWeekImport } from "@/modules/imports/merge";
@@ -124,6 +124,22 @@ describe("synthèse des coûts d'une semaine", () => {
     });
     expect(summary.byTeam.map((x) => [x.letter, x.grossEur, x.netEur])).toEqual([["D", 15.96, 9.96]]);
     expect(summary.byZone.map((x) => x.grossEur)).toEqual([15.96]);
+  });
+
+  it("calcule les mêmes totaux pour une semaine, un mois, une année ou des dates libres", async () => {
+    const periods = [
+      { kind: "semaine", year: 2026, number: 45 },
+      { kind: "mois", year: 2026, month: 11 },
+      { kind: "annee", year: 2026 },
+      { kind: "periode", from: "2026-10-20", to: "2026-11-05" },
+    ] as const;
+    for (const period of periods) {
+      const summary = await periodCostSummary(t.db, production, period);
+      expect(summary.totals).toMatchObject({ grossEur: 15.96, recoveredEur: 6, netEur: 9.96 });
+      expect(summary.byWeek.map((w) => [w.number, w.grossEur])).toEqual([[45, 15.96]]);
+    }
+    const before = await periodCostSummary(t.db, production, { kind: "periode", from: "2026-10-01", to: "2026-11-01" });
+    expect(before).toMatchObject({ declarations: 0, totals: { grossEur: 0, netEur: 0 } });
   });
 
   it("réservé aux indicateurs économiques (administration, production, direction)", async () => {

@@ -33,8 +33,11 @@ export function canReadStats(user: AuthUser): boolean {
   return can(user, "stats.global") || can(user, "indicators.read");
 }
 
-/** Condition SQL d'une période ; null si elle ne correspond à aucune semaine du calendrier. */
-async function periodCondition(db: Db, period: Period): Promise<SQL | null> {
+/**
+ * Condition SQL d'une période ; null si elle ne correspond à aucune semaine du calendrier. Semaine et année :
+ * semaine de production ; mois et dates libres : date réelle de la perte. Utilisée aussi par « Coûts des pertes ».
+ */
+export async function periodCondition(db: Db, period: Period): Promise<SQL | null> {
   switch (period.kind) {
     case "semaine": {
       const [week] = await db
