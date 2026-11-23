@@ -3,6 +3,7 @@
  * Partagé entre le navigateur (aide à la saisie) et le serveur (contrôle définitif).
  */
 import { z } from "zod";
+import { MAX_LOT_LINES, MAX_PHOTOS } from "@/domain/lots";
 
 export const PRODUCT_CATEGORIES = [
   "matiere_premiere",
@@ -132,6 +133,30 @@ export const declarationInputSchema = z
       )
       .min(1, "Choisissez au moins une destination"),
     destinationGapJustification: z.string().trim().max(500).nullable().optional(),
+    /** N° de lot et DLC (Réception, Stockage ; facultatifs, règle R37), quantité répartie entre les lots. */
+    lots: z
+      .array(
+        z.object({
+          lotNumber: z.string().trim().max(60, "N° de lot trop long (60 caractères au plus)").nullable(),
+          dlc: z.iso.date({ message: "DLC invalide" }).nullable(),
+          quantity: positive,
+        }),
+      )
+      .max(MAX_LOT_LINES)
+      .optional(),
+    /**
+     * Photos du lot et de la DLC : une photo déjà enregistrée (correction) ou une nouvelle, JPEG réduit sur
+     * l'appareil et encodé en base64. Correction : les photos absentes de la liste sont retirées.
+     */
+    photos: z
+      .array(
+        z.union([
+          z.object({ photoId: uuid }),
+          z.object({ dataUrl: z.string().regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/, "Photo invalide") }),
+        ]),
+      )
+      .max(MAX_PHOTOS, `${MAX_PHOTOS} photos au plus par perte`)
+      .optional(),
     comment: z.string().trim().max(1000).nullable().optional(),
     /** Identifiant créé sur l'appareil (saisie hors ligne, docs/PHASE6.md étape 6.5) : évite un double enregistrement. */
     clientId: uuid.optional(),

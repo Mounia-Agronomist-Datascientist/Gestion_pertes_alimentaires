@@ -7,6 +7,7 @@ import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/cout
 import { checkDestinationSplit } from "@/domain/destinations";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
 import { snackAllowedIn } from "@/domain/encas";
+import { lotsAllowedIn } from "@/domain/lots";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { materialsForPlace } from "@/domain/matieres";
 import {
@@ -34,8 +35,9 @@ import { gramsToKg, SNACK_ZONE_CODES } from "@/modules/imports/merge";
 import { isNetworkError, stamp } from "@/modules/declarations/offline-queue";
 import { useOfflineQueue } from "../offline-provider";
 import { proposeCauseAction, submitCorrection, submitDeclaration, type SubmitResult } from "./actions";
+import { type LotLineText, LotsStep, lotsPayload, lotsSummary, type WizardPhoto } from "./lots-step";
 
-type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "cause" | "destination" | "recap" | "done";
+type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "lots" | "cause" | "destination" | "recap" | "done";
 export type ProductChoice =
   | { kind: "listed"; id: string; name: string; category: string }
   | {
@@ -89,6 +91,10 @@ export interface WizardInitial {
   occurredOn: string;
   occurredTime: string;
   comment: string;
+  /** N° de lot, DLC (« JJ/MM/AAAA ») et quantité de chaque lot (Réception, Stockage). */
+  lotLines?: LotLineText[];
+  /** Photos du lot et de la DLC : déjà enregistrées (correction) ou prises sur l'appareil. */
+  photos?: WizardPhoto[];
 }
 
 /** Ligne préparée en mode « plusieurs pertes », gardée sur l'appareil jusqu'à la validation du lot. */
@@ -198,6 +204,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   }, [options.today]);
   const [occurredTime, setOccurredTime] = useState(init?.occurredTime ?? "");
   const [comment, setComment] = useState(init?.comment ?? "");
+  const [lotLines, setLotLines] = useState<LotLineText[]>(init?.lotLines ?? []);
+  const [photos, setPhotos] = useState<WizardPhoto[]>(init?.photos ?? []);
   const [reason, setReason] = useState("");
   const [result, setResult] = useState<SubmitResult | null>(null);
   /** Perte gardée sur l'appareil faute de réseau (envoyée au retour du réseau). */
@@ -224,6 +232,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     ...(needsTeam ? (["team"] as const) : []),
     "product",
     "quantity",
+    ...(zone && lotsAllowedIn(zone.code) ? (["lots"] as const) : []),
     "cause",
     "destination",
     "recap",
@@ -456,6 +465,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     setDestinationLines([]);
     setJustification("");
     setComment("");
+    setLotLines([]);
+    setPhotos([]);
     setOccurredTime("");
     setResult(null);
     setQueued(false);
@@ -520,6 +531,13 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
         .filter((l) => l.quantity > 0),
       destinationGapJustification: justification || null,
       comment: comment || null,
+      ...(zone && lotsAllowedIn(zone.code)
+        ? {
+            lots: lotsPayload(lotLines, net.quantity, today),
+            // Série : pas de photos (envoi groupé trop lourd).
+            photos: batch ? [] : photos.map((p) => (p.photoId ? { photoId: p.photoId } : { dataUrl: p.dataUrl! })),
+          }
+        : {}),
     };
     if (batch) {
       batch.onAdd({
@@ -546,6 +564,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           occurredOn,
           occurredTime,
           comment,
+          lotLines,
         },
         summary: {
           productName: product.name,
@@ -1036,6 +1055,19 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
         </Section>
       )}
 
+      {step === "lots" && net && (
+        <LotsStep
+          total={net.quantity}
+          unitLabel={unitLabel(net.unitCode)}
+          today={today}
+          lines={lotLines}
+          onLinesChange={setLotLines}
+          photos={batch ? null : photos}
+          onPhotosChange={setPhotos}
+          onContinue={() => goNext("lots")}
+        />
+      )}
+
       {step === "cause" && (
         <Section title="Pourquoi ?">
           <div className="flex flex-col gap-2">
@@ -1216,6 +1248,22 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               )}
             </dd>
             <EditLink onClick={() => setStep("quantity")} />
+            {zone && lotsAllowedIn(zone.code) && (
+              <>
+                <dt className="text-slate-500">Lots et DLC</dt>
+                <dd>
+                  {lotsSummary(lotLines, today, unitLabel(net.unitCode)) ?? (
+                    <span className="text-slate-500">Non indiqués</span>
+                  )}
+                  {photos.length > 0 && (
+                    <span className="block text-sm text-slate-500">
+                      {photos.length} photo{photos.length > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </dd>
+                <EditLink onClick={() => setStep("lots")} />
+              </>
+            )}
             {product?.kind === "week" && (
               <>
                 <dt className="text-slate-500">Coût brut</dt>

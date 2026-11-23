@@ -177,6 +177,7 @@ communes), `closed_at`.
 | cause_id | FK | |
 | comment | text, null | |
 | destination_gap_justification | text, null | si la répartition ne tombe pas juste |
+| lots | jsonb, null | Réception, Stockage (R37) : `[{lotNumber, dlc, quantity}]`, quantités dans l'unité nette, somme = `net_quantity` |
 | cost_* | numeric, null | **colonnes réservées Phase 3** (alimentaire, main-d'œuvre, emballage, indirect, méthode, date de calcul) |
 | row_version | int | verrou optimiste pour les corrections concurrentes |
 
@@ -191,6 +192,10 @@ le type, le nombre et la version), `count`, `tare_kg_snapshot`.
 
 **declaration_destinations** — `id`, `declaration_id`, `destination_id`, `quantity`, `unit_code`, `net_kg` null,
 `recovered_amount` numeric null (Phase 3).
+
+**declaration_photos** — `id`, `declaration_id`, `content_type` (`image/jpeg`), `content` bytea (photo réduite sur
+l'appareil), `byte_size`, `created_by`, `created_at`. Photos de l'étiquette (lot, DLC ; R37), effacées au bout de
+3 mois ; index sur `declaration_id` et `created_at`.
 
 ### Traçabilité
 

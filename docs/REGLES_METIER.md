@@ -539,3 +539,22 @@ Migration 0037 ; les pertes déjà enregistrées gardent leur cause.
   (ancienne « 7. Lot oublié / surstock »), **5. Retour non utilisable** (nouvelle : par exemple un seau de crème ouvert
   depuis plus de 48 h ; « Conservation / stockage » · évitable, proposé), 6. Rupture du froid (panne de chambre),
   7. Nuisibles, 8. Chute / écrasement en manutention.
+
+## R37 — N° de lot, DLC et photos (23/11/2026)
+
+Demandé par le futur utilisateur de la Réception (migration 0038).
+
+- **Où** : étape « N° de lot et DLC » après la quantité, en **Réception et Stockage**, **facultative** (« Passer »).
+  Refusé par le serveur dans les autres zones.
+- **Plusieurs lots ou DLC** pour une même perte (50 kg de carottes avec 3 DLC) : une ligne par lot, chacune avec un
+  n° de lot et/ou une DLC et **sa quantité**, dans l'unité de la quantité nette ; la **somme doit faire la quantité de
+  la perte** (même tolérance que les destinations, R4). Une seule ligne porte toute la quantité. 20 lignes au plus.
+- **Saisie rapide** : DLC au clavier numérique (« 251126 », « 25/11/2026 » ; sans année, la date la plus proche
+  d'aujourd'hui), « Mettre le reste » remplit la dernière quantité.
+- **Lecture** : n° de lot et DLC **tapés** pour l'instant ; la lecture automatique sur photo (service en ligne,
+  payant à la photo) pourra s'ajouter plus tard sans changer la saisie.
+- **Photos** : 4 au plus par perte, prises avec la tablette, **réduites sur l'appareil** (1 600 px, JPEG ≈ 150 à
+  400 Ko) et gardées **dans la base** ; **effacées au bout de 3 mois** (à chaque nouvelle photo enregistrée) ; le
+  lot, la DLC et la quantité restent. Visibles dans le détail de la perte par ceux qui peuvent la lire. Pas de photo
+  en saisie « plusieurs pertes » (envoi groupé trop lourd), les lots y restent possibles.
+- **Correction** : lots modifiables ; une photo retirée est effacée, une photo ajoutée est enregistrée.

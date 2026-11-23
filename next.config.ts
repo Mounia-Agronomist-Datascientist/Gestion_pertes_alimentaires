@@ -15,6 +15,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Photos du lot et de la DLC (règle R37) : jusqu'à 4 photos réduites (≈ 600 Ko chacune) dans une même saisie.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   // Développement seulement : ouvrir le serveur local depuis un téléphone ou une tablette du même réseau wifi
   // (adresse « Network » affichée au lancement, ex. http://192.168.1.20:3001).
   allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "172.*.*.*"],

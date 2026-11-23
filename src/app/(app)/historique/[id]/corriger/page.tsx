@@ -10,6 +10,7 @@ import { getDeclarationDetail } from "@/modules/declarations/queries";
 import { packagingOptions } from "@/modules/matieres/colis";
 import { DeclarationWizard, type WizardInitial } from "../../../declarer/declaration-wizard";
 import type { FreePrice } from "@/domain/produit-absent";
+import { formatDlc } from "@/domain/lots";
 
 export const metadata = { title: "Corriger une perte — Pertes" };
 
@@ -106,6 +107,12 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     occurredOn: d.occurredOn,
     occurredTime: d.occurredTime?.slice(0, 5) ?? "",
     comment: d.comment ?? "",
+    lotLines: (d.lots ?? []).map((l) => ({
+      lotNumber: l.lotNumber ?? "",
+      dlc: l.dlc ? formatDlc(l.dlc) : "",
+      quantity: String(l.quantity).replace(".", ","),
+    })),
+    photos: detail.photos.map((p) => ({ photoId: p.id, src: `/historique/${id}/photo/${p.id}` })),
   };
 
   const options = await getDeclarationOptions(

@@ -2,7 +2,7 @@
  * Enregistrement d'une déclaration de perte.
  * Toutes les règles sont appliquées ici, côté serveur, quel que soit l'écran utilisé.
  */
-import { and, eq, gte, inArray, isNull, lte, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { COST_METHOD, lossCostBreakdown } from "@/domain/couts";
@@ -12,6 +12,14 @@ import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCo
 import { normalizeCauseName as normalizeLabel } from "@/modules/admin/causes";
 import { tomeKey } from "@/modules/imports/tome/parse-tome";
 import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
+import {
+  LotError,
+  type LotLine,
+  lotsAllowedIn,
+  MAX_PHOTO_BYTES,
+  PHOTO_RETENTION_MONTHS,
+  validateLots,
+} from "@/domain/lots";
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
 import { computeNetWeight, type GastroLine, type SupportTare, TareError } from "@/domain/tares";
@@ -547,6 +555,32 @@ async function prepareDeclaration(
   );
   const kgPerUnit = measurement.netKg != null ? measurement.netKg / measurement.netQuantity : null;
 
+  // ─── Lots, DLC et photos (règle R37) ─────────────────────────────────────
+  if ((input.lots?.length || input.photos?.length) && !lotsAllowedIn(place.zone.code)) {
+    throw new DeclarationError("Les n° de lot, DLC et photos se notent à la Réception et au Stockage");
+  }
+  let lots: LotLine[] | null = null;
+  if (input.lots?.length) {
+    try {
+      lots = validateLots(measurement.netQuantity, input.lots);
+    } catch (e) {
+      if (e instanceof LotError) throw new DeclarationError(e.message);
+      throw e;
+    }
+  }
+  const photos = { keep: [] as string[], add: [] as Buffer[] };
+  for (const p of input.photos ?? []) {
+    if ("photoId" in p) {
+      photos.keep.push(p.photoId);
+      continue;
+    }
+    const bytes = Buffer.from(p.dataUrl.slice(p.dataUrl.indexOf(",") + 1), "base64");
+    if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff)
+      throw new DeclarationError("Photo illisible : reprenez-la");
+    if (bytes.length > MAX_PHOTO_BYTES) throw new DeclarationError("Photo trop lourde : reprenez-la");
+    photos.add.push(bytes);
+  }
+
   // ─── Coût brut figé (docs/PHASE3.md, étapes 3.3 et 3.4) ────────────────────
   // Coûts du tome de la semaine et emballages en vigueur à la date de la perte ; rien pour un produit sans coût.
   // Toutes les colonnes sont écrites (null par défaut) : une correction vers un produit sans coût efface l'ancien coût.
@@ -645,10 +679,12 @@ async function prepareDeclaration(
       causeId: cause.id,
       causeName: cause.name,
       comment: input.comment || null,
+      lots,
       destinationGapJustification: justification,
       updatedAt: now,
     },
     containers: measurement.containers,
+    photos,
     destinations: input.destinations.map((d) => ({
       destinationId: d.destinationId,
       quantity: roundQuantity(d.quantity),
@@ -765,6 +801,56 @@ async function writeVersionLines(
   return { declaration, containers, destinations };
 }
 
+/**
+ * Enregistre les photos d'une perte (règle R37). Correction (`replacing`) : les photos déjà enregistrées qui ne sont
+ * pas gardées sont retirées. Les photos de plus de 3 mois, de toutes les pertes, sont effacées au passage.
+ */
+async function savePhotos(
+  tx: Db,
+  user: AuthUser,
+  declarationId: string,
+  photos: PreparedDeclaration["photos"],
+  now: Date,
+  replacing: boolean,
+) {
+  if (replacing) {
+    const existing = await tx
+      .select({ id: s.declarationPhotos.id })
+      .from(s.declarationPhotos)
+      .where(eq(s.declarationPhotos.declarationId, declarationId));
+    if (photos.keep.some((id) => !existing.some((p) => p.id === id)))
+      throw new DeclarationError("Photo introuvable : rechargez la page");
+    const removed = existing.filter((p) => !photos.keep.includes(p.id)).map((p) => p.id);
+    if (removed.length) await tx.delete(s.declarationPhotos).where(inArray(s.declarationPhotos.id, removed));
+  } else if (photos.keep.length) {
+    throw new DeclarationError("Photo introuvable : reprenez-la");
+  }
+  if (photos.add.length) {
+    await tx.insert(s.declarationPhotos).values(
+      photos.add.map((content) => ({
+        declarationId,
+        contentType: "image/jpeg",
+        content,
+        byteSize: content.length,
+        createdBy: user.id,
+        createdAt: now,
+      })),
+    );
+    await purgeOldPhotos(tx, now);
+  }
+}
+
+/** Efface les photos de lot / DLC de plus de 3 mois (le lot, la DLC et la quantité restent sur la perte). */
+export async function purgeOldPhotos(db: Db, now: Date = new Date()): Promise<number> {
+  const limit = new Date(now);
+  limit.setUTCMonth(limit.getUTCMonth() - PHOTO_RETENTION_MONTHS);
+  const removed = await db
+    .delete(s.declarationPhotos)
+    .where(lt(s.declarationPhotos.createdAt, limit))
+    .returning({ id: s.declarationPhotos.id });
+  return removed.length;
+}
+
 function summarize(declaration: typeof s.lossDeclarations.$inferSelect): CreatedDeclaration {
   return {
     id: declaration.id,
@@ -792,6 +878,7 @@ async function insertNewDeclaration(
   if (!declaration) throw new Error("Enregistrement impossible");
 
   const snapshot = await writeVersionLines(tx, declaration, prepared);
+  await savePhotos(tx, user, declaration.id, prepared.photos, now, false);
   await tx.insert(s.declarationRevisions).values({
     declarationId: declaration.id,
     revision: 1,
@@ -1047,6 +1134,7 @@ export async function correctDeclaration(
     if (!declaration) throw new DeclarationConflictError();
 
     const after = await writeVersionLines(tx, declaration, prepared);
+    await savePhotos(tx, user, id, prepared.photos, now, true);
     await tx.insert(s.declarationRevisions).values({
       declarationId: id,
       revision,

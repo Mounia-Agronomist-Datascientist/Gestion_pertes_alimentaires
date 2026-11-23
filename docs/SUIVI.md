@@ -57,6 +57,7 @@
 | 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
 | 2026-11-19 | Réception : un seul poste (« Contrôle des marchandises » désactivé, migration 0030) ; semaines S-1, S, S+1 ; « Produit absent de la liste » sous la recherche (tous les postes) ; fournisseur et colis sous chaque matière ; méthodes « 1. Comptage en nombre de colis, sachets ou unités », « 2. Pesée à la balance », « 3. Estimation » ; kg seulement ; poids du colis corrigeable et « Autre colis » (Réception, Stockage) | 437 tests ; parcours Réception vérifié en local (Chrome piloté) |
+| 2026-11-23 | N° de lot, DLC et photos (R37) : étape facultative en Réception et Stockage, plusieurs lots par perte avec la quantité de chacun (somme = quantité de la perte), photos réduites sur la tablette, gardées 3 mois dans la base, visibles dans le détail ; saisie manuelle du lot et de la DLC (migration 0038) | 485 tests (6 unitaires, 7 d'intégration en plus) + 6 parcours de bout en bout ; saisie, détail et correction vérifiés dans Chrome |
 | 2026-11-23 | Retours du futur utilisateur : Réception sans « Problème de température » (marchandise jamais acceptée), avec « Étiquetage ou emballage non conforme » ; « Autres pertes » devient « Autres causes » ; Stockage renuméroté (4. Surstock, 5. Retour non utilisable — nouvelle —, 6 à 8) (migration 0037) | 472 tests ; listes vérifiées en base locale |
 | 2026-11-23 | « 2. Problème de qualité » (Stockage) : « rupture de la chaîne du froid » retirée de la précision, la cause 4 s'en charge (migration 0036) | 472 tests ; précision vérifiée en base locale |
 | 2026-11-23 | Référentiel des pertes, étape 2 (R35) : 10 causes (Réception 1, Stockage 4 dont 2 réactivées et numérotées 4 à 7, Cuisine 3, Cuisine et Conditionnement 1, Conditionnement 1), chacune avec sa famille proposée (migration 0035) | 472 tests + 6 parcours de bout en bout ; listes « Pourquoi ? » vérifiées dans Chrome (Réception, Stockage, Cuisine) |
@@ -139,7 +140,7 @@
 
 ## Anomalies connues / points de vigilance
 
-- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0037 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
+- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0038 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
 - TypeScript 7 (nouvelle version native) fait la vérification des types (`npm run typecheck`, paquet `typescript7`, nom

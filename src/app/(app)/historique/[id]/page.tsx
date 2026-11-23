@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db/client";
+import { lotLabel } from "@/domain/lots";
 import { productLabel } from "@/domain/produits";
 import { formatProductionWeek } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
@@ -25,6 +26,7 @@ const TRACKED_FIELDS: Record<string, string> = {
   netUnitCode: "unité",
   tareTotalKg: "tare",
   causeName: "cause",
+  lots: "lots et DLC",
   comment: "commentaire",
 };
 
@@ -168,6 +170,46 @@ export default async function DeclarationDetailPage({
             <span className="block text-sm text-amber-700">Écart justifié : {d.destinationGapJustification}</span>
           )}
         </dd>
+        {(d.lots?.length || detail.photos.length > 0) && (
+          <>
+            <dt className="text-slate-500">Lots et DLC</dt>
+            <dd className="flex flex-col gap-2">
+              {d.lots?.length ? (
+                <ul>
+                  {d.lots.map((l, i) => (
+                    <li key={i}>
+                      {lotLabel(l)} : {fmtNumber(l.quantity)} {UNIT_LABELS[d.netUnitCode] ?? d.netUnitCode}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {detail.photos.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {detail.photos.map((p, i) => (
+                    <a
+                      key={p.id}
+                      href={`/historique/${d.id}/photo/${p.id}`}
+                      target="_blank"
+                      rel="noopener"
+                      className="block"
+                      aria-label={`Photo ${i + 1} du lot et de la DLC`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- photo privée servie par l'application */}
+                      <img
+                        src={`/historique/${d.id}/photo/${p.id}`}
+                        alt={`Photo ${i + 1} du lot et de la DLC`}
+                        className="size-24 rounded-lg border border-slate-200 object-cover"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+              {detail.photos.length > 0 && (
+                <span className="text-sm text-slate-500">Photos gardées 3 mois, puis effacées.</span>
+              )}
+            </dd>
+          </>
+        )}
         <dt className="text-slate-500">Lieu</dt>
         <dd>
           {detail.zoneName} › {detail.subzoneName}

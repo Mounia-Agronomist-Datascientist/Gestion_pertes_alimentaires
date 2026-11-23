@@ -28,6 +28,8 @@ mémorisation du dernier contexte (zone, sous-zone).
    - *Comptage* : nombre + unité (pièces, barquettes) → conversion affichée si poids unitaire connu,
      sinon mention « non converti en kg ».
    - *Estimation manuelle*.
+5 bis. **N° de lot et DLC** (Réception, Stockage ; R37) — facultatif : photos de l'étiquette, une ligne par lot
+   (n° de lot, DLC, quantité), « Mettre le reste », « Passer ».
 6. **Cause** — liste filtrée par zone ; « Autres causes » toujours présente ; lien « Proposer une nouvelle cause ».
 7. **Destination** — une tuile = 100 % ; bouton « Répartir » pour ajouter des lignes, avec compteur
    « reste à affecter : 3,0 kg » et alerte si écart.

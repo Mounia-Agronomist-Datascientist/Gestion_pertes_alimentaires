@@ -51,6 +51,7 @@ Application **Pertes** · semaine de production du **jeudi au mercredi**.
 |---|---|
 | Une équipe ne trouve pas un plat | L'import de la semaine est-il fait ? Le plat est-il dans le plan de son équipe ? |
 | Une équipe a dépassé le délai | Un responsable déclare ou corrige à sa place (déclaration : 7 jours ; correction : une semaine après la fin de la semaine de production). |
+| Litige fournisseur (lot, DLC) | Historique → la perte : **lots, DLC et quantités** notés en Réception ou Stockage, et les **photos de l'étiquette** (touchez une photo pour l'agrandir). Les photos sont **effacées au bout de 3 mois** : enregistrer celles utiles au litige avant ; le lot, la DLC et la quantité restent. |
 | Une perte est restée « en attente » sur une tablette | Ouvrir l'application sur cette tablette avec le compte de l'équipe, réseau disponible : l'envoi part tout seul. Page « Pertes en attente » pour voir les refus et leur motif. |
 | Tablette changée ou remise à zéro | Les pertes en attente sur l'ancienne tablette sont perdues : les faire saisir à nouveau. |
 | Le site ne répond plus | Vérifier l'hébergement (Netlify, Neon). Les équipes peuvent continuer à saisir hors ligne quelques minutes. |

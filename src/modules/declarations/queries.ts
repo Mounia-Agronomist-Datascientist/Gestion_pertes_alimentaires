@@ -98,7 +98,7 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
   if (!row || !canReadDeclaration(user, row.declaration)) return null;
   const d = row.declaration;
 
-  const [weeks, containers, destinations, revisions] = await Promise.all([
+  const [weeks, containers, destinations, revisions, photos] = await Promise.all([
     db.select().from(s.productionWeeks).where(eq(s.productionWeeks.id, d.productionWeekId)),
     db
       .select({
@@ -138,6 +138,12 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
       .innerJoin(s.users, eq(s.declarationRevisions.changedBy, s.users.id))
       .where(eq(s.declarationRevisions.declarationId, id))
       .orderBy(desc(s.declarationRevisions.revision)),
+    // Photos du lot et de la DLC (sans leur contenu, servi par /historique/[id]/photo/[photoId]).
+    db
+      .select({ id: s.declarationPhotos.id, createdAt: s.declarationPhotos.createdAt })
+      .from(s.declarationPhotos)
+      .where(eq(s.declarationPhotos.declarationId, id))
+      .orderBy(s.declarationPhotos.createdAt),
   ]);
   const productionWeek = weeks.find((w) => w.id === d.productionWeekId)!;
 
@@ -147,6 +153,7 @@ export async function getDeclarationDetail(db: Db, user: AuthUser, id: string, n
     containers,
     destinations,
     revisions,
+    photos,
     canModify: d.status !== "annulee" && canModifyDeclaration(user, d, toProductionLocalDate(now)),
     /** Jours entre la perte et sa saisie (0 = saisie le jour même). */
     delayDays: daysBetween(d.occurredOn, toProductionLocalDate(d.declaredAt)),

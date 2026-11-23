@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  customType,
   date,
   index,
   integer,
@@ -21,6 +22,7 @@ import { users } from "./auth";
 import { subzones, teams, zones } from "./organisation";
 import { productionWeeks } from "./production-weeks";
 import { weeklyImports, weekRecipeLines, weekRecipes, weekSubRecipes } from "./imports";
+import type { LotLine } from "@/domain/lots";
 import { causes, containerTares, destinations, productCategoryEnum, products, units } from "./referentiels";
 
 export const declarationStatusEnum = pgEnum("declaration_status", ["brouillon", "validee", "corrigee", "annulee"]);
@@ -147,6 +149,11 @@ export const lossDeclarations = pgTable(
       .references(() => causes.id),
     causeName: text("cause_name").notNull(),
     comment: text("comment"),
+    /**
+     * N° de lot et DLC (Réception, Stockage ; règle R37), avec la quantité de chaque lot dans l'unité de la quantité
+     * nette ; null : non renseignés. Recopiés tels quels d'une version à l'autre.
+     */
+    lots: jsonb("lots").$type<LotLine[]>(),
     destinationGapJustification: text("destination_gap_justification"),
 
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -211,6 +218,33 @@ export const declarationDestinations = pgTable("declaration_destinations", {
   /** N° de la poubelle où la perte est jetée (destinations qui le demandent : Les Alchimistes). */
   binNumber: text("bin_number"),
 });
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "bytea" });
+
+/**
+ * Photos du n° de lot et de la DLC (règle R37) : JPEG réduit sur l'appareil, gardé 3 mois puis effacé ; le lot, la
+ * DLC et la quantité tapés restent sur la perte.
+ */
+export const declarationPhotos = pgTable(
+  "declaration_photos",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    declarationId: uuid("declaration_id")
+      .notNull()
+      .references(() => lossDeclarations.id),
+    contentType: text("content_type").notNull(),
+    content: bytea("content").notNull(),
+    byteSize: integer("byte_size").notNull(),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("declaration_photos_declaration_idx").on(t.declarationId),
+    index("declaration_photos_created_at_idx").on(t.createdAt),
+  ],
+);
 
 /**
  * Historique complet : une ligne par version d'une déclaration, en insertion seule
