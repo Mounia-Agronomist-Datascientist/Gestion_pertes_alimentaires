@@ -21,7 +21,12 @@ export async function tablesToXlsx(tables: readonly CsvTable[]): Promise<Uint8Ar
   const used = new Set<string>();
   for (const table of tables) {
     const sheet = workbook.addWorksheet(sheetName(table.title, used), { views: [{ state: "frozen", ySplit: 1 }] });
-    sheet.addRow(table.headers).font = { bold: true };
+    // En-têtes aux couleurs de l'application (R31) : texte blanc en gras sur brun foncé.
+    const header = sheet.addRow(table.headers);
+    header.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    header.eachCell((cell) => {
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF280606" } };
+    });
     // Texte saisi (libellés) : jamais interprété comme une formule, ExcelJS écrit les chaînes telles quelles.
     for (const row of table.rows) sheet.addRow(row.map((v) => v ?? null));
     sheet.columns.forEach((column, i) => {

@@ -471,6 +471,10 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   pour les titres et les liens, plus foncés pour rester lisibles), **brun foncé** #280606 pour le texte et les
   boutons d'action, fond **crème**, police **Nunito** (servie par l'application ; les polices de titre du site sont
   sous licence Adobe et ne sont pas reprises).
+- **Documents téléchargés** (23/11/2026) : mêmes couleurs que l'application. Rapports PDF : titres en rouge
+  #D90019, texte et barres en brun foncé #280606, lignes alternées et chiffres clés sur fond crème, équipes avec
+  une pastille à leur couleur ; police Helvetica (police standard des PDF). Exports Excel : en-têtes en blanc gras
+  sur brun foncé. Les CSV n'ont pas de couleur.
 - **Logo** sur la page de connexion **uniquement** (fichier `public/marque/logo-brigade-de-vero.svg`, copié du site).
 - L'en-tête garde la **couleur de l'équipe** pour un compte équipe ; rouge pour les autres comptes.
 - Les erreurs gardent leur encadré rouge clair. Graphiques : anneaux et colonnes dans la palette assortie à la charte (R30) ;

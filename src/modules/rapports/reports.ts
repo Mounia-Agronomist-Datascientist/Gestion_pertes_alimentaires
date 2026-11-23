@@ -307,6 +307,8 @@ async function periodic(
         String(x.summary.events),
         trend(x.summary.foodKg, x.previous?.foodKg, "")?.replace(" vs ", "") ?? "—",
       ]),
+      // Une équipe garde sa couleur, comme dans l'application (R30).
+      { swatches: rows.map((x) => x.color) },
     );
   pdf.heading("Par zone", tableHeight(zones.rows.length));
   if (zones.rows.length) axisTable("Zone", zones.rows);

@@ -10,13 +10,23 @@ const MARGIN = 42;
 /** Hauteur d'une ligne de tableau. */
 export const ROW_HEIGHT = 15;
 const CONTENT_WIDTH = A4.width - 2 * MARGIN;
-const INK = rgb(0.06, 0.09, 0.16);
-const MUTED = rgb(0.4, 0.45, 0.52);
-const LINE = rgb(0.85, 0.87, 0.9);
-const ZEBRA = rgb(0.96, 0.97, 0.98);
-const ACCENT = rgb(0.06, 0.46, 0.43);
-const BAR = rgb(0.06, 0.46, 0.43);
-const BAR_TRACK = rgb(0.93, 0.95, 0.96);
+/** Couleur « #rrggbb » pour pdf-lib. */
+export function hexColor(hex: string) {
+  const n = Number.parseInt(hex.replace("#", ""), 16);
+  return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+}
+
+/**
+ * Charte de l'application (R31, décision du 23/11/2026) : texte et barres en brun foncé, titres en rouge, lignes
+ * alternées sur fond crème, comme à l'écran.
+ */
+const INK = hexColor("#280606");
+const MUTED = hexColor("#6f5d58");
+const LINE = hexColor("#eadbd0");
+const ZEBRA = hexColor("#fff8f0");
+const ACCENT = hexColor("#d90019");
+const BAR = hexColor("#280606");
+const BAR_TRACK = hexColor("#f5e6dc");
 
 /**
  * Texte compatible avec l'encodage des polices standard (WinAnsi) : espaces insécables fines des nombres
@@ -135,7 +145,7 @@ export class ReportPdf {
 
   /** Titre principal de la première page. */
   cover(lead: string) {
-    this.page.drawText(pdfText(this.title), { x: MARGIN, y: this.y, size: 20, font: this.bold, color: INK });
+    this.page.drawText(pdfText(this.title), { x: MARGIN, y: this.y, size: 20, font: this.bold, color: ACCENT });
     this.y -= 22;
     this.page.drawText(pdfText(this.subtitle), { x: MARGIN, y: this.y, size: 12, font: this.font, color: INK });
     this.y -= 16;
@@ -214,12 +224,23 @@ export class ReportPdf {
     this.y -= 4;
   }
 
-  table(columns: Column[], rows: string[][], options: { total?: string[] } = {}) {
+  /** `swatches` : pastille de couleur devant la première cellule de chaque ligne (couleur d'une équipe). */
+  table(
+    columns: Column[],
+    rows: string[][],
+    options: { total?: string[]; swatches?: readonly (string | null | undefined)[] } = {},
+  ) {
     const totalWidth = columns.reduce((a, c) => a + c.width, 0);
     const widths = columns.map((c) => (c.width / totalWidth) * CONTENT_WIDTH);
     const size = 8.5;
     const rowHeight = ROW_HEIGHT;
-    const drawRow = (cells: string[], font: PDFFont, background: ReturnType<typeof rgb> | null, color = INK) => {
+    const drawRow = (
+      cells: string[],
+      font: PDFFont,
+      background: ReturnType<typeof rgb> | null,
+      color = INK,
+      swatch?: string | null,
+    ) => {
       this.ensure(rowHeight);
       if (background)
         this.page.drawRectangle({
@@ -230,10 +251,12 @@ export class ReportPdf {
           color: background,
         });
       let x = MARGIN;
+      if (swatch) this.page.drawRectangle({ x: x + 4, y: this.y - 7, width: 7, height: 7, color: hexColor(swatch) });
       cells.forEach((cell, i) => {
         const w = widths[i]!;
-        const text = this.fit(cell ?? "", font, size, w - 8);
-        const tx = columns[i]!.align === "right" ? x + w - 4 - font.widthOfTextAtSize(text, size) : x + 4;
+        const indent = i === 0 && swatch ? 11 : 0;
+        const text = this.fit(cell ?? "", font, size, w - 8 - indent);
+        const tx = columns[i]!.align === "right" ? x + w - 4 - font.widthOfTextAtSize(text, size) : x + 4 + indent;
         this.page.drawText(text, { x: tx, y: this.y - 7, size, font, color });
         x += w;
       });
@@ -262,7 +285,7 @@ export class ReportPdf {
         this.newPage();
         header();
       }
-      drawRow(row, this.font, i % 2 ? ZEBRA : null);
+      drawRow(row, this.font, i % 2 ? ZEBRA : null, INK, options.swatches?.[i]);
     });
     if (options.total) {
       this.page.drawLine({
