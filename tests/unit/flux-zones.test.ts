@@ -17,6 +17,8 @@ const fact = (zoneId: string, netKg: number | null, grossEur = 0): LossFact => (
   weekSubRecipeId: null,
   causeId: "c",
   causeName: "c",
+  causeFamily: null,
+  avoidability: null,
   netKg,
   netQuantity: netKg ?? 1,
   netUnitCode: netKg == null ? "piece" : "kg",

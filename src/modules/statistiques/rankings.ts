@@ -12,7 +12,14 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { productLabel } from "@/domain/produits";
 import type { Period } from "@/domain/periodes";
-import { destinationTotals, type LossFact, type RankBy, rankGroups, type StatsSummary } from "@/domain/statistiques";
+import {
+  causeLenses,
+  destinationTotals,
+  type LossFact,
+  type RankBy,
+  rankGroups,
+  type StatsSummary,
+} from "@/domain/statistiques";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { loadFacts, type StatsFilters } from "./facts";
 
@@ -140,5 +147,7 @@ export async function causeAndDestinationRanking(
     total: facts.length,
     causes: causes.map((c) => ({ ...c, mainZone: c.mainZoneId ? (zoneNames.get(c.mainZoneId) ?? null) : null })),
     destinations,
+    /** Pertes évitables et familles de causes racines (décision du 23/11/2026). */
+    lenses: causeLenses(facts, withCosts, by),
   };
 }

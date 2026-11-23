@@ -6,7 +6,7 @@ import { asc } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import type { Period } from "@/domain/periodes";
-import { summarize } from "@/domain/statistiques";
+import { causeLenses, summarize } from "@/domain/statistiques";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { adjacentOf, loadFacts, type StatsFilters } from "./facts";
 import { zoneFlowTiles } from "./flux-zones";
@@ -42,6 +42,8 @@ export async function generalDashboard(db: Db, user: AuthUser, period: Period, f
     zoneFlow: await zoneFlowTiles(db, user, filters, facts, previousFacts, withCosts, returns),
     /** Retours fournisseur, hors du total perdu (décision du 19/11/2026). */
     supplierReturns: summarize(returns, withCosts),
+    /** Pertes évitables et familles de causes racines (décision du 23/11/2026). */
+    lenses: causeLenses(facts, withCosts),
   };
 }
 

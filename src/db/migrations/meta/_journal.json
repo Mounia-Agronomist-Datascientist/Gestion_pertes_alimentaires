@@ -239,6 +239,13 @@
       "when": 1795423446982,
       "tag": "0033_articles_a_valider",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795428538726,
+      "tag": "0034_familles_causes",
+      "breakpoints": true
     }
   ]
 }

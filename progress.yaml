@@ -33,9 +33,9 @@ etapes_phase_6:
   - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: faite, date: 2026-11-18 }
 
 base_de_donnees:
-  derniere_migration: "0033_articles_a_valider"
+  derniere_migration: "0034_familles_causes"
   production:
-    a_appliquer: "0014 à 0033"
+    a_appliquer: "0014 à 0034"
     puis:
       - "Compléter depuis les tomes importés (Administration → Produits)"
       - "Dépôt du ZIP des bons de commande"

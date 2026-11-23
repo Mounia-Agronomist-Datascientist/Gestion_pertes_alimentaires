@@ -8,6 +8,7 @@ import { canReadStats } from "@/modules/statistiques/facts";
 import {
   SupplierReturns,
   Card,
+  CauseLensCards,
   DestinationBars,
   ExportLinks,
   FilterForm,
@@ -57,6 +58,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
       <Card title="Devenir des pertes alimentaires">
         <DestinationBars summary={dashboard.current} />
       </Card>
+      <CauseLensCards lenses={dashboard.lenses} withCosts={dashboard.withCosts} />
 
       <ExportLinks tab="general" ctx={ctx} />
 

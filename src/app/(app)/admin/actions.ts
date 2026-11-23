@@ -10,7 +10,14 @@ import {
   setAccountActive,
   setAccountZones,
 } from "@/modules/admin/accounts";
-import { createCause, reviewCause, setCauseActive, updateCause } from "@/modules/admin/causes";
+import {
+  createCause,
+  reviewCause,
+  setCauseActive,
+  setCauseClassification,
+  updateCause,
+  validateProposedClassifications,
+} from "@/modules/admin/causes";
 import { setContainerActive, setContainerMaxCount, setContainerTare } from "@/modules/admin/containers";
 import { setLabourRate } from "@/modules/admin/labour";
 import {
@@ -168,6 +175,17 @@ export async function causeAction(_prev: CauseActionState, formData: FormData): 
       case "deactivate":
         await setCauseActive(db, admin, causeId, intent === "activate");
         break;
+      case "classify":
+        await setCauseClassification(db, admin, causeId, {
+          family: String(formData.get("family") ?? ""),
+          avoidability: String(formData.get("avoidability") ?? ""),
+        });
+        break;
+      case "validate_classifications": {
+        const n = await validateProposedClassifications(db, admin);
+        revalidatePath("/admin/causes");
+        return { message: `${n} classement${n > 1 ? "s" : ""} validé${n > 1 ? "s" : ""}` };
+      }
       default:
         return { error: "Action inconnue" };
     }

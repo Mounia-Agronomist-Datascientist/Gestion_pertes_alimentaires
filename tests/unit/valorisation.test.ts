@@ -17,6 +17,8 @@ const fact = (over: Partial<LossFact>): LossFact => ({
   weekSubRecipeId: null,
   causeId: "c1",
   causeName: "Erreur",
+  causeFamily: null,
+  avoidability: null,
   netKg: 1,
   netQuantity: 1,
   netUnitCode: "kg",

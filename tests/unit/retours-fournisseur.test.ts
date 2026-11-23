@@ -19,6 +19,8 @@ const fact = (id: string, destinations: [string, number][], over: Partial<LossFa
   weekSubRecipeId: null,
   causeId: "c",
   causeName: "Cause",
+  causeFamily: null,
+  avoidability: null,
   netKg: 10,
   netQuantity: 10,
   netUnitCode: "kg",

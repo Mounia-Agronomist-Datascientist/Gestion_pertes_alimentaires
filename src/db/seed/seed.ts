@@ -1,4 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
+import { PROPOSED_CAUSE_CLASSIFICATION } from "@/domain/familles-causes";
 import { defaultProductionDays } from "@/domain/plages-reutilisation";
 import { generateProductionCalendar } from "@/domain/semaine-production";
 import * as schema from "../schema";
@@ -99,6 +100,8 @@ export async function seed(db: Db): Promise<void> {
           description: c.description ?? null,
           isOther: c.isOther,
           displayOrder: c.isOther ? 999 : i,
+          family: PROPOSED_CAUSE_CLASSIFICATION[c.code]?.[0] ?? null,
+          avoidability: PROPOSED_CAUSE_CLASSIFICATION[c.code]?.[1] ?? null,
         })),
       )
       .onConflictDoNothing();

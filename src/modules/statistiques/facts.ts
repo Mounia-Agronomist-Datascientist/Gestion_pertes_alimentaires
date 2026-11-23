@@ -157,6 +157,12 @@ async function loadAllFacts(db: Db, user: AuthUser, period: Period, filters: Sta
     });
   }
 
+  // Classement actuel de chaque cause (famille, évitable) : une lecture d'analyse, pas un instantané de la perte.
+  const causeRows = await db
+    .select({ id: s.causes.id, family: s.causes.family, avoidability: s.causes.avoidability })
+    .from(s.causes);
+  const causeOf = new Map(causeRows.map((c) => [c.id, c]));
+
   const facts = rows.map((r): LossFact => {
     // Coût brut figé ; une perte saisie avant le coût brut (Phase 2) compte pour son coût matière (comme « Coûts des pertes »).
     const gross = r.grossCostEur ?? r.materialCostEur;
@@ -176,6 +182,8 @@ async function loadAllFacts(db: Db, user: AuthUser, period: Period, filters: Sta
       weekSubRecipeId: r.weekSubRecipeId,
       causeId: r.causeId,
       causeName: r.causeName,
+      causeFamily: causeOf.get(r.causeId)?.family ?? null,
+      avoidability: causeOf.get(r.causeId)?.avoidability ?? null,
       netKg: r.netKg,
       netQuantity: r.netQuantity,
       netUnitCode: r.netUnitCode,

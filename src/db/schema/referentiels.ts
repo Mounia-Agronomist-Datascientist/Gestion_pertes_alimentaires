@@ -119,6 +119,22 @@ export const products = pgTable(
 
 export const causeStatusEnum = pgEnum("cause_status", ["proposee", "active", "rejetee", "inactive"]);
 
+/**
+ * Famille de cause racine (référentiel des pertes agroalimentaires, causes C01–C37 regroupées ; décision du
+ * 23/11/2026) et caractère évitable : réglés par l'administration sur chaque cause, jamais demandés à la saisie.
+ */
+export const causeFamilyEnum = pgEnum("cause_family", [
+  "organisation",
+  "equipement_process",
+  "fournisseur_matiere",
+  "conservation",
+  "hygiene",
+  "surproduction",
+  "inherente",
+  "autre",
+]);
+export const causeAvoidabilityEnum = pgEnum("cause_avoidability", ["evitable", "inevitable", "a_evaluer"]);
+
 export const causes = pgTable(
   "causes",
   {
@@ -128,6 +144,10 @@ export const causes = pgTable(
     description: text("description"),
     /** Cause « Autres pertes » : proposée dans toutes les zones. */
     isOther: boolean("is_other").notNull().default(false),
+    family: causeFamilyEnum("family"),
+    avoidability: causeAvoidabilityEnum("avoidability"),
+    /** false : classement proposé, pas encore confirmé par l'administration. */
+    classificationValidated: boolean("classification_validated").notNull().default(false),
     status: causeStatusEnum("status").notNull().default("active"),
     displayOrder: smallint("display_order").notNull().default(0),
     proposedBy: uuid("proposed_by").references(() => users.id),

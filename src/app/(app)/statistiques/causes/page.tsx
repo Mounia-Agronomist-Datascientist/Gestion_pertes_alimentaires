@@ -9,6 +9,7 @@ import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { causeAndDestinationRanking, RANK_BY_LABELS } from "@/modules/statistiques/rankings";
 import {
   ShareChart,
+  CauseLensCards,
   Card,
   euro,
   ExportLinks,
@@ -96,6 +97,8 @@ export default async function CausesPage({ searchParams }: { searchParams: Promi
           Les causes en tête de classement sont celles qui méritent en priorité une action corrective.
         </p>
       </Card>
+
+      <CauseLensCards lenses={ranking.lenses} withCosts={ranking.withCosts} />
 
       <Card title="Destinations">
         {ranking.destinations.length === 0 ? (

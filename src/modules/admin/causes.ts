@@ -2,10 +2,11 @@
  * Causes de pertes (cahier des charges §9) : gestion par l'administrateur et propositions des utilisateurs.
  * Une cause n'est jamais supprimée ; les déclarations conservent le nom de la cause au moment de la saisie.
  */
-import { and, asc, eq, inArray, ne } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import { AVOIDABILITIES, CAUSE_FAMILIES } from "@/domain/familles-causes";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import { AdminError } from "./accounts";
@@ -223,4 +224,52 @@ export async function setCauseActive(db: Db, admin: AuthUser, causeId: string, a
 /** Nombre de propositions en attente (pour signaler l'administration). */
 export async function countPendingProposals(db: Db): Promise<number> {
   return db.$count(s.causes, inArray(s.causes.status, ["proposee"]));
+}
+
+// ─── Famille de cause racine et pertes évitables (décision du 23/11/2026) ─────────────────────────────
+
+const classificationSchema = z.object({
+  family: z.enum(CAUSE_FAMILIES, { message: "Choisissez la famille de la cause" }),
+  avoidability: z.enum(AVOIDABILITIES, { message: "Indiquez si la perte est évitable" }),
+});
+
+/** Famille et caractère évitable d'une cause, confirmés par l'administration. */
+export async function setCauseClassification(db: Db, admin: AuthUser, causeId: string, raw: unknown) {
+  requirePermission(admin, "referentiel.manage");
+  const parsed = classificationSchema.safeParse(raw);
+  if (!parsed.success) throw new AdminError(parsed.error.issues[0]?.message ?? "Classement invalide");
+  const [before] = await db.select().from(s.causes).where(eq(s.causes.id, causeId));
+  if (!before) throw new AdminError("Cause introuvable");
+  await db
+    .update(s.causes)
+    .set({ ...parsed.data, classificationValidated: true, updatedAt: new Date() })
+    .where(eq(s.causes.id, causeId));
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "classify_cause",
+    entity: "cause",
+    entityId: causeId,
+    before: { family: before.family, avoidability: before.avoidability, validated: before.classificationValidated },
+    after: { ...parsed.data, validated: true },
+  });
+}
+
+/** Valide d'un coup les classements proposés (causes déjà classées, pas encore confirmées). */
+export async function validateProposedClassifications(db: Db, admin: AuthUser): Promise<number> {
+  requirePermission(admin, "referentiel.manage");
+  const rows = await db
+    .update(s.causes)
+    .set({ classificationValidated: true, updatedAt: new Date() })
+    .where(
+      and(eq(s.causes.classificationValidated, false), isNotNull(s.causes.family), isNotNull(s.causes.avoidability)),
+    )
+    .returning({ id: s.causes.id });
+  if (rows.length)
+    await writeAudit(db, {
+      userId: admin.id,
+      action: "validate_cause_classifications",
+      entity: "cause",
+      after: { count: rows.length },
+    });
+  return rows.length;
 }

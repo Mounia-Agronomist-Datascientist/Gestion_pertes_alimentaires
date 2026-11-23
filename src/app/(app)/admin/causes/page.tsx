@@ -36,6 +36,9 @@ export default async function CausesPage() {
           subzoneNames: c.subzoneNames,
           proposedByName: c.proposedByName,
           proposedAt: c.proposedAt?.toISOString() ?? null,
+          family: c.family,
+          avoidability: c.avoidability,
+          classificationValidated: c.classificationValidated,
         }))}
       />
     </>

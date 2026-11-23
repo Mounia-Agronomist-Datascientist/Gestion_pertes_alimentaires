@@ -37,6 +37,9 @@ export interface LossFact {
   weekSubRecipeId: string | null;
   causeId: string;
   causeName: string;
+  /** Famille de cause racine et caractère évitable (réglés sur la cause par l'administration) ; null : pas classée. */
+  causeFamily: string | null;
+  avoidability: string | null;
   netKg: number | null;
   netQuantity: number;
   netUnitCode: string;
@@ -166,6 +169,17 @@ export function rankGroups<K extends string>(
   return [...groupFacts(facts, keyOf)]
     .map(([key, list]) => ({ key, summary: summarize(list, withCosts) }))
     .sort((a, b) => value(b.summary) - value(a.summary) || b.summary.events - a.summary.events);
+}
+
+/**
+ * Lectures par famille de cause racine et par caractère évitable (décision du 23/11/2026) ; une cause pas encore
+ * classée compte à part (« a_classer »).
+ */
+export function causeLenses(facts: readonly LossFact[], withCosts: boolean, by: RankBy = "kg") {
+  return {
+    byFamily: rankGroups(facts, (f) => f.causeFamily ?? "a_classer", withCosts, by),
+    byAvoidability: rankGroups(facts, (f) => f.avoidability ?? "a_classer", withCosts, by),
+  };
 }
 
 /** Totaux par destination (lignes de destination de chaque perte) : kg alimentaires et nombre de pertes. */

@@ -486,3 +486,19 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   d'encas jusqu'à ce que l'administration lui donne sa famille (fiche produit, « Famille d'encas »).
 - Le serveur refuse un encas déclaré ailleurs que là où il est rangé. En Réception et en Conditionnement, tous les
   encas restent proposés.
+
+
+## R34 — Familles de causes racines et pertes évitables (23/11/2026)
+
+- D'après le référentiel des pertes agroalimentaires (causes C01–C37), chaque cause de l'application est rangée
+  dans une **famille de causes racines** : organisation / erreur humaine ; équipement / process ; fournisseur /
+  matière première ; conservation / stockage ; hygiène / contamination ; surproduction / planification ; inhérente
+  au procédé / contrôle qualité ; autre / à préciser.
+- Chaque cause est aussi **évitable**, **inévitable** (épluchures, parures, chutes de découpe, fonds de gastro,
+  barquettes de test d'oxygène) ou **à évaluer** (« Autres pertes »).
+- Ce classement est réglé par l'administration dans Administration → Causes : un classement a été **proposé** le
+  23/11/2026 pour chaque cause existante (migration 0034), marqué « proposé — à valider » jusqu'à confirmation ; une
+  nouvelle cause est « à classer ». Les équipes ne voient **aucune question en plus** à la saisie.
+- Statistiques (vue générale, synthèse, causes et destinations) : carte **« Pertes évitables »** (kg et part
+  évitables, en euros et en kg) et carte **« Par famille de cause racine »**. Le classement actuel de la cause
+  s'applique à toutes ses pertes, passées comprises (lecture d'analyse).

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { destinationTotals, evolution, type LossFact, rankGroups, summarize } from "@/domain/statistiques";
+import { causeLenses, destinationTotals, evolution, type LossFact, rankGroups, summarize } from "@/domain/statistiques";
 
 const fact = (over: Partial<LossFact>): LossFact => ({
   id: "x",
@@ -16,6 +16,8 @@ const fact = (over: Partial<LossFact>): LossFact => ({
   weekSubRecipeId: null,
   causeId: "c1",
   causeName: "Erreur",
+  causeFamily: null,
+  avoidability: null,
   netKg: 1,
   netQuantity: 1,
   netUnitCode: "kg",
@@ -115,5 +117,29 @@ describe("agrégats des statistiques", () => {
     expect(evolution(12, 10)).toEqual({ delta: 2, percent: 20 });
     expect(evolution(5, 0)).toEqual({ delta: 5, percent: null });
     expect(evolution(5, null)).toBeNull();
+  });
+});
+
+describe("pertes évitables et familles de causes (décision du 23/11/2026)", () => {
+  it("regroupe par caractère évitable et par famille ; une cause non classée compte à part", () => {
+    const lenses = causeLenses(
+      [
+        fact({ netKg: 5, causeFamily: "surproduction", avoidability: "evitable" }),
+        fact({ netKg: 2, causeFamily: "inherente", avoidability: "inevitable" }),
+        fact({ netKg: 1, causeFamily: "surproduction", avoidability: "evitable" }),
+        fact({ netKg: 4 }),
+      ],
+      false,
+    );
+    expect(lenses.byAvoidability.map((g) => [g.key, g.summary.foodKg])).toEqual([
+      ["evitable", 6],
+      ["a_classer", 4],
+      ["inevitable", 2],
+    ]);
+    expect(lenses.byFamily.map((g) => [g.key, g.summary.foodKg])).toEqual([
+      ["surproduction", 6],
+      ["a_classer", 4],
+      ["inherente", 2],
+    ]);
   });
 });

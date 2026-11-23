@@ -8,7 +8,14 @@ import { asc } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { productLabel } from "@/domain/produits";
-import { type LossFact, type RankBy, rankGroups, type StatsSummary, summarize } from "@/domain/statistiques";
+import {
+  causeLenses,
+  type LossFact,
+  type RankBy,
+  rankGroups,
+  type StatsSummary,
+  summarize,
+} from "@/domain/statistiques";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { weekComparison } from "./evolution";
 import { adjacentOf, loadFacts, type StatsFilters } from "./facts";
@@ -133,5 +140,7 @@ export async function weeklySummary(
     byCause,
     byProduct,
     rises,
+    /** Pertes évitables et familles de causes racines (décision du 23/11/2026). */
+    lenses: causeLenses(current, withCosts, by),
   };
 }

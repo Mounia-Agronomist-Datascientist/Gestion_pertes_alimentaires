@@ -1,6 +1,15 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import {
+  AVOIDABILITIES,
+  AVOIDABILITY_LABELS,
+  type Avoidability,
+  CAUSE_FAMILIES,
+  CAUSE_FAMILY_HINTS,
+  CAUSE_FAMILY_LABELS,
+  type CauseFamily,
+} from "@/domain/familles-causes";
 import { type CauseActionState, causeAction } from "../actions";
 
 interface Cause {
@@ -13,6 +22,9 @@ interface Cause {
   subzoneNames: string[];
   proposedByName: string | null;
   proposedAt: string | null;
+  family: CauseFamily | null;
+  avoidability: Avoidability | null;
+  classificationValidated: boolean;
 }
 
 interface Props {
@@ -27,6 +39,10 @@ export function CausesAdmin({ causes, zones }: Props) {
   const [creating, setCreating] = useState(false);
 
   const pendingProposals = causes.filter((c) => c.status === "proposee");
+  const toConfirm = causes.filter(
+    (c) => c.status !== "rejetee" && c.status !== "proposee" && !c.classificationValidated && c.family,
+  );
+  const unclassified = causes.filter((c) => (c.status === "active" || c.status === "inactive") && !c.family);
   const listed = causes.filter(
     (c) => (c.status === "active" || c.status === "inactive") && (c.isOther || c.zoneIds.includes(zoneFilter)),
   );
@@ -119,6 +135,42 @@ export function CausesAdmin({ causes, zones }: Props) {
         ))}
       </nav>
 
+      <section className="flex flex-col gap-2 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
+        <h2 className="text-lg font-semibold">Famille de cause et pertes évitables</h2>
+        <p className="text-sm text-amber-950">
+          Chaque cause est rangée dans une famille de causes racines et marquée évitable ou non (référentiel des pertes
+          agroalimentaires). Les équipes ne voient rien de plus à la saisie : ce classement sert aux statistiques («
+          pertes évitables », répartition par famille).
+          {toConfirm.length > 0 &&
+            ` ${toConfirm.length} classement${toConfirm.length > 1 ? "s" : ""} proposé${toConfirm.length > 1 ? "s" : ""} à vérifier.`}
+          {unclassified.length > 0 && ` ${unclassified.length} cause${unclassified.length > 1 ? "s" : ""} à classer.`}
+        </p>
+        <details className="text-sm">
+          <summary className="cursor-pointer font-medium text-rouge-700">Ce que regroupe chaque famille</summary>
+          <dl className="mt-2 grid gap-1 sm:grid-cols-[auto_1fr] sm:gap-x-3">
+            {CAUSE_FAMILIES.map((f) => (
+              <div key={f} className="contents">
+                <dt className="font-medium">{CAUSE_FAMILY_LABELS[f]}</dt>
+                <dd className="text-slate-600">{CAUSE_FAMILY_HINTS[f]}</dd>
+              </div>
+            ))}
+          </dl>
+        </details>
+        {toConfirm.length > 0 && (
+          <form action={action}>
+            <button
+              type="submit"
+              name="intent"
+              value="validate_classifications"
+              disabled={pending}
+              className="rounded-xl border-2 border-brun-700 bg-white px-4 py-2 font-semibold"
+            >
+              Valider les {toConfirm.length} classements proposés tels quels
+            </button>
+          </form>
+        )}
+      </section>
+
       <ul className="flex flex-col gap-2">
         {listed.map((c) => (
           <li
@@ -148,6 +200,7 @@ export function CausesAdmin({ causes, zones }: Props) {
                   )}
                 </span>
                 {c.description && <span className="text-sm text-slate-600">{c.description}</span>}
+                <Classification cause={c} action={action} pending={pending} />
                 <span className="text-sm text-slate-500">
                   {c.isOther
                     ? "Toutes les zones"
@@ -226,5 +279,65 @@ function CauseFields({
         </fieldset>
       )}
     </>
+  );
+}
+
+/** Famille et caractère évitable d'une cause : proposés (à valider) ou confirmés, modifiables sur place. */
+function Classification({
+  cause: c,
+  action,
+  pending,
+}: {
+  cause: Cause;
+  action: (formData: FormData) => void;
+  pending: boolean;
+}) {
+  return (
+    <form action={action} className="mt-1 flex flex-wrap items-end gap-2 rounded-xl bg-slate-50 p-2">
+      <input type="hidden" name="intent" value="classify" />
+      <input type="hidden" name="causeId" value={c.id} />
+      <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+        <span>Famille</span>
+        <select name="family" className="field" defaultValue={c.family ?? ""} required>
+          <option value="" disabled>
+            À classer…
+          </option>
+          {CAUSE_FAMILIES.map((f) => (
+            <option key={f} value={f}>
+              {CAUSE_FAMILY_LABELS[f]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex flex-col gap-1 text-sm">
+        <span>Perte</span>
+        <select name="avoidability" className="field" defaultValue={c.avoidability ?? ""} required>
+          <option value="" disabled>
+            …
+          </option>
+          {AVOIDABILITIES.map((a) => (
+            <option key={a} value={a}>
+              {AVOIDABILITY_LABELS[a]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button
+        type="submit"
+        disabled={pending}
+        className="rounded-xl bg-brun-700 px-4 py-2 text-sm font-semibold text-white"
+      >
+        {c.classificationValidated ? "Enregistrer" : "Valider"}
+      </button>
+      <span
+        className={`w-full text-xs ${c.classificationValidated ? "text-emerald-800" : c.family ? "text-amber-800" : "text-red-800"}`}
+      >
+        {c.classificationValidated
+          ? "Classement validé"
+          : c.family
+            ? "Classement proposé — à valider"
+            : "Cause pas encore classée"}
+      </span>
+    </form>
   );
 }

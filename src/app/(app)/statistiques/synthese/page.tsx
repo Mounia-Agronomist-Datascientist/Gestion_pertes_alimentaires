@@ -12,6 +12,7 @@ import { TrendTable } from "../evolution/trend-table";
 import {
   SupplierReturns,
   ShareChart,
+  CauseLensCards,
   Card,
   euro,
   FilterForm,
@@ -208,6 +209,8 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
             </Card>
           );
         })}
+
+      <CauseLensCards lenses={data.lenses} withCosts={withCosts} />
 
       <Card title="Tendance sur 8 semaines">
         <TrendTable trends={comparison.trends} stableRate={comparison.trendStableRate} />

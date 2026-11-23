@@ -4,7 +4,15 @@ import { ShareDonut } from "./share-donut";
 import Link from "next/link";
 import { db } from "@/db/client";
 import { type Period, periodLabel, periodParams } from "@/domain/periodes";
-import { evolution, type StatsSummary } from "@/domain/statistiques";
+import { type causeLenses, evolution, type StatsSummary } from "@/domain/statistiques";
+import {
+  AVOIDABILITIES,
+  AVOIDABILITY_LABELS,
+  CAUSE_FAMILIES,
+  CAUSE_FAMILY_LABELS,
+  UNCLASSIFIED,
+  UNCLASSIFIED_LABEL,
+} from "@/domain/familles-causes";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { type Params, type StatsContext, statsContext as parseStatsContext } from "@/modules/statistiques/context";
@@ -694,5 +702,84 @@ function ZoneTile({
         )}
       </div>
     </div>
+  );
+}
+
+type Lenses = ReturnType<typeof causeLenses>;
+
+/**
+ * Pertes évitables et familles de causes racines (décision du 23/11/2026) : deux cartes, chacune en euros (si le
+ * profil les voit) et en kg. Classement réglé sur chaque cause dans Administration → Causes.
+ */
+export function CauseLensCards({ lenses, withCosts }: { lenses: Lenses; withCosts: boolean }) {
+  if (!lenses.byAvoidability.length) return null;
+  const avoidOrder = [...AVOIDABILITIES, UNCLASSIFIED] as string[];
+  const familyOrder = [...CAUSE_FAMILIES, UNCLASSIFIED] as string[];
+  const label = (key: string) =>
+    key === UNCLASSIFIED
+      ? UNCLASSIFIED_LABEL
+      : ((AVOIDABILITY_LABELS as Record<string, string>)[key] ??
+        (CAUSE_FAMILY_LABELS as Record<string, string>)[key] ??
+        key);
+  const rowsOf = (groups: Lenses["byFamily"], order: string[], m: "cout" | "kg"): BarRow[] =>
+    [...groups]
+      .sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key))
+      .map((g) => {
+        const eur = g.summary.cost?.grossEur ?? 0;
+        return {
+          key: g.key,
+          label: label(g.key),
+          value: m === "cout" ? eur : g.summary.foodKg,
+          text: m === "cout" ? euro.format(eur) : `${num.format(g.summary.foodKg)} kg`,
+          detail: detailOf(g.summary),
+        };
+      });
+  const totalKg = lenses.byAvoidability.reduce((a, g) => a + g.summary.foodKg, 0);
+  const avoidable = lenses.byAvoidability.find((g) => g.key === "evitable")?.summary;
+  const pair = (groups: Lenses["byFamily"], order: string[], caption: string, keepOrder: boolean) => (
+    <>
+      {withCosts && (
+        <>
+          <h3 className="font-semibold">En euros</h3>
+          <ShareChart
+            unit="euro"
+            caption={`${caption} (€)`}
+            rows={rowsOf(groups, order, "cout")}
+            colorOrder={order}
+            keepOrder={keepOrder}
+          />
+        </>
+      )}
+      <h3 className="font-semibold">En kg</h3>
+      <ShareChart
+        unit="kg"
+        caption={`${caption} (kg)`}
+        rows={rowsOf(groups, order, "kg")}
+        colorOrder={order}
+        keepOrder={keepOrder}
+      />
+    </>
+  );
+  return (
+    <>
+      <Card title="Pertes évitables">
+        {avoidable && totalKg > 0 && (
+          <p className="text-lg">
+            <strong>
+              {num.format(avoidable.foodKg)} kg évitables ({pct.format(avoidable.foodKg / totalKg)})
+            </strong>
+            {withCosts && avoidable.cost && ` · ${euro.format(avoidable.cost.grossEur)}`}
+          </p>
+        )}
+        {pair(lenses.byAvoidability, avoidOrder, "Pertes évitables ou non", true)}
+        <p className="text-xs text-slate-500">
+          D&apos;après la cause de chaque perte : épluchures, parures, fonds de gastro ou barquettes de test sont
+          inévitables ; « Autres pertes » est à évaluer. Réglage : Administration → Causes.
+        </p>
+      </Card>
+      <Card title="Par famille de cause racine">
+        {pair(lenses.byFamily, familyOrder, "Pertes par famille de cause", false)}
+      </Card>
+    </>
   );
 }
