@@ -18,8 +18,8 @@ import { CHART } from "../palette";
 export const metadata = { title: "Alchimistes — Statistiques — Pertes" };
 
 /** Couleurs fixes des deux séries (palette catégorielle validée, dans l'ordre). */
-const DECLARED = CHART.bleu;
-const MEASURED = CHART.moutarde;
+const DECLARED = CHART.bordeaux;
+const MEASURED = CHART.orange;
 
 const kg = (n: number) => `${num.format(n)} kg`;
 const gap = (r: ReconciliationRow) =>

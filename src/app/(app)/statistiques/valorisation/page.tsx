@@ -39,9 +39,9 @@ export const metadata = { title: "Valorisation — Statistiques — Pertes" };
 
 /** Couleurs fixes des trois groupes (palette catégorielle validée, dans l'ordre : jamais réattribuées). */
 const GROUP_COLORS: Record<RecoveryGroup, string> = {
-  avec_recette: CHART.bleu,
-  sans_recette: CHART.moutarde,
-  a_part: CHART.sarcelle,
+  avec_recette: CHART.bordeaux,
+  sans_recette: CHART.orange,
+  a_part: CHART.caramel,
 };
 
 const GROUP_NOTES: Record<RecoveryGroup, string> = {

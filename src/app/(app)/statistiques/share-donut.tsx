@@ -25,11 +25,7 @@ export interface DonutRow {
   color?: string;
 }
 
-/**
- * Palette assortie à la charte (décision du 23/11/2026) : rouge de la charte, bleu, moutarde, sarcelle, caramel,
- * prune ; vérifiée avec l'outil de contrôle des couleurs (luminosité, saturation, daltonisme sur les parts voisines,
- * et le rouge face à toutes les autres puisque la dernière part touche la première). « Autres » en gris chaud.
- */
+/** Palette des graphiques : voir ./palette.ts. « Autres » en gris clair. */
 const COLORS = CHART_ORDER;
 const OTHER_COLOR = CHART.gris;
 const MAX_SLICES = 6;

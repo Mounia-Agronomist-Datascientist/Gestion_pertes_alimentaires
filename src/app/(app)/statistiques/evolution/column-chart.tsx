@@ -14,8 +14,8 @@ export interface Column {
   highlight?: boolean;
 }
 
-/** Couleur de la moyenne glissante : bleu de la palette, distinct des colonnes brunes (vérifié pour les daltonismes). */
-const AVERAGE_COLOR = CHART.bleu;
+/** Couleur de la moyenne glissante : orange de la palette, distinct des colonnes brunes (vérifié pour les daltonismes). */
+const AVERAGE_COLOR = CHART.orange;
 
 /**
  * `average` : moyenne glissante tracée en ligne sur les colonnes (même unité, même axe), avec sa légende et sa

@@ -7,9 +7,9 @@ import { CHART } from "../palette";
 
 /** Couleurs fixes des trois sources (palette catégorielle validée, dans l'ordre : jamais réattribuées). */
 const SOURCE_COLORS: Record<SurplusSource, string> = {
-  tgtg: CHART.bleu,
-  vente_flash: CHART.moutarde,
-  linkee: CHART.sarcelle,
+  tgtg: CHART.bordeaux,
+  vente_flash: CHART.orange,
+  linkee: CHART.caramel,
 };
 const SOURCE_NAMES: Record<SurplusSource, string> = {
   tgtg: "Too Good To Go",

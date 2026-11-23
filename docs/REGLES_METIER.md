@@ -436,17 +436,19 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   années restent en colonnes : un anneau ne montre pas une évolution dans le temps.
 - **6 parts au plus**, les plus grandes ; le reste est regroupé dans « + N autres » (gris). Zones, sous-zones et
   devenirs gardent leur ordre (marche en avant). Couleurs dans un ordre fixe, vérifié pour les daltonismes.
-- **Couleurs des anneaux** (23/11/2026) : palette assortie à la charte, dans cet ordre — rouge de la charte #D90019,
-  bleu #1F6FA3, moutarde #E0A31B, sarcelle #2A9D8F, caramel #C9773A, prune #7B4FA0 ; « autres » en gris chaud
-  #B3AAA3. Contrôlée avec l'outil de vérification des couleurs : luminosité et saturation, parts voisines distinctes
-  pour les daltonismes, et le rouge distinct de toutes les autres (la dernière part touche la première). La
-  moutarde est claire sur fond blanc : la légende écrite (nom, valeur, part) suffit à l'identifier.
-- **Même palette pour les colonnes** (23/11/2026) : coût par composante (matières en rouge, main-d'œuvre en bleu,
-  emballages en moutarde, indirects en sarcelle) ; valorisation (avec recette en bleu, sans recette en moutarde, à
-  part en sarcelle) ; ventes et dons (Too Good To Go en bleu, vente flash en moutarde, Linkee en sarcelle) ;
-  environnement (mesuré en bleu, estimé en moutarde, non couvert en gris) ; Alchimistes (déclaré en bleu, pesé en
-  moutarde) ; moyenne sur 4 semaines en bleu sur les colonnes brunes. Chaque groupe de couleurs utilisé ensemble a
-  été contrôlé. Les barres horizontales restent en brun, les parts dans les zones en rouge de la charte.
+- **Couleurs des anneaux** (23/11/2026, tons choisis par l'administration : bruns, caramel, sable, orange et
+  bordeaux) : dans cet ordre — caramel #9A6526, sable #C69B63, bordeaux #7D1A3C, orange #EF8219, brun #5B2C08,
+  ocre #D9A441 ; « autres » en gris clair #D6CFC8. Teintes ajustées et ordre choisi avec l'outil de vérification des
+  couleurs : deux parts voisines restent distinctes, y compris pour les daltonismes, et la première se distingue de
+  toutes les autres (la dernière part touche la première). Le brun et le bordeaux sont plus sombres, le sable plus
+  doux que la norme de l'outil : ils restent visibles sur fond blanc et la légende est toujours écrite.
+- **Même palette pour les colonnes** (23/11/2026) : bordeaux, orange, caramel puis brun nuit #2B1206, contrôlés
+  ensemble (le sable, trop proche de l'orange, n'est pas mis côte à côte avec lui). Coût par composante : matières
+  en bordeaux, main-d'œuvre en orange, emballages en caramel, indirects en brun nuit ; valorisation (avec recette,
+  sans recette, à part), ventes et dons (Too Good To Go, vente flash, Linkee), environnement (mesuré, estimé, non
+  couvert en gris) et Alchimistes (déclaré, pesé) dans le même ordre ; moyenne sur 4 semaines en orange sur les
+  colonnes brunes. Les barres horizontales restent en brun. Toutes les couleurs sont dans
+  `src/app/(app)/statistiques/palette.ts`.
 - **Équipes en leurs couleurs** (23/11/2026) : dans les anneaux par équipe (comparaison des équipes, « Par équipe »
   du détail d'une zone), chaque équipe garde sa couleur (Verte en vert, Bleue en bleu…), celle du réglage de
   l'équipe.
