@@ -96,10 +96,10 @@ interface CauseSeed {
   subzones?: readonly string[];
 }
 
-/** « Autres pertes » : toujours disponible, dans toutes les zones (§9.2). */
+/** « Autres causes » : toujours disponible, dans toutes les zones (§9.2). */
 export const OTHER_CAUSE = {
   code: "AUTRES",
-  name: "Autres pertes",
+  name: "Autres causes",
   description: "À préciser en commentaire",
 } as const;
 
@@ -130,7 +130,7 @@ export const CAUSES: readonly CauseSeed[] = [
   { code: "STO_CHAINE_FROID", name: "Rupture de la chaîne du froid", zones: ["STOCKAGE"] },
   { code: "STO_ROTATION", name: "Mauvaise rotation", zones: ["STOCKAGE"] },
   { code: "STO_MAUVAIS_STOCKAGE", name: "Mauvais stockage", zones: ["STOCKAGE"] },
-  { code: "STO_EXCEDENT", name: "Stock excédentaire", zones: ["STOCKAGE"] },
+  { code: "STO_EXCEDENT", name: "4. Surstock", zones: ["STOCKAGE"] },
 
   // Stockage et Cuisine
   {
@@ -157,8 +157,8 @@ export const CAUSES: readonly CauseSeed[] = [
   },
 
   // Référentiel des pertes, étape 2 (décision du 23/11/2026)
-  { code: "STO_NUISIBLES", name: "5. Nuisibles", description: "Insectes, rongeurs", zones: ["STOCKAGE"] },
-  { code: "STO_MANUTENTION", name: "6. Chute / écrasement en manutention", zones: ["STOCKAGE"] },
+  { code: "STO_NUISIBLES", name: "7. Nuisibles", description: "Insectes, rongeurs", zones: ["STOCKAGE"] },
+  { code: "STO_MANUTENTION", name: "8. Chute / écrasement en manutention", zones: ["STOCKAGE"] },
   { code: "CUI_SURCUISSON", name: "Surcuisson / brûlé", zones: ["CUISINE"] },
   {
     code: "CUI_ERREUR_RECETTE",
@@ -174,6 +174,19 @@ export const CAUSES: readonly CauseSeed[] = [
   },
   { code: "PANNE_EQUIPEMENT", name: "Panne d'équipement", zones: ["CUISINE", "CONDITIONNEMENT"] },
   { code: "REC_CORPS_ETRANGER", name: "Corps étranger / contamination", zones: ["RECEPTION"] },
+  // Retours du futur utilisateur (décision du 23/11/2026, migration 0037)
+  {
+    code: "REC_ETIQUETAGE",
+    name: "Étiquetage ou emballage non conforme",
+    description: "Pas de n° de lot ou de DLC, etc.",
+    zones: ["RECEPTION"],
+  },
+  {
+    code: "STO_RETOUR_INUTILISABLE",
+    name: "5. Retour non utilisable",
+    description: "Ex. seau de crème ouvert depuis plus de 48 h",
+    zones: ["STOCKAGE"],
+  },
   {
     code: "CON_REGLAGE_LIGNE",
     name: "Réglage / démarrage de la ligne",

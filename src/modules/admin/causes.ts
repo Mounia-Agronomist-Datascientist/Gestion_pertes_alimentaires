@@ -202,12 +202,12 @@ export async function reviewCause(
   });
 }
 
-/** Active ou désactive une cause ; « Autres pertes » reste toujours disponible (§9.2). */
+/** Active ou désactive une cause ; « Autres causes » reste toujours disponible (§9.2). */
 export async function setCauseActive(db: Db, admin: AuthUser, causeId: string, active: boolean) {
   requirePermission(admin, "referentiel.manage");
   const [cause] = await db.select().from(s.causes).where(eq(s.causes.id, causeId));
   if (!cause) throw new AdminError("Cause introuvable");
-  if (cause.isOther && !active) throw new AdminError("« Autres pertes » doit toujours rester disponible");
+  if (cause.isOther && !active) throw new AdminError("« Autres causes » doit toujours rester disponible");
   if (!["active", "inactive"].includes(cause.status)) throw new AdminError("Traitez d'abord la proposition");
   await db
     .update(s.causes)

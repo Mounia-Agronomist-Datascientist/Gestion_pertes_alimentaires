@@ -403,14 +403,14 @@ describe("déclaration de perte", () => {
       expect(r.id).toBeTruthy();
     });
 
-    it("« Autres pertes » est acceptée partout", async () => {
+    it("« Autres causes » est acceptée partout", async () => {
       const r = await createDeclaration(
         t.db,
         teamC,
         cuisine({ causeId: ref("cause:AUTRES"), comment: "Bac renversé" }),
         NOW,
       );
-      expect(await load(r.id)).toMatchObject({ causeName: "Autres pertes", comment: "Bac renversé" });
+      expect(await load(r.id)).toMatchObject({ causeName: "Autres causes", comment: "Bac renversé" });
     });
   });
 

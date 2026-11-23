@@ -774,7 +774,7 @@ export function CauseLensCards({ lenses, withCosts }: { lenses: Lenses; withCost
         {pair(lenses.byAvoidability, avoidOrder, "Pertes évitables ou non", true)}
         <p className="text-xs text-slate-500">
           D&apos;après la cause de chaque perte : épluchures, parures, fonds de gastro ou barquettes de test sont
-          inévitables ; « Autres pertes » est à évaluer. Réglage : Administration → Causes.
+          inévitables ; « Autres causes » est à évaluer. Réglage : Administration → Causes.
         </p>
       </Card>
       <Card title="Par famille de cause racine">

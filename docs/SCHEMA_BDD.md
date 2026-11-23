@@ -126,7 +126,7 @@ Melba), `subject`, `week_number`, `production_week_id` null, `delivery_date`, `o
 `per_unit_eur`) ; `supplier_products` (PK `product_id`,`supplier_id` : `supplier_code`, conditionnement et
 contenance du dernier bon livré, `last_order_id`, `last_delivery_date`).
 
-**causes** — `id`, `code`, `name`, `description`, `is_other` (cause « Autres pertes », toujours disponible),
+**causes** — `id`, `code`, `name`, `description`, `is_other` (cause « Autres causes », toujours disponible),
 `status` (`proposee`|`active`|`rejetee`|`inactive`), `proposed_by` FK users null, `proposed_at`,
 `reviewed_by`, `reviewed_at`.
 

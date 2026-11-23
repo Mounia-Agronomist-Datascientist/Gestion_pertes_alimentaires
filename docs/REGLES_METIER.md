@@ -371,7 +371,7 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Perte répartie (ex. 3 kg renvoyés, 2 kg au compost) : coupée au prorata des quantités de chaque destination.
 - Devenir **« Retour fournisseur »** proposé seulement en **Réception** ; **« Réutilisation dans une autre préparation »**
   n'est pas proposée en Réception. Le serveur refait le contrôle (une correction garde un devenir déjà saisi).
-- **« Autre destination »** demande un commentaire qui la précise (comme le motif « Autres pertes »).
+- **« Autre destination »** demande un commentaire qui la précise (comme le motif « Autres causes »).
 - **Matières de la semaine complètes** : fournisseur et poids du colis lus dans les bons (contenu en sous-colis pesés,
   « 4 Sac 2,5kg » ; colis imbriqué, « Palette (80 Carton (10KG)) » ; pièces avec le poids écrit dans le nom du produit,
   « Escalope de dinde 120g »). Si l'intitulé et le contenu donnent deux poids différents, rien n'est retenu. Ce qui
@@ -495,7 +495,7 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   matière première ; conservation / stockage ; hygiène / contamination ; surproduction / planification ; inhérente
   au procédé / contrôle qualité ; autre / à préciser.
 - Chaque cause est aussi **évitable**, **inévitable** (épluchures, parures, chutes de découpe, fonds de gastro,
-  barquettes de test d'oxygène) ou **à évaluer** (« Autres pertes »).
+  barquettes de test d'oxygène) ou **à évaluer** (« Autres causes »).
 - Ce classement est réglé par l'administration dans Administration → Causes : un classement a été **proposé** le
   23/11/2026 pour chaque cause existante (migration 0034), marqué « proposé — à valider » jusqu'à confirmation ; une
   nouvelle cause est « à classer ». Les équipes ne voient **aucune question en plus** à la saisie.
@@ -526,3 +526,16 @@ Non retenue : « Épluchures, parures, os, arêtes » (Déboîtage, Préparation
 
 « 2. Problème de qualité » (Stockage) ne mentionne plus la rupture de la chaîne du froid, qui a sa propre cause (4) :
 sa précision devient « Produit abîmé, pourri, moisi, contaminé » (migration 0036).
+
+## R36 — Causes de la Réception et du Stockage revues avec le futur utilisateur (23/11/2026)
+
+Migration 0037 ; les pertes déjà enregistrées gardent leur cause.
+
+- **Réception** : « Problème de température » est retirée, car la marchandise n'est jamais acceptée en cas de problème
+  de température. Ajout de **« Étiquetage ou emballage non conforme »** (pas de n° de lot ou de DLC, etc.), rangée
+  dans « Fournisseur / matière » · évitable (classement proposé, R34).
+- **Toutes les zones** : la cause toujours disponible « Autres causes » s'appelle désormais **« Autres causes »**.
+- **Stockage**, dans cet ordre : 1. Problème de DLC, 2. Problème de qualité, 3. Retour non conforme, **4. Surstock**
+  (ancienne « 7. Lot oublié / surstock »), **5. Retour non utilisable** (nouvelle : par exemple un seau de crème ouvert
+  depuis plus de 48 h ; « Conservation / stockage » · évitable, proposé), 6. Rupture du froid (panne de chambre),
+  7. Nuisibles, 8. Chute / écrasement en manutention.

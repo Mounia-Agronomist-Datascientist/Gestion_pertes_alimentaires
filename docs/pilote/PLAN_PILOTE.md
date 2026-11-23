@@ -9,7 +9,7 @@ Les valeurs marquées **à valider** sont des propositions : à confirmer avant 
 
 | # | Action | Qui | État |
 |---|---|---|---|
-| 1 | Mise en ligne (à partir du 8 décembre) : sauvegarde, migrations 0014 à 0036 (workflow « Base de données »), déploiement, vérification de la connexion | Administration | ⏳ |
+| 1 | Mise en ligne (à partir du 8 décembre) : sauvegarde, migrations 0014 à 0037 (workflow « Base de données »), déploiement, vérification de la connexion | Administration | ⏳ |
 | 2 | Après la mise en ligne : « Charger la proposition Agribalyse » (Administration → Facteurs d'émission), déposer les fichiers TGTG, ventes flash et Linkee, « Compléter depuis les tomes importés » (Administration → Produits), déposer le ZIP du dossier des bons de commande du Drive | Administration | ⏳ |
 | 3 | Choisir les équipes pilotes (**à valider** : une équipe de cuisine + le conditionnement, pour couvrir les deux modes : équipe et zone) | Production | ⏳ |
 | 4 | Créer ou vérifier leurs comptes (sans prénom), noter les mots de passe hors de l'application | Administration | ⏳ |
@@ -37,7 +37,7 @@ Les valeurs marquées **à valider** sont des propositions : à confirmer avant 
 | Temps d'une série de 5 pertes | Chronomètre | Moins de 3 minutes |
 | Pertes oubliées | Comparaison avec l'ancien suivi | Aucune |
 | Produits introuvables | Saisies « hors liste » (Administration → Produits) | Moins de 5 % des saisies |
-| Causes qui manquent | Causes proposées, « Autres pertes » avec commentaire | Liste à compléter |
+| Causes qui manquent | Causes proposées, « Autres causes » avec commentaire | Liste à compléter |
 | Quantités non converties en kg | Statistiques : « sans poids en kg » | À identifier (estimations par contenant) |
 | Coupures de réseau | Bandeau « Hors ligne », pertes en attente | Aucune perte perdue |
 | Erreurs de saisie corrigées | Historique des versions | À suivre |

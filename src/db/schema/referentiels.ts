@@ -142,7 +142,7 @@ export const causes = pgTable(
     code: text("code"),
     name: text("name").notNull(),
     description: text("description"),
-    /** Cause « Autres pertes » : proposée dans toutes les zones. */
+    /** Cause « Autres causes » : proposée dans toutes les zones. */
     isOther: boolean("is_other").notNull().default(false),
     family: causeFamilyEnum("family"),
     avoidability: causeAvoidabilityEnum("avoidability"),

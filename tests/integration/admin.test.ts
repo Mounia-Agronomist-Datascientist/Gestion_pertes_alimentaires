@@ -212,12 +212,12 @@ describe("causes", () => {
 
   it("une proposition rejetée ne bloque pas une nouvelle proposition du même nom", async () => {
     const p = await proposeCause(t.db, team, { name: "Coupure de courant", zoneId: cuisine });
-    await reviewCause(t.db, admin, p.id, { accept: false, reason: "Utiliser « Autres pertes »" });
+    await reviewCause(t.db, admin, p.id, { accept: false, reason: "Utiliser « Autres causes »" });
     expect((await t.db.select().from(s.causes).where(eq(s.causes.id, p.id)))[0]?.status).toBe("rejetee");
     await expect(proposeCause(t.db, team, { name: "Coupure de courant", zoneId: cuisine })).resolves.toBeTruthy();
   });
 
-  it("désactive une cause, mais jamais « Autres pertes »", async () => {
+  it("désactive une cause, mais jamais « Autres causes »", async () => {
     const causes = await listCausesForAdmin(t.db, admin);
     const other = causes.find((c) => c.isOther)!;
     const four = causes.find((c) => c.code === "CUI_FOUR_SALE")!;

@@ -1046,7 +1046,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 selected={c.id === causeId}
                 onClick={() => {
                   setCauseId(c.id);
-                  // « Autres pertes » : on reste ici pour écrire le commentaire qui explique la perte.
+                  // « Autres causes » : on reste ici pour écrire le commentaire qui explique la perte.
                   if (!c.isOther) setStep("destination");
                 }}
               >
@@ -1074,7 +1074,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             </div>
           )}
           <p className="text-sm text-slate-500">
-            Aucune cause ne correspond ? Choisissez « Autres pertes » et expliquez en commentaire.
+            Aucune cause ne correspond ? Choisissez « Autres causes » et expliquez en commentaire.
           </p>
           {zone && <ProposeCause zoneId={zone.id} zoneName={zone.name} />}
         </Section>
@@ -1506,7 +1506,7 @@ function ProposeCause({ zoneId, zoneName }: { zoneId: string; zoneName: string }
                 ? {
                     ok: true,
                     message:
-                      "Merci : proposition envoyée à l'administrateur. En attendant, choisissez « Autres pertes ».",
+                      "Merci : proposition envoyée à l'administrateur. En attendant, choisissez « Autres causes ».",
                   }
                 : { ok: false, message: r.error ?? "Proposition impossible" },
             );

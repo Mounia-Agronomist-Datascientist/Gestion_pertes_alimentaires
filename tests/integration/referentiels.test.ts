@@ -67,7 +67,7 @@ describe("données initiales des référentiels", () => {
     expect(rows).toEqual([{ subzone: "CUI_DEBOITAGE" }]);
   });
 
-  it("a une seule cause « Autres pertes »", async () => {
+  it("a une seule cause « Autres causes »", async () => {
     const others = await t.db.select().from(s.causes).where(eq(s.causes.isOther, true));
     expect(others).toHaveLength(1);
   });

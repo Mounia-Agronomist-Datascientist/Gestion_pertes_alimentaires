@@ -28,7 +28,7 @@ mémorisation du dernier contexte (zone, sous-zone).
    - *Comptage* : nombre + unité (pièces, barquettes) → conversion affichée si poids unitaire connu,
      sinon mention « non converti en kg ».
    - *Estimation manuelle*.
-6. **Cause** — liste filtrée par zone ; « Autres pertes » toujours présente ; lien « Proposer une nouvelle cause ».
+6. **Cause** — liste filtrée par zone ; « Autres causes » toujours présente ; lien « Proposer une nouvelle cause ».
 7. **Destination** — une tuile = 100 % ; bouton « Répartir » pour ajouter des lignes, avec compteur
    « reste à affecter : 3,0 kg » et alerte si écart.
 8. **Récapitulatif** — date réelle (aujourd'hui par défaut, modifiable → déclaration tardive signalée),

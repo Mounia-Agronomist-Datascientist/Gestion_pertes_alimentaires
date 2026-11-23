@@ -96,4 +96,7 @@ export const PROPOSED_CAUSE_CLASSIFICATION: Record<string, [CauseFamily, Avoidab
   PANNE_EQUIPEMENT: ["equipement_process", "evitable"],
   REC_CORPS_ETRANGER: ["hygiene", "evitable"],
   CON_REGLAGE_LIGNE: ["equipement_process", "a_evaluer"],
+  // Retours du futur utilisateur (décision du 23/11/2026, migration 0037)
+  REC_ETIQUETAGE: ["fournisseur_matiere", "evitable"],
+  STO_RETOUR_INUTILISABLE: ["conservation", "evitable"],
 };
