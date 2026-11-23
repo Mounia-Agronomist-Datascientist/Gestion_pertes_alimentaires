@@ -24,13 +24,22 @@ async function labels(db: Db) {
     db.select({ id: s.zones.id, name: s.zones.name, order: s.zones.displayOrder }).from(s.zones),
     db.select({ id: s.subzones.id, name: s.subzones.name, zoneId: s.subzones.zoneId }).from(s.subzones),
     db
-      .select({ id: s.teams.id, letter: s.teams.letter, colorName: s.teams.colorName, order: s.teams.displayOrder })
+      .select({
+        id: s.teams.id,
+        letter: s.teams.letter,
+        colorName: s.teams.colorName,
+        colorHex: s.teams.colorHex,
+        order: s.teams.displayOrder,
+      })
       .from(s.teams),
   ]);
   return {
     zone: new Map(zones.map((z) => [z.id, { label: z.name, order: z.order }])),
     subzone: new Map(subzones.map((z) => [z.id, z.name])),
-    team: new Map(teams.map((t) => [t.id, { label: `Équipe ${t.letter} – ${t.colorName}`, order: t.order }])),
+    // Couleur de l'équipe : ses parts dans les anneaux en prennent la couleur (décision du 23/11/2026).
+    team: new Map(
+      teams.map((t) => [t.id, { label: `Équipe ${t.letter} – ${t.colorName}`, order: t.order, color: t.colorHex }]),
+    ),
   };
 }
 
@@ -42,6 +51,8 @@ function checkAxis(user: AuthUser, axis: Axis) {
 export interface AxisRow {
   id: string;
   label: string;
+  /** Couleur de l'équipe (axe « équipe ») ; absente pour une zone. */
+  color?: string;
   summary: StatsSummary;
   previous: StatsSummary | null;
 }
@@ -64,6 +75,7 @@ export async function compareAxis(db: Db, user: AuthUser, axis: Axis, period: Pe
     .map((g) => ({
       id: g.key,
       label: ref.get(g.key)?.label ?? "—",
+      ...(axis === "equipe" ? { color: names.team.get(g.key)?.color } : {}),
       summary: g.summary,
       previous: previous ? (previous.get(g.key) ?? summarize([], withCosts)) : null,
     }))
@@ -172,7 +184,11 @@ export async function axisDetail(
     subzones: ranked((f) => f.subzoneId).map((g) => ({ ...g, label: names.subzone.get(g.key) ?? "—" })),
     teams:
       axis === "zone" && can(user, "stats.compare_teams")
-        ? ranked((f) => f.teamId).map((g) => ({ ...g, label: names.team.get(g.key)?.label ?? "—" }))
+        ? ranked((f) => f.teamId).map((g) => ({
+            ...g,
+            label: names.team.get(g.key)?.label ?? "—",
+            color: names.team.get(g.key)?.color,
+          }))
         : [],
     weeks,
   };

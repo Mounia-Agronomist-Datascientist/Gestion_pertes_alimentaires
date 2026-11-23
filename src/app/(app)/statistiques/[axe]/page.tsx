@@ -114,6 +114,7 @@ async function Comparison({
               rows={result.rows.map((r) => ({
                 key: r.id,
                 label: r.label,
+                color: r.color,
                 href: detailHref(r.id),
                 value: r.summary.foodKg,
                 text: `${num.format(r.summary.foodKg)} kg`,
@@ -130,6 +131,7 @@ async function Comparison({
                 rows={result.rows.map((r) => ({
                   key: r.id,
                   label: r.label,
+                  color: r.color,
                   href: detailHref(r.id),
                   value: r.summary.cost?.grossEur ?? 0,
                   text: euro.format(r.summary.cost?.grossEur ?? 0),
@@ -179,6 +181,7 @@ async function Detail({
     rows.slice(0, limit).map((r) => ({
       key: r.key,
       label: r.label,
+      color: (r as { color?: string }).color,
       value: r.summary.foodKg,
       text: `${num.format(r.summary.foodKg)} kg`,
       detail: [sub?.(r), detailOf(r.summary)].filter(Boolean).join(" · "),

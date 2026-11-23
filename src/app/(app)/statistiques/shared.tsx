@@ -400,6 +400,8 @@ export interface BarRow {
   text: string;
   /** Précision sous le libellé (ex. « 3 pertes · 12,40 € »). */
   detail?: string;
+  /** Couleur propre à l'élément dans un anneau (couleur d'une équipe). */
+  color?: string;
 }
 
 /**

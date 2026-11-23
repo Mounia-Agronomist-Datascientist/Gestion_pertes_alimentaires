@@ -20,10 +20,17 @@ export interface DonutRow {
   text: string;
   /** Précision au survol (« 3 pertes · 12,40 € »). */
   detail?: string;
+  /** Couleur propre à l'élément (une équipe a sa couleur) ; sinon la palette. */
+  color?: string;
 }
 
-const COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"];
-const OTHER_COLOR = "#94a3b8";
+/**
+ * Palette assortie à la charte (décision du 23/11/2026) : rouge de la charte, bleu, moutarde, sarcelle, caramel,
+ * prune ; vérifiée avec l'outil de contrôle des couleurs (luminosité, saturation, daltonisme sur les parts voisines,
+ * et le rouge face à toutes les autres puisque la dernière part touche la première). « Autres » en gris chaud.
+ */
+const COLORS = ["#d90019", "#1f6fa3", "#e0a31b", "#2a9d8f", "#c9773a", "#7b4fa0"];
+const OTHER_COLOR = "#b3aaa3";
 const MAX_SLICES = 6;
 const pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
 
@@ -53,7 +60,7 @@ function slicesOf(
   const pool = COLORS.filter((c) => !taken.has(c));
   const slices: Slice[] = shown.map((r) => ({
     ...r,
-    color: fixed.get(r.key) ?? pool.shift() ?? OTHER_COLOR,
+    color: r.color ?? fixed.get(r.key) ?? pool.shift() ?? OTHER_COLOR,
     share: total > 0 ? r.value / total : 0,
   }));
   const restValue = rest.reduce((a, r) => a + r.value, 0);

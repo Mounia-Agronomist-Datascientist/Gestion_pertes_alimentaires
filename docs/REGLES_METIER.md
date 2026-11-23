@@ -436,6 +436,14 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   années restent en colonnes : un anneau ne montre pas une évolution dans le temps.
 - **6 parts au plus**, les plus grandes ; le reste est regroupé dans « + N autres » (gris). Zones, sous-zones et
   devenirs gardent leur ordre (marche en avant). Couleurs dans un ordre fixe, vérifié pour les daltonismes.
+- **Couleurs des anneaux** (23/11/2026) : palette assortie à la charte, dans cet ordre — rouge de la charte #D90019,
+  bleu #1F6FA3, moutarde #E0A31B, sarcelle #2A9D8F, caramel #C9773A, prune #7B4FA0 ; « autres » en gris chaud
+  #B3AAA3. Contrôlée avec l'outil de vérification des couleurs : luminosité et saturation, parts voisines distinctes
+  pour les daltonismes, et le rouge distinct de toutes les autres (la dernière part touche la première). La
+  moutarde est claire sur fond blanc : la légende écrite (nom, valeur, part) suffit à l'identifier.
+- **Équipes en leurs couleurs** (23/11/2026) : dans les anneaux par équipe (comparaison des équipes, « Par équipe »
+  du détail d'une zone), chaque équipe garde sa couleur (Verte en vert, Bleue en bleu…), celle du réglage de
+  l'équipe.
 - **Légende toujours écrite** : nom, valeur (kg, €, kg CO2e ou nombre de pertes) et part. Au survol, au toucher ou
   au clavier, la part est mise en avant et son détail s'affiche (nombre de pertes, coût, évolution…). La liste
   complète s'ouvre avec « Voir le détail ».
@@ -457,8 +465,8 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   sous licence Adobe et ne sont pas reprises).
 - **Logo** sur la page de connexion **uniquement** (fichier `public/marque/logo-brigade-de-vero.svg`, copié du site).
 - L'en-tête garde la **couleur de l'équipe** pour un compte équipe ; rouge pour les autres comptes.
-- Les erreurs gardent leur encadré rouge clair ; les couleurs des graphiques ne changent pas (palette vérifiée pour
-  les daltonismes), sauf les colonnes semaine après semaine, en brun (semaine choisie en brun foncé).
+- Les erreurs gardent leur encadré rouge clair. Graphiques : anneaux dans la palette assortie à la charte (R30) ;
+  colonnes semaine après semaine en brun (semaine choisie en brun foncé).
 
 
 ## R32 — Article saisi à la main en Réception et Stockage (23/11/2026)
