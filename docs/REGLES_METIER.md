@@ -457,3 +457,19 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - L'en-tête garde la **couleur de l'équipe** pour un compte équipe ; rouge pour les autres comptes.
 - Les erreurs gardent leur encadré rouge clair ; les couleurs des graphiques ne changent pas (palette vérifiée pour
   les daltonismes), sauf les colonnes semaine après semaine, en brun (semaine choisie en brun foncé).
+
+
+## R32 — Article saisi à la main en Réception et Stockage (23/11/2026)
+
+- En **Réception** comme en Stockage, un produit absent de la liste est une **matière première** ou un **encas**.
+- L'opérateur peut indiquer le **fournisseur** (facultatif) : un fournisseur connu, ou « Autre fournisseur » dont il
+  tape le nom (nouveau fournisseur « à valider »).
+- L'article entre **aussitôt dans la liste des articles**, marqué « saisi à la main — à valider », avec son
+  fournisseur et son prix s'il est indiqué ; il est proposé dès la perte suivante. Un même nom (sans accents ni
+  majuscules) retrouve l'article déjà saisi au lieu d'en créer un autre.
+- L'administration (Administration → Produits, « Articles saisis à la main ») : **valide** l'article, corrige sa
+  fiche, ou le **fusionne** avec l'article existant (ses pertes passent sur cet article, coût recalculé ; l'article
+  saisi est désactivé) ; elle valide aussi le nouveau fournisseur (ou Administration → Fournisseurs). Un fournisseur
+  retrouvé dans un bon de commande déposé est validé de lui-même.
+- Ailleurs (Cuisine, Conditionnement, Plonge), un produit absent reste une saisie « hors liste » (R28).
+- **N° de poubelle** des Alchimistes : encadré orange vif au récapitulatif, pour ne pas oublier de le vérifier.

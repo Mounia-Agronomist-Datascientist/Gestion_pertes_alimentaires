@@ -80,6 +80,14 @@ export const declarationInputSchema = z
         category: z.enum(PRODUCT_CATEGORIES),
         /** Prix d'achat facultatif (décision du 20/11/2026), au kg ou à la pièce. */
         price: freePriceSchema.nullable().optional(),
+        /** Fournisseur (Réception, Stockage ; facultatif) : un connu, ou un nom tapé (« Autre fournisseur »). */
+        supplier: z
+          .union([
+            z.object({ supplierId: uuid }),
+            z.object({ supplierName: z.string().trim().min(2, "Nom du fournisseur trop court").max(120) }),
+          ])
+          .nullable()
+          .optional(),
       }),
     ]),
     method: z.enum(INPUT_METHODS),

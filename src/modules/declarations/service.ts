@@ -7,7 +7,9 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { COST_METHOD, lossCostBreakdown } from "@/domain/couts";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
-import { type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
+import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
+import { normalizeCauseName as normalizeLabel } from "@/modules/admin/causes";
+import { tomeKey } from "@/modules/imports/tome/parse-tome";
 import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
 import { roundQuantity } from "@/domain/nombres";
 import { isLateDeclaration, toProductionLocalDate } from "@/domain/semaine-production";
@@ -52,6 +54,83 @@ export interface CreatedDeclaration {
 
 /** Valeurs calculées d'une déclaration, prêtes à être enregistrées. */
 type PreparedDeclaration = Awaited<ReturnType<typeof prepareDeclaration>>;
+
+interface NewArticle {
+  name: string;
+  category: (typeof PRODUCT_CATEGORIES)[number];
+  supplier: { supplierId: string } | { supplierName: string } | null;
+  price: FreePrice | null;
+  occurredOn: string;
+}
+
+/** Article actif de même type et de même nom (sans accents, majuscules ni espaces en trop). */
+async function findEnteredArticle(db: Db, category: (typeof PRODUCT_CATEGORIES)[number], name: string) {
+  const key = normalizeLabel(name);
+  const rows = await db
+    .select()
+    .from(s.products)
+    .where(and(eq(s.products.category, category), eq(s.products.active, true)));
+  return rows.find((p) => normalizeLabel(`${p.name} ${p.variant ?? ""}`) === key) ?? null;
+}
+
+/**
+ * Crée l'article saisi à la main (« à valider »), son fournisseur tapé s'il est nouveau (« à valider » aussi) et son
+ * prix d'achat, dans la transaction de la perte ; la perte est alors rattachée à l'article.
+ */
+async function createEnteredArticle(tx: Db, user: AuthUser, prepared: PreparedDeclaration, now: Date) {
+  const article = prepared.newArticle;
+  if (!article) return;
+  let product = await findEnteredArticle(tx, article.category, article.name);
+  if (!product) {
+    let supplierId: string | null = null;
+    if (article.supplier && "supplierId" in article.supplier) supplierId = article.supplier.supplierId;
+    else if (article.supplier) {
+      const key = tomeKey(article.supplier.supplierName);
+      const [known] = await tx.select().from(s.suppliers).where(eq(s.suppliers.key, key));
+      supplierId =
+        known?.id ??
+        (
+          await tx
+            .insert(s.suppliers)
+            .values({ name: article.supplier.supplierName, key, toValidate: true })
+            .returning({ id: s.suppliers.id })
+        )[0]!.id;
+    }
+    const [created] = await tx
+      .insert(s.products)
+      .values({
+        category: article.category,
+        name: article.name,
+        defaultUnit: "kg",
+        source: "saisie",
+        toValidate: true,
+        manualSupplierId: supplierId,
+        enteredBy: user.id,
+      })
+      .returning();
+    product = created!;
+    if (article.price)
+      await tx.insert(s.productPrices).values({
+        productId: product!.id,
+        source: "manuel",
+        validFrom: article.occurredOn,
+        perKgEur: article.price.per === "kg" ? article.price.amountEur : null,
+        perUnitEur: article.price.per === "piece" ? article.price.amountEur : null,
+        createdBy: user.id,
+        createdAt: now,
+      });
+    await writeAudit(tx, {
+      userId: user.id,
+      action: "create_entered_article",
+      entity: "product",
+      entityId: product!.id,
+      after: { ...article, productId: product!.id, supplierId },
+      occurredAt: now,
+    });
+  }
+  prepared.values.productId = product!.id;
+  prepared.values.productUnlisted = false;
+}
 
 /**
  * Contrôle une saisie et calcule toutes les valeurs à enregistrer, sans rien écrire.
@@ -130,6 +209,33 @@ async function prepareDeclaration(
       .where(and(eq(s.teamWeekStatus.teamId, teamId), eq(s.teamWeekStatus.productionWeekId, lossWeek.id)));
     if (!team || !team.active || weekStatus?.active === false) {
       throw new DeclarationError("Cette équipe n'est pas active pour cette semaine");
+    }
+  }
+
+  // ─── Article saisi à la main en Réception ou Stockage (décision du 23/11/2026) ──
+  // Déjà dans la liste (même nom, même type) : la perte est rattachée à cet article. Sinon, il sera créé « à valider »
+  // au moment de l'enregistrement (`createEnteredArticle`).
+  let newArticle: NewArticle | null = null;
+  if ("freeLabel" in input.product && CATALOG_ENTRY_ZONE_CODES.includes(place.zone.code)) {
+    const free = input.product;
+    if (!freeCategoriesFor(place.zone.code, PRODUCT_CATEGORIES).includes(free.category))
+      throw new DeclarationError(
+        `Type de produit non proposé dans la zone ${place.zone.name} : ${PRODUCT_CATEGORY_LABELS[free.category]}`,
+      );
+    const existing = await findEnteredArticle(db, free.category, free.freeLabel);
+    if (existing) input.product = { productId: existing.id };
+    else {
+      if (free.supplier && "supplierId" in free.supplier) {
+        const [known] = await db.select().from(s.suppliers).where(eq(s.suppliers.id, free.supplier.supplierId));
+        if (!known) throw new DeclarationError("Fournisseur inconnu : choisissez-le à nouveau");
+      }
+      newArticle = {
+        name: free.freeLabel,
+        category: free.category,
+        supplier: free.supplier ?? null,
+        price: free.price ?? null,
+        occurredOn: input.occurredOn,
+      };
     }
   }
 
@@ -491,6 +597,7 @@ async function prepareDeclaration(
   }
 
   return {
+    newArticle,
     values: {
       occurredOn: input.occurredOn,
       occurredTime: input.occurredTime ?? null,
@@ -671,6 +778,7 @@ async function insertNewDeclaration(
   now: Date,
   batchId: string | null = null,
 ): Promise<CreatedDeclaration> {
+  await createEnteredArticle(tx, user, prepared, now);
   const [declaration] = await tx
     .insert(s.lossDeclarations)
     .values({ ...prepared.values, status: "validee", revision: 1, createdBy: user.id, batchId })
@@ -923,6 +1031,7 @@ export async function correctDeclaration(
   );
 
   return db.transaction(async (tx) => {
+    await createEnteredArticle(tx, user, prepared, now);
     const revision = existing.revision + 1;
     const [declaration] = await tx
       .update(s.lossDeclarations)
@@ -1021,7 +1130,8 @@ export async function cancelDeclaration(
 export async function linkDeclarationsToProduct(
   db: Db,
   user: AuthUser,
-  input: { declarationIds: string[]; productId: string },
+  /** `fromProductId` : pertes d'un article saisi à la main, fusionné avec un article de la liste. */
+  input: { declarationIds: string[]; productId: string; fromProductId?: string },
   now: Date = new Date(),
 ): Promise<number> {
   requirePermission(user, "referentiel.manage");
@@ -1029,11 +1139,19 @@ export async function linkDeclarationsToProduct(
   if (!product || !product.active) throw new DeclarationError("Produit inconnu ou désactivé");
   const ids = [...new Set(input.declarationIds)];
   if (ids.length === 0) throw new DeclarationError("Aucune déclaration à rattacher");
-  const reason = `Rattachement au produit du référentiel « ${product.name} »`;
+  const reason = input.fromProductId
+    ? `Article saisi à la main fusionné avec « ${product.name} »`
+    : `Rattachement au produit du référentiel « ${product.name} »`;
 
   return db.transaction(async (tx) => {
     const rows = await tx.select().from(s.lossDeclarations).where(inArray(s.lossDeclarations.id, ids));
-    if (rows.length !== ids.length || rows.some((d) => !d.productUnlisted || d.status === "annulee")) {
+    if (
+      rows.length !== ids.length ||
+      rows.some(
+        (d) =>
+          d.status === "annulee" || (input.fromProductId ? d.productId !== input.fromProductId : !d.productUnlisted),
+      )
+    ) {
       throw new DeclarationConflictError();
     }
     for (const existing of rows) {

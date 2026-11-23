@@ -232,6 +232,13 @@
       "when": 1795180934328,
       "tag": "0032_encas",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795423446982,
+      "tag": "0033_articles_a_valider",
+      "breakpoints": true
     }
   ]
 }

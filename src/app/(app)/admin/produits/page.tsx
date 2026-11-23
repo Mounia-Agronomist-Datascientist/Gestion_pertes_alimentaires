@@ -2,12 +2,13 @@ import Link from "next/link";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as s from "@/db/schema";
-import { listProductsForAdmin, listUnlistedGroups } from "@/modules/admin/products";
+import { listEnteredArticles, listProductsForAdmin, listUnlistedGroups } from "@/modules/admin/products";
 import { toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { pricesInForce } from "@/modules/matieres/referentiel";
 import { listSuppliers, placementChoices, suppliersByProduct } from "@/modules/matieres/fiche";
 import { referenceDensity, referenceDensityLabel } from "@/domain/densites";
+import { EnteredArticles } from "./entered-articles";
 import { ProductsAdmin } from "./products-admin";
 
 /** Densité tirée du tableau de référence des liquides (et non saisie à la main) : son origine. */
@@ -22,7 +23,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const { fournisseur } = await searchParams;
   const admin = await requireUser();
   const today = toProductionLocalDate(new Date());
-  const [products, groups, units, prices, choices, suppliers, supplierIdsOf] = await Promise.all([
+  const [products, groups, units, prices, choices, suppliers, supplierIdsOf, entered] = await Promise.all([
     listProductsForAdmin(db, admin),
     listUnlistedGroups(db, admin),
     db
@@ -34,6 +35,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     placementChoices(db),
     listSuppliers(db, admin),
     suppliersByProduct(db),
+    listEnteredArticles(db, admin),
   ]);
   const categoryOf = new Map(choices.categories.map((c) => [c.id, c]));
   const placeName = new Map(choices.subzones.map((z) => [z.id, z.name]));
@@ -53,6 +55,12 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       <Link href="/admin/produits/a-completer" className="self-start font-medium text-rouge-700 underline">
         Matières de la semaine à compléter (fournisseur, poids du colis)
       </Link>
+      <EnteredArticles
+        articles={entered}
+        candidates={products
+          .filter((p) => p.active && !p.toValidate)
+          .map((p) => ({ id: p.id, name: p.variant ? `${p.name} – ${p.variant}` : p.name, category: p.category }))}
+      />
       <ProductsAdmin
         units={units}
         materialCategories={choices.categories.map((c) => ({ id: c.id, name: c.name }))}

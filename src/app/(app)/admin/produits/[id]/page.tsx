@@ -44,6 +44,12 @@ export default async function ProductSheetPage({ params }: { params: Promise<{ i
         {p.externalId?.startsWith("melba:") && " · matière Melba"}
         {!p.active && " · désactivé"}
       </p>
+      {p.toValidate && (
+        <p className="rounded-xl border-2 border-amber-300 bg-amber-50 p-3 text-amber-950">
+          Article saisi à la main en Réception ou en Stockage : à valider (Administration → Produits, « Articles saisis
+          à la main »). Corrigez ici son nom, son poids ou son prix si besoin.
+        </p>
+      )}
       <ProductSheet
         today={today}
         units={units}

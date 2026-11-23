@@ -66,6 +66,7 @@ export async function getDeclarationOptions(
     unitRows,
     containerRows,
     productRows,
+    supplierRows,
   ] = await Promise.all([
     db.select().from(s.zones).where(eq(s.zones.active, true)).orderBy(asc(s.zones.displayOrder)),
     db.select().from(s.subzones).where(eq(s.subzones.active, true)).orderBy(asc(s.subzones.displayOrder)),
@@ -99,6 +100,11 @@ export async function getDeclarationOptions(
       .orderBy(asc(s.containerTypes.displayOrder)),
     // Référentiel saisi à la main ; les produits de la semaine viennent de `weekCatalogs`.
     db.select().from(s.products).where(eq(s.products.active, true)).orderBy(asc(s.products.name)),
+    db
+      .select({ id: s.suppliers.id, name: s.suppliers.name })
+      .from(s.suppliers)
+      .where(eq(s.suppliers.active, true))
+      .orderBy(asc(s.suppliers.name)),
   ]);
 
   // Numéro de la zone dans le sens de la marche en avant (1 Réception … 5 Plonge), le même pour tous, même pour un
@@ -210,7 +216,10 @@ export async function getDeclarationOptions(
       unitWeightKg: p.unitWeightKg,
       densityKgPerL: p.densityKgPerL,
       snackFamily: p.snackFamily,
+      toValidate: p.toValidate,
     })),
+    /** Fournisseurs proposés pour un article saisi à la main (Réception, Stockage). */
+    supplierList: supplierRows.map((r) => ({ id: r.id, name: r.name })),
   };
 }
 

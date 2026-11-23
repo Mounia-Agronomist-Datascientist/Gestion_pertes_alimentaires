@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { type ProductSheetState, supplierAction } from "../actions";
+import { enteredArticleAction, type ProductSheetState, supplierAction } from "../actions";
 
 interface Supplier {
   id: string;
@@ -10,6 +10,8 @@ interface Supplier {
   orders: number;
   materials: number;
   lastDelivery: string | null;
+  /** Tapé à la saisie d'un article (« Autre fournisseur ») : à valider. */
+  toValidate: boolean;
 }
 
 const dayFormat = new Intl.DateTimeFormat("fr-FR", {
@@ -60,12 +62,28 @@ export function SuppliersList({ suppliers }: { suppliers: Supplier[] }) {
               </form>
             ) : (
               <>
-                <span className="font-semibold">{x.name}</span>
+                <span className="font-semibold">
+                  {x.name}
+                  {x.toValidate && (
+                    <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+                      saisi à la main — à valider
+                    </span>
+                  )}
+                </span>
                 <span className="text-sm text-slate-600">
                   {x.orders} bon{x.orders > 1 ? "s" : ""} · {x.materials} matière{x.materials > 1 ? "s" : ""}
                   {x.lastDelivery && ` · dernière livraison le ${fmtDay(x.lastDelivery)}`}
                 </span>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap items-center gap-4">
+                  {x.toValidate && (
+                    <form action={enteredArticleAction}>
+                      <input type="hidden" name="intent" value="validate_supplier" />
+                      <input type="hidden" name="supplierId" value={x.id} />
+                      <button type="submit" className="text-sm font-semibold text-brun-700 underline">
+                        Valider le fournisseur
+                      </button>
+                    </form>
+                  )}
                   <Link
                     href={`/admin/produits?fournisseur=${x.id}`}
                     className="text-sm font-medium text-rouge-700 underline"

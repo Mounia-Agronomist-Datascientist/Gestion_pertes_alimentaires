@@ -28,6 +28,8 @@ export const suppliers = pgTable("suppliers", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   key: text("key").notNull().unique(),
+  /** Fournisseur tapé à la saisie d'un article (« Autre fournisseur ») : à valider par l'administration. */
+  toValidate: boolean("to_validate").notNull().default(false),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

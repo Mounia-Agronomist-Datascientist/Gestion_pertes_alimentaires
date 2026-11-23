@@ -122,6 +122,9 @@ export async function savePurchaseOrders(
       // ─── Fournisseur ───────────────────────────────────────────────────
       const supplierKey = tomeKey(order.supplier);
       let [supplier] = await tx.select().from(s.suppliers).where(eq(s.suppliers.key, supplierKey));
+      // Fournisseur tapé à la saisie d'un article, retrouvé dans un bon : confirmé.
+      if (supplier?.toValidate)
+        await tx.update(s.suppliers).set({ toValidate: false, updatedAt: now }).where(eq(s.suppliers.id, supplier.id));
       if (!supplier) {
         [supplier] = await tx.insert(s.suppliers).values({ name: order.supplier, key: supplierKey }).returning();
         result.newSuppliers++;

@@ -16,18 +16,24 @@ describe("produit absent de la liste en Stockage : types de la zone et prix d'ac
   const NOW = new Date("2026-11-13T10:00:00Z");
   const id = async (table: typeof s.subzones | typeof s.causes | typeof s.destinations, code: string) =>
     (await t.db.select().from(table).where(eq(table.code, code)))[0]!.id;
-  const loss = async (name: string, category: string, kg: number, price?: { amountEur: number; per: "kg" | "piece" }) =>
+  const loss = async (
+    name: string,
+    category: string,
+    kg: number,
+    price?: { amountEur: number; per: "kg" | "piece" },
+    place: [string, string] = ["STO_BOF", "STO_PEREMPTION"],
+  ) =>
     createDeclaration(
       t.db,
       admin,
       {
         occurredOn: "2026-11-12",
-        subzoneId: await id(s.subzones, "STO_BOF"),
+        subzoneId: await id(s.subzones, place[0]),
         product: { freeLabel: name, category, price },
         method: "pesee",
         quantity: kg,
         unitCode: "kg",
-        causeId: await id(s.causes, "STO_PEREMPTION"),
+        causeId: await id(s.causes, place[1]),
         destinations: [{ destinationId: await id(s.destinations, "ORDURES"), quantity: kg }],
       },
       NOW,
@@ -65,8 +71,10 @@ describe("produit absent de la liste en Stockage : types de la zone et prix d'ac
   });
 
   it("prix indiqué après coup : nouvelle version, coût recalculé ; rattachement au prix du produit", async () => {
-    const first = await loss("Crème fraîche", "matiere_premiere", 3);
-    await loss("crème  FRAÎCHE", "matiere_premiere", 1);
+    // Saisie « hors liste » (Conditionnement ; en Réception et Stockage, l'article entre aussitôt dans la liste).
+    const conditionnement: [string, string] = ["CON_AUTRES", "CON_SURPRODUCTION"];
+    const first = await loss("Crème fraîche", "matiere_premiere", 3, undefined, conditionnement);
+    await loss("crème  FRAÎCHE", "matiere_premiere", 1, undefined, conditionnement);
     expect((await row(first.id)).grossCostEur).toBeNull();
     const group = (await listUnlistedGroups(t.db, admin)).find((g) => g.label === "Crème fraîche")!;
     expect(group).toMatchObject({ count: 2, priced: 0, freePrice: null });

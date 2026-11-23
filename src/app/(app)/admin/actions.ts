@@ -36,9 +36,12 @@ import {
   createProduct,
   linkUnlistedGroup,
   listUnlistedGroups,
+  mergeEnteredArticle,
   priceUnlistedGroup,
   setProductActive,
   updateProduct,
+  validateEnteredArticle,
+  validateSupplier,
 } from "@/modules/admin/products";
 import { setTeamWeekActive } from "@/modules/admin/teams";
 import { requireUser } from "@/modules/auth/next-session";
@@ -614,4 +617,32 @@ export async function supplierAction(_prev: ProductSheetState, formData: FormDat
   }
   revalidatePath("/admin/fournisseurs");
   return { message: "Fournisseur renommé." };
+}
+
+/**
+ * Articles saisis à la main en Réception ou Stockage (décision du 23/11/2026) : valider, fusionner avec un article de
+ * la liste, valider le fournisseur tapé. Une erreur (article déjà traité) laisse simplement la liste à jour.
+ */
+export async function enteredArticleAction(formData: FormData): Promise<void> {
+  const admin = await requireUser();
+  const productId = String(formData.get("productId") ?? "");
+  try {
+    switch (String(formData.get("intent"))) {
+      case "validate":
+        await validateEnteredArticle(db, admin, productId);
+        break;
+      case "merge": {
+        const targetId = String(formData.get("targetId") ?? "");
+        if (targetId) await mergeEnteredArticle(db, admin, productId, targetId);
+        break;
+      }
+      case "validate_supplier":
+        await validateSupplier(db, admin, String(formData.get("supplierId") ?? ""));
+        break;
+    }
+  } catch (e) {
+    if (!(e instanceof AdminError)) throw e;
+  }
+  revalidatePath("/admin/produits");
+  revalidatePath("/admin/fournisseurs");
 }

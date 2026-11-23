@@ -9,8 +9,15 @@ import type { PRODUCT_CATEGORIES } from "@/modules/declarations/input";
 type Category = (typeof PRODUCT_CATEGORIES)[number];
 
 const BY_ZONE: Record<string, readonly Category[]> = {
+  RECEPTION: ["matiere_premiere", "produit_externe"],
   STOCKAGE: ["matiere_premiere", "produit_externe"],
 };
+
+/**
+ * Réception et Stockage (décision du 23/11/2026) : un article saisi à la main entre aussitôt dans la liste des
+ * articles, « saisi à la main — à valider » par l'administration, avec son fournisseur (facultatif).
+ */
+export const CATALOG_ENTRY_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"];
 
 /** Types proposés pour un produit absent de la liste, dans ce lieu (tous, sauf règle de la zone). */
 export function freeCategoriesFor(zoneCode: string, all: readonly Category[]): Category[] {

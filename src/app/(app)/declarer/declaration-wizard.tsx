@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
-import { type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
+import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { materialsForPlace } from "@/domain/matieres";
 import {
   gastroTareAllowed,
@@ -37,7 +37,14 @@ import { proposeCauseAction, submitCorrection, submitDeclaration, type SubmitRes
 type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "cause" | "destination" | "recap" | "done";
 export type ProductChoice =
   | { kind: "listed"; id: string; name: string; category: string }
-  | { kind: "free"; name: string; category: (typeof PRODUCT_CATEGORIES)[number]; price?: FreePrice | null }
+  | {
+      kind: "free";
+      name: string;
+      category: (typeof PRODUCT_CATEGORIES)[number];
+      price?: FreePrice | null;
+      /** Réception, Stockage : fournisseur connu ou tapé (facultatif) ; l'article est ajouté « à valider ». */
+      supplier?: { supplierId: string } | { supplierName: string } | null;
+    }
   | {
       /** Produit de l'import de la semaine (plat, sous-recette ou ingrédient). */
       kind: "week";
@@ -466,7 +473,12 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           ? { productId: product.id }
           : product.kind === "week"
             ? { weekItem: { kind: product.itemKind, id: product.id } }
-            : { freeLabel: product.name, category: product.category, price: product.price ?? null },
+            : {
+                freeLabel: product.name,
+                category: product.category,
+                price: product.price ?? null,
+                ...(product.supplier ? { supplier: product.supplier } : {}),
+              },
       method,
       quantity: useTare ? null : net.quantity,
       unitCode: useTare ? null : unitCode,
@@ -790,6 +802,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           weekMaterials={options.weekMaterials}
           packagings={options.packagings}
           suppliers={options.suppliers}
+          supplierList={options.supplierList}
           materialCategories={options.materialCategories}
           zoneCode={zone?.code ?? ""}
           materialPlace={
@@ -1256,12 +1269,14 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             ))}
             {binLines.map((l) => (
               <div key={`bin-${l.destinationId}`} className="col-span-3">
-                <label className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-sky-50 p-3">
-                  <span className="text-sm font-medium">
+                {/* Bien visible pour ne pas oublier de le noter (décision du 23/11/2026). */}
+                <label className="flex flex-wrap items-center justify-between gap-2 rounded-xl border-2 border-amber-500 bg-amber-100 p-3 shadow-sm">
+                  <span className="text-base font-bold text-amber-950">
+                    <span aria-hidden>🗑️ </span>
                     N° de poubelle – {options.destinations.find((d) => d.id === l.destinationId)?.name}
                     {binMode(l.destinationId) === "facultatif" && " (facultatif)"}
-                    <span className="block text-xs font-normal text-slate-600">
-                      À changer seulement si la poubelle a changé.
+                    <span className="block text-sm font-medium text-amber-900">
+                      Vérifiez le numéro écrit sur la poubelle ; à changer seulement si la poubelle a changé.
                     </span>
                   </span>
                   <input
@@ -1274,7 +1289,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                   />
                 </label>
                 {binMode(l.destinationId) === "obligatoire" && !binOf(l.destinationId).trim() && (
-                  <p className="mt-1 text-sm text-amber-800">Indiquez le n° de la poubelle.</p>
+                  <p className="mt-1 text-sm font-semibold text-amber-900">⚠ Indiquez le n° de la poubelle.</p>
                 )}
               </div>
             ))}
@@ -1549,6 +1564,7 @@ function ProductStep({
   weekMaterials,
   packagings,
   suppliers,
+  supplierList,
   materialCategories,
   zoneCode,
   materialPlace,
@@ -1568,6 +1584,8 @@ function ProductStep({
   /** Colis fournisseur par produit : fournisseur et colis affichés sous chaque matière. */
   packagings: DeclarationOptions["packagings"];
   suppliers: DeclarationOptions["suppliers"];
+  /** Fournisseurs proposés pour un article saisi à la main. */
+  supplierList: DeclarationOptions["supplierList"];
   materialCategories: DeclarationOptions["materialCategories"];
   /** Zone de la perte : types proposés pour un produit absent de la liste. */
   zoneCode: string;
@@ -1593,6 +1611,11 @@ function ProductStep({
   const [freeCategory, setFreeCategory] = useState<(typeof PRODUCT_CATEGORIES)[number] | null>(null);
   const [freePriceText, setFreePriceText] = useState("");
   const [freePricePer, setFreePricePer] = useState<FreePrice["per"]>("kg");
+  /** Fournisseur : « » inconnu, un identifiant, ou « autre » (nom tapé). */
+  const [freeSupplier, setFreeSupplier] = useState("");
+  const [freeSupplierName, setFreeSupplierName] = useState("");
+  const toCatalog = CATALOG_ENTRY_ZONE_CODES.includes(zoneCode);
+  const supplierInvalid = toCatalog && freeSupplier === "autre" && freeSupplierName.trim().length < 2;
   const freeCategories = freeCategoriesFor(zoneCode, PRODUCT_CATEGORIES);
   const freePriceValue = Number(freePriceText.replace(",", ".").trim());
   const freePriceInvalid = freePriceText.trim() !== "" && !(freePriceValue > 0);
@@ -1725,16 +1748,54 @@ function ProductStep({
               : "Pour chiffrer la perte. Sinon, l'administration pourra l'indiquer plus tard."}
           </span>
         </div>
+        {toCatalog && (
+          <>
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">Fournisseur (facultatif)</span>
+              <select className="field" value={freeSupplier} onChange={(e) => setFreeSupplier(e.target.value)}>
+                <option value="">Je ne sais pas</option>
+                {supplierList.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+                <option value="autre">Autre fournisseur (le taper)…</option>
+              </select>
+            </label>
+            {freeSupplier === "autre" && (
+              <label className="flex flex-col gap-1">
+                <span className="font-medium">Nom du fournisseur</span>
+                <input
+                  className="field"
+                  value={freeSupplierName}
+                  onChange={(e) => setFreeSupplierName(e.target.value)}
+                  placeholder="ex. Pro à Pro"
+                />
+              </label>
+            )}
+            <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-950">
+              Cet article sera ajouté à la liste des articles, marqué « saisi à la main », et devra être validé par
+              l&apos;administration.
+            </p>
+          </>
+        )}
         <button
           type="button"
           className="btn-primary"
-          disabled={freeName.trim().length < 2 || !freeCategory || freePriceInvalid}
+          disabled={freeName.trim().length < 2 || !freeCategory || freePriceInvalid || supplierInvalid}
           onClick={() =>
             onChoose({
               kind: "free",
               name: freeName.trim(),
               category: freeCategory!,
               price: freePriceText.trim() ? { amountEur: freePriceValue, per: freePricePer } : null,
+              supplier: !toCatalog
+                ? null
+                : freeSupplier === "autre"
+                  ? { supplierName: freeSupplierName.trim() }
+                  : freeSupplier
+                    ? { supplierId: freeSupplier }
+                    : null,
             })
           }
         >
@@ -1853,6 +1914,7 @@ function ProductStep({
               <small className="font-normal opacity-70">
                 {PRODUCT_CATEGORY_LABELS[p.category]}
                 {p.code && ` · ${p.code}`}
+                {p.toValidate && " · saisi à la main, à valider"}
               </small>
             </Tile>
           ))}
@@ -1978,6 +2040,7 @@ function ProductStep({
               <small className="font-normal opacity-70">
                 {PRODUCT_CATEGORY_LABELS[p.category]}
                 {p.code && ` · ${p.code}`}
+                {p.toValidate && " · saisi à la main, à valider"}
               </small>
             </Tile>
           ))}

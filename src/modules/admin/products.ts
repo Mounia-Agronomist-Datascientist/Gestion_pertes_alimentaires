@@ -205,3 +205,122 @@ export async function linkUnlistedGroup(
   if (!group) throw new AdminError("Ces saisies ont déjà été rattachées");
   return linkDeclarationsToProduct(db, admin, { declarationIds: group.declarationIds, productId }, now);
 }
+
+// ─── Articles saisis à la main en Réception ou Stockage (décision du 23/11/2026) ─────────────────────────────
+
+/** Articles « saisis à la main — à valider » : fournisseur indiqué, qui l'a saisi, nombre de pertes. */
+export async function listEnteredArticles(db: Db, admin: AuthUser) {
+  requirePermission(admin, "referentiel.manage");
+  const rows = await db
+    .select({
+      product: s.products,
+      supplier: s.suppliers.name,
+      supplierToValidate: s.suppliers.toValidate,
+      enteredBy: s.users.displayName,
+    })
+    .from(s.products)
+    .leftJoin(s.suppliers, eq(s.suppliers.id, s.products.manualSupplierId))
+    .leftJoin(s.users, eq(s.users.id, s.products.enteredBy))
+    .where(and(eq(s.products.toValidate, true), eq(s.products.active, true)))
+    .orderBy(desc(s.products.createdAt));
+  if (!rows.length) return [];
+  const counts = await db
+    .select({ productId: s.lossDeclarations.productId, n: sql<number>`count(*)::int` })
+    .from(s.lossDeclarations)
+    .where(
+      and(
+        inArray(
+          s.lossDeclarations.productId,
+          rows.map((r) => r.product.id),
+        ),
+        ne(s.lossDeclarations.status, "annulee"),
+      ),
+    )
+    .groupBy(s.lossDeclarations.productId);
+  const countOf = new Map(counts.map((c) => [c.productId, c.n]));
+  return rows.map((r) => ({
+    id: r.product.id,
+    name: r.product.name,
+    category: r.product.category,
+    supplier: r.supplier,
+    supplierId: r.product.manualSupplierId,
+    supplierToValidate: r.supplierToValidate ?? false,
+    enteredBy: r.enteredBy,
+    createdAt: r.product.createdAt,
+    declarations: countOf.get(r.product.id) ?? 0,
+  }));
+}
+
+/** Valide un article saisi à la main : il devient un article ordinaire de la liste. */
+export async function validateEnteredArticle(db: Db, admin: AuthUser, productId: string, now = new Date()) {
+  requirePermission(admin, "referentiel.manage");
+  const [before] = await db.select().from(s.products).where(eq(s.products.id, productId));
+  if (!before?.toValidate) throw new AdminError("Article introuvable ou déjà validé");
+  await db.update(s.products).set({ toValidate: false, updatedAt: now }).where(eq(s.products.id, productId));
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "validate_entered_article",
+    entity: "product",
+    entityId: productId,
+    before: { toValidate: true },
+    after: { toValidate: false },
+    occurredAt: now,
+  });
+}
+
+/**
+ * Fusionne un article saisi à la main avec un article de la liste (doublon, faute de frappe) : ses pertes passent sur
+ * l'article choisi (coût recalculé à son prix), puis il est désactivé.
+ */
+export async function mergeEnteredArticle(
+  db: Db,
+  admin: AuthUser,
+  productId: string,
+  targetId: string,
+  now = new Date(),
+): Promise<number> {
+  requirePermission(admin, "referentiel.manage");
+  if (productId === targetId) throw new AdminError("Choisissez un autre article");
+  const [source] = await db.select().from(s.products).where(eq(s.products.id, productId));
+  if (!source?.toValidate || !source.active) throw new AdminError("Article introuvable ou déjà validé");
+  const declarations = await db
+    .select({ id: s.lossDeclarations.id })
+    .from(s.lossDeclarations)
+    .where(and(eq(s.lossDeclarations.productId, productId), ne(s.lossDeclarations.status, "annulee")));
+  const moved = declarations.length
+    ? await linkDeclarationsToProduct(
+        db,
+        admin,
+        { declarationIds: declarations.map((d) => d.id), productId: targetId, fromProductId: productId },
+        now,
+      )
+    : 0;
+  await db
+    .update(s.products)
+    .set({ active: false, toValidate: false, updatedAt: now })
+    .where(eq(s.products.id, productId));
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "merge_entered_article",
+    entity: "product",
+    entityId: productId,
+    before: { name: source.name },
+    after: { mergedInto: targetId, declarations: moved },
+    occurredAt: now,
+  });
+  return moved;
+}
+
+/** Valide un fournisseur tapé à la saisie d'un article. */
+export async function validateSupplier(db: Db, admin: AuthUser, supplierId: string, now = new Date()) {
+  requirePermission(admin, "referentiel.manage");
+  await db.update(s.suppliers).set({ toValidate: false, updatedAt: now }).where(eq(s.suppliers.id, supplierId));
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "validate_supplier",
+    entity: "supplier",
+    entityId: supplierId,
+    after: { toValidate: false },
+    occurredAt: now,
+  });
+}

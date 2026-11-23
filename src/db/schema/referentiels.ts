@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   date,
@@ -15,6 +16,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
+import { suppliers } from "./matieres";
 import { subzones, zones } from "./organisation";
 
 const timestamps = {
@@ -91,6 +93,13 @@ export const products = pgTable(
     storageSubzoneId: uuid("storage_subzone_id").references(() => subzones.id),
     /** Famille d'un encas (« Fromages », « Crackers »…), pour ranger la liste des encas (décision du 20/11/2026). */
     snackFamily: text("snack_family"),
+    /**
+     * Article saisi à la main en Réception ou en Stockage (décision du 23/11/2026) : ajouté aussitôt à la liste, à
+     * valider par l'administration ; fournisseur indiqué à la saisie (facultatif) et compte qui l'a saisi.
+     */
+    toValidate: boolean("to_validate").notNull().default(false),
+    manualSupplierId: uuid("manual_supplier_id").references((): AnyPgColumn => suppliers.id),
+    enteredBy: uuid("entered_by").references(() => users.id),
     active: boolean("active").notNull().default(true),
     ...timestamps,
   },

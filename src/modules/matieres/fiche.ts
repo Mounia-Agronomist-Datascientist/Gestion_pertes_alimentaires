@@ -4,7 +4,7 @@
  * fournisseurs. Les imports suivants ne touchent à aucun de ces réglages (règle R23) : une matière est retrouvée par
  * son identifiant Melba, jamais par son nom.
  */
-import { and, asc, count, desc, eq, inArray, max } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNotNull, max, sql } from "drizzle-orm";
 import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
@@ -254,7 +254,7 @@ export async function removeManualPrice(db: Db, admin: AuthUser, productId: stri
 /** Fournisseurs des bons déposés, avec leur nombre de bons, de matières et leur dernière livraison. */
 export async function listSuppliers(db: Db, admin: AuthUser) {
   requirePermission(admin, "referentiel.manage");
-  const [suppliers, orders, fromOrders, fromManual] = await Promise.all([
+  const [suppliers, orders, fromOrders, fromManual, fromEntries] = await Promise.all([
     db.select().from(s.suppliers).orderBy(asc(s.suppliers.name)),
     db
       .select({
@@ -270,11 +270,15 @@ export async function listSuppliers(db: Db, admin: AuthUser) {
     db
       .select({ supplierId: s.manualPackagings.supplierId, productId: s.manualPackagings.productId })
       .from(s.manualPackagings),
+    db
+      .select({ supplierId: sql<string>`${s.products.manualSupplierId}`, productId: s.products.id })
+      .from(s.products)
+      .where(isNotNull(s.products.manualSupplierId)),
   ]);
   const ordersOf = new Map(orders.map((o) => [o.supplierId, o]));
   // Matières d'un fournisseur : commandées dans ses bons ou avec un colis saisi à la main, une fois chacune.
   const productsOf = new Map<string, Set<string>>();
-  for (const r of [...fromOrders, ...fromManual])
+  for (const r of [...fromOrders, ...fromManual, ...fromEntries])
     productsOf.set(r.supplierId, (productsOf.get(r.supplierId) ?? new Set()).add(r.productId));
   const materialsOf = new Map([...productsOf].map(([id, set]) => [id, set.size]));
   return suppliers.map((x) => ({
@@ -283,6 +287,7 @@ export async function listSuppliers(db: Db, admin: AuthUser) {
     orders: ordersOf.get(x.id)?.orders ?? 0,
     lastDelivery: ordersOf.get(x.id)?.lastDelivery ?? null,
     materials: materialsOf.get(x.id) ?? 0,
+    toValidate: x.toValidate,
   }));
 }
 
@@ -314,6 +319,11 @@ export async function suppliersByProduct(db: Db) {
     db
       .select({ productId: s.manualPackagings.productId, supplierId: s.manualPackagings.supplierId })
       .from(s.manualPackagings),
+    // Fournisseur indiqué à la saisie d'un article (décision du 23/11/2026).
+    db
+      .select({ productId: s.products.id, supplierId: sql<string>`${s.products.manualSupplierId}` })
+      .from(s.products)
+      .where(isNotNull(s.products.manualSupplierId)),
   ]);
   const map = new Map<string, string[]>();
   for (const r of rows.flat())
