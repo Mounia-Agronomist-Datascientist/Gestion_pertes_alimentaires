@@ -31,7 +31,8 @@ async function fillLoss(page: Page, product: string, kg: string, from: "zone" | 
   await page.getByLabel("Nom du produit").fill(product);
   await page.getByRole("button", { name: "Matière première" }).click();
   await page.getByRole("button", { name: "Continuer" }).click();
-  await page.getByRole("button", { name: /^Pesée/ }).click();
+  await page.getByRole("button", { name: /Pesée à la balance/ }).click();
+  await page.getByRole("button", { name: /^Poids net/ }).click();
   await page.getByLabel("Quantité", { exact: true }).fill(kg);
   await page.getByRole("button", { name: "Continuer" }).click();
   await page.getByRole("button", { name: /^Erreur de préparation/ }).click();
@@ -95,7 +96,8 @@ test("une équipe ne voit pas les pertes d'une autre équipe ni l'administration
   await page.getByLabel("Nom du produit").fill("Navets");
   await page.getByRole("button", { name: "Matière première" }).click();
   await page.getByRole("button", { name: "Continuer" }).click();
-  await page.getByRole("button", { name: /^Pesée/ }).click();
+  await page.getByRole("button", { name: /Pesée à la balance/ }).click();
+  await page.getByRole("button", { name: /^Poids net/ }).click();
   await page.getByLabel("Quantité", { exact: true }).fill("1");
   await page.getByRole("button", { name: "Continuer" }).click();
   await page.getByRole("button", { name: /^Erreur de préparation/ }).click();

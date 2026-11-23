@@ -399,9 +399,11 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   à 120 g ») ; litres pour un liquide (densité, R24).
 - **Gastros et contenants** (estimation par contenant, pesée dans des gastros) : seulement en **Cuisine** (dont le
   Déboîtage) et en **Conditionnement**.
-- **Cuisine/production, sauf au Déboîtage** (décision du 20/11/2026) : **pesée à la balance seulement** (kg ou g),
-  avec la tare des gastros si besoin ; ni comptage ni estimation. Un consommable, un moule ou un plat à gratin s'y
-  compte toujours en pièces. Le Déboîtage garde toutes les façons de mesurer. Le serveur refuse les autres.
+- **Cuisine/production, aux quatre postes** (Déboîtage, Préparation froide, Cuisine, Salle blanche ; décision du
+  23/11/2026, qui remplace la pesée seule du 20/11/2026) : **1. Nombre de pièces** (poisson, hauts de cuisse… en
+  pièces seulement, jamais en contenants), **2. Pesée à la balance** — au choix « Pesé dans des gastros » (tare
+  déduite) ou « Poids net » saisi directement —, **3. Estimation** (kg, g, L, mL, pièces, gastros, contenants). Un
+  consommable, un moule ou un plat à gratin s'y compte toujours en pièces. Le serveur refuse les autres.
 - **Barquettes** : seulement en **Conditionnement** (et un futur poste de post-conditionnement de cette zone). En
   cuisine, un plat perdu se compte en pièces : une pièce = une portion (R10), comptée aussi dans les « barquettes
   perdues » des statistiques.

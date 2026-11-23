@@ -161,7 +161,15 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [unitCode, setUnitCode] = useState<string | null>(init?.unitCode ?? null);
   const [packagingKey, setPackagingKey] = useState<string | null>(init?.packagingKey ?? null);
   const [packagingKgText, setPackagingKgText] = useState(init?.packagingKg ?? "");
-  const [useTare, setUseTare] = useState(init?.useTare ?? false);
+  const [useTare, setUseTareState] = useState(init?.useTare ?? false);
+  /** Pesée là où les gastros existent : « gastros » (tare déduite) ou « net » (poids net saisi), à choisir. */
+  const [weighChoice, setWeighChoice] = useState<"gastros" | "net" | null>(
+    init?.useTare ? "gastros" : init ? "net" : null,
+  );
+  const setUseTare = (v: boolean) => {
+    setUseTareState(v);
+    setWeighChoice(v ? "gastros" : null);
+  };
   const [grossKg, setGrossKg] = useState(init?.grossKg ?? "");
   const [gastroCounts, setGastroCounts] = useState<Record<string, number>>(init?.gastroCounts ?? {});
   const [supportId, setSupportId] = useState<string | null>(init?.supportId ?? null);
@@ -845,42 +853,55 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           </TileGrid>
 
           {method === "pesee" && gastroTareAllowed(measureContext) && (
-            <label className="flex items-center gap-3 rounded-xl bg-white p-3 text-lg">
-              <input
-                type="checkbox"
-                className="size-6"
-                checked={useTare}
-                onChange={(e) => setUseTare(e.target.checked)}
-              />
-              Pesé dans des gastros (déduire la tare)
-            </label>
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 font-medium">Comment avez-vous pesé ?</legend>
+              <TileGrid>
+                <Tile compact selected={weighChoice === "gastros"} onClick={() => setUseTare(true)}>
+                  Pesé dans des gastros
+                  <small className="font-normal opacity-80">La tare des gastros est déduite</small>
+                </Tile>
+                <Tile
+                  compact
+                  selected={weighChoice === "net"}
+                  onClick={() => {
+                    setUseTareState(false);
+                    setWeighChoice("net");
+                  }}
+                >
+                  Poids net
+                  <small className="font-normal opacity-80">Saisi directement, sans contenant</small>
+                </Tile>
+              </TileGrid>
+            </fieldset>
           )}
 
-          {method && !useTare && (
-            <div className="flex gap-2">
-              <input
-                className="field min-w-0 flex-1"
-                inputMode="decimal"
-                placeholder="Quantité"
-                aria-label="Quantité"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                autoFocus
-              />
-              <select
-                className="field"
-                aria-label="Unité"
-                value={unitCode ?? ""}
-                onChange={(e) => chooseUnit(e.target.value)}
-              >
-                {unitsFor(method, measureContext).map((code) => (
-                  <option key={code} value={code}>
-                    {unitLabel(code)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          {method &&
+            !useTare &&
+            !(method === "pesee" && gastroTareAllowed(measureContext) && weighChoice !== "net") && (
+              <div className="flex gap-2">
+                <input
+                  className="field min-w-0 flex-1"
+                  inputMode="decimal"
+                  placeholder="Quantité"
+                  aria-label="Quantité"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  autoFocus
+                />
+                <select
+                  className="field"
+                  aria-label="Unité"
+                  value={unitCode ?? ""}
+                  onChange={(e) => chooseUnit(e.target.value)}
+                >
+                  {unitsFor(method, measureContext).map((code) => (
+                    <option key={code} value={code}>
+                      {unitLabel(code)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
           {method && !useTare && unitCode === "colis" && (
             <div className="flex flex-col gap-2 rounded-xl bg-white p-3">

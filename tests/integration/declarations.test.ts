@@ -280,38 +280,46 @@ describe("déclaration de perte", () => {
       expect(dest.map((d) => d.netKg).sort()).toEqual([1.4, 2.8]);
     });
 
-    it("Cuisine/production : pesée seule (gastros possibles), sauf au Déboîtage ; consommables comptés", async () => {
+    it("Cuisine/production, aux 4 postes : pièces, pesée ou estimation ; ni contenants comptés ; consommables comptés", async () => {
+      const two = [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }];
       await expect(
-        createDeclaration(t.db, teamC, cuisine({ method: "estimation_manuelle", quantity: 2, unitCode: "kg" }), NOW),
+        createDeclaration(
+          t.db,
+          teamC,
+          cuisine({ method: "estimation_manuelle", quantity: 2, unitCode: "kg", destinations: two }),
+          NOW,
+        ),
+      ).resolves.toBeTruthy();
+      await expect(
+        createDeclaration(
+          t.db,
+          teamC,
+          cuisine({ method: "comptage", quantity: 2, unitCode: "piece", destinations: two }),
+          NOW,
+        ),
+      ).resolves.toBeTruthy();
+      await expect(
+        createDeclaration(
+          t.db,
+          teamC,
+          cuisine({ method: "comptage", quantity: 2, unitCode: "contenant", destinations: two }),
+          NOW,
+        ),
       ).rejects.toThrow(/Unité non proposée/);
       await expect(
         createDeclaration(
           t.db,
           teamC,
           cuisine({
-            subzoneId: ref("sz:CUI_DEBOITAGE"),
-            method: "estimation_manuelle",
+            product: { freeLabel: "Film étirable", category: "consommable" },
+            method: "pesee",
             quantity: 2,
             unitCode: "kg",
-            destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }],
+            destinations: two,
           }),
           NOW,
         ),
-      ).resolves.toBeTruthy();
-      await expect(
-        createDeclaration(
-          t.db,
-          teamC,
-          cuisine({
-            product: { freeLabel: "Film étirable", category: "consommable" },
-            method: "comptage",
-            quantity: 2,
-            unitCode: "piece",
-            destinations: [{ destinationId: ref("dest:ALCHIMISTES"), quantity: 2, binNumber: "1" }],
-          }),
-          NOW,
-        ),
-      ).resolves.toBeTruthy();
+      ).rejects.toThrow(/Unité non proposée/);
     });
 
     it("convertit les litres avec la densité, jamais 1 L = 1 kg", async () => {

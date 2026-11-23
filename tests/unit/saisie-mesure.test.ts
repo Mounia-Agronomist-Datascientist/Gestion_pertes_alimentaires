@@ -19,13 +19,19 @@ const ctx = (zoneCode: string, over: Partial<Parameters<typeof unitsFor>[1]> = {
 });
 
 describe("façons de mesurer selon le lieu et le produit (R25)", () => {
-  it("Cuisine/production : pesée seule (gastros), sauf au Déboîtage ; un consommable s'y compte", () => {
-    const poste = (subzoneCode: string, over = {}) => ctx("CUISINE", { subzoneCode, ...over });
-    expect(methodsFor(INPUT_METHODS, poste("CUI_CUISINE"))).toEqual(["pesee"]);
-    expect(unitsFor("estimation_manuelle", poste("CUI_PREP_FROIDE"))).toEqual([]);
-    expect(gastroTareAllowed(poste("CUI_CUISINE"))).toBe(true);
-    expect(methodsFor(INPUT_METHODS, poste("CUI_CUISINE", { isConsumable: true }))).toEqual(["comptage"]);
-    expect(methodsFor(INPUT_METHODS, poste("CUI_DEBOITAGE")).length).toBeGreaterThan(1);
+  it("Cuisine/production, aux 4 postes : 1. pièces, 2. pesée (gastros possibles), 3. estimation", () => {
+    for (const subzoneCode of ["CUI_DEBOITAGE", "CUI_PREP_FROIDE", "CUI_CUISINE", "CUI_SALLE_BLANCHE"]) {
+      const c = ctx("CUISINE", { subzoneCode });
+      expect(methodsFor(INPUT_METHODS, c)).toEqual(["comptage", "pesee", "estimation_manuelle"]);
+      expect(methodsFor(INPUT_METHODS, c).map((m, i) => methodLabel(m, "CUISINE", m, i))).toEqual([
+        "1. Nombre de pièces",
+        "2. Pesée à la balance",
+        "3. Estimation",
+      ]);
+      expect(unitsFor("comptage", c)).toEqual(["piece"]);
+      expect(gastroTareAllowed(c)).toBe(true);
+    }
+    expect(methodsFor(INPUT_METHODS, ctx("CUISINE", { isConsumable: true }))).toEqual(["comptage"]);
   });
 
   it("Réception et Stockage : kg, colis ; pièces seulement avec un poids connu ; ni gastros ni barquettes", () => {
@@ -47,7 +53,7 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
     expect(unitsFor("estimation_manuelle", ctx("RECEPTION"))).toEqual(["kg", "l", "colis"]);
     // Ailleurs qu'en Réception et en Stockage, rien ne change.
     expect(unitsFor("pesee", ctx("CUISINE"))).toEqual(["kg", "g"]);
-    expect(methodLabel("pesee", "CUISINE", "Pesée", 0)).toBe("Pesée");
+    expect(methodLabel("pesee", "CONDITIONNEMENT", "Pesée", 0)).toBe("Pesée");
   });
 
   it("Stockage : les mêmes façons de mesurer qu'en Réception (décision du 19/11/2026)", () => {
@@ -69,8 +75,7 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
 
   it("Déboîtage : gastros et pièces, ni colis ni barquettes ; Conditionnement : barquettes et gastros", () => {
     const deboitage = ctx("CUISINE", { subzoneCode: "CUI_DEBOITAGE" });
-    expect(unitsFor("comptage", deboitage)).toEqual(["piece", "contenant"]);
-    expect(unitsFor("estimation_contenant", deboitage)).toEqual(["gastro", "contenant"]);
+    expect(unitsFor("estimation_manuelle", deboitage)).toEqual(["kg", "g", "l", "ml", "piece", "contenant", "gastro"]);
     expect(gastroTareAllowed(deboitage)).toBe(true);
     expect(unitsFor("comptage", ctx("CONDITIONNEMENT"))).toEqual(["piece", "barquette", "contenant"]);
     expect(unitsFor("comptage", ctx("PLONGE"))).toEqual(["piece"]);
