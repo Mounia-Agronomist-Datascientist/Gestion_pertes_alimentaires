@@ -24,11 +24,12 @@ import {
   StatsTabs,
   statsContext,
 } from "../shared";
+import { CHART } from "../palette";
 
 export const metadata = { title: "Environnement — Statistiques — Pertes" };
 
 /** Couleurs fixes : mesuré, estimé, non couvert (palette catégorielle validée, dans l'ordre ; gris pour « non couvert »). */
-const COLORS = { mesure: "#2a78d6", estime: "#eb6834", non_couvert: "#cbd5e1" } as const;
+const COLORS = { mesure: CHART.bleu, estime: CHART.moutarde, non_couvert: CHART.gris } as const;
 const METHOD_LABELS = {
   mesure: "Mesuré (recette Melba)",
   estime: "Estimé (hors liste, par famille)",

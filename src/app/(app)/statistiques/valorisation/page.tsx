@@ -33,14 +33,15 @@ import {
   StatsTabs,
   statsContext,
 } from "../shared";
+import { CHART } from "../palette";
 
 export const metadata = { title: "Valorisation — Statistiques — Pertes" };
 
 /** Couleurs fixes des trois groupes (palette catégorielle validée, dans l'ordre : jamais réattribuées). */
 const GROUP_COLORS: Record<RecoveryGroup, string> = {
-  avec_recette: "#2a78d6",
-  sans_recette: "#eb6834",
-  a_part: "#1baf7a",
+  avec_recette: CHART.bleu,
+  sans_recette: CHART.moutarde,
+  a_part: CHART.sarcelle,
 };
 
 const GROUP_NOTES: Record<RecoveryGroup, string> = {

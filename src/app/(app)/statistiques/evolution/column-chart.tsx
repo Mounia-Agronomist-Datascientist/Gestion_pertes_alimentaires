@@ -3,6 +3,8 @@
  * avant plus foncée et étiquetée, valeur au survol, et tableau des valeurs juste en dessous (§25 : jamais
  * l'information par la seule image).
  */
+import { CHART } from "../palette";
+
 export interface Column {
   key: string;
   label: string;
@@ -12,8 +14,8 @@ export interface Column {
   highlight?: boolean;
 }
 
-/** Couleur de la moyenne glissante : contraste avec les colonnes vertes (palette catégorielle validée). */
-const AVERAGE_COLOR = "#eb6834";
+/** Couleur de la moyenne glissante : bleu de la palette, distinct des colonnes brunes (vérifié pour les daltonismes). */
+const AVERAGE_COLOR = CHART.bleu;
 
 /**
  * `average` : moyenne glissante tracée en ligne sur les colonnes (même unité, même axe), avec sa légende et sa

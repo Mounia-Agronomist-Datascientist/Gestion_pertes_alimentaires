@@ -441,6 +441,12 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   #B3AAA3. Contrôlée avec l'outil de vérification des couleurs : luminosité et saturation, parts voisines distinctes
   pour les daltonismes, et le rouge distinct de toutes les autres (la dernière part touche la première). La
   moutarde est claire sur fond blanc : la légende écrite (nom, valeur, part) suffit à l'identifier.
+- **Même palette pour les colonnes** (23/11/2026) : coût par composante (matières en rouge, main-d'œuvre en bleu,
+  emballages en moutarde, indirects en sarcelle) ; valorisation (avec recette en bleu, sans recette en moutarde, à
+  part en sarcelle) ; ventes et dons (Too Good To Go en bleu, vente flash en moutarde, Linkee en sarcelle) ;
+  environnement (mesuré en bleu, estimé en moutarde, non couvert en gris) ; Alchimistes (déclaré en bleu, pesé en
+  moutarde) ; moyenne sur 4 semaines en bleu sur les colonnes brunes. Chaque groupe de couleurs utilisé ensemble a
+  été contrôlé. Les barres horizontales restent en brun, les parts dans les zones en rouge de la charte.
 - **Équipes en leurs couleurs** (23/11/2026) : dans les anneaux par équipe (comparaison des équipes, « Par équipe »
   du détail d'une zone), chaque équipe garde sa couleur (Verte en vert, Bleue en bleu…), celle du réglage de
   l'équipe.
@@ -465,7 +471,7 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   sous licence Adobe et ne sont pas reprises).
 - **Logo** sur la page de connexion **uniquement** (fichier `public/marque/logo-brigade-de-vero.svg`, copié du site).
 - L'en-tête garde la **couleur de l'équipe** pour un compte équipe ; rouge pour les autres comptes.
-- Les erreurs gardent leur encadré rouge clair. Graphiques : anneaux dans la palette assortie à la charte (R30) ;
+- Les erreurs gardent leur encadré rouge clair. Graphiques : anneaux et colonnes dans la palette assortie à la charte (R30) ;
   colonnes semaine après semaine en brun (semaine choisie en brun foncé).
 
 

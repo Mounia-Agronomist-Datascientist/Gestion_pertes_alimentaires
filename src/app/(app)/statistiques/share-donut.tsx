@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { type DonutUnit, formatDonutValue } from "./donut-format";
+import { CHART, CHART_ORDER } from "./palette";
 
 export type { DonutUnit };
 
@@ -29,8 +30,8 @@ export interface DonutRow {
  * prune ; vérifiée avec l'outil de contrôle des couleurs (luminosité, saturation, daltonisme sur les parts voisines,
  * et le rouge face à toutes les autres puisque la dernière part touche la première). « Autres » en gris chaud.
  */
-const COLORS = ["#d90019", "#1f6fa3", "#e0a31b", "#2a9d8f", "#c9773a", "#7b4fa0"];
-const OTHER_COLOR = "#b3aaa3";
+const COLORS = CHART_ORDER;
+const OTHER_COLOR = CHART.gris;
 const MAX_SLICES = 6;
 const pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
 

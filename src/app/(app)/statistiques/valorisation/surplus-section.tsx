@@ -3,9 +3,14 @@ import { SURPLUS_SOURCES, type SurplusSource, surplusTrays } from "@/domain/surp
 import type { surplusDashboard } from "@/modules/statistiques/surplus";
 import { StackedColumnChart } from "../evolution/stacked-chart";
 import { Card, euro, num } from "../shared";
+import { CHART } from "../palette";
 
 /** Couleurs fixes des trois sources (palette catégorielle validée, dans l'ordre : jamais réattribuées). */
-const SOURCE_COLORS: Record<SurplusSource, string> = { tgtg: "#2a78d6", vente_flash: "#eb6834", linkee: "#1baf7a" };
+const SOURCE_COLORS: Record<SurplusSource, string> = {
+  tgtg: CHART.bleu,
+  vente_flash: CHART.moutarde,
+  linkee: CHART.sarcelle,
+};
 const SOURCE_NAMES: Record<SurplusSource, string> = {
   tgtg: "Too Good To Go",
   vente_flash: "Ventes flash",

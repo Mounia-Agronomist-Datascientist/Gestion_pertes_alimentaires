@@ -13,12 +13,13 @@ import {
 import { anchorWeek } from "@/modules/statistiques/context";
 import { adjacentOf } from "@/modules/statistiques/facts";
 import { Card, ExportLinks, num, type Params, PeriodNav, pct, Stat, StatsTabs, statsContext } from "../shared";
+import { CHART } from "../palette";
 
 export const metadata = { title: "Alchimistes — Statistiques — Pertes" };
 
 /** Couleurs fixes des deux séries (palette catégorielle validée, dans l'ordre). */
-const DECLARED = "#2a78d6";
-const MEASURED = "#eb6834";
+const DECLARED = CHART.bleu;
+const MEASURED = CHART.moutarde;
 
 const kg = (n: number) => `${num.format(n)} kg`;
 const gap = (r: ReconciliationRow) =>
