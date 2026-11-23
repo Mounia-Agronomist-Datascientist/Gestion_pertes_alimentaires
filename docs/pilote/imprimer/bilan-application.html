@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Bilan de l&#x27;application Pertes — où en est-on ?</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="doc">
+  <div>
+    <div class="kicker">Application Pertes · bilan</div>
+    <h1>Où en est l'application ?</h1>
+  </div>
+  <div class="meta">Toutes les fonctions et leurs options<br>Version du 23/11/2026</div>
+</header>
+<p class="small">Fiche de repère, à relire quand on s'y perd. Le détail des règles est dans docs/REGLES_METIER.md, le journal daté dans docs/SUIVI.md.</p>
+<h2>En bref</h2>
+<div class="box info">
+<ul><li><strong>L'application est prête pour l'essai pilote.</strong> Toutes les phases prévues (déclarations, import Melba, coûts, statistiques, valorisation, environnement, alertes, saisie sans réseau) sont faites et testées (485 tests automatiques et 6 parcours complets dans Chrome).</li><li><strong>Elle n'est pas encore à jour en ligne</strong> : les crédits Netlify sont épuisés jusqu'au <strong>8 décembre 2026</strong>. Toutes les nouveautés depuis le 13/11 tournent seulement en local.</li><li><strong>Ce qui reste surtout</strong> : la mise en ligne, l'essai avec les équipes, et quelques décisions métier (en fin de fiche).</li></ul>
+</div>
+<h2>Qui fait quoi</h2>
+<table><thead><tr><th>Profil</th><th>Ce qu'il voit et fait</th></tr></thead><tbody>
+<tr><td><strong>Compte équipe</strong> (A Bleue … H Turquoise)</td><td>Déclare ses pertes (Cuisine/production par défaut), corrige les siennes dans le délai, voit « Mon équipe »</td></tr>
+<tr><td><strong>Responsable de zone</strong></td><td>Déclare dans ses zones (les autres sont grisées), corrige sans délai, statistiques de ses zones</td></tr>
+<tr><td><strong>Responsable de production</strong></td><td>Toutes les zones, statistiques complètes, journal d'audit</td></tr>
+<tr><td><strong>Direction</strong></td><td>Statistiques et rapports</td></tr>
+<tr><td><strong>Administrateur</strong></td><td>Tout, plus l'Administration (imports, référentiels, comptes, réglages)</td></tr>
+</tbody></table>
+<p>Les zones d'un compte se cochent dans Administration → Comptes. Aucun prénom dans l'application : comptes nommés par fonction.</p>
+<h2>Déclarer une perte — le parcours</h2>
+<p>Accueil → <strong>Déclarer une perte</strong>. Une question par écran ; « Modifier » au récapitulatif pour revenir sur une étape.</p>
+<ol><li><strong>Où ?</strong> La zone (numérotée dans le sens de la marche en avant), puis le poste.</li><li><strong>Quelle équipe ?</strong> Seulement pour un compte sans équipe, en Cuisine/production.</li><li><strong>Quel produit ?</strong> Recherche par lettres ou par code (VI01). « Produit absent de la liste » juste sous la recherche.</li><li><strong>Quelle quantité ?</strong> La façon de mesurer dépend de la zone (tableau ci-dessous).</li><li><strong>N° de lot et DLC</strong> (Réception, Stockage seulement, facultatif).</li><li><strong>Pourquoi ?</strong> La cause, propre à la zone. Aucune ne convient : « Autres causes » + commentaire, ou « Proposer une nouvelle cause ».</li><li><strong>Où part la perte ?</strong> Une destination, ou « Répartir entre plusieurs destinations ».</li><li><strong>Vérifier et valider.</strong> Date et heure de la perte, commentaire, coût estimé, n° de poubelle des Alchimistes.</li></ol>
+<h3>Ce qui change selon la zone</h3>
+<table><thead><tr><th>Zone</th><th>Produits proposés</th><th>Façons de mesurer</th><th>Particularités</th></tr></thead><tbody>
+<tr><td><strong>1. Réception</strong></td><td>Matières des semaines S-1, S et S+1 (tome et bons de commande), avec fournisseur et colis ; « Tous les encas »</td><td>1. Comptage en colis, sachets ou unités · 2. Pesée à la balance · 3. Estimation — en kg</td><td>Lots, DLC, photos ; « Retour fournisseur » compté à part, pas de « Réutilisation »</td></tr>
+<tr><td><strong>2. Stockage</strong></td><td>Matières de la semaine rangées dans le lieu choisi d'abord, les autres à part ; encas selon le lieu (yaourts et fromages au Local encas frais, le reste au Stockage sec – ENCAS)</td><td>Comme la Réception, en kg ; colis du fournisseur (poids corrigeable, « Autre colis »)</td><td>Lots, DLC, photos</td></tr>
+<tr><td><strong>3. Cuisine / Production</strong> (4 postes)</td><td>Plats de l'équipe → sous-recettes → ingrédients (tome de la semaine)</td><td>1. Nombre de pièces · 2. Pesée à la balance : « Pesé dans des gastros » (tare déduite, échelle possible) ou « Poids net » · 3. Estimation</td><td>Équipe obligatoire ; consommables comptés en pièces</td></tr>
+<tr><td><strong>4. Conditionnement</strong></td><td>Tous les plats de la semaine et les encas</td><td>kg, pièces, gastros (avec tare), barquettes</td><td>—</td></tr>
+<tr><td><strong>5. Plonge</strong></td><td>Liste des produits</td><td>kg ou pièces</td><td>—</td></tr>
+</tbody></table>
+<p><strong>Produit absent de la liste</strong> : nom, type, prix d'achat facultatif (la perte est alors chiffrée). En Réception et Stockage : seulement matière première ou encas, fournisseur facultatif (connu ou tapé) ; l'article est ajouté aussitôt à la liste, « à valider » par l'administration.</p>
+<p><strong>N° de lot et DLC</strong> (Réception, Stockage) : photos de l'étiquette (4 au plus, gardées 3 mois), une ligne par lot ou DLC avec sa quantité, « Mettre le reste », total = quantité de la perte. DLC au clavier numérique (« 251126 »). Lot et DLC tapés à la main pour l'instant (lecture automatique possible plus tard).</p>
+<h3>Causes par zone (base locale au 23/11)</h3>
+<table><thead><tr><th>Zone</th><th>Causes</th></tr></thead><tbody>
+<tr><td>Réception</td><td>Produit arrivé cassé / ouvert / dessouvidé · Cassé / ouvert pendant la manipulation · Problème de qualité (abîmé, pourri…) · Étiquetage ou emballage non conforme · Corps étranger / contamination</td></tr>
+<tr><td>Stockage</td><td>1. Problème de DLC · 2. Problème de qualité · 3. Retour non conforme · 4. Surstock · 5. Retour non utilisable · 6. Rupture du froid (panne de chambre) · 7. Nuisibles · 8. Chute / écrasement en manutention</td></tr>
+<tr><td>Cuisine / Production</td><td>Four mal nettoyé · Chute de gastro · Chutes de découpe (Déboîtage) · Surplus non réutilisable · Non-conformité qualité · Surcuisson / brûlé · Erreur de recette ou de dosage · Résidu au fond de la marmite · Panne d'équipement</td></tr>
+<tr><td>Conditionnement</td><td>Non-conformité qualité · Surplus de production · Chute de produit · Doseuse · Défaut de scellage · Barquettes de test d'oxygène · Erreur d'étiquetage · Poids non conforme · Défaut d'aspect · Barquette abîmée · Erreur de production · Barquette remise au personnel puis jetée · Fond de gastro · Panne d'équipement · Réglage / démarrage de la ligne</td></tr>
+<tr><td>Plonge</td><td>Fond de gastro</td></tr>
+<tr><td>Partout</td><td><strong>Autres causes</strong> (avec commentaire)</td></tr>
+</tbody></table>
+<p>Chaque cause a une <strong>famille de cause racine</strong> (organisation, équipement, fournisseur, conservation, hygiène, surproduction, inhérente, autre) et un caractère <strong>évitable / inévitable / à évaluer</strong>, proposés puis validés dans Administration → Causes. Les équipes ne voient rien de plus : ils servent aux statistiques.</p>
+<h3>Destinations</h3>
+<p>Les Alchimistes – compost (n° de poubelle, facultatif) · Association / don · Personnel · Ordures ménagères · Réutilisation dans une autre préparation (pas en Réception) · Retour fournisseur (Réception seulement) · Autre destination (commentaire obligatoire). <strong>Too Good To Go, vente flash et Linkee</strong> ne se déclarent pas : ils viennent des fichiers de l'entreprise déposés par l'administration.</p>
+<h2>Les autres façons de saisir</h2>
+<ul><li><strong>Plusieurs pertes d'un coup</strong> (Accueil → Déclarer plusieurs pertes) : liste préparée sur la tablette, validée en une fois (tout ou rien). Lots possibles, pas de photos.</li><li><strong>Sans réseau</strong> : la perte est gardée sur la tablette et part toute seule au retour du réseau (bandeau orange, page « Pertes en attente »). L'application s'ouvre même sans réseau si elle a été installée.</li><li><strong>Corriger ou annuler</strong> (Pertes déclarées → la perte) : nouvelle version avec motif obligatoire, l'ancienne est gardée. Équipes : déclarer jusqu'à 7 jours après la perte, corriger jusqu'à une semaine après la fin de la semaine de production. Responsables : sans délai.</li></ul>
+<h2>Les alertes</h2>
+<ul><li><strong>« Saisie incomplète »</strong> : une équipe sans déclaration un jour de production compte 150 kg estimés pour la plage (jeudi-vendredi ou lundi-mercredi) ; l'alerte s'efface quand les pertes sont saisies, ou se lève avec un motif.</li><li><strong>Alertes d'analyse</strong> (calculées la nuit, à l'accueil, « Vu » par compte) : pertes inhabituelles (+50 % sur la moyenne de 4 semaines, 5 kg minimum, à volume égal), causes récurrentes (même cause en tête 3 semaines de suite), tendances (hausse / stable / baisse). Seuils réglables. <strong>Mise en service prévue après l'essai des équipes.</strong></li></ul>
+<h2>Les statistiques</h2>
+<p>Période (semaine, mois, année, libre) et filtres en haut ; exports Excel et CSV sur chaque onglet ; impression A4.</p>
+<table><thead><tr><th>Onglet</th><th>Ce qu'on y lit</th></tr></thead><tbody>
+<tr><td>Vue générale</td><td>kg, coûts, barquettes, déclarations ; zones en logigramme ; devenir des pertes ; pertes évitables et familles de causes</td></tr>
+<tr><td>Par zone, Par équipe (« Mon équipe » pour un compte équipe)</td><td>Comparaison et détail : causes, produits, postes, devenir, 8 semaines</td></tr>
+<tr><td>Produits · Causes et destinations</td><td>Classements (plats, sous-recettes partagées, cause principale ; causes et destinations)</td></tr>
+<tr><td>Évolution</td><td>Semaine précédente, moyenne 4 semaines, même semaine l'an passé, à volume égal ; coûts par composante ; tendances</td></tr>
+<tr><td>Ratios</td><td>Pertes rapportées à la production prévue (plan) et réelle (Décompte barquettes)</td></tr>
+<tr><td>Synthèse de la semaine</td><td>Résumé imprimable (2 à 3 pages) : anneaux en € et en kg par zone, cause, produit ; plus fortes hausses ; 12 semaines</td></tr>
+<tr><td>Valorisation</td><td>Pertes avec ou sans recette (ventes, dons), part récupérée ; ventes TGTG, flash, Linkee</td></tr>
+<tr><td>Alchimistes</td><td>Nos kg déclarés face aux pesées des Alchimistes, écarts</td></tr>
+<tr><td>Environnement</td><td>CO2e des pertes (par la recette Melba et les facteurs Agribalyse validés)</td></tr>
+<tr><td>Rapports PDF</td><td>Hebdomadaire, mensuel, annuel, valorisation, environnemental</td></tr>
+</tbody></table>
+<p>Les répartitions sont en anneaux (6 parts + « autres », même couleur pour le même élément d'un anneau à l'autre) ; une baisse des pertes s'affiche en vert. <strong>Coûts des pertes</strong> (menu à part) : brut, recettes, net, par équipe et zone.</p>
+<h2>Les coûts — d'où viennent les euros</h2>
+<ul><li><strong>Plats, sous-recettes, ingrédients de la semaine</strong> : coûts du tome Melba de la semaine, figés sur la perte.</li><li><strong>Matières premières</strong> : prix d'achat en vigueur à la date de la perte (tome, bons de commande, ou saisi à la main).</li><li><strong>Emballages</strong> : référentiel daté (moules Melba + emballages par plat).</li><li><strong>Produit absent de la liste</strong> : le prix indiqué à la saisie ou ajouté ensuite par l'administration.</li><li><strong>Main-d'œuvre et coûts indirects</strong> : pas encore imputés (méthode à définir).</li><li>Une perte garde toujours le coût calculé le jour de sa saisie.</li></ul>
+<h2>L'administration</h2>
+<p><strong>Chaque semaine</strong> : import du <strong>tome Melba + plan de production</strong> (mardi) · <strong>Décompte barquettes</strong> (jeudi) · <strong>bons de commande</strong> (jeudi, PDF ou ZIP du Drive) · <strong>Recoupement</strong> tome / bons · <strong>Matières à compléter</strong> · alertes à lire · <strong>Synthèse</strong> pour la réunion de production. Fichiers ponctuels : ventes TGTG / flash / Linkee, pesées des Alchimistes.</p>
+<p><strong>Au fil de l'eau</strong> :</p>
+<ul><li><strong>Causes</strong> : valider les causes proposées par les équipes ; valider la famille et l'évitabilité de chaque cause.</li><li><strong>Produits</strong> : articles saisis à la main (valider, corriger, fusionner) ; saisies hors liste (prix, rattachement) ; fiche produit (prix datés, colis, lieu de stockage, famille d'encas).</li><li><strong>Fournisseurs</strong> : valider un fournisseur tapé à la saisie, renommer.</li></ul>
+<p><strong>Réglages</strong> : comptes et leurs zones · équipes actives par semaine · jours de production (fériés, samedis) · zones et postes · destinations (n° de poubelle) · gastros et tares · emballages · main-d'œuvre · lieux de stockage des matières · facteurs CO2e · seuils des alertes · journal d'audit.</p>
+<h2 class="page-break">Ce qui a changé récemment (20 au 23 novembre)</h2>
+<ul><li><strong>Charte de La Brigade de Véro</strong> : rouge, brun, crème, police Nunito ; logo à la connexion seulement.</li><li><strong>Statistiques</strong> : anneaux au lieu de barres, zones en logigramme, impression plus compacte.</li><li><strong>Encas</strong> : liste des 99 encas à part, rangés par famille, selon le lieu au Stockage.</li><li><strong>Cuisine/production</strong> : 3 façons de mesurer aux 4 postes, pesée en gastros ou en poids net.</li><li><strong>Réception / Stockage</strong> : article saisi à la main ajouté « à valider » ; n° de poubelle en encadré orange ; <strong>n° de lot, DLC et photos</strong>.</li><li><strong>Causes</strong> : familles de cause racine et pertes évitables ; 10 causes ajoutées ; Réception et Stockage revues avec le futur utilisateur (température retirée, étiquetage ajouté, Stockage renuméroté de 1 à 8) ; « Autres pertes » devient « Autres causes ».</li><li><strong>Import</strong> : un tome sans composition des plats est refusé (S47 et S48 réimportées en local).</li></ul>
+<h2>Ce qui reste à faire ou à décider</h2>
+<p><strong>Mise en ligne (à partir du 8 décembre)</strong>, dans l'ordre, après une sauvegarde :</p>
+<ol><li>pousser les commits, puis passer les migrations <strong>0014 à 0038</strong> (GitHub → Actions → « Base de données ») ;</li><li>Administration → Produits → « Compléter depuis les tomes importés » ;</li><li>réimporter les semaines dont le tome a été importé avant le 19/11 (composition des plats manquante) ;</li><li>déposer le ZIP des bons de commande du Drive ;</li><li>ranger les catégories Melba dans les lieux de stockage.</li></ol>
+<p><strong>À valider par l'administration</strong> : classement des causes (Administration → Causes) ; facteurs carbone et rattachements « À revoir » ; articles et fournisseurs saisis à la main.</p>
+<p><strong>Décisions métier encore ouvertes</strong> : méthode d'imputation de la main-d'œuvre et des coûts indirects ; poids par contenant pour l'estimation en gastros ; poids unitaires manquants (dont 10 encas) ; date de mise en service des alertes ; lecture automatique des étiquettes (service en ligne payant) ; étape 3 du référentiel des pertes (destinations), non demandée pour l'instant.</p>
+<p><strong>Essai pilote</strong> : préparé (fiche équipe, guide de l'administration, plan du pilote), à lancer après la mise en ligne.</p>
+</body>
+</html>
