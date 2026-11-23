@@ -128,20 +128,18 @@ une baisse des pertes s'affiche en vert. **Coûts des pertes** (menu à part) : 
 
 ## L'administration
 
-**Chaque semaine** : import du **tome Melba + plan de production** (mardi) · **Décompte barquettes** (jeudi) ·
-**bons de commande** (jeudi, PDF ou ZIP du Drive) · **Recoupement** tome / bons · **Matières à compléter** · alertes
-à lire · **Synthèse** pour la réunion de production. Fichiers ponctuels : ventes TGTG / flash / Linkee, pesées des
-Alchimistes.
+Rangée en 6 familles, de la plus utilisée à la plus rare :
 
-**Au fil de l'eau** :
-- **Causes** : valider les causes proposées par les équipes ; valider la famille et l'évitabilité de chaque cause.
-- **Produits** : articles saisis à la main (valider, corriger, fusionner) ; saisies hors liste (prix, rattachement) ;
-  fiche produit (prix datés, colis, lieu de stockage, famille d'encas).
-- **Fournisseurs** : valider un fournisseur tapé à la saisie, renommer.
+| Famille | Options | Quand |
+|---|---|---|
+| **1. Chaque semaine** | Import de la semaine (tome Melba + plan le mardi ; Décompte barquettes et bons de commande le jeudi ; ventes TGTG / flash / Linkee et pesées des Alchimistes quand ils arrivent) · Recoupement tome / bons · Matières à compléter | Chaque semaine |
+| **2. Ce que les équipes voient à la saisie** | Causes (propositions des équipes, famille et évitabilité à valider) · Destinations (n° de poubelle) · Zones et postes · Gastros et tares | Au fil de l'eau |
+| **3. Produits et achats** | Produits (articles saisis à la main, saisies hors liste, fiches : prix datés, colis, lieu, famille d'encas) · Fournisseurs (à valider, renommer) · Lieux de stockage des matières | Au fil de l'eau |
+| **4. Équipes, comptes et calendrier** | Comptes et leurs zones · Équipes par semaine · Jours de production (fériés, samedis) | Ponctuellement |
+| **5. Coûts et environnement** | Emballages et consommables · Main-d'œuvre · Facteurs d'émission (CO2e) · Rattachement des ingrédients | Quand les coûts changent, après chaque tome |
+| **6. Alertes et contrôle** | Seuils des alertes · Journal d'audit | Ponctuellement |
 
-**Réglages** : comptes et leurs zones · équipes actives par semaine · jours de production (fériés, samedis) · zones
-et postes · destinations (n° de poubelle) · gastros et tares · emballages · main-d'œuvre · lieux de stockage des
-matières · facteurs CO2e · seuils des alertes · journal d'audit.
+Chaque semaine aussi : lire les alertes (accueil) et la **Synthèse de la semaine** pour la réunion de production.
 
 ## Ce qui a changé récemment (20 au 23 novembre)
 
@@ -155,6 +153,7 @@ matières · facteurs CO2e · seuils des alertes · journal d'audit.
   le futur utilisateur (température retirée, étiquetage ajouté, Stockage renuméroté de 1 à 8) ; « Autres pertes »
   devient « Autres causes ».
 - **Import** : un tome sans composition des plats est refusé (S47 et S48 réimportées en local).
+- **Administration** : options rangées en 6 familles.
 
 ## Ce qui reste à faire ou à décider
 

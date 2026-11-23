@@ -2,6 +2,17 @@
 
 Application **Pertes** · semaine de production du **jeudi au mercredi**.
 
+## La page Administration
+
+La page **Administration** est rangée en 6 familles (pastilles en haut pour y aller directement) :
+1. **Chaque semaine** — Import de la semaine · Recoupement de la semaine · Matières à compléter.
+2. **Ce que les équipes voient à la saisie** — Causes · Destinations · Zones et postes · Gastros et tares.
+3. **Produits et achats** — Produits · Fournisseurs · Lieux de stockage des matières.
+4. **Équipes, comptes et calendrier** — Comptes · Équipes par semaine · Jours de production.
+5. **Coûts et environnement** — Emballages et consommables · Main-d'œuvre · Facteurs d'émission (CO2e) ·
+   Rattachement des ingrédients.
+6. **Alertes et contrôle** — Seuils des alertes · Journal d'audit.
+
 ## Chaque semaine
 
 | Quand | Où | Quoi |
