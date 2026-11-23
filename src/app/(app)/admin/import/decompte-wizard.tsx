@@ -67,13 +67,7 @@ export function DecompteWizard({ existing }: { existing: { year: number; week: n
       : "";
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold">Barquettes réellement produites (Décompte barquettes)</h2>
-      <p className="text-sm text-slate-600">
-        Après la semaine : Google Sheets « Décompte barquettes » → Fichier → Télécharger → Microsoft Excel. Seule la
-        colonne « Ma production » de l&apos;onglet « Semaine NN » est lue ; les onglets des jours (noms des opérateurs)
-        ne sont jamais lus.
-      </p>
+    <section className="flex flex-col gap-3">
       <input
         type="file"
         accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

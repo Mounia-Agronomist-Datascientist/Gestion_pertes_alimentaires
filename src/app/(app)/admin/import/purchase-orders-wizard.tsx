@@ -144,14 +144,7 @@ export function PurchaseOrdersWizard() {
   const warned = ready?.orders.filter((o) => o.warnings.length) ?? [];
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold">Bons de commande fournisseurs</h2>
-      <p className="text-sm text-slate-600">
-        Chaque jeudi : déposez les bons de commande Melba de la semaine suivante (PDF). Pour reprendre
-        l&apos;historique, téléchargez le dossier des bons de commande depuis le Drive (clic droit → Télécharger) et
-        déposez le ZIP. Les fichiers sont lus sur cet ordinateur ; les adresses e-mail ne sont jamais lues. Un bon déjà
-        déposé est remplacé.
-      </p>
+    <section className="flex flex-col gap-3">
       <input
         type="file"
         multiple

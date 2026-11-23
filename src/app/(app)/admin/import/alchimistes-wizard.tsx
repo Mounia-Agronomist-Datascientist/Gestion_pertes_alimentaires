@@ -73,14 +73,7 @@ export function AlchimistesWizard({ coverage }: { coverage: string[] }) {
       : "";
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold">Pesées des Alchimistes</h2>
-      <p className="text-sm text-slate-600">
-        Export CSV ou Excel des rendez-vous des Alchimistes. Seules les collectes sont gardées (date, poids, bac,
-        qualité, incident) ; le nom du client et de l&apos;établissement ne sont pas lus. La semaine de production est
-        calculée à partir de la date. Ces poids servent au contrôle : ils ne s&apos;ajoutent jamais aux pertes
-        déclarées.
-      </p>
+    <section className="flex flex-col gap-3">
       <input
         type="file"
         accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

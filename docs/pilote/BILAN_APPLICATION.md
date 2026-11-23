@@ -132,7 +132,7 @@ Rangée en 6 familles, de la plus utilisée à la plus rare :
 
 | Famille | Options | Quand |
 |---|---|---|
-| **1. Chaque semaine** | Import de la semaine (tome Melba + plan le mardi ; Décompte barquettes et bons de commande le jeudi ; ventes TGTG / flash / Linkee et pesées des Alchimistes quand ils arrivent) · Recoupement tome / bons · Matières à compléter | Chaque semaine |
+| **1. Chaque semaine** | Import de la semaine, rangé par jour : **mardi** tome Melba + plan (S+1) ; **jeudi** Décompte barquettes, pesées des Alchimistes, ventes TGTG / flash / Linkee (S-1), puis bons de commande (S+1) · Recoupement tome / bons · Matières à compléter | Chaque semaine |
 | **2. Ce que les équipes voient à la saisie** | Causes (propositions des équipes, famille et évitabilité à valider) · Destinations (n° de poubelle) · Zones et postes · Gastros et tares | Au fil de l'eau |
 | **3. Produits et achats** | Produits (articles saisis à la main, saisies hors liste, fiches : prix datés, colis, lieu, famille d'encas) · Fournisseurs (à valider, renommer) · Lieux de stockage des matières | Au fil de l'eau |
 | **4. Équipes, comptes et calendrier** | Comptes et leurs zones · Équipes par semaine · Jours de production (fériés, samedis) | Ponctuellement |
@@ -153,7 +153,7 @@ Chaque semaine aussi : lire les alertes (accueil) et la **Synthèse de la semain
   le futur utilisateur (température retirée, étiquetage ajouté, Stockage renuméroté de 1 à 8) ; « Autres pertes »
   devient « Autres causes ».
 - **Import** : un tome sans composition des plats est refusé (S47 et S48 réimportées en local).
-- **Administration** : options rangées en 6 familles.
+- **Administration** : options rangées en 6 familles ; Import de la semaine rangé par jour, avec la semaine concernée (S-1, S, S+1) et l'usage de chaque document.
 
 ## Ce qui reste à faire ou à décider
 

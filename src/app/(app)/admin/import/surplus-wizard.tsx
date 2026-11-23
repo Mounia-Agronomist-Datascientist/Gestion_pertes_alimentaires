@@ -125,13 +125,7 @@ export function SurplusWizard({
       : "";
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <h2 className="text-lg font-semibold">Ventes et dons des surplus de barquettes</h2>
-      <p className="text-sm text-slate-600">
-        Fichiers « VENTES TGTG », « VENTES FLASH » et « Gestion des surplus barquettes pour association Linkee » : dans
-        Google Sheets, Fichier → Télécharger → Microsoft Excel. Le type de fichier est reconnu tout seul. Ces fichiers
-        font foi : les équipes ne déclarent plus ces destinations. Les contacts du fichier Linkee ne sont pas lus.
-      </p>
+    <section className="flex flex-col gap-3">
       <input
         type="file"
         accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

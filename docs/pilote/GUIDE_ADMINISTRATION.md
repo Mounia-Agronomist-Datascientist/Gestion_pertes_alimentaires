@@ -15,19 +15,21 @@ La page **Administration** est rangée en 6 familles (pastilles en haut pour y a
 
 ## Chaque semaine
 
+Semaine de production du jeudi au mercredi : **S** = semaine en cours, **S-1** = celle qui vient de se terminer, **S+1** = celle qui commence jeudi. La page Import de la semaine est rangée dans le même ordre (mardi, puis jeudi), avec pour chaque document ce qu'il est, sa semaine et à quoi il sert.
+
 | Quand | Où | Quoi |
 |---|---|---|
-| **Mardi** (avant la nouvelle semaine) | Administration → **Import de la semaine** | Déposer le **tome Melba** (PDF « Imprimer les recettes ») et le **plan de production** (Google Sheets → Fichier → Télécharger → Microsoft Excel). Vérifier l'aperçu (plats par équipe, anomalies) puis valider. Sans import, les équipes ne voient pas les plats de la semaine. |
+| **Mardi** (avant la nouvelle semaine) | Administration → **Import de la semaine** | Pour la semaine qui commence jeudi (**S+1**) : déposer le **tome Melba** (PDF « Imprimer les recettes ») et le **plan de production** (Google Sheets → Fichier → Télécharger → Microsoft Excel). Vérifier l'aperçu (plats par équipe, anomalies) puis valider. Sans import, les équipes ne voient pas les plats de la semaine. |
 | Mardi | Administration → **Équipes par semaine** | Désactiver une équipe qui ne travaille pas (semaine creuse) : pas d'alerte « saisie incomplète » pour elle. |
 | Avant un férié ou un samedi travaillé | Administration → **Jours de production** | Retirer le jour férié, ajouter le samedi. |
-| **Après la fin de la semaine** (jeudi) | Administration → **Import** → « Barquettes réellement produites » | Déposer le **« Décompte barquettes »** : il donne les ratios et la comparaison à volume égal. |
-| **Jeudi** | Administration → **Import** → « Bons de commande fournisseurs » | Déposer les **bons de commande** de la semaine suivante (PDF, ou le dossier du Drive en ZIP). Nouvelles matières, colis et prix d'achat sont enregistrés ; un bon redéposé est remplacé. |
+| **Après la fin de la semaine** (jeudi) | Administration → **Import** → « Barquettes réellement produites » | Déposer le **« Décompte barquettes »** (**S-1**) : il donne les ratios et la comparaison à volume égal. |
+| **Jeudi** | Administration → **Import** → « Pesées des Alchimistes » | Déposer leur export (CSV ou Excel) jusqu'à la semaine terminée (**S-1**) : comparaison avec nos kg déclarés au compost. |
+| **Jeudi** | Administration → **Import** → « Ventes et dons des surplus » | Déposer **VENTES TGTG**, **VENTES FLASH**, **Linkee** (Excel) jusqu'à la semaine terminée (**S-1**). Un fichier redéposé remplace sa période. |
+| **Jeudi** | Administration → **Import** → « Bons de commande fournisseurs » | Déposer les **bons de commande** de la semaine suivante (**S+1**) (PDF, ou le dossier du Drive en ZIP). Nouvelles matières, colis et prix d'achat sont enregistrés ; un bon redéposé est remplacé. |
 | Jeudi, après les bons | Administration → **Recoupement de la semaine** | Ingrédients du tome face aux bons de la semaine : écarts de prix, commandes absentes du tome, ingrédients sans commande. |
 | Jeudi, après les bons | Administration → **Matières à compléter** | Matières de la semaine et de la suivante sans fournisseur ou sans poids de colis : les compléter sur la fiche produit (colis saisi à la main), une fois pour toutes. |
 | Jeudi | Accueil, **Alertes d'analyse** | Pertes inhabituelles et causes récurrentes de la semaine terminée (calculées dans la nuit). Les lire, noter « Vu ». |
 | Chaque jour ou deux | **Alertes « saisie incomplète »** | Équipes sans déclaration un jour de production (150 kg estimés). Lever une alerte justifiée, avec motif (équipe en formation…). |
-| Quand les fichiers sont mis à jour | Administration → **Import** → « Ventes et dons des surplus » | Déposer **VENTES TGTG**, **VENTES FLASH**, **Linkee** (Excel). Un fichier redéposé remplace sa période. |
-| Quand Les Alchimistes l'envoient | Administration → **Import** → « Pesées des Alchimistes » | Déposer leur export (CSV ou Excel). |
 | Au fil de l'eau | Administration → **Causes** | Valider ou refuser les causes proposées par les équipes. |
 | Une fois, puis à chaque nouvelle cause | Administration → **Causes** | Vérifier la **famille** et le caractère **évitable** de chaque cause (classement proposé, à valider) : ils alimentent « Pertes évitables » et « Par famille de cause racine ». |
 | Au fil de l'eau | Administration → **Produits** | **Articles saisis à la main** (Réception, Stockage) : valider, corriger la fiche ou fusionner avec l'article existant ; valider un nouveau fournisseur. Saisies « hors liste » : indiquer le prix d'achat (la perte est chiffrée), rattacher à un produit de la liste ou créer le produit avec son prix. Encas : type « Encas » et sa famille sur la fiche produit (une ligne de bon « ENCAS » en crée un tout seul). |
