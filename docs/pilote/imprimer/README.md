@@ -5,7 +5,7 @@ PDF A4 prêts à imprimer, produits depuis les fichiers HTML de ce dossier (feui
 | PDF | Pour qui | Pages |
 |---|---|---|
 | `fiche-equipes.pdf` | Équipes (près de chaque tablette) | 2 (recto-verso) |
-| `guide-administration.pdf` | Administration | 2 |
+| `guide-administration.pdf` | Administration | 3 |
 | `plan-pilote.pdf` | Administration ; pages 3 et 4 à remettre aux équipes pilotes (chronométrage, retours) | 4 |
 
 Le contenu suit docs/pilote/*.md : après une modification, mettre à jour le HTML puis réimprimer en PDF avec Chrome
