@@ -523,3 +523,6 @@ de cause racine (R34, classement proposé à valider) :
 | Conditionnement | Réglage / démarrage de la ligne | Équipement / process · à évaluer |
 
 Non retenue : « Épluchures, parures, os, arêtes » (Déboîtage, Préparation froide).
+
+« 2. Problème de qualité » (Stockage) ne mentionne plus la rupture de la chaîne du froid, qui a sa propre cause (4) :
+sa précision devient « Produit abîmé, pourri, moisi, contaminé » (migration 0036).

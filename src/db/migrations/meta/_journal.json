@@ -253,6 +253,13 @@
       "when": 1795430399421,
       "tag": "0035_causes_referentiel",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795430999560,
+      "tag": "0036_precision_qualite_stockage",
+      "breakpoints": true
     }
   ]
 }

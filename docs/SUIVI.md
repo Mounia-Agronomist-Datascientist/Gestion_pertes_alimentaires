@@ -57,6 +57,7 @@
 | 2026-11-17 | Tests de bout en bout (Playwright, Chrome au format tablette, build de production, base `pertes_e2e` recréée à chaque lancement) : saisie et correction, série, droits d'une équipe, saisie hors ligne, administration des alertes ; tâche « e2e » dans GitHub Actions | 5 parcours passent en local (19 s) |
 | 2026-11-17 | Préparation de l'essai pilote : fiche équipe, guide de l'administration (semaine type), plan du pilote (prérequis, grille d'observation, questions) dans docs/pilote/ ; délai de correction des équipes porté à une semaine après la fin de la semaine de production | Tests d'intégration du délai |
 | 2026-11-19 | Réception : un seul poste (« Contrôle des marchandises » désactivé, migration 0030) ; semaines S-1, S, S+1 ; « Produit absent de la liste » sous la recherche (tous les postes) ; fournisseur et colis sous chaque matière ; méthodes « 1. Comptage en nombre de colis, sachets ou unités », « 2. Pesée à la balance », « 3. Estimation » ; kg seulement ; poids du colis corrigeable et « Autre colis » (Réception, Stockage) | 437 tests ; parcours Réception vérifié en local (Chrome piloté) |
+| 2026-11-23 | « 2. Problème de qualité » (Stockage) : « rupture de la chaîne du froid » retirée de la précision, la cause 4 s'en charge (migration 0036) | 472 tests ; précision vérifiée en base locale |
 | 2026-11-23 | Référentiel des pertes, étape 2 (R35) : 10 causes (Réception 1, Stockage 4 dont 2 réactivées et numérotées 4 à 7, Cuisine 3, Cuisine et Conditionnement 1, Conditionnement 1), chacune avec sa famille proposée (migration 0035) | 472 tests + 6 parcours de bout en bout ; listes « Pourquoi ? » vérifiées dans Chrome (Réception, Stockage, Cuisine) |
 | 2026-11-23 | Référentiel des pertes, étape 1 (R34) : famille de cause racine et caractère évitable sur chaque cause, proposés puis validés dans Administration → Causes ; cartes « Pertes évitables » et « Par famille de cause racine » (vue générale, synthèse, causes) ; aucune question en plus à la saisie (migration 0034) | 471 tests + 6 parcours de bout en bout ; Administration → Causes et statistiques vérifiées dans Chrome |
 | 2026-11-23 | Cuisine/production, aux 4 postes (R25) : 1. Nombre de pièces, 2. Pesée à la balance (« Pesé dans des gastros » ou « Poids net » saisi directement), 3. Estimation ; remplace la pesée seule du 20/11 | 468 tests + 6 parcours de bout en bout ; Préparation froide et Salle blanche vérifiées dans Chrome |
@@ -137,7 +138,7 @@
 
 ## Anomalies connues / points de vigilance
 
-- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0035 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
+- **Mise en ligne en attente** (crédits Netlify épuisés jusqu'au 8 décembre) : migrations 0014 à 0036 à passer, puis « Compléter depuis les tomes importés » (Administration → Produits) et dépôt du ZIP des bons de commande du Drive, dans
   l'ordre, avec une sauvegarde avant (docs/pilote/PLAN_PILOTE.md).
 
 - TypeScript 7 (nouvelle version native) fait la vérification des types (`npm run typecheck`, paquet `typescript7`, nom
