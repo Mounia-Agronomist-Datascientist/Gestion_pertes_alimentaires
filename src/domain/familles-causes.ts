@@ -73,7 +73,7 @@ export const PROPOSED_CAUSE_CLASSIFICATION: Record<string, [CauseFamily, Avoidab
   REC_DESSOUVIDE: ["fournisseur_matiere", "evitable"],
   STO_DLC_COURTE: ["conservation", "evitable"],
   STO_ABIME: ["conservation", "evitable"],
-  STO_CHAINE_FROID: ["conservation", "evitable"],
+  STO_CHAINE_FROID: ["equipement_process", "evitable"],
   STO_EXCEDENT: ["conservation", "evitable"],
   STO_MAUVAIS_STOCKAGE: ["conservation", "evitable"],
   STO_OUVERT: ["conservation", "evitable"],
@@ -87,4 +87,13 @@ export const PROPOSED_CAUSE_CLASSIFICATION: Record<string, [CauseFamily, Avoidab
   CON_TEST_OXYGENE: ["inherente", "inevitable"],
   FOND_GASTRO: ["inherente", "inevitable"],
   AUTRES: ["autre", "a_evaluer"],
+  // Étape 2 (décision du 23/11/2026, migration 0035)
+  STO_NUISIBLES: ["hygiene", "evitable"],
+  STO_MANUTENTION: ["organisation", "evitable"],
+  CUI_SURCUISSON: ["equipement_process", "evitable"],
+  CUI_ERREUR_RECETTE: ["organisation", "evitable"],
+  CUI_RESIDU_MARMITE: ["inherente", "inevitable"],
+  PANNE_EQUIPEMENT: ["equipement_process", "evitable"],
+  REC_CORPS_ETRANGER: ["hygiene", "evitable"],
+  CON_REGLAGE_LIGNE: ["equipement_process", "a_evaluer"],
 };

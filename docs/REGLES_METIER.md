@@ -502,3 +502,24 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - Statistiques (vue générale, synthèse, causes et destinations) : carte **« Pertes évitables »** (kg et part
   évitables, en euros et en kg) et carte **« Par famille de cause racine »**. Le classement actuel de la cause
   s'applique à toutes ses pertes, passées comprises (lecture d'analyse).
+
+
+## R35 — Causes ajoutées d'après le référentiel des pertes (23/11/2026)
+
+Choisies par l'administration parmi les propositions tirées du référentiel (migration 0035), chacune avec sa famille
+de cause racine (R34, classement proposé à valider) :
+
+| Zone | Cause | Famille · évitable |
+|---|---|---|
+| Réception | Corps étranger / contamination | Hygiène / contamination · évitable |
+| Stockage | 4. Rupture du froid (panne de chambre) — ancienne « Rupture de la chaîne du froid », réactivée | Équipement / process · évitable |
+| Stockage | 5. Nuisibles | Hygiène / contamination · évitable |
+| Stockage | 6. Chute / écrasement en manutention | Organisation / erreur humaine · évitable |
+| Stockage | 7. Lot oublié / surstock — ancienne « Stock excédentaire », réactivée | Conservation / stockage · évitable |
+| Cuisine | Surcuisson / brûlé | Équipement / process · évitable |
+| Cuisine | Erreur de recette ou de dosage | Organisation / erreur humaine · évitable |
+| Cuisine | Résidu au fond de la marmite | Inhérente au procédé · inévitable |
+| Cuisine et Conditionnement | Panne d'équipement | Équipement / process · évitable |
+| Conditionnement | Réglage / démarrage de la ligne | Équipement / process · à évaluer |
+
+Non retenue : « Épluchures, parures, os, arêtes » (Déboîtage, Préparation froide).

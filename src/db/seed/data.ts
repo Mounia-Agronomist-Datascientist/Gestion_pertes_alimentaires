@@ -156,6 +156,31 @@ export const CAUSES: readonly CauseSeed[] = [
     zones: ["CUISINE"],
   },
 
+  // Référentiel des pertes, étape 2 (décision du 23/11/2026)
+  { code: "STO_NUISIBLES", name: "5. Nuisibles", description: "Insectes, rongeurs", zones: ["STOCKAGE"] },
+  { code: "STO_MANUTENTION", name: "6. Chute / écrasement en manutention", zones: ["STOCKAGE"] },
+  { code: "CUI_SURCUISSON", name: "Surcuisson / brûlé", zones: ["CUISINE"] },
+  {
+    code: "CUI_ERREUR_RECETTE",
+    name: "Erreur de recette ou de dosage",
+    description: "Mauvais ingrédient, mauvaise quantité",
+    zones: ["CUISINE"],
+  },
+  {
+    code: "CUI_RESIDU_MARMITE",
+    name: "Résidu au fond de la marmite",
+    description: "Produit attaché aux parois ou au fond",
+    zones: ["CUISINE"],
+  },
+  { code: "PANNE_EQUIPEMENT", name: "Panne d'équipement", zones: ["CUISINE", "CONDITIONNEMENT"] },
+  { code: "REC_CORPS_ETRANGER", name: "Corps étranger / contamination", zones: ["RECEPTION"] },
+  {
+    code: "CON_REGLAGE_LIGNE",
+    name: "Réglage / démarrage de la ligne",
+    description: "Barquettes perdues au réglage ou au démarrage",
+    zones: ["CONDITIONNEMENT"],
+  },
+
   // Cuisine et Conditionnement
   {
     code: "NON_CONFORMITE_QUALITE",

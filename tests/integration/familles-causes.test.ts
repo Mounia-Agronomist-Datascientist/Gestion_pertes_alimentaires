@@ -58,6 +58,28 @@ describe("famille de cause racine et pertes évitables (décision du 23/11/2026)
     expect(await cause("CON_TEST_OXYGENE")).toMatchObject({ classificationValidated: true });
   });
 
+  it("étape 2 : causes ajoutées zone par zone, avec leur famille", async () => {
+    const zonesOf = async (code: string) =>
+      (
+        await t.db
+          .select({ zone: s.zones.code })
+          .from(s.causeZones)
+          .innerJoin(s.zones, eq(s.zones.id, s.causeZones.zoneId))
+          .where(eq(s.causeZones.causeId, (await cause(code)).id))
+      )
+        .map((r) => r.zone)
+        .sort();
+    expect(await cause("STO_NUISIBLES")).toMatchObject({
+      family: "hygiene",
+      avoidability: "evitable",
+      status: "active",
+    });
+    expect(await cause("CUI_RESIDU_MARMITE")).toMatchObject({ family: "inherente", avoidability: "inevitable" });
+    expect(await cause("CON_REGLAGE_LIGNE")).toMatchObject({ family: "equipement_process", avoidability: "a_evaluer" });
+    expect(await zonesOf("PANNE_EQUIPEMENT")).toEqual(["CONDITIONNEMENT", "CUISINE"]);
+    expect(await zonesOf("REC_CORPS_ETRANGER")).toEqual(["RECEPTION"]);
+  });
+
   it("les statistiques lisent la famille et le caractère évitable de la cause", async () => {
     const loss = async (causeCode: string, kg: number) =>
       createDeclaration(
