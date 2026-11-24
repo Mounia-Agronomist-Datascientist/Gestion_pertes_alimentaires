@@ -205,7 +205,7 @@ describe("causes", () => {
   });
 
   it("refuse les doublons de formulation (accents, casse, ponctuation)", async () => {
-    await expect(proposeCause(t.db, team, { name: "erreur de PREPARATION !", zoneId: cuisine })).rejects.toThrow(
+    await expect(proposeCause(t.db, team, { name: "5. chute de GASTRO !", zoneId: cuisine })).rejects.toThrow(
       /existe déjà/,
     );
   });
@@ -220,7 +220,7 @@ describe("causes", () => {
   it("désactive une cause, mais jamais « Autres causes »", async () => {
     const causes = await listCausesForAdmin(t.db, admin);
     const other = causes.find((c) => c.isOther)!;
-    const four = causes.find((c) => c.code === "CUI_FOUR_SALE")!;
+    const four = causes.find((c) => c.code === "CUI_OUBLI_ECHELLE")!;
     await expect(setCauseActive(t.db, admin, other.id, false)).rejects.toThrow(/toujours/);
     await setCauseActive(t.db, admin, four.id, false);
     expect(await activeCauseNames(cuisine)).not.toContain(four.name);

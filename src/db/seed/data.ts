@@ -65,7 +65,7 @@ export const ZONES = [
       { code: "CUI_DEBOITAGE", name: "Déboîtage" },
       { code: "CUI_PREP_FROIDE", name: "Préparation froide" },
       { code: "CUI_CUISINE", name: "Cuisine" },
-      { code: "CUI_SALLE_BLANCHE", name: "Salle blanche" },
+      { code: "CUI_SALLE_BLANCHE", name: "Cellule de refroidissement et Salle blanche" },
     ],
   },
   {
@@ -132,47 +132,48 @@ export const CAUSES: readonly CauseSeed[] = [
   { code: "STO_MAUVAIS_STOCKAGE", name: "Mauvais stockage", zones: ["STOCKAGE"] },
   { code: "STO_EXCEDENT", name: "4. Surstock", zones: ["STOCKAGE"] },
 
-  // Stockage et Cuisine
+  // Cuisine / Production : même liste aux 4 postes (décision du 24/11/2026, migration 0039)
   {
-    code: "ERREUR_PREPARATION",
-    name: "Erreur de préparation",
-    description: "Trop / pas assez cuit, mauvais ingrédients…",
-    zones: ["STOCKAGE", "CUISINE"],
-  },
-
-  // Cuisine / Production
-  { code: "CUI_FOUR_SALE", name: "Four mal nettoyé (miettes sales)", zones: ["CUISINE"] },
-  { code: "CUI_CHUTE_GASTRO", name: "Chute de gastro", description: "Gastro tombé", zones: ["CUISINE"] },
-  {
-    code: "CUI_CHUTES_DECOUPE",
-    name: "Chutes de découpe",
-    description: "Parures et chutes non réutilisables",
+    code: "CUI_NC_POIDS",
+    name: "1. Non-conformité POIDS",
+    description: "Poids inférieur ou supérieur au poids théorique",
     zones: ["CUISINE"],
-    subzones: ["CUI_DEBOITAGE"],
+  },
+  {
+    code: "CUI_SURCUISSON",
+    name: "2. Non-conformité CUISSON",
+    description: "Trop ou pas assez cuit",
+    zones: ["CUISINE"],
+  },
+  {
+    code: "CUI_NC_INGREDIENT",
+    name: "3. Non-conformité INGRÉDIENT",
+    description: "Changement de référence, allergène, DLC, packaging, etc.",
+    zones: ["CUISINE"],
   },
   {
     code: "CUI_SURPLUS_NON_REUTILISABLE",
-    name: "Surplus non réutilisable (week-end / fin de semaine de production)",
+    name: "4. Surplus non utilisable",
+    description: "Week-end ou fin de semaine de production",
     zones: ["CUISINE"],
   },
+  { code: "CUI_CHUTE_GASTRO", name: "5. Chute de gastro", description: "Gastro tombé", zones: ["CUISINE"] },
+  { code: "CUI_OUBLI_ECHELLE", name: "6. Oubli de gastro sur une échelle", zones: ["CUISINE"] },
+  {
+    code: "CUI_PROTECTION_GASTRO",
+    name: "7. Non-protection des gastros",
+    description: "En cellule",
+    zones: ["CUISINE"],
+  },
+  { code: "CUI_CONTAMINATION", name: "8. Contamination / corps étranger", zones: ["CUISINE"] },
+  { code: "CUI_PANNE_MACHINE", name: "9. Panne / casse machine", zones: ["CUISINE"] },
+  { code: "ERREUR_PREPARATION", name: "10. Erreur de déboîtage / préparation", zones: ["CUISINE"] },
+  { code: "CUI_PREVISIONNEL", name: "11. Erreur sur les chiffres prévisionnels", zones: ["CUISINE"] },
 
   // Référentiel des pertes, étape 2 (décision du 23/11/2026)
   { code: "STO_NUISIBLES", name: "7. Nuisibles", description: "Insectes, rongeurs", zones: ["STOCKAGE"] },
   { code: "STO_MANUTENTION", name: "8. Chute / écrasement en manutention", zones: ["STOCKAGE"] },
-  { code: "CUI_SURCUISSON", name: "Surcuisson / brûlé", zones: ["CUISINE"] },
-  {
-    code: "CUI_ERREUR_RECETTE",
-    name: "Erreur de recette ou de dosage",
-    description: "Mauvais ingrédient, mauvaise quantité",
-    zones: ["CUISINE"],
-  },
-  {
-    code: "CUI_RESIDU_MARMITE",
-    name: "Résidu au fond de la marmite",
-    description: "Produit attaché aux parois ou au fond",
-    zones: ["CUISINE"],
-  },
-  { code: "PANNE_EQUIPEMENT", name: "Panne d'équipement", zones: ["CUISINE", "CONDITIONNEMENT"] },
+  { code: "PANNE_EQUIPEMENT", name: "Panne d'équipement", zones: ["CONDITIONNEMENT"] },
   { code: "REC_CORPS_ETRANGER", name: "Corps étranger / contamination", zones: ["RECEPTION"] },
   // Retours du futur utilisateur (décision du 23/11/2026, migration 0037)
   {
@@ -194,12 +195,11 @@ export const CAUSES: readonly CauseSeed[] = [
     zones: ["CONDITIONNEMENT"],
   },
 
-  // Cuisine et Conditionnement
   {
     code: "NON_CONFORMITE_QUALITE",
     name: "Non-conformité qualité",
     description: "Ex. : panna cotta qui ne fige pas",
-    zones: ["CUISINE", "CONDITIONNEMENT"],
+    zones: ["CONDITIONNEMENT"],
   },
 
   // Conditionnement (réponses du 06/11/2026 + §9.4 du cahier des charges)

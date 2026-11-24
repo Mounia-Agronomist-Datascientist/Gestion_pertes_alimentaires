@@ -74,9 +74,10 @@ describe("famille de cause racine et pertes évitables (décision du 23/11/2026)
       avoidability: "evitable",
       status: "active",
     });
-    expect(await cause("CUI_RESIDU_MARMITE")).toMatchObject({ family: "inherente", avoidability: "inevitable" });
+    expect(await cause("CUI_PROTECTION_GASTRO")).toMatchObject({ family: "hygiene", avoidability: "evitable" });
     expect(await cause("CON_REGLAGE_LIGNE")).toMatchObject({ family: "equipement_process", avoidability: "a_evaluer" });
-    expect(await zonesOf("PANNE_EQUIPEMENT")).toEqual(["CONDITIONNEMENT", "CUISINE"]);
+    expect(await zonesOf("PANNE_EQUIPEMENT")).toEqual(["CONDITIONNEMENT"]);
+    expect(await zonesOf("CUI_PANNE_MACHINE")).toEqual(["CUISINE"]);
     expect(await zonesOf("REC_CORPS_ETRANGER")).toEqual(["RECEPTION"]);
   });
 

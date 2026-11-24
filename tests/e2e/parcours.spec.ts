@@ -35,7 +35,7 @@ async function fillLoss(page: Page, product: string, kg: string, from: "zone" | 
   await page.getByRole("button", { name: /^Poids net/ }).click();
   await page.getByLabel("Quantité", { exact: true }).fill(kg);
   await page.getByRole("button", { name: "Continuer" }).click();
-  await page.getByRole("button", { name: /^Erreur de préparation/ }).click();
+  await page.getByRole("button", { name: /Erreur de déboîtage \/ préparation/ }).click();
   await page.getByRole("button", { name: /^Ordures ménagères/ }).click();
   await expect(page.getByRole("heading", { name: "Vérifier et valider" })).toBeVisible();
 }
@@ -100,7 +100,7 @@ test("une équipe ne voit pas les pertes d'une autre équipe ni l'administration
   await page.getByRole("button", { name: /^Poids net/ }).click();
   await page.getByLabel("Quantité", { exact: true }).fill("1");
   await page.getByRole("button", { name: "Continuer" }).click();
-  await page.getByRole("button", { name: /^Erreur de préparation/ }).click();
+  await page.getByRole("button", { name: /Erreur de déboîtage \/ préparation/ }).click();
   await expect(page.getByRole("button", { name: /^Ordures ménagères/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Too Good To Go|Vente flash|Linkee/ })).toHaveCount(0);
 });
@@ -157,5 +157,5 @@ test("les répartitions s'affichent en anneau, avec le total au centre et la lé
     await legend.click();
     await expect(legend).toHaveClass(/bg-slate-100/, { timeout: 1000 });
   }).toPass();
-  await expect(donut.getByRole("status")).toContainText("Erreur de préparation");
+  await expect(donut.getByRole("status")).toContainText("Erreur de déboîtage / préparation");
 });

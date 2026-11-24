@@ -93,6 +93,6 @@ describe("liste des encas, quelle que soit la semaine (décision du 20/11/2026)"
 
   it("refusé hors conditionnement, réception et stockage (règle R9)", async () => {
     const [team] = await t.db.select().from(s.teams).limit(1);
-    await expect(loss("CUI_DEBOITAGE", "CUI_FOUR_SALE", 1, team!.id)).rejects.toThrow(/encas se déclarent/);
+    await expect(loss("CUI_DEBOITAGE", "CUI_CHUTE_GASTRO", 1, team!.id)).rejects.toThrow(/encas se déclarent/);
   });
 });

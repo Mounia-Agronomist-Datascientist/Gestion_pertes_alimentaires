@@ -57,14 +57,36 @@ describe("données initiales des référentiels", () => {
     expect(rows.map((r) => r.zone).sort()).toEqual(["CONDITIONNEMENT", "PLONGE"]);
   });
 
-  it("restreint « Chutes de découpe » au déboîtage", async () => {
+  it("Cuisine / Production : 11 causes numérotées, les mêmes aux 4 postes (décision du 24/11/2026)", async () => {
     const rows = await t.db
-      .select({ subzone: s.subzones.code })
+      .select({ name: s.causes.name })
+      .from(s.causeZones)
+      .innerJoin(s.causes, eq(s.causeZones.causeId, s.causes.id))
+      .innerJoin(s.zones, eq(s.causeZones.zoneId, s.zones.id))
+      .where(and(eq(s.zones.code, "CUISINE"), eq(s.causes.status, "active")))
+      .orderBy(s.causes.displayOrder);
+    expect(rows.map((r) => r.name)).toEqual([
+      "1. Non-conformité POIDS",
+      "2. Non-conformité CUISSON",
+      "3. Non-conformité INGRÉDIENT",
+      "4. Surplus non utilisable",
+      "5. Chute de gastro",
+      "6. Oubli de gastro sur une échelle",
+      "7. Non-protection des gastros",
+      "8. Contamination / corps étranger",
+      "9. Panne / casse machine",
+      "10. Erreur de déboîtage / préparation",
+      "11. Erreur sur les chiffres prévisionnels",
+    ]);
+    const cuisineRestrictions = await t.db
+      .select()
       .from(s.causeSubzones)
-      .innerJoin(s.causes, eq(s.causeSubzones.causeId, s.causes.id))
       .innerJoin(s.subzones, eq(s.causeSubzones.subzoneId, s.subzones.id))
-      .where(eq(s.causes.code, "CUI_CHUTES_DECOUPE"));
-    expect(rows).toEqual([{ subzone: "CUI_DEBOITAGE" }]);
+      .innerJoin(s.zones, eq(s.subzones.zoneId, s.zones.id))
+      .where(eq(s.zones.code, "CUISINE"));
+    expect(cuisineRestrictions).toEqual([]);
+    const [salle] = await t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_SALLE_BLANCHE"));
+    expect(salle?.name).toBe("Cellule de refroidissement et Salle blanche");
   });
 
   it("a une seule cause « Autres causes »", async () => {

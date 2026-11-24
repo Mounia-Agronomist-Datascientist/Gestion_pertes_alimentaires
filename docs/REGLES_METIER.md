@@ -122,7 +122,7 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 - Un compte équipe peut aussi déclarer une perte constatée hors cuisine (ex. au conditionnement) ; elle est
   alors attribuée à la zone, et l'équipe reste enregistrée comme auteur de la saisie.
 - ✅ Chaque sous-zone porte un paramètre `team_mode` (validé le 06/11/2026) :
-  - `equipe` — Cuisine / Production (déboîtage → salle blanche) : la perte est attribuée à l'une des 8 équipes ;
+  - `equipe` — Cuisine / Production (déboîtage → cellule de refroidissement et salle blanche) : la perte est attribuée à l'une des 8 équipes ;
   - `zone` — Réception, Stockage, Conditionnement, Plonge : la perte est attribuée à la zone et à son
     responsable unique, sans équipe.
 - Une équipe désactivée pour une semaine n'apparaît pas dans les choix de cette semaine, mais son historique
@@ -399,7 +399,7 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   à 120 g ») ; litres pour un liquide (densité, R24).
 - **Gastros et contenants** (estimation par contenant, pesée dans des gastros) : seulement en **Cuisine** (dont le
   Déboîtage) et en **Conditionnement**.
-- **Cuisine/production, aux quatre postes** (Déboîtage, Préparation froide, Cuisine, Salle blanche ; décision du
+- **Cuisine/production, aux quatre postes** (Déboîtage, Préparation froide, Cuisine, Cellule de refroidissement et Salle blanche ; décision du
   23/11/2026, qui remplace la pesée seule du 20/11/2026) : **1. Nombre de pièces** (poisson, hauts de cuisse… en
   pièces seulement, jamais en contenants), **2. Pesée à la balance** — au choix « Pesé dans des gastros » (tare
   déduite) ou « Poids net » saisi directement —, **3. Estimation** (kg, g, L, mL, pièces, gastros, contenants). Un
@@ -592,3 +592,31 @@ Demandé par le futur utilisateur de la Réception (migration 0038).
 - Les profils qui comparent les équipes (production, direction, administration) gardent les pertes par zone.
 - **Zones numérotées par l'administration** (« 1. Réception ») : le numéro n'est plus affiché deux fois au choix du
   lieu ni dans le logigramme.
+
+## R39 — Causes de la Cuisine / Production (24/11/2026)
+
+Migration 0039 ; les pertes déjà enregistrées gardent leur cause.
+
+- Le 4e poste « Salle blanche » s'appelle **« Cellule de refroidissement et Salle blanche »**.
+- **Les 4 postes proposent la même liste**, dans cet ordre, puis « Autres causes » :
+  1. Non-conformité POIDS (poids inférieur ou supérieur au poids théorique) ;
+  2. Non-conformité CUISSON (trop ou pas assez cuit) ;
+  3. Non-conformité INGRÉDIENT (changement de référence, allergène, DLC, packaging, etc.) ;
+  4. Surplus non utilisable (week-end ou fin de semaine de production) ;
+  5. Chute de gastro ;
+  6. Oubli de gastro sur une échelle ;
+  7. Non-protection des gastros (en cellule) ;
+  8. Contamination / corps étranger ;
+  9. Panne / casse machine ;
+  10. Erreur de déboîtage / préparation ;
+  11. Erreur sur les chiffres prévisionnels.
+- **Reprises** (même sens, renommées) : « Surcuisson / brûlé » → 2, « Surplus non réutilisable » → 4, « Chute de
+  gastro » → 5, « Erreur de préparation » → 10 (qui ne sert plus au Stockage, absente de sa liste R36).
+- **Retirées de la Cuisine** : four mal nettoyé, chutes de découpe (n'était proposée qu'au Déboîtage), erreur de
+  recette ou de dosage, résidu au fond de la marmite (désactivées) ; « Panne d'équipement » et « Non-conformité
+  qualité » restent au Conditionnement seulement. Une cause ajoutée à la main en Cuisine quitte la Cuisine ; les
+  propositions des équipes en attente ne bougent pas.
+- **Classement proposé** (R34, à confirmer dans Administration → Causes) : POIDS, oubli sur une échelle, erreur de
+  déboîtage / préparation → Organisation · évitable ; CUISSON, panne / casse machine → Équipement / process ·
+  évitable ; INGRÉDIENT → Fournisseur / matière · évitable ; gastros non protégés, contamination → Hygiène ·
+  évitable ; surplus, chiffres prévisionnels → Surproduction / planification · évitable.

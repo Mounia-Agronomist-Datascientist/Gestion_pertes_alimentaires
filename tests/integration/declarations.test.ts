@@ -390,14 +390,20 @@ describe("déclaration de perte", () => {
       ).rejects.toThrow(/cette zone/);
     });
 
-    it("« Chutes de découpe » n'est acceptée qu'au déboîtage", async () => {
-      await expect(
-        createDeclaration(t.db, teamC, cuisine({ causeId: ref("cause:CUI_CHUTES_DECOUPE") }), NOW),
-      ).rejects.toThrow(/sous-zone/);
+    it("une cause réservée à un poste n'est acceptée qu'à ce poste", async () => {
+      const [restricted] = await t.db
+        .insert(s.causes)
+        .values({ name: "Cause du déboîtage (test)", status: "active", displayOrder: 900 })
+        .returning();
+      await t.db.insert(s.causeZones).values({ causeId: restricted!.id, zoneId: ref("zone:CUISINE") });
+      await t.db.insert(s.causeSubzones).values({ causeId: restricted!.id, subzoneId: ref("sz:CUI_DEBOITAGE") });
+      await expect(createDeclaration(t.db, teamC, cuisine({ causeId: restricted!.id }), NOW)).rejects.toThrow(
+        /sous-zone/,
+      );
       const r = await createDeclaration(
         t.db,
         teamC,
-        cuisine({ subzoneId: ref("sz:CUI_DEBOITAGE"), causeId: ref("cause:CUI_CHUTES_DECOUPE") }),
+        cuisine({ subzoneId: ref("sz:CUI_DEBOITAGE"), causeId: restricted!.id }),
         NOW,
       );
       expect(r.id).toBeTruthy();

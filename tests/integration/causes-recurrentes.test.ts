@@ -73,10 +73,10 @@ describe("alertes : causes récurrentes", () => {
     // Équipe C : « Erreur de préparation » en tête en S43, S44 et S45. Équipe A : la cause change en S44.
     for (const day of ["2026-10-16", "2026-10-23", "2026-10-30"]) {
       await declare(teamC, day, 6, "ERREUR_PREPARATION");
-      await declare(teamC, day, 2, "NON_CONFORMITE_QUALITE");
+      await declare(teamC, day, 2, "CUI_SURCUISSON");
     }
     await declare(teamA, "2026-10-16", 6, "ERREUR_PREPARATION");
-    await declare(teamA, "2026-10-23", 6, "NON_CONFORMITE_QUALITE");
+    await declare(teamA, "2026-10-23", 6, "CUI_SURCUISSON");
     await declare(teamA, "2026-10-30", 6, "ERREUR_PREPARATION");
 
     const result = await evaluateLossAlerts(t.db, { startDate: START, now: THURSDAY_S46 });
