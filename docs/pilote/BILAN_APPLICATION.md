@@ -46,7 +46,7 @@ Accueil → **Déclarer une perte**. Une question par écran ; « Modifier » au
 | **1. Réception** | Matières des semaines S-1, S et S+1 (tome et bons de commande), avec fournisseur et colis ; « Tous les encas » | 1. Comptage en colis, sachets ou unités · 2. Pesée à la balance · 3. Estimation — en kg | Lots, DLC, photos ; « Retour fournisseur » compté à part, pas de « Réutilisation » |
 | **2. Stockage** | Matières de la semaine rangées dans le lieu choisi d'abord, les autres à part ; encas selon le lieu (yaourts et fromages au Local encas frais, le reste au Stockage sec – ENCAS) | Comme la Réception, en kg ; colis du fournisseur (poids corrigeable, « Autre colis ») | Lots, DLC, photos |
 | **3. Cuisine / Production** (4 postes) | Plats de l'équipe → sous-recettes → ingrédients (tome de la semaine) | 1. Nombre de pièces · 2. Pesée à la balance : « Pesé dans des gastros » (tare déduite, échelle possible) ou « Poids net » · 3. Estimation | Équipe obligatoire ; consommables comptés en pièces |
-| **4. Conditionnement** | Tous les plats de la semaine et les encas | kg, pièces, gastros (avec tare), barquettes | — |
+| **4. Conditionnement** | Tous les plats de la semaine et les encas | 1. Nombre de barquettes (plat, au poids de sa barquette) ou d'encas (au poids d'un encas) · 2. Pesée à la balance · 3. Estimation ; kg seulement, sans gastros | — |
 | **5. Plonge** | Liste des produits | kg ou pièces | — |
 
 **Produit absent de la liste** : nom, type, prix d'achat facultatif (la perte est alors chiffrée). En Réception et

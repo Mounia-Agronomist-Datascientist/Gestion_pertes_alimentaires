@@ -12,6 +12,7 @@ import { zoneNameWithoutNumber } from "@/domain/nom-zone";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { materialsForPlace } from "@/domain/matieres";
 import {
+  countUnitLabel,
   gastroTareAllowed,
   type MeasureContext,
   methodLabel,
@@ -294,6 +295,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     subzoneCode: subzone?.code ?? null,
     isConsumable,
     pieceWeightKnown: (product?.kind === "week" ? product.unitWeightKg : listedProduct?.unitWeightKg) != null,
+    isSnack: product?.category === "produit_externe",
     hasPackaging: productPackagings.length > 0,
   };
   const methods = methodsFor(INPUT_METHODS, measureContext);
@@ -321,7 +323,13 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     return { quantity: q, unitCode: unit.code, kg: conversion.netKg, note: conversion.reason };
   })();
 
-  const unitLabel = (code: string) => options.units.find((u) => u.code === code)?.label ?? code;
+  const unitLabel = (code: string) =>
+    countUnitLabel(code, measureContext) ?? options.units.find((u) => u.code === code)?.label ?? code;
+  // Poids d'une barquette ou d'un encas compté en salle des cartons, rappelé sous la quantité.
+  const countedUnitKg =
+    zone?.code === "CONDITIONNEMENT" && (unitCode === "barquette" || unitCode === "piece") && !isConsumable
+      ? ((product?.kind === "week" ? product.unitWeightKg : listedProduct?.unitWeightKg) ?? null)
+      : null;
   const netLabel = net ? `${fmt(net.quantity)} ${unitLabel(net.unitCode)}` : "";
 
   const split = (() => {
@@ -850,7 +858,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             setMethod(null);
             setUseTare(false);
             // Une seule façon de mesurer (pesée en Cuisine/production) : déjà choisie.
-            const ctx = { ...measureContext, isConsumable: isNonFoodCategory(p.category) };
+            const ctx = {
+              ...measureContext,
+              isConsumable: isNonFoodCategory(p.category),
+              isSnack: p.category === "produit_externe",
+            };
             const only = methodsFor(INPUT_METHODS, ctx);
             if (only.length === 1) {
               setMethod(only[0]!);
@@ -866,7 +878,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           <TileGrid>
             {methods.map((m) => (
               <Tile key={m} onClick={() => chooseMethod(m)} selected={m === method} compact>
-                {methodLabel(m, zone?.code ?? "", METHOD_LABELS[m], methods.indexOf(m))}
+                {methodLabel(m, zone?.code ?? "", METHOD_LABELS[m], methods.indexOf(m), measureContext)}
               </Tile>
             ))}
           </TileGrid>
@@ -921,6 +933,13 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 </select>
               </div>
             )}
+
+          {method && !useTare && countedUnitKg != null && (
+            <p className="text-sm text-slate-600">
+              1 {unitCode === "barquette" ? "barquette" : "encas"} = {fmt(Math.round(countedUnitKg * 1000))} g
+              {unitCode === "barquette" ? " (poids de la barquette pour ce plat)" : " (poids d'un encas)"}
+            </p>
+          )}
 
           {method && !useTare && unitCode === "colis" && (
             <div className="flex flex-col gap-2 rounded-xl bg-white p-3">

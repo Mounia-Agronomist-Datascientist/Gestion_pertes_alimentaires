@@ -126,6 +126,25 @@ describe("saisie à partir des produits de la semaine", () => {
     expect(row?.materialCostEur).toBeCloseTo(13.3, 2);
   });
 
+  it("salle des cartons : un plat se compte en barquettes, au poids de sa barquette (décision du 24/11/2026)", async () => {
+    const plat = { weekItem: { kind: "plat", id: dish("VI01").id } };
+    const at = { subzoneId: ref.conditionnement, causeId: ref.condCause };
+    const r = await declare(admin, plat, { ...at, unitCode: "barquette" });
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
+    expect(row).toMatchObject({ netKg: 3.151, kgStatus: "converti" });
+    // Ni pièces, ni grammes, ni gastros en salle des cartons.
+    await expect(declare(admin, plat, { ...at, unitCode: "piece" })).rejects.toThrow(/Unité non proposée/);
+    await expect(
+      declare(admin, plat, {
+        ...at,
+        method: "pesee",
+        unitCode: "g",
+        quantity: 500,
+        destinations: [{ destinationId: ref.compost, quantity: 500, binNumber: "1" }],
+      }),
+    ).rejects.toThrow(/Unité non proposée/);
+  });
+
   it("un produit hors liste n'a pas de coût (jamais deviné)", async () => {
     const r = await declare(
       teamD,

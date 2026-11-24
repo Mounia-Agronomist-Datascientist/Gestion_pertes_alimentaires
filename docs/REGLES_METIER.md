@@ -398,13 +398,14 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
 - **Partout** : kg (ou g) et unités du produit (pièces, converties avec le poids d'une pièce : « 10 hauts de cuisse
   à 120 g ») ; litres pour un liquide (densité, R24).
 - **Gastros et contenants** (estimation par contenant, pesée dans des gastros) : seulement en **Cuisine** (dont le
-  Déboîtage) et en **Conditionnement**.
+  Déboîtage) ; plus en salle des cartons depuis le 24/11/2026 (R40).
 - **Cuisine/production, aux quatre postes** (Déboîtage, Préparation froide, Cuisine, Cellule de refroidissement et Salle blanche ; décision du
   23/11/2026, qui remplace la pesée seule du 20/11/2026) : **1. Nombre de pièces** (poisson, hauts de cuisse… en
   pièces seulement, jamais en contenants), **2. Pesée à la balance** — au choix « Pesé dans des gastros » (tare
   déduite) ou « Poids net » saisi directement —, **3. Estimation** (kg, g, L, mL, pièces, gastros, contenants). Un
   consommable, un moule ou un plat à gratin s'y compte toujours en pièces. Le serveur refuse les autres.
-- **Barquettes** : seulement en **Conditionnement** (et un futur poste de post-conditionnement de cette zone). En
+- **Barquettes** : seulement en **salle des cartons** (Conditionnement), pour un plat dont le poids de la barquette
+  est connu (R40). En
   cuisine, un plat perdu se compte en pièces : une pièce = une portion (R10), comptée aussi dans les « barquettes
   perdues » des statistiques.
 - **Colis du fournisseur** (« sachet de 2 kg », « Bouteille 64 cl ») : seulement en **Réception** et en **Stockage**,
@@ -620,3 +621,20 @@ Migration 0039 ; les pertes déjà enregistrées gardent leur cause.
   déboîtage / préparation → Organisation · évitable ; CUISSON, panne / casse machine → Équipement / process ·
   évitable ; INGRÉDIENT → Fournisseur / matière · évitable ; gastros non protégés, contamination → Hygiène ·
   évitable ; surplus, chiffres prévisionnels → Surproduction / planification · évitable.
+
+## R40 — Quantités en salle des cartons (24/11/2026)
+
+Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes : barquettes jetées et encas jetés.
+
+- **Comme en Réception**, dans cet ordre : **1. Nombre de barquettes** (pour un plat) ou **1. Nombre d'encas** (pour
+  un encas), **2. Pesée à la balance**, **3. Estimation**. En **kg seulement** (ni g, ni L, ni mL) ; plus de gastros
+  ni de contenants (ni pesée dans des gastros).
+- **L'unité comptée suit le produit** : un plat se compte en **barquettes**, converties avec le **poids de la
+  barquette de ce plat** (poids d'une portion, lu dans le tome de la semaine) ; un encas se compte en **encas**,
+  convertis avec le **poids d'un encas** (fiche produit). Le poids est rappelé sous la quantité (« 1 barquette =
+  370 g »). Un encas jeté au poste des barquettes (ou l'inverse) garde donc la bonne unité.
+- **Poids inconnu** : le comptage n'est pas proposé (jamais une perte à 0 kg) ; on pèse ou on estime en kg. Au
+  24/11/2026, 10 encas sur 99 n'ont pas de poids : à compléter dans leur fiche (Administration → Produits).
+- Un consommable (barquette vide, carton) se compte toujours en pièces. L'estimation propose le kg et l'unité
+  comptée. Le serveur refuse les autres unités, aussi pour une correction ; les pertes déjà enregistrées ne changent
+  pas.

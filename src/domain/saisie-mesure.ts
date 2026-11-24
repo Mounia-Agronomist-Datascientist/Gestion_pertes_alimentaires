@@ -8,11 +8,15 @@
  *   perte à 0 kg) ; un consommable se compte toujours en pièces ;
  * - en Cuisine/production, aux quatre postes (décision du 23/11/2026, qui remplace celle du 20/11/2026) :
  *   1. Nombre de pièces, 2. Pesée à la balance (gastros tarés ou poids net saisi), 3. Estimation ; un consommable,
- *   un moule ou un plat à gratin s'y compte toujours en pièces.
+ *   un moule ou un plat à gratin s'y compte toujours en pièces ;
+ * - en salle des cartons (Conditionnement, décision du 24/11/2026) : comme en Réception, 1. Nombre de barquettes ou
+ *   d'encas, 2. Pesée à la balance, 3. Estimation, en kg seulement, sans gastros ; l'unité comptée est la barquette
+ *   (poids de la barquette du plat) pour un plat, l'encas (poids d'un encas) pour un encas, proposée seulement si ce
+ *   poids est connu (jamais une perte à 0 kg).
  */
 import type { InputMethod } from "@/modules/declarations/input";
 
-export const GASTRO_ZONE_CODES: readonly string[] = ["CUISINE", "CONDITIONNEMENT"];
+export const GASTRO_ZONE_CODES: readonly string[] = ["CUISINE"];
 export const TRAY_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT"];
 export const PACKAGING_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"];
 
@@ -24,6 +28,8 @@ export interface MeasureContext {
   isConsumable: boolean;
   /** Poids d'une pièce connu pour ce produit. */
   pieceWeightKnown: boolean;
+  /** Encas (produit externe) : compté en encas en salle des cartons. */
+  isSnack?: boolean;
   /** Au moins un colis fournisseur convertible en kg pour ce produit (sinon, poids du colis indiqué à la saisie). */
   hasPackaging: boolean;
 }
@@ -39,10 +45,28 @@ const BASE_UNITS: Record<InputMethod, readonly string[]> = {
 /** Cuisine/production : pièces comptées une à une seulement (poisson, hauts de cuisse…), jamais des contenants. */
 const KITCHEN_ZONE_CODE = "CUISINE";
 
-/** Zones où l'on n'utilise que le kg (ni g ni mL) : Réception et Stockage (décisions du 19/11/2026). */
-const KG_ONLY_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"];
+/** Zones où l'on n'utilise que le kg (ni g ni mL) : Réception et Stockage (19/11/2026), salle des cartons (24/11/2026). */
+const KG_ONLY_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE", "CONDITIONNEMENT"];
+
+/** Salle des cartons (barquettes jetées, encas jetés). */
+const CARTONS_ZONE_CODE = "CONDITIONNEMENT";
+
+/** Unité comptée en salle des cartons : l'encas (pièce) pour un encas, la barquette pour un plat. */
+function cartonsUnitAllowed(code: string, c: MeasureContext): boolean {
+  switch (code) {
+    case "barquette":
+      return !c.isSnack && !c.isConsumable && c.pieceWeightKnown;
+    case "piece":
+      return c.isConsumable || (!!c.isSnack && c.pieceWeightKnown);
+    case "kg":
+      return true;
+    default:
+      return false;
+  }
+}
 
 function unitAllowed(code: string, c: MeasureContext): boolean {
+  if (c.zoneCode === CARTONS_ZONE_CODE) return cartonsUnitAllowed(code, c);
   switch (code) {
     case "g":
       return !KG_ONLY_ZONE_CODES.includes(c.zoneCode);
@@ -94,6 +118,11 @@ const ZONE_METHOD_LABELS: Record<string, Partial<Record<InputMethod, string>>> =
     estimation_manuelle: "Estimation",
   },
   CUISINE: { comptage: "Nombre de pièces", pesee: "Pesée à la balance", estimation_manuelle: "Estimation" },
+  CONDITIONNEMENT: {
+    comptage: "Nombre d'unités",
+    pesee: "Pesée à la balance",
+    estimation_manuelle: "Estimation",
+  },
 };
 
 /** Façons de mesurer proposées, dans l'ordre du lieu : celles qui ont au moins une unité. */
@@ -103,9 +132,26 @@ export function methodsFor(methods: readonly InputMethod[], c: MeasureContext): 
 }
 
 /** Libellé d'une façon de mesurer dans ce lieu (numéroté là où l'ordre est fixé), sinon le libellé général. */
-export function methodLabel(method: InputMethod, zoneCode: string, fallback: string, index: number): string {
-  const label = ZONE_METHOD_LABELS[zoneCode]?.[method];
+export function methodLabel(
+  method: InputMethod,
+  zoneCode: string,
+  fallback: string,
+  index: number,
+  product?: Pick<MeasureContext, "isSnack" | "isConsumable">,
+): string {
+  const cartonsCount =
+    method === "comptage" && zoneCode === CARTONS_ZONE_CODE && product && !product.isConsumable
+      ? product.isSnack
+        ? "Nombre d'encas"
+        : "Nombre de barquettes"
+      : null;
+  const label = cartonsCount ?? ZONE_METHOD_LABELS[zoneCode]?.[method];
   return label ? `${index + 1}. ${label}` : fallback;
+}
+
+/** Nom de l'unité comptée là où elle a un sens précis : l'encas en salle des cartons (au lieu de « pièce »). */
+export function countUnitLabel(code: string, c: Pick<MeasureContext, "zoneCode" | "isSnack" | "isConsumable">) {
+  return code === "piece" && c.zoneCode === CARTONS_ZONE_CODE && c.isSnack && !c.isConsumable ? "encas" : null;
 }
 
 // ─── Poids d'un colis fournisseur ───────────────────────────────────────────

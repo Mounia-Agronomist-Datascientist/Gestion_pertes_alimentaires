@@ -390,10 +390,11 @@ async function prepareDeclaration(
     subzoneCode: place.subzone.code,
     isConsumable,
     pieceWeightKnown: product.unitWeightKg != null,
+    isSnack: product.category === "produit_externe",
     hasPackaging: packaging != null,
   };
   if (input.tare && !gastroTareAllowed(measureContext)) {
-    throw new DeclarationError("Les gastros ne sont proposés qu'en cuisine et en conditionnement");
+    throw new DeclarationError("Les gastros ne sont proposés qu'en cuisine");
   }
   if (!input.tare && !unitsFor(input.method, measureContext).includes(input.unitCode!)) {
     throw new DeclarationError("Unité non proposée dans ce lieu pour ce produit");

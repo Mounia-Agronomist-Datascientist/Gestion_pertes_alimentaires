@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  countUnitLabel,
   gastroTareAllowed,
   isLooseByKg,
   methodLabel,
@@ -53,7 +54,7 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
     expect(unitsFor("estimation_manuelle", ctx("RECEPTION"))).toEqual(["kg", "l", "colis"]);
     // Ailleurs qu'en Réception et en Stockage, rien ne change.
     expect(unitsFor("pesee", ctx("CUISINE"))).toEqual(["kg", "g"]);
-    expect(methodLabel("pesee", "CONDITIONNEMENT", "Pesée", 0)).toBe("Pesée");
+    expect(methodLabel("pesee", "PLONGE", "Pesée", 0)).toBe("Pesée");
   });
 
   it("Stockage : les mêmes façons de mesurer qu'en Réception (décision du 19/11/2026)", () => {
@@ -73,13 +74,40 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
     ]);
   });
 
-  it("Déboîtage : gastros et pièces, ni colis ni barquettes ; Conditionnement : barquettes et gastros", () => {
+  it("Déboîtage : gastros et pièces, ni colis ni barquettes", () => {
     const deboitage = ctx("CUISINE", { subzoneCode: "CUI_DEBOITAGE" });
     expect(unitsFor("estimation_manuelle", deboitage)).toEqual(["kg", "g", "l", "ml", "piece", "contenant", "gastro"]);
     expect(gastroTareAllowed(deboitage)).toBe(true);
-    expect(unitsFor("comptage", ctx("CONDITIONNEMENT"))).toEqual(["piece", "barquette", "contenant"]);
     expect(unitsFor("comptage", ctx("PLONGE"))).toEqual(["piece"]);
     expect(methodsFor(INPUT_METHODS, ctx("PLONGE"))).not.toContain("estimation_contenant");
+  });
+
+  it("salle des cartons : comme en Réception, en barquettes (plat) ou en encas, kg seulement, sans gastros", () => {
+    const plat = ctx("CONDITIONNEMENT", { subzoneCode: "CON_BARQUETTES", pieceWeightKnown: true });
+    expect(methodsFor(INPUT_METHODS, plat)).toEqual(["comptage", "pesee", "estimation_manuelle"]);
+    expect(methodsFor(INPUT_METHODS, plat).map((m, i) => methodLabel(m, "CONDITIONNEMENT", m, i, plat))).toEqual([
+      "1. Nombre de barquettes",
+      "2. Pesée à la balance",
+      "3. Estimation",
+    ]);
+    expect(unitsFor("comptage", plat)).toEqual(["barquette"]);
+    expect(unitsFor("pesee", plat)).toEqual(["kg"]);
+    expect(unitsFor("estimation_manuelle", plat)).toEqual(["kg", "barquette"]);
+    expect(gastroTareAllowed(plat)).toBe(false);
+
+    const encas = ctx("CONDITIONNEMENT", { subzoneCode: "CON_AUTRES", isSnack: true, pieceWeightKnown: true });
+    expect(methodLabel("comptage", "CONDITIONNEMENT", "comptage", 0, encas)).toBe("1. Nombre d'encas");
+    expect(unitsFor("comptage", encas)).toEqual(["piece"]);
+    expect(unitsFor("estimation_manuelle", encas)).toEqual(["kg", "piece"]);
+    expect(countUnitLabel("piece", encas)).toBe("encas");
+    expect(countUnitLabel("piece", plat)).toBeNull();
+
+    // Poids inconnu : pas de comptage (jamais une perte à 0 kg), pesée et estimation en kg.
+    const sansPoids = ctx("CONDITIONNEMENT", { isSnack: true });
+    expect(methodsFor(INPUT_METHODS, sansPoids)).toEqual(["pesee", "estimation_manuelle"]);
+    expect(unitsFor("estimation_manuelle", sansPoids)).toEqual(["kg"]);
+    // Un consommable reste compté en pièces.
+    expect(unitsFor("comptage", ctx("CONDITIONNEMENT", { isConsumable: true }))).toEqual(["piece"]);
   });
 
   it("consommable : toujours en pièces, jamais en colis ni en litres", () => {
