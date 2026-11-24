@@ -99,7 +99,10 @@ des fichiers de l'entreprise déposés par l'administration.
 
 ## Les statistiques
 
-Période (semaine, mois, année, libre) et filtres en haut ; exports Excel et CSV sur chaque onglet ; impression A4.
+Un seul bouton « Statistiques » à l'accueil (la synthèse de la semaine est un onglet). Période (semaine, mois, année,
+libre) et filtres en haut ; exports Excel et CSV sur chaque onglet ; impression A4. Une équipe voit la part de ses
+pertes dans sa zone puis dans l'entreprise, un responsable de zone la part de sa zone dans l'entreprise, à la place
+des pertes par zone.
 
 | Onglet | Ce qu'on y lit |
 |---|---|
@@ -154,6 +157,8 @@ Chaque semaine aussi : lire les alertes (accueil) et la **Synthèse de la semain
   le futur utilisateur (température retirée, étiquetage ajouté, Stockage renuméroté de 1 à 8) ; « Autres pertes »
   devient « Autres causes ».
 - **Import** : un tome sans composition des plats est refusé (S47 et S48 réimportées en local).
+- **Statistiques** : un seul accès ; part de l'équipe ou de la zone dans les pertes pour les équipes et les
+  responsables de zone ; numéro de zone plus affiché deux fois.
 - **Coûts des pertes** : choix de la période (semaine, mois, année, dates libres, raccourcis), totaux et semaine
   par semaine recalculés.
 - **Administration** : options rangées en 6 familles ; Import de la semaine rangé par jour, avec la semaine concernée (S-1, S, S+1) et l'usage de chaque document.

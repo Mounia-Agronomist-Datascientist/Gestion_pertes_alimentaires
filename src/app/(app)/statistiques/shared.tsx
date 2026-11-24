@@ -23,6 +23,8 @@ export const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency
 export const num = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
 export const pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
 import type { ZoneFlowTile } from "@/domain/flux-zones";
+import { zoneNameWithoutNumber } from "@/domain/nom-zone";
+import type { ShareOfTotal } from "@/modules/statistiques/dashboard";
 export { isUuid, type Params, type StatsContext } from "@/modules/statistiques/context";
 
 /** Période et filtres de la page, lus dans l'adresse. */
@@ -78,9 +80,12 @@ export function StatsTabs({
       <Link className={chip(active === "synthese")} href={statsHref("/statistiques/synthese", ctx)}>
         Synthèse de la semaine
       </Link>
-      <Link className={chip(active === "zones")} href={statsHref("/statistiques/zones", ctx)}>
-        Par zone
-      </Link>
+      {(ctx.compareTeams || ctx.zoneIds.length > 1) && (
+        // Compte d'une équipe ou d'un responsable d'une seule zone : pas d'onglet « Par zone » (24/11/2026).
+        <Link className={chip(active === "zones")} href={statsHref("/statistiques/zones", ctx)}>
+          Par zone
+        </Link>
+      )}
       {ctx.compareTeams ? (
         <Link className={chip(active === "equipes")} href={statsHref("/statistiques/equipes", ctx)}>
           Par équipe
@@ -605,6 +610,63 @@ export function SupplierReturns({ summary, withCosts }: { summary: StatsSummary;
  * kg perdus, coût brut, kg, évolution des kg par rapport à la période précédente.
  */
 /**
+ * Part d'une équipe ou d'une zone dans les pertes (décision du 24/11/2026), à la place des pertes par zone pour les
+ * comptes qui ne voient qu'une zone : équipe → part dans sa zone puis dans l'entreprise ; responsable de zone → part
+ * dans l'entreprise, toutes zones confondues.
+ */
+export function ShareOfTotalCard({ share, withCosts }: { share: ShareOfTotal; withCosts: boolean }) {
+  const rows = [
+    ...(share.zone ? [{ label: `des pertes de la zone ${share.zone.name}`, of: share.zone.summary }] : []),
+    { label: "des pertes de l'entreprise, toutes zones confondues", of: share.total },
+  ];
+  return (
+    <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm" aria-label="Part dans les pertes">
+      <h2 className="text-lg font-semibold">
+        {share.kind === "equipe"
+          ? `Part de l'${share.label.charAt(0).toLowerCase()}${share.label.slice(1)}`
+          : `Part de ${share.label}`}{" "}
+        dans les pertes
+      </h2>
+      {rows.map((r) => {
+        const ratio = r.of.foodKg > 0 ? share.own.foodKg / r.of.foodKg : null;
+        const costRatio =
+          withCosts && share.own.cost && r.of.cost && r.of.cost.grossEur > 0
+            ? share.own.cost.grossEur / r.of.cost.grossEur
+            : null;
+        const width = Math.min(100, Math.round((ratio ?? 0) * 100));
+        return (
+          <div key={r.label} className="flex flex-col gap-1">
+            <p>
+              <span className="text-2xl font-bold tabular-nums">{ratio == null ? "—" : pct.format(ratio)}</span>{" "}
+              <span className="text-slate-700">{r.label}</span>
+            </p>
+            <div
+              className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100"
+              role="meter"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={width}
+              aria-label={`Part ${r.label}`}
+            >
+              <div className="h-full rounded-full bg-rouge-500" style={{ width: `${width}%` }} />
+            </div>
+            <p className="text-sm text-slate-600">
+              {num.format(share.own.foodKg)} kg sur {num.format(r.of.foodKg)} kg
+              {costRatio != null &&
+                ` · ${pct.format(costRatio)} du coût brut (${euro.format(share.own.cost!.grossEur)} sur ${euro.format(r.of.cost!.grossEur)})`}
+            </p>
+          </div>
+        );
+      })}
+      <p className="text-xs text-slate-500">
+        Pertes alimentaires en kg de la période, sans les retours fournisseur. Seuls les totaux sont comparés : le
+        détail des autres {share.kind === "equipe" ? "équipes" : "zones"} reste réservé aux responsables.
+      </p>
+    </section>
+  );
+}
+
+/**
  * Pertes par zone en logigramme vertical, de haut en bas dans le sens de la marche en avant (décision du 20/11/2026) :
  * une étape par zone, reliées par une flèche.
  */
@@ -665,7 +727,7 @@ function ZoneTile({
         {step}
       </span>
       <div className="flex min-w-0 flex-col gap-1">
-        <span className="font-semibold">{t.name}</span>
+        <span className="font-semibold">{zoneNameWithoutNumber(t.name)}</span>
         <div
           className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100"
           role="meter"

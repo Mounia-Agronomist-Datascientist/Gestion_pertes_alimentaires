@@ -8,6 +8,7 @@ import { checkDestinationSplit } from "@/domain/destinations";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
 import { snackAllowedIn } from "@/domain/encas";
 import { lotsAllowedIn } from "@/domain/lots";
+import { zoneNameWithoutNumber } from "@/domain/nom-zone";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { materialsForPlace } from "@/domain/matieres";
 import {
@@ -770,8 +771,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                   </span>
                 )}
                 <Tile onClick={() => chooseZone(z.id)} selected={z.id === zoneId} disabled={z.allowed === false}>
-                  {z.number ? `${z.number}. ` : ""}
-                  {z.name}
+                  {z.number ? `${z.number}. ${zoneNameWithoutNumber(z.name)}` : z.name}
                   {z.id === lastZoneId && <small className="font-normal opacity-80">Dernière utilisée</small>}
                   {z.allowed === false && <small className="font-normal">Pas dans vos zones</small>}
                 </Tile>

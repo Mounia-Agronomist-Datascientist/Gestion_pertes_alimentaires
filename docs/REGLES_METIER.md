@@ -578,3 +578,17 @@ Demandé par le futur utilisateur de la Réception (migration 0038).
   lot, la DLC et la quantité restent. Visibles dans le détail de la perte par ceux qui peuvent la lire. Pas de photo
   en saisie « plusieurs pertes » (envoi groupé trop lourd), les lots y restent possibles.
 - **Correction** : lots modifiables ; une photo retirée est effacée, une photo ajoutée est enregistrée.
+
+## R38 — Statistiques des équipes et des responsables de zone (24/11/2026)
+
+- **Un seul accès « Statistiques »** à l'accueil : la synthèse de la semaine en est un onglet.
+- **Compte d'une équipe de cuisine** : pas de pertes par zone (l'équipe ne travaille que dans une zone). À la place,
+  « Part de l'équipe dans les pertes » : part de ses kg dans les pertes de sa zone (Cuisine / Production, toutes
+  équipes), puis dans les pertes de l'entreprise, toutes zones confondues.
+- **Responsable de zone** (Réception, Stockage…) : pas de pertes par zone ni d'onglet « Par zone » ; « Part de la
+  zone dans les pertes » : part de ses kg dans les pertes de l'entreprise, toutes zones confondues.
+- Même période et même filtre de type de produit ; sans les retours fournisseur ; en euros aussi pour les profils qui
+  voient les coûts. Seuls les totaux des autres sont lus, jamais leur détail. Vue générale et synthèse de la semaine.
+- Les profils qui comparent les équipes (production, direction, administration) gardent les pertes par zone.
+- **Zones numérotées par l'administration** (« 1. Réception ») : le numéro n'est plus affiché deux fois au choix du
+  lieu ni dans le logigramme.

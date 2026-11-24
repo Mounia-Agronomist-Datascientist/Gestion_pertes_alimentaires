@@ -141,14 +141,10 @@ export default async function HomePage({
       )}
 
       {(can(user, "stats.global") || can(user, "indicators.read")) && (
-        <>
-          <Link href="/statistiques/synthese" className="btn-secondary flex items-center justify-center">
-            Synthèse de la semaine
-          </Link>
-          <Link href="/statistiques" className="btn-secondary flex items-center justify-center">
-            Statistiques
-          </Link>
-        </>
+        // Un seul accès (24/11/2026) : la synthèse de la semaine est un onglet des statistiques.
+        <Link href="/statistiques" className="btn-secondary flex items-center justify-center">
+          Statistiques
+        </Link>
       )}
       {can(user, "indicators.read") && (
         <Link href="/couts" className="btn-secondary flex items-center justify-center">

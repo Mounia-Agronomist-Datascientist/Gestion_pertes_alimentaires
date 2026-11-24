@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/db/client";
 import { periodLabel } from "@/domain/periodes";
 import { requireUser } from "@/modules/auth/next-session";
-import { generalDashboard } from "@/modules/statistiques/dashboard";
+import { generalDashboard, shareOfTotal } from "@/modules/statistiques/dashboard";
 import { canReadStats } from "@/modules/statistiques/facts";
 import {
   SupplierReturns,
@@ -18,6 +18,7 @@ import {
   StatsTabs,
   statsContext,
   SummaryNotes,
+  ShareOfTotalCard,
   SummaryTiles,
   ZoneFlow,
 } from "./shared";
@@ -28,7 +29,10 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
   const user = await requireUser();
   if (!canReadStats(user)) redirect("/");
   const ctx = await statsContext(user, await searchParams);
-  const dashboard = await generalDashboard(db, user, ctx.period, ctx.filters);
+  const [dashboard, share] = await Promise.all([
+    generalDashboard(db, user, ctx.period, ctx.filters),
+    shareOfTotal(db, user, ctx.period, ctx.filters),
+  ]);
   const note = scopeNote(user, ctx.compareTeams);
 
   return (
@@ -50,10 +54,14 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
       />
       <SummaryNotes summary={dashboard.current} withCosts={dashboard.withCosts} />
       <SupplierReturns summary={dashboard.supplierReturns} withCosts={dashboard.withCosts} />
-      <ZoneFlow
-        tiles={dashboard.zoneFlow}
-        previousLabel={dashboard.previousPeriod ? periodLabel(dashboard.previousPeriod) : null}
-      />
+      {share ? (
+        <ShareOfTotalCard share={share} withCosts={dashboard.withCosts} />
+      ) : (
+        <ZoneFlow
+          tiles={dashboard.zoneFlow}
+          previousLabel={dashboard.previousPeriod ? periodLabel(dashboard.previousPeriod) : null}
+        />
+      )}
 
       <Card title="Devenir des pertes alimentaires">
         <DestinationBars summary={dashboard.current} />

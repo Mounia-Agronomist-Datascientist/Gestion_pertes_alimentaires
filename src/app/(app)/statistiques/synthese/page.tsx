@@ -7,6 +7,7 @@ import { requireUser } from "@/modules/auth/next-session";
 import { adjacentOf, canReadStats } from "@/modules/statistiques/facts";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { type WeeklyRow, weeklySummary } from "@/modules/statistiques/weekly";
+import { shareOfTotal } from "@/modules/statistiques/dashboard";
 import { ColumnChart } from "../evolution/column-chart";
 import { TrendTable } from "../evolution/trend-table";
 import {
@@ -25,6 +26,7 @@ import {
   statsContext,
   SummaryNotes,
   SummaryTiles,
+  ShareOfTotalCard,
   ZoneFlow,
 } from "../shared";
 import { PrintButton } from "./print-button";
@@ -43,7 +45,11 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
   }
   if (!anchor) return <p className="rounded-xl bg-red-50 p-3 text-red-800">Semaine absente du calendrier.</p>;
   const ctx = { ...base, period: anchor as Period };
-  const [data, next] = await Promise.all([weeklySummary(db, user, anchor, ctx.filters), adjacentOf(db, anchor, 1)]);
+  const [data, next, share] = await Promise.all([
+    weeklySummary(db, user, anchor, ctx.filters),
+    adjacentOf(db, anchor, 1),
+    shareOfTotal(db, user, anchor, ctx.filters),
+  ]);
   if (!data) return <p className="rounded-xl bg-red-50 p-3 text-red-800">Semaine absente du calendrier.</p>;
   const { comparison, withCosts } = data;
   const path = "/statistiques/synthese";
@@ -103,7 +109,11 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
         withCosts={withCosts}
       />
       <SupplierReturns summary={data.supplierReturns} withCosts={withCosts} />
-      <ZoneFlow tiles={data.zoneFlow} previousLabel={previousLabel} />
+      {share ? (
+        <ShareOfTotalCard share={share} withCosts={withCosts} />
+      ) : (
+        <ZoneFlow tiles={data.zoneFlow} previousLabel={previousLabel} />
+      )}
       {comparison.average && (
         <p className="text-sm text-slate-600">
           Moyenne des {comparison.average.weeks} semaines d&apos;avant : {num.format(comparison.average.foodKg ?? 0)} kg
@@ -120,7 +130,7 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
           <p className="text-slate-600">Aucune perte cette semaine.</p>
         ) : (
           <ul className="flex flex-col gap-2 text-sm">
-            {data.byZone[0] && (
+            {data.byZone[0] && !share && (
               <li>
                 <strong>Zone</strong> : {data.byZone[0].label} — {fmtValue(data.byZone[0].value)} (
                 {pct.format(data.byZone[0].share)} de la semaine)
@@ -169,7 +179,8 @@ export default async function WeeklyPage({ searchParams }: { searchParams: Promi
           ],
         ] as const
       )
-        .filter(([, list]) => list.length > 0)
+        // Compte d'une équipe ou d'un responsable de zone : pas de répartition par zone (24/11/2026).
+        .filter(([title, list]) => list.length > 0 && !(share && title === "Par zone"))
         .map(([title, list, euroTitle, kgTitle]) => {
           // Mêmes couleurs dans les deux anneaux : zones dans le sens de la marche en avant, sinon les plus grosses
           // parts du classement de la semaine.
