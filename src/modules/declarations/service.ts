@@ -401,6 +401,7 @@ async function prepareDeclaration(
     isConsumable,
     pieceWeightKnown: product.unitWeightKg != null,
     isSnack: product.category === "produit_externe",
+    isSubRecipe: "weekItem" in input.product && product.category === "sous_recette",
     hasPackaging: packaging != null,
   };
   if (input.tare && !gastroTareAllowed(measureContext)) {

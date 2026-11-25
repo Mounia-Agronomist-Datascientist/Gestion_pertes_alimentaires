@@ -186,6 +186,9 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
   s'ajoutaient à tout plat perdu. Aucun emballage n'est ajouté aux encas, sous-recettes et ingrédients.
 - Le coût est figé sur la déclaration avec sa méthode et sa date de calcul.
 
+- **Coût des matières inconnu** (revue du 26/11/2026) : le coût brut est **inconnu**, même si les emballages sont
+  connus (jamais « 0 € ») ; la perte compte parmi les « pertes sans coût connu ».
+
 ## R13 — Recettes encaissées et coût net (Phase 3, 10/11/2026)
 
 - Seules les destinations de **vente** (Too Good To Go, vente flash) portent une recette : le **montant réellement
@@ -405,6 +408,8 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   pièces seulement, jamais en contenants), **2. Pesée à la balance** — au choix « Pesé dans des gastros » (tare
   déduite) ou « Poids net » saisi directement —, **3. Estimation** (kg, g, L, mL, pièces, gastros, contenants). Un
   consommable, un moule ou un plat à gratin s'y compte toujours en pièces. Le serveur refuse les autres.
+  Une **sous-recette du tome** sans poids d'une pièce ne se compte pas en pièces (pesée ou estimation, revue du
+  26/11/2026) : sinon ni kg ni coût.
 - **Barquettes** : seulement en **salle des cartons** (Conditionnement), pour un plat dont le poids de la barquette
   est connu (R40). En
   cuisine, un plat perdu se compte en pièces : une pièce = une portion (R10), comptée aussi dans les « barquettes

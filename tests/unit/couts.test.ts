@@ -67,6 +67,17 @@ describe("coût brut par composante", () => {
     });
   });
 
+  it("coût des matières inconnu : coût brut inconnu, jamais « 0 € » d'emballages seuls (revue du 26/11/2026)", () => {
+    const unknown = { ...vi03, food: { perKgEur: null, perUnitEur: null } };
+    expect(
+      lossCostBreakdown({ netKg: 0.43, quantity: 5, unitCode: "piece" }, { ...unknown, packagingPerPortionEur: 0 }),
+    ).toMatchObject({
+      foodEur: null,
+      packagingEur: 0,
+      grossEur: null,
+    });
+  });
+
   it("moule perdu : son coût va dans les emballages ; rien de connu → coût brut vide", () => {
     const none = { perKgEur: null, perUnitEur: null };
     expect(

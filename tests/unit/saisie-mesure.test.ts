@@ -35,6 +35,12 @@ describe("façons de mesurer selon le lieu et le produit (R25)", () => {
     expect(methodsFor(INPUT_METHODS, ctx("CUISINE", { isConsumable: true }))).toEqual(["comptage"]);
   });
 
+  it("Cuisine : une sous-recette sans poids d'une pièce ne se compte pas (revue du 26/11/2026)", () => {
+    const c = ctx("CUISINE", { subzoneCode: "CUI_CUISINE", isSubRecipe: true });
+    expect(methodsFor(INPUT_METHODS, c)).toEqual(["pesee", "estimation_manuelle"]);
+    expect(methodsFor(INPUT_METHODS, { ...c, pieceWeightKnown: true })).toContain("comptage");
+  });
+
   it("Réception et Stockage : kg, colis ; pièces seulement avec un poids connu ; ni gastros ni barquettes", () => {
     expect(unitsFor("comptage", ctx("RECEPTION"))).toEqual(["colis"]);
     expect(unitsFor("comptage", ctx("STOCKAGE", { pieceWeightKnown: true }))).toEqual(["piece", "colis"]);

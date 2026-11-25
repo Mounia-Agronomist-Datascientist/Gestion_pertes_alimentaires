@@ -28,6 +28,8 @@ export interface MeasureContext {
   isConsumable: boolean;
   /** Poids d'une pièce connu pour ce produit. */
   pieceWeightKnown: boolean;
+  /** Sous-recette du tome (préparation) : se pèse ou s'estime, se compte seulement si le poids d'une pièce est connu. */
+  isSubRecipe?: boolean;
   /** Encas (produit externe) : compté en encas en salle des cartons. */
   isSnack?: boolean;
   /** Au moins un colis fournisseur convertible en kg pour ce produit (sinon, poids du colis indiqué à la saisie). */
@@ -93,7 +95,9 @@ function unitAllowed(code: string, c: MeasureContext): boolean {
 export function unitsFor(method: InputMethod, c: MeasureContext): string[] {
   if (c.zoneCode === KITCHEN_ZONE_CODE) {
     if (c.isConsumable && method !== "comptage") return [];
-    if (method === "comptage") return ["piece"];
+    // Une sous-recette sans poids d'une pièce ne se compte pas (ni kg ni coût, revue du 26/11/2026) ; une matière
+    // comptée sans poids connu reste possible (hauts de cuisse…), ses kg se complètent quand le poids est réglé.
+    if (method === "comptage") return c.isSubRecipe && !c.pieceWeightKnown ? [] : ["piece"];
   }
   return BASE_UNITS[method].filter((u) => unitAllowed(u, c));
 }

@@ -170,13 +170,16 @@ export function lossCostBreakdown(
       ? roundQuantity(portions * inputs.packagingPerPortionEur)
       : null;
   const known = [foodEur, packagingEur].filter((v): v is number => v != null);
+  // Coût des matières inconnu (produit qui n'est pas lui-même un emballage) : le coût brut est inconnu, jamais
+  // réduit aux seuls emballages (une perte à « 0 € » passerait pour valorisée).
+  const foodMissing = foodEur == null && !inputs.packagingItself;
   return {
     portions,
     foodEur,
     packagingEur,
     labourEur: null,
     indirectEur: null,
-    grossEur: known.length ? roundQuantity(known.reduce((a, b) => a + b, 0)) : null,
+    grossEur: !foodMissing && known.length ? roundQuantity(known.reduce((a, b) => a + b, 0)) : null,
   };
 }
 

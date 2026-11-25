@@ -162,7 +162,7 @@ async function loadAllFacts(db: Db, user: AuthUser, period: Period, filters: Sta
 
   // Classement actuel de chaque cause (famille, évitable) : une lecture d'analyse, pas un instantané de la perte.
   const causeRows = await db
-    .select({ id: s.causes.id, family: s.causes.family, avoidability: s.causes.avoidability })
+    .select({ id: s.causes.id, name: s.causes.name, family: s.causes.family, avoidability: s.causes.avoidability })
     .from(s.causes);
   const causeOf = new Map(causeRows.map((c) => [c.id, c]));
 
@@ -184,7 +184,8 @@ async function loadAllFacts(db: Db, user: AuthUser, period: Period, filters: Sta
       productCode: r.productCode,
       weekSubRecipeId: r.weekSubRecipeId,
       causeId: r.causeId,
-      causeName: r.causeName,
+      // Nom actuel de la cause (une cause renommée garde ses pertes passées sous son nouveau nom).
+      causeName: causeOf.get(r.causeId)?.name ?? r.causeName,
       causeFamily: causeOf.get(r.causeId)?.family ?? null,
       avoidability: causeOf.get(r.causeId)?.avoidability ?? null,
       netKg: r.netKg,

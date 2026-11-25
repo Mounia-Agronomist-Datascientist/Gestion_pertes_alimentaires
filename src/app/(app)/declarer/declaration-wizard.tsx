@@ -312,6 +312,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     isConsumable,
     pieceWeightKnown: (product?.kind === "week" ? product.unitWeightKg : listedProduct?.unitWeightKg) != null,
     isSnack: product?.category === "produit_externe",
+    // Sous-recette du tome de la semaine (un produit absent de la liste se rattache plus tard, avec son poids).
+    isSubRecipe: product?.kind === "week" && product.category === "sous_recette",
     hasPackaging: productPackagings.length > 0,
   };
   const methods = methodsFor(INPUT_METHODS, measureContext);
