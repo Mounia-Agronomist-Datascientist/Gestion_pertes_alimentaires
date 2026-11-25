@@ -687,6 +687,9 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
        **emballages par portion** réglés par l'administration (Administration → Emballages et consommables), aux prix
        en vigueur à la date de la perte ; une recette peut avoir à la fois un moule et une barquette ;
     3. le total des emballages par portion s'affiche, puis le coût de la perte « dont emballages ».
+  - **Reconnaître un moule** : un « Moule rond… », « Moule rectangulaire… », « MOULE … INDIVIDUEL BIODEG… » ou un
+    « Plat à gratin… » du tome ; les **moules à manger** (« moules décoquillées cuites ») sont une denrée, comptée
+    dans les matières (corrigé le 26/11/2026, migration 0040).
   - **Sous-recette déclarée seule** : on ne propose un moule que si le tome en cite un dans cette sous-recette ; dans
     les tomes chargés, les moules sont toujours cités au niveau de la recette, donc aucune question aujourd'hui.
   - avant la salle blanche (Déboîtage, Préparation froide, Cuisine), aucune question et aucun emballage.

@@ -16,7 +16,13 @@ export const gramsToKg = (g: number | null) => (g == null ? null : Math.round(g 
  * BIODEG 180mL », « Petit plat à gratin format individuel ») : catégorie « Moules et plats à gratin ».
  * « Appareil à gratin », « Gratiné de polenta » ou « Bombe de graisse pour moule » ne sont pas des moules.
  */
-export const isMouldLabel = (label: string) => /^\s*moules?\b/i.test(label) || /\bplats? à gratin\b/i.test(label);
+/**
+ * Moule ou plat à gratin (emballage de cuisson), pas une denrée : « Moule rond biodeg », « MOULE RECTANGULAIRE
+ * INDIVIDUEL… », « Plat à gratin (grand format) ». Les moules à manger (« moules décoquillées cuites ») n'en sont pas.
+ */
+const MOULD_RE =
+  /^\s*moules?\s+(rond|rectangulaire|carr[ée]|ovale|individuel|silicone|biod[ée]g|cake|tarte|muffin|cannel|savarin|kouglof|papier|alu|à\s|a\s)/i;
+export const isMouldLabel = (label: string) => MOULD_RE.test(label) || /\bplats? à gratin\b/i.test(label);
 
 /** Zones où les encas sont proposés (règle R9). */
 export const SNACK_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT", "RECEPTION", "STOCKAGE"];

@@ -281,6 +281,13 @@
       "when": 1795530919686,
       "tag": "0039_causes_cuisine",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795612830166,
+      "tag": "0040_moules_comestibles",
+      "breakpoints": true
     }
   ]
 }

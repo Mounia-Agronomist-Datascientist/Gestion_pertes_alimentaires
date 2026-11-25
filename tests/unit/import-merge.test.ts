@@ -57,6 +57,13 @@ describe("rapprochement du tome et du plan S45", () => {
     expect(isMouldLabel("Petit plat à gratin format individuel ( sous-recette)")).toBe(true);
     expect(isMouldLabel("Légume sauteuse: Appareil à gratin de poireau, oignons et lardons")).toBe(false);
     expect(isMouldLabel("Gratiné de polenta à la raclette")).toBe(false);
+    expect(isMouldLabel("Moule rond biodeg ( sous-recette)")).toBe(true);
+    expect(isMouldLabel("Moule rectangulaire cake ( sous-recette)")).toBe(true);
+    expect(isMouldLabel("Plat à gratin (grand format)")).toBe(true);
+    // Des moules à manger ne sont pas un emballage.
+    expect(isMouldLabel("moules décoquillées cuites 300/500")).toBe(false);
+    expect(isMouldLabel("Poisson: Moule décortiquée (sous recette)")).toBe(false);
+    expect(isMouldLabel("Bombe de graisse pour moule et plaque")).toBe(false);
     expect(isMouldLabel("muscade moulue")).toBe(false);
     expect(isMouldLabel("Bombe de graisse pour moule et plaque")).toBe(false);
     expect(isMouldLabel("Plat à gratin (grand format)")).toBe(true);
