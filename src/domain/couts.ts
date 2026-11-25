@@ -110,7 +110,7 @@ export function missingPackagingAnswer(q: PackagingQuestions, a: DiscardedPackag
   if (q.moulds.length && a?.moulds == null) return "Indiquez si le moule ou le plat à gratin est jeté avec le plat";
   if (a?.moulds?.some((m) => !q.moulds.some((x) => x.label === m)))
     return "Moule inconnu pour ce plat : choisissez-le dans la liste";
-  if (q.tray && a?.tray == null) return "Indiquez si le plat était en barquette";
+  if (q.tray && a?.tray == null) return "Indiquez si la recette était en barquette";
   return null;
 }
 

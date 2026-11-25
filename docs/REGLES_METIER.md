@@ -676,14 +676,18 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
   la barquette sont comptés à part, en **emballages**, seulement s'ils sont jetés :
   - à partir de la **salle blanche** (Cellule de refroidissement et Salle blanche) et en **salle des cartons**, pour
     un **plat entier** (pas une sous-recette, un ingrédient ou un encas), à l'étape « Quelle quantité ? », **juste
-    après le choix du mode de comptage**, un encadré « Emballages et consommables jetés avec le plat » (réponses
+    après le choix du mode de comptage**, un encadré « Emballages et consommables jetés avec la recette » (réponses
     obligatoires, 26/11/2026) :
-    1. « Moule ou plat à gratin (d'après le tome Melba) : jeté avec ? » — la liste des moules et plats à gratin que
-       le tome cite pour ce plat (sous-recettes comprises), chacun avec son coût par portion, à cocher, ou « Aucun
-       moule jeté » ; pas de question si le plat n'en a pas ;
-    2. « Le plat était-il mis en barquette ? » — oui : coût de la barquette par portion, les **emballages par
-       portion** réglés par l'administration (Administration → Emballages et consommables), aux prix en vigueur à la
-       date de la perte ; un plat peut avoir à la fois un moule et une barquette ;
+    1. « Moule ou plat à gratin prévu par le tome Melba pour cette recette : jeté avec ? » — seulement les moules et
+       plats à gratin que le tome cite pour cette recette (directement ou par une sous-recette « Plat à gratin… »),
+       chacun avec son coût par portion, à cocher, ou « Aucun moule jeté » ; **si le tome n'en cite aucun, rien n'est
+       proposé** ;
+    2. « Était-elle en barquette (barquette filmée avec étiquette) ? » — posée pour **toutes les recettes** (plats et
+       petits-déjeuners), avec ou sans moule ; oui : coût de la barquette, du film et de l'étiquette par portion, les
+       **emballages par portion** réglés par l'administration (Administration → Emballages et consommables), aux prix
+       en vigueur à la date de la perte ; une recette peut avoir à la fois un moule et une barquette ;
     3. le total des emballages par portion s'affiche, puis le coût de la perte « dont emballages ».
+  - **Sous-recette déclarée seule** : on ne propose un moule que si le tome en cite un dans cette sous-recette ; dans
+    les tomes chargés, les moules sont toujours cités au niveau de la recette, donc aucune question aujourd'hui.
   - avant la salle blanche (Déboîtage, Préparation froide, Cuisine), aucune question et aucun emballage.
 - Les réponses sont gardées sur la perte (récapitulatif, correction). Les pertes déjà enregistrées gardent leur coût.

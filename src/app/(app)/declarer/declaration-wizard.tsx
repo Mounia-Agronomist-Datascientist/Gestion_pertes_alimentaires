@@ -2439,11 +2439,11 @@ function PackagingStep({
   const perPortion = discardedPackagingPerPortion(questions, answers, trayPerPortionEur) ?? 0;
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-white p-3 shadow-sm">
-      <p className="font-semibold">Emballages et consommables jetés avec le plat</p>
+      <p className="font-semibold">Emballages et consommables jetés avec la recette</p>
       {questions.moulds.length > 0 && (
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 font-medium">
-            Moule ou plat à gratin (d&apos;après le tome Melba) : jeté avec ?
+            Moule ou plat à gratin prévu par le tome Melba pour cette recette : jeté avec ?
           </legend>
           <TileGrid>
             {questions.moulds.map((m) => (
@@ -2460,10 +2460,10 @@ function PackagingStep({
       )}
       {questions.tray && (
         <YesNo
-          legend="Le plat était-il mis en barquette ?"
+          legend="Était-elle en barquette (barquette filmée avec étiquette) ?"
           hint={
             trayPerPortionEur
-              ? `Barquette : ${fmtEuro(trayPerPortionEur)} par portion`
+              ? `Barquette, film et étiquette : ${fmtEuro(trayPerPortionEur)} par portion`
               : "Coût de la barquette pas encore renseigné (Administration → Emballages et consommables)"
           }
           value={answers.tray ?? null}
