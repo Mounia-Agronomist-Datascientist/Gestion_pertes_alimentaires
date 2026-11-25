@@ -109,3 +109,28 @@ export const labourRates = pgTable(
     check("labour_rates_period", sql`${t.validTo} is null or ${t.validTo} >= ${t.validFrom}`),
   ],
 );
+
+/**
+ * Objectif de pertes d'une zone (décision du 26/11/2026) : au plus N kg de pertes alimentaires par semaine de
+ * production, daté (une nouvelle valeur s'applique à partir d'une date, la précédente est close la veille).
+ */
+export const zoneTargets = pgTable(
+  "zone_targets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    zoneId: uuid("zone_id")
+      .notNull()
+      .references(() => zones.id),
+    maxKgPerWeek: numeric("max_kg_per_week", { precision: 10, scale: 1, mode: "number" }).notNull(),
+    validFrom: date("valid_from", { mode: "string" }).notNull(),
+    validTo: date("valid_to", { mode: "string" }),
+    source: text("source"),
+    createdBy: uuid("created_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique("zone_targets_zone_valid_from_key").on(t.zoneId, t.validFrom),
+    check("zone_targets_positive", sql`${t.maxKgPerWeek} >= 0`),
+    check("zone_targets_period", sql`${t.validTo} is null or ${t.validTo} >= ${t.validFrom}`),
+  ],
+);

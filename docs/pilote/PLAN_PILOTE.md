@@ -9,7 +9,7 @@ Les valeurs marquées **à valider** sont des propositions : à confirmer avant 
 
 | # | Action | Qui | État |
 |---|---|---|---|
-| 1 | Mise en ligne (à partir du 8 décembre) : sauvegarde, migrations 0014 à 0043 (workflow « Base de données »), déploiement, vérification de la connexion | Administration | ⏳ |
+| 1 | Mise en ligne (à partir du 8 décembre) : sauvegarde, migrations 0014 à 0044 (workflow « Base de données »), déploiement, vérification de la connexion | Administration | ⏳ |
 | 2 | Après la mise en ligne : « Charger la proposition Agribalyse » (Administration → Facteurs d'émission), déposer les fichiers TGTG, ventes flash et Linkee, « Compléter depuis les tomes importés » (Administration → Produits), déposer le ZIP du dossier des bons de commande du Drive | Administration | ⏳ |
 | 3 | Choisir les équipes pilotes (**à valider** : une équipe de cuisine + le conditionnement, pour couvrir les deux modes : équipe et zone) | Production | ⏳ |
 | 4 | Créer ou vérifier leurs comptes (sans prénom), noter les mots de passe hors de l'application | Administration | ⏳ |

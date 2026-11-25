@@ -30,6 +30,7 @@ import { sameDayLosses } from "@/modules/declarations/doublons";
 import { summarize } from "@/domain/statistiques";
 import { loadFacts } from "@/modules/statistiques/facts";
 import { supplierReport } from "@/modules/statistiques/fournisseurs";
+import { setZoneTarget, zoneTargetProgress } from "@/modules/objectifs";
 import { createTestDb } from "../helpers/test-db";
 
 const DIR = "tests/fixtures/bons-commande";
@@ -588,5 +589,22 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     const mine = report.rows.find((r) => r.key === row!.supplierId)!;
     expect(mine.name).toBe(colis.supplier);
     expect(mine.receptionKg).toBeGreaterThan(0);
+  });
+
+  it("objectifs par zone : datés, écart et suivi des semaines (26/11/2026)", async () => {
+    const reception = (await t.db.select().from(s.zones).where(eq(s.zones.code, "RECEPTION")))[0]!;
+    await expect(
+      setZoneTarget(t.db, team, reception.id, { maxKgPerWeek: "10", validFrom: "2026-11-12" }, "2026-11-12"),
+    ).rejects.toThrow(ForbiddenError);
+    await setZoneTarget(t.db, admin, reception.id, { maxKgPerWeek: "10,5", validFrom: "2026-11-12" }, "2026-11-12");
+    const progress = (await zoneTargetProgress(t.db, admin, { year: 2026, number: 47 }))!;
+    expect(progress.weeks.length).toBeLessThanOrEqual(8);
+    const zone = progress.zones.find((z) => z.zoneId === reception.id)!;
+    const last = zone.weeks[zone.weeks.length - 1]!;
+    expect(last.label).toBe("S47");
+    expect(last.target).toBe(10.5);
+    expect(last.kg).toBeGreaterThan(0);
+    // Avant sa date, pas d'objectif.
+    expect(zone.weeks[0]!.target).toBeNull();
   });
 });

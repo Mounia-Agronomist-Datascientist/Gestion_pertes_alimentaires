@@ -71,6 +71,7 @@ export function StatsTabs({
     | "environnement"
     | "alchimistes"
     | "fournisseurs"
+    | "objectifs"
     | "rapports";
 }) {
   return (
@@ -101,6 +102,9 @@ export function StatsTabs({
           </Link>
         )
       )}
+      <Link className={chip(active === "objectifs")} href={statsHref("/statistiques/objectifs", ctx)}>
+        Objectifs
+      </Link>
       <Link className={chip(active === "evolution")} href={statsHref("/statistiques/evolution", ctx)}>
         Évolution
       </Link>

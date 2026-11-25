@@ -309,6 +309,13 @@
       "when": 1795619329304,
       "tag": "0043_fournisseur_perte",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1795619782551,
+      "tag": "0044_objectifs_zones",
+      "breakpoints": true
     }
   ]
 }

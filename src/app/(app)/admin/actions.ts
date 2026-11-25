@@ -51,6 +51,7 @@ import {
   validateSupplier,
 } from "@/modules/admin/products";
 import { setTeamWeekActive } from "@/modules/admin/teams";
+import { setZoneTarget } from "@/modules/objectifs";
 import { requireUser } from "@/modules/auth/next-session";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import { DeclarationError } from "@/modules/declarations/service";
@@ -530,6 +531,32 @@ export async function labourAction(_prev: PlaceActionState, formData: FormData):
     revalidatePath("/admin/main-oeuvre");
     return {
       message: `${rate.hourlyCostEur.toLocaleString("fr-FR", { minimumFractionDigits: 2 })} € de l'heure à partir du ${rate.validFrom.split("-").reverse().join("/")}.`,
+    };
+  } catch (e) {
+    if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };
+    throw e;
+  }
+}
+
+/** Objectif de pertes d'une zone, en kg par semaine (décision du 26/11/2026). */
+export async function targetAction(_prev: PlaceActionState, formData: FormData): Promise<PlaceActionState> {
+  const admin = await requireUser();
+  try {
+    const target = await setZoneTarget(
+      db,
+      admin,
+      String(formData.get("zoneId") ?? ""),
+      {
+        maxKgPerWeek: String(formData.get("maxKgPerWeek") ?? ""),
+        validFrom: String(formData.get("validFrom") ?? ""),
+        note: String(formData.get("note") ?? ""),
+      },
+      toProductionLocalDate(new Date()),
+    );
+    revalidatePath("/admin/objectifs");
+    revalidatePath("/statistiques/objectifs");
+    return {
+      message: `Au plus ${target.maxKgPerWeek.toLocaleString("fr-FR")} kg par semaine à partir du ${target.validFrom.split("-").reverse().join("/")}.`,
     };
   } catch (e) {
     if (e instanceof AdminError || e instanceof ForbiddenError) return { error: e.message };

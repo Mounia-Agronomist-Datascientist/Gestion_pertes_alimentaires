@@ -750,3 +750,12 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
   attendu), trois causes et trois produits principaux. Classement en kg, en coût ou en nombre de pertes, mêmes
   périodes et filtres que les autres onglets.
 
+## R44 — Objectifs par zone (26/11/2026)
+
+- Administration → **Objectifs par zone** : pour chaque zone, **au plus N kg** de pertes alimentaires **par semaine
+  de production**, daté (un nouvel objectif s'applique à partir de sa date ; l'ancien reste dans l'historique).
+- Statistiques → **Objectifs** : pour la semaine choisie, kg perdus de chaque zone, **écart à l'objectif** (marge ou
+  dépassement, en kg et en %), différence avec la semaine d'avant, et les **8 dernières semaines** en barres (rouge
+  au-dessus de l'objectif, objectif en pointillés). Nombre de zones dans l'objectif. Retours fournisseur non
+  comptés ; une perte de plusieurs jours compte pour chaque jour de sa période (R5 quater).
+
