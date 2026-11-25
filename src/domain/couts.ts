@@ -78,13 +78,14 @@ const PACKAGING_SUBZONE_CODES: readonly string[] = ["CUI_SALLE_BLANCHE"];
 const PACKAGING_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT"];
 
 export interface PackagingQuestions {
-  /** « Le moule ou le plat à gratin est-il jeté avec ? » : plat entier qui en contient. */
-  mould: boolean;
-  /** « La barquette est-elle jetée aussi ? » : plat entier. */
+  /** Moules et plats à gratin du plat (tome) proposés : « jeté avec le plat ? » ; vide si le plat n'en a pas. */
+  moulds: DishMould[];
+  /** « Le plat était-il en barquette ? » : plat entier. */
   tray: boolean;
 }
 export interface DiscardedPackaging {
-  mould?: boolean | null;
+  /** Libellés des moules jetés avec le plat ([] : aucun) ; null ou absent : pas encore répondu. */
+  moulds?: string[] | null;
   tray?: boolean | null;
 }
 
@@ -94,18 +95,22 @@ export interface DiscardedPackaging {
  */
 export function packagingQuestionsFor(
   place: { zoneCode: string; subzoneCode: string | null },
-  dish: { wholeDish: boolean; mouldPerPortionEur: number | null },
+  dish: { wholeDish: boolean; moulds: readonly DishMould[] | null },
 ): PackagingQuestions {
   const inScope =
     dish.wholeDish &&
     (PACKAGING_ZONE_CODES.includes(place.zoneCode) || PACKAGING_SUBZONE_CODES.includes(place.subzoneCode ?? ""));
-  return { mould: inScope && (dish.mouldPerPortionEur ?? 0) > 0, tray: inScope };
+  return { moulds: inScope ? [...(dish.moulds ?? [])] : [], tray: inScope };
 }
 
-/** Réponse manquante à une question posée, ou null. */
+export const asksPackaging = (q: PackagingQuestions) => q.moulds.length > 0 || q.tray;
+
+/** Réponse manquante ou inattendue à une question posée, ou null. */
 export function missingPackagingAnswer(q: PackagingQuestions, a: DiscardedPackaging | null | undefined) {
-  if (q.mould && a?.mould == null) return "Indiquez si le moule ou le plat à gratin est jeté avec le plat";
-  if (q.tray && a?.tray == null) return "Indiquez si la barquette est jetée aussi";
+  if (q.moulds.length && a?.moulds == null) return "Indiquez si le moule ou le plat à gratin est jeté avec le plat";
+  if (a?.moulds?.some((m) => !q.moulds.some((x) => x.label === m)))
+    return "Moule inconnu pour ce plat : choisissez-le dans la liste";
+  if (q.tray && a?.tray == null) return "Indiquez si le plat était en barquette";
   return null;
 }
 
@@ -116,10 +121,11 @@ export function missingPackagingAnswer(q: PackagingQuestions, a: DiscardedPackag
 export function discardedPackagingPerPortion(
   q: PackagingQuestions,
   a: DiscardedPackaging | null | undefined,
-  parts: { mouldEur: number | null; trayEur: number | null },
+  trayEur: number | null,
 ): number | null {
-  if (!q.mould && !q.tray) return null;
-  const total = (q.mould && a?.mould ? (parts.mouldEur ?? 0) : 0) + (q.tray && a?.tray ? (parts.trayEur ?? 0) : 0);
+  if (!asksPackaging(q)) return null;
+  const moulds = q.moulds.filter((m) => a?.moulds?.includes(m.label)).reduce((sum, m) => sum + m.eur, 0);
+  const total = moulds + (q.tray && a?.tray ? (trayEur ?? 0) : 0);
   return Math.round(total * 100_000) / 100_000;
 }
 
@@ -182,18 +188,45 @@ export function mouldCostOf<L extends { label: string; costEur: number | null; s
   lines: readonly L[],
   subRecipes: ReadonlyMap<string, { totalCostEur: number | null; lines: readonly L[] }>,
   isMould: (label: string) => boolean,
-  depth = 0,
 ): number {
-  let total = 0;
+  return Math.round(mouldLinesOf(lines, subRecipes, isMould).reduce((a, m) => a + m.eur, 0) * 10_000) / 10_000;
+}
+
+/** Moule ou plat à gratin d'un plat, tel que le tome le cite, et son coût par portion. */
+export interface DishMould {
+  label: string;
+  eur: number;
+}
+
+const mouldLabel = (label: string) => label.replace(/\s*\(\s*sous[\s-]*recettes?\s*\)\s*/i, " ").trim();
+
+/**
+ * Moules et plats à gratin d'un plat (lignes du tome, sous-recettes comprises au prorata de la quantité utilisée),
+ * regroupés par libellé : proposés à la saisie quand le plat est jeté avec (R42).
+ */
+export function mouldLinesOf<L extends { label: string; costEur: number | null; subRecipeId: string | null }>(
+  lines: readonly L[],
+  subRecipes: ReadonlyMap<string, { totalCostEur: number | null; lines: readonly L[] }>,
+  isMould: (label: string) => boolean,
+  depth = 0,
+  share = 1,
+  out = new Map<string, number>(),
+): DishMould[] {
   for (const line of lines) {
     if (line.costEur == null) continue;
     if (isMould(line.label)) {
-      total += line.costEur;
+      const label = mouldLabel(line.label);
+      out.set(label, (out.get(label) ?? 0) + line.costEur * share);
     } else if (line.subRecipeId && depth < 5) {
       const sub = subRecipes.get(line.subRecipeId);
       if (!sub?.totalCostEur) continue;
-      total += line.costEur * (mouldCostOf(sub.lines, subRecipes, isMould, depth + 1) / sub.totalCostEur);
+      mouldLinesOf(sub.lines, subRecipes, isMould, depth + 1, (share * line.costEur) / sub.totalCostEur, out);
     }
   }
-  return Math.round(total * 10_000) / 10_000;
+  return depth > 0
+    ? []
+    : [...out]
+        .map(([label, eur]) => ({ label, eur: Math.round(eur * 10_000) / 10_000 }))
+        .filter((m) => m.eur > 0)
+        .sort((a, b) => a.label.localeCompare(b.label, "fr"));
 }

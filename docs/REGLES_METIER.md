@@ -675,11 +675,15 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
 - **Coût d'un plat** : les matières seules (coût Melba de la portion, moules et plats à gratin retirés). Le moule et
   la barquette sont comptés à part, en **emballages**, seulement s'ils sont jetés :
   - à partir de la **salle blanche** (Cellule de refroidissement et Salle blanche) et en **salle des cartons**, pour
-    un **plat entier** (pas une sous-recette, un ingrédient ou un encas), deux questions obligatoires après la
-    quantité : « Le moule ou le plat à gratin est-il jeté avec ? » (seulement si le plat en contient) et « La
-    barquette est-elle jetée aussi ? » ;
-  - oui → coût du moule ou plat à gratin par portion (lu dans le tome) ; oui → coût de la barquette par portion :
-    les **emballages par portion** réglés par l'administration (Administration → Emballages et consommables), aux
-    prix en vigueur à la date de la perte ;
+    un **plat entier** (pas une sous-recette, un ingrédient ou un encas), à l'étape « Quelle quantité ? », **juste
+    après le choix du mode de comptage**, un encadré « Emballages et consommables jetés avec le plat » (réponses
+    obligatoires, 26/11/2026) :
+    1. « Moule ou plat à gratin (d'après le tome Melba) : jeté avec ? » — la liste des moules et plats à gratin que
+       le tome cite pour ce plat (sous-recettes comprises), chacun avec son coût par portion, à cocher, ou « Aucun
+       moule jeté » ; pas de question si le plat n'en a pas ;
+    2. « Le plat était-il mis en barquette ? » — oui : coût de la barquette par portion, les **emballages par
+       portion** réglés par l'administration (Administration → Emballages et consommables), aux prix en vigueur à la
+       date de la perte ; un plat peut avoir à la fois un moule et une barquette ;
+    3. le total des emballages par portion s'affiche, puis le coût de la perte « dont emballages ».
   - avant la salle blanche (Déboîtage, Préparation froide, Cuisine), aucune question et aucun emballage.
 - Les réponses sont gardées sur la perte (récapitulatif, correction). Les pertes déjà enregistrées gardent leur coût.

@@ -7,7 +7,14 @@
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { dishUnitCost, ingredientUnitCost, mouldCostOf, subRecipeUnitCost, type UnitCost } from "@/domain/couts";
+import {
+  type DishMould,
+  dishUnitCost,
+  ingredientUnitCost,
+  mouldLinesOf,
+  subRecipeUnitCost,
+  type UnitCost,
+} from "@/domain/couts";
 import type { PortionKind } from "@/modules/admin/packaging-labels";
 import { melbaExternalId } from "@/domain/matieres";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
@@ -61,6 +68,8 @@ export interface WeekCatalog {
     cost: UnitCost;
     /** Moules et plats à gratin inclus dans le coût Melba d'une portion (comptés en emballages). */
     mouldPerPortionEur: number;
+    /** Ces moules, un par libellé du tome, avec leur coût par portion (proposés à la saisie, R42). */
+    moulds: DishMould[];
     /** Emballages du référentiel ajoutés par portion. */
     portionKind: PortionKind | null;
     lines: CatalogLine[];
@@ -178,13 +187,15 @@ function importStructure(lines: readonly LineRow[], subRecipes: readonly SubReci
  */
 function dishCosts(r: typeof s.weekRecipes.$inferSelect, structure: ReturnType<typeof importStructure>) {
   const snack = isSnackCode(r.code);
-  const mould = snack ? 0 : mouldCostOf(structure.linesOfRecipe(r.id), structure.subRecipes, isMouldLabel);
+  const moulds = snack ? [] : mouldLinesOf(structure.linesOfRecipe(r.id), structure.subRecipes, isMouldLabel);
+  const mould = Math.round(moulds.reduce((a, m) => a + m.eur, 0) * 10_000) / 10_000;
   return {
     cost: dishUnitCost(
       r.totalCostEur != null ? Math.round((r.totalCostEur - mould) * 10_000) / 10_000 : null,
       portionWeightG(r),
     ),
     mouldPerPortionEur: mould,
+    moulds,
     portionKind: snack ? null : r.code.startsWith("PJ") ? ("petit_dejeuner" as const) : ("plat" as const),
   };
 }
@@ -210,6 +221,7 @@ const subRecipeCost = (sr: {
 const itemCost = (cost: UnitCost, mould: boolean): ResolvedWeekItem["cost"] => ({
   food: mould ? { perKgEur: null, perUnitEur: null } : cost,
   mouldPerPortionEur: null,
+  moulds: [],
   portionKind: null,
   portionWeightKg: null,
   packagingItself: mould ? cost : null,
@@ -236,6 +248,8 @@ export interface ResolvedWeekItem {
     food: UnitCost;
     /** Moules inclus dans le coût Melba d'une portion de plat. */
     mouldPerPortionEur: number | null;
+    /** Ces moules, par libellé du tome (plat entier) ; vide sinon. */
+    moulds: DishMould[];
     /** Emballages du référentiel à ajouter par portion (plat, petit-déjeuner) ; null pour les autres produits. */
     portionKind: PortionKind | null;
     portionWeightKg: number | null;
@@ -272,6 +286,7 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
       cost: {
         food: costs.cost,
         mouldPerPortionEur: costs.mouldPerPortionEur,
+        moulds: costs.moulds,
         portionKind: costs.portionKind,
         portionWeightKg: gramsToKg(portionWeightG(r)),
         packagingItself: null,

@@ -6,9 +6,12 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   type CostInputs,
   type DiscardedPackaging,
+  type DishMould,
+  asksPackaging,
   discardedPackagingPerPortion,
   lossCostBreakdown,
   missingPackagingAnswer,
+  type PackagingQuestions,
   packagingQuestionsFor,
   type UnitCost,
 } from "@/domain/couts";
@@ -73,7 +76,7 @@ export type ProductChoice =
       /** Coûts du tome de la semaine (matières ; emballages seulement pour un moule ou un plat à gratin vendu seul). */
       cost: CostInputs;
       /** Plat entier : moule (ou plat à gratin) et barquette par portion, comptés seulement s'ils sont jetés (R42). */
-      dishPackaging?: { mouldPerPortionEur: number | null; trayPerPortionEur: number | null };
+      dishPackaging?: { moulds: DishMould[]; trayPerPortionEur: number | null };
     };
 
 /** État de départ d'une correction, construit à partir de la déclaration existante. */
@@ -384,7 +387,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     { zoneCode: zone?.code ?? "", subzoneCode: subzone?.code ?? null },
     {
       wholeDish: product?.kind === "week" && !!product.dishPackaging,
-      mouldPerPortionEur: product?.kind === "week" ? (product.dishPackaging?.mouldPerPortionEur ?? null) : null,
+      moulds: product?.kind === "week" ? (product.dishPackaging?.moulds ?? null) : null,
     },
   );
   const packagingMissing = missingPackagingAnswer(packagingQuestions, discarded);
@@ -395,10 +398,11 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           product.dishPackaging
             ? {
                 ...product.cost,
-                packagingPerPortionEur: discardedPackagingPerPortion(packagingQuestions, discarded, {
-                  mouldEur: product.dishPackaging.mouldPerPortionEur,
-                  trayEur: product.dishPackaging.trayPerPortionEur,
-                }),
+                packagingPerPortionEur: discardedPackagingPerPortion(
+                  packagingQuestions,
+                  discarded,
+                  product.dishPackaging.trayPerPortionEur,
+                ),
               }
             : product.cost,
         )
@@ -573,7 +577,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
         .filter((l) => l.quantity > 0),
       destinationGapJustification: justification || null,
       comment: comment || null,
-      discarded: packagingQuestions.mould || packagingQuestions.tray ? discarded : null,
+      discarded: asksPackaging(packagingQuestions) ? discarded : null,
       ...(zone && lotsAllowedIn(zone.code)
         ? {
             lots: lotsPayload(lotLines, net.quantity, today),
@@ -926,6 +930,15 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             ))}
           </TileGrid>
 
+          {method && asksPackaging(packagingQuestions) && product?.kind === "week" && product.dishPackaging && (
+            <PackagingStep
+              questions={packagingQuestions}
+              answers={discarded}
+              trayPerPortionEur={product.dishPackaging.trayPerPortionEur}
+              onChange={setDiscarded}
+            />
+          )}
+
           {method === "pesee" && gastroTareAllowed(measureContext) && (
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-1 font-medium">Comment avez-vous pesé ?</legend>
@@ -1088,33 +1101,20 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               {net.kg != null && net.unitCode !== "kg" ? (
                 <>
                   Soit <strong>{fmt(net.kg)} kg</strong>
-                  {pricedProduct && costPreview?.grossEur != null && <> · ≈ {fmtEuro(costPreview.grossEur)}</>}
+                  {(pricedProduct || product?.kind === "week") && costPreview?.grossEur != null && (
+                    <> · ≈ {fmtEuro(costPreview.grossEur)}</>
+                  )}
+                  {costPreview?.packagingEur ? <> (dont emballages {fmtEuro(costPreview.packagingEur)})</> : null}
                 </>
-              ) : net.kg != null && pricedProduct && costPreview?.grossEur != null ? (
-                <>≈ {fmtEuro(costPreview.grossEur)}</>
+              ) : net.kg != null && (pricedProduct || product?.kind === "week") && costPreview?.grossEur != null ? (
+                <>
+                  ≈ {fmtEuro(costPreview.grossEur)}
+                  {costPreview.packagingEur ? <> (dont emballages {fmtEuro(costPreview.packagingEur)})</> : null}
+                </>
               ) : (
                 (net.note ?? (isConsumable ? "Consommable : compté en unités, pas en kg alimentaires." : null))
               )}
             </p>
-          )}
-
-          {(packagingQuestions.mould || packagingQuestions.tray) && (
-            <div className="flex flex-col gap-3">
-              {packagingQuestions.mould && (
-                <YesNo
-                  legend="Le moule ou le plat à gratin est-il jeté avec ?"
-                  value={discarded.mould ?? null}
-                  onChange={(v) => setDiscarded((d) => ({ ...d, mould: v }))}
-                />
-              )}
-              {packagingQuestions.tray && (
-                <YesNo
-                  legend="La barquette est-elle jetée aussi ?"
-                  value={discarded.tray ?? null}
-                  onChange={(v) => setDiscarded((d) => ({ ...d, tray: v }))}
-                />
-              )}
-            </div>
           )}
 
           <button
@@ -1317,14 +1317,10 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             <dt className="text-slate-500">Quantité</dt>
             <dd>
               {netLabel}
-              {(packagingQuestions.mould || packagingQuestions.tray) && (
+              {asksPackaging(packagingQuestions) && (
                 <span className="block text-sm text-slate-500">
-                  {[
-                    packagingQuestions.mould && `moule ${discarded.mould ? "jeté avec" : "gardé"}`,
-                    packagingQuestions.tray && `barquette ${discarded.tray ? "jetée aussi" : "gardée"}`,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
+                  Emballages jetés :{" "}
+                  {[...(discarded.moulds ?? []), ...(discarded.tray ? ["barquette"] : [])].join(", ") || "aucun"}
                 </span>
               )}
               {useTare &&
@@ -1846,7 +1842,7 @@ function ProductStep({
       week: week!,
       cost: { food: d.cost, packagingPerPortionEur: null, portionWeightKg: gramsToKg(d.portionWeightG) },
       dishPackaging: d.portionKind
-        ? { mouldPerPortionEur: d.mouldPerPortionEur, trayPerPortionEur: packagingPerPortion[d.portionKind] }
+        ? { moulds: d.moulds, trayPerPortionEur: packagingPerPortion[d.portionKind] }
         : undefined,
     });
   const chooseSubRecipe = (id: string) =>
@@ -2391,10 +2387,21 @@ function OtherDestinationComment({ value, onChange }: { value: string; onChange:
 }
 
 /** Question oui / non posée en grandes tuiles (aucune réponse par défaut). */
-function YesNo({ legend, value, onChange }: { legend: string; value: boolean | null; onChange: (v: boolean) => void }) {
+function YesNo({
+  legend,
+  hint,
+  value,
+  onChange,
+}: {
+  legend: string;
+  hint?: string;
+  value: boolean | null;
+  onChange: (v: boolean) => void;
+}) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-1 font-medium">{legend}</legend>
+      {hint && <p className="-mt-1 text-sm text-slate-500">{hint}</p>}
       <TileGrid>
         <Tile compact selected={value === true} onClick={() => onChange(true)}>
           Oui
@@ -2404,5 +2411,68 @@ function YesNo({ legend, value, onChange }: { legend: string; value: boolean | n
         </Tile>
       </TileGrid>
     </fieldset>
+  );
+}
+
+/**
+ * Emballages et consommables jetés avec un plat entier (salle blanche, salle des cartons ; R42) : moules et plats à
+ * gratin du tome, puis la barquette, avec le total par portion.
+ */
+function PackagingStep({
+  questions,
+  answers,
+  trayPerPortionEur,
+  onChange,
+}: {
+  questions: PackagingQuestions;
+  answers: DiscardedPackaging;
+  trayPerPortionEur: number | null;
+  onChange: (a: DiscardedPackaging) => void;
+}) {
+  const chosen = answers.moulds ?? null;
+  const toggle = (label: string) => {
+    const set = new Set(chosen ?? []);
+    if (set.has(label)) set.delete(label);
+    else set.add(label);
+    onChange({ ...answers, moulds: [...set] });
+  };
+  const perPortion = discardedPackagingPerPortion(questions, answers, trayPerPortionEur) ?? 0;
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl bg-white p-3 shadow-sm">
+      <p className="font-semibold">Emballages et consommables jetés avec le plat</p>
+      {questions.moulds.length > 0 && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 font-medium">
+            Moule ou plat à gratin (d&apos;après le tome Melba) : jeté avec ?
+          </legend>
+          <TileGrid>
+            {questions.moulds.map((m) => (
+              <Tile key={m.label} compact selected={!!chosen?.includes(m.label)} onClick={() => toggle(m.label)}>
+                {m.label}
+                <small className="font-normal opacity-80">{fmtEuro(m.eur)} par portion</small>
+              </Tile>
+            ))}
+            <Tile compact selected={chosen?.length === 0} onClick={() => onChange({ ...answers, moulds: [] })}>
+              Aucun moule jeté
+            </Tile>
+          </TileGrid>
+        </fieldset>
+      )}
+      {questions.tray && (
+        <YesNo
+          legend="Le plat était-il mis en barquette ?"
+          hint={
+            trayPerPortionEur
+              ? `Barquette : ${fmtEuro(trayPerPortionEur)} par portion`
+              : "Coût de la barquette pas encore renseigné (Administration → Emballages et consommables)"
+          }
+          value={answers.tray ?? null}
+          onChange={(v) => onChange({ ...answers, tray: v })}
+        />
+      )}
+      <p className="text-sm text-slate-600">
+        Emballages par portion : <strong>{fmtEuro(perPortion)}</strong>
+      </p>
+    </div>
   );
 }

@@ -256,6 +256,10 @@ describe("saisie à partir des produits de la semaine", () => {
     const adminCatalog = await weekCatalogs(t.db, admin, DAY);
     const vi03 = adminCatalog[0]!.dishes.find((d) => d.code === "VI03")!; // Choutiflette : 1,46 € dont 0,07 € de plat à gratin
     expect(vi03).toMatchObject({ mouldPerPortionEur: 0.07, portionKind: "plat", cost: { perUnitEur: 1.39 } });
+    // Le moule est proposé tel que le tome le cite, avec son coût par portion.
+    expect(vi03.moulds).toHaveLength(1);
+    expect(vi03.moulds[0]!.eur).toBe(0.07);
+    const mould = vi03.moulds[0]!.label;
     const teamH = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "H")))[0]!.id;
     const plat = { weekItem: { kind: "plat", id: vi03.id } };
     const four = {
@@ -279,22 +283,30 @@ describe("saisie à partir des produits de la semaine", () => {
     // Salle blanche : les deux questions sont obligatoires.
     const salleBlanche = { ...four, subzoneId: ref.salleBlanche };
     await expect(declare(admin, plat, salleBlanche)).rejects.toThrow(/moule ou le plat à gratin/);
-    await expect(declare(admin, plat, { ...salleBlanche, discarded: { mould: true } })).rejects.toThrow(/barquette/);
-    const both = await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { mould: true, tray: true } }));
+    await expect(declare(admin, plat, { ...salleBlanche, discarded: { moulds: [mould] } })).rejects.toThrow(
+      /en barquette/,
+    );
+    await expect(
+      declare(admin, plat, { ...salleBlanche, discarded: { moulds: ["Moule inventé"], tray: false } }),
+    ).rejects.toThrow(/Moule inconnu/);
+    const both = await rowOf(
+      await declare(admin, plat, { ...salleBlanche, discarded: { moulds: [mould], tray: true } }),
+    );
     expect(both).toMatchObject({ packagingCostEur: 0.88, grossCostEur: 6.44 }); // 4 × (0,07 + 0,12 + 0,03)
     expect(both?.costDetails).toMatchObject({
       portions: 4,
       packagingComplete: true,
       packagingDate: DAY,
-      discarded: { mould: true, tray: true },
+      discarded: { moulds: [mould], tray: true },
+      moulds: [{ label: mould, eur: 0.07 }],
     });
     // Moule gardé, barquette jetée : 4 × 0,15.
     expect(
-      await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { mould: false, tray: true } })),
+      await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { moulds: [], tray: true } })),
     ).toMatchObject({ packagingCostEur: 0.6 });
     // Rien de jeté : 0 € d'emballages.
     expect(
-      await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { mould: false, tray: false } })),
+      await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { moulds: [], tray: false } })),
     ).toMatchObject({ packagingCostEur: 0, grossCostEur: 5.56 });
 
     // Salle des cartons, en barquettes : mêmes questions.

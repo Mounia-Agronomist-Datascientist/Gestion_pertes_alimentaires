@@ -6,6 +6,7 @@ import { and, eq, gte, inArray, isNull, lt, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import {
+  asksPackaging,
   COST_METHOD,
   discardedPackagingPerPortion,
   lossCostBreakdown,
@@ -338,6 +339,7 @@ async function prepareDeclaration(
         item: {
           food: mould ? { perKgEur: null, perUnitEur: null } : unitCost,
           mouldPerPortionEur: null,
+          moulds: [],
           portionKind: null,
           portionWeightKg: null,
           packagingItself: mould ? unitCost : null,
@@ -611,7 +613,7 @@ async function prepareDeclaration(
     // Moule et barquette : comptés seulement s'ils sont jetés, en salle blanche et en salle des cartons (R42).
     const questions = packagingQuestionsFor(
       { zoneCode: place.zone.code, subzoneCode: place.subzone.code },
-      { wholeDish: c.portionKind != null, mouldPerPortionEur: c.mouldPerPortionEur },
+      { wholeDish: c.portionKind != null, moulds: c.moulds },
     );
     const missing = missingPackagingAnswer(questions, input.discarded);
     if (missing) throw new DeclarationError(missing);
@@ -619,10 +621,11 @@ async function prepareDeclaration(
       c.portionKind && questions.tray && input.discarded?.tray
         ? await portionPackagingCost(db, c.portionKind, input.occurredOn)
         : null;
-    const packagingPerPortionEur = discardedPackagingPerPortion(questions, input.discarded, {
-      mouldEur: c.mouldPerPortionEur,
-      trayEur: packaging?.totalEur ?? null,
-    });
+    const packagingPerPortionEur = discardedPackagingPerPortion(
+      questions,
+      input.discarded,
+      packaging?.totalEur ?? null,
+    );
     const loss = { netKg: measurement.netKg, quantity: measurement.netQuantity, unitCode: measurement.netUnitCode };
     const breakdown = lossCostBreakdown(loss, {
       food: c.food,
@@ -646,13 +649,13 @@ async function prepareDeclaration(
         mouldPerPortionEur: c.mouldPerPortionEur,
         packagingPerPortionEur,
         packagingDate: packaging ? input.occurredOn : null,
-        discarded:
-          questions.mould || questions.tray
-            ? {
-                ...(questions.mould ? { mould: !!input.discarded?.mould } : {}),
-                ...(questions.tray ? { tray: !!input.discarded?.tray } : {}),
-              }
-            : null,
+        discarded: asksPackaging(questions)
+          ? {
+              ...(questions.moulds.length ? { moulds: input.discarded?.moulds ?? [] } : {}),
+              ...(questions.tray ? { tray: !!input.discarded?.tray } : {}),
+            }
+          : null,
+        moulds: questions.moulds.filter((m) => input.discarded?.moulds?.includes(m.label)),
         packagingComplete: packaging?.complete ?? null,
         packagingLines: packaging?.lines ?? [],
         packagingItself: c.packagingItself,
@@ -730,6 +733,7 @@ function freeCost(category: string, price: FreePrice) {
     item: {
       food: mould ? { perKgEur: null, perUnitEur: null } : unitCost,
       mouldPerPortionEur: null,
+      moulds: [],
       portionKind: null,
       portionWeightKg: null,
       packagingItself: mould ? unitCost : null,
@@ -749,6 +753,7 @@ function costColumns(
     item: {
       food: { perKgEur: number | null; perUnitEur: number | null };
       mouldPerPortionEur: null;
+      moulds: [];
       portionKind: null;
       portionWeightKg: null;
       packagingItself: { perKgEur: number | null; perUnitEur: number | null } | null;
@@ -1323,6 +1328,7 @@ export async function linkDeclarationsToProduct(
                   ? { perKgEur: null, perUnitEur: null }
                   : { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur },
                 mouldPerPortionEur: null,
+                moulds: [],
                 portionKind: null,
                 portionWeightKg: null,
                 packagingItself: mould ? { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur } : null,

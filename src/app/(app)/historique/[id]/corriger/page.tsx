@@ -6,6 +6,7 @@ import { computeProductionWeek, toProductionLocalDate } from "@/domain/semaine-p
 import { requireUser } from "@/modules/auth/next-session";
 import { INPUT_METHODS, type InputMethod } from "@/modules/declarations/input";
 import { getDeclarationOptions } from "@/modules/declarations/options";
+import { findWeekItem } from "@/modules/imports/catalog";
 import { getDeclarationDetail } from "@/modules/declarations/queries";
 import { packagingOptions } from "@/modules/matieres/colis";
 import { DeclarationWizard, type WizardInitial } from "../../../declarer/declaration-wizard";
@@ -54,7 +55,6 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
   );
   const details = d.costDetails as {
     packagingPerPortionEur?: number | null;
-    mouldPerPortionEur?: number | null;
     packagingItself?: UnitCost | null;
     freePrice?: FreePrice | null;
     discarded?: DiscardedPackaging | null;
@@ -84,7 +84,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
           },
           dishPackaging: wholeDish
             ? {
-                mouldPerPortionEur: details?.mouldPerPortionEur ?? null,
+                moulds: (await findWeekItem(db, "plat", weekItem!.id))?.cost.moulds ?? [],
                 trayPerPortionEur:
                   options.packagingPerPortion[d.productCode?.startsWith("PJ") ? "petit_dejeuner" : "plat"],
               }
