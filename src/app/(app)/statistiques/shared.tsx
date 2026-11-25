@@ -70,6 +70,7 @@ export function StatsTabs({
     | "valorisation"
     | "environnement"
     | "alchimistes"
+    | "fournisseurs"
     | "rapports";
 }) {
   return (
@@ -111,6 +112,9 @@ export function StatsTabs({
       </Link>
       <Link className={chip(active === "causes")} href={statsHref("/statistiques/causes", ctx)}>
         Causes et destinations
+      </Link>
+      <Link className={chip(active === "fournisseurs")} href={statsHref("/statistiques/fournisseurs", ctx)}>
+        Fournisseurs
       </Link>
       <Link className={chip(active === "valorisation")} href={statsHref("/statistiques/valorisation", ctx)}>
         Valorisation
@@ -533,7 +537,7 @@ export function BarTable({
               <div className="h-2.5 rounded-r bg-brun-700" style={{ width: `${(r.value / max) * 100}%` }} />
             )}
           </div>
-          {r.detail && <span className="text-xs text-slate-500">{r.detail}</span>}
+          {r.detail && <span className="text-xs whitespace-pre-line text-slate-500">{r.detail}</span>}
         </li>
       ))}
     </ul>

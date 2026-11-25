@@ -738,3 +738,15 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
     les tomes chargés, les moules sont toujours cités au niveau de la recette, donc aucune question aujourd'hui.
   - avant la salle blanche (Déboîtage, Préparation froide, Cuisine), aucune question et aucun emballage.
 - Les réponses sont gardées sur la perte (récapitulatif, correction). Les pertes déjà enregistrées gardent leur coût.
+
+## R43 — Bilan par fournisseur (26/11/2026)
+
+- Chaque perte de la **Réception** et du **Stockage** garde le **fournisseur de la matière** : celui du colis choisi à
+  la saisie, sinon le dernier fournisseur livré avant la perte (bons de commande), sinon le colis ou le fournisseur
+  saisis à la main (article saisi à la main). Les pertes déjà enregistrées ont été complétées de la même façon
+  (migration 0043) ; sans aucune de ces informations : « Fournisseur inconnu ».
+- Statistiques → **Fournisseurs** : par fournisseur, pertes (kg, euros, nombre ; Réception et Stockage séparés), part
+  due à des causes de la famille « Fournisseur / matière première », **retours fournisseur** (hors pertes, avoir
+  attendu), trois causes et trois produits principaux. Classement en kg, en coût ou en nombre de pertes, mêmes
+  périodes et filtres que les autres onglets.
+

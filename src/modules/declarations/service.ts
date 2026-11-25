@@ -81,6 +81,43 @@ interface NewArticle {
   occurredOn: string;
 }
 
+/** Zones où le fournisseur d'une matière perdue est gardé (bilan par fournisseur, décision du 26/11/2026). */
+const SUPPLIER_ZONE_CODES: readonly string[] = ["RECEPTION", "STOCKAGE"];
+
+/**
+ * Fournisseur d'une matière perdue : celui du colis choisi, sinon le dernier fournisseur livré avant la perte (bons de
+ * commande), sinon le colis ou le fournisseur saisis à la main. null hors Réception et Stockage.
+ */
+async function lossSupplierId(
+  db: Db,
+  zoneCode: string,
+  productId: string | null,
+  packagingKey: string | null | undefined,
+  occurredOn: string,
+): Promise<string | null> {
+  if (!SUPPLIER_ZONE_CODES.includes(zoneCode)) return null;
+  if (packagingKey) return packagingKey.split(":")[1] ?? null;
+  if (!productId) return null;
+  const delivered = await db
+    .select({ supplierId: s.supplierProducts.supplierId, date: s.supplierProducts.lastDeliveryDate })
+    .from(s.supplierProducts)
+    .where(eq(s.supplierProducts.productId, productId));
+  const before = delivered.filter((d) => d.date <= occurredOn).sort((a, b) => b.date.localeCompare(a.date));
+  const latest = [...delivered].sort((a, b) => b.date.localeCompare(a.date));
+  if (before[0] ?? latest[0]) return (before[0] ?? latest[0])!.supplierId;
+  const [manual] = await db
+    .select({ supplierId: s.manualPackagings.supplierId })
+    .from(s.manualPackagings)
+    .where(eq(s.manualPackagings.productId, productId))
+    .limit(1);
+  if (manual) return manual.supplierId;
+  const [product] = await db
+    .select({ supplierId: s.products.manualSupplierId })
+    .from(s.products)
+    .where(eq(s.products.id, productId));
+  return product?.supplierId ?? null;
+}
+
 /** Article actif de même type et de même nom (sans accents, majuscules ni espaces en trop). */
 async function findEnteredArticle(db: Db, category: (typeof PRODUCT_CATEGORIES)[number], name: string) {
   const key = normalizeLabel(name);
@@ -148,6 +185,8 @@ async function createEnteredArticle(tx: Db, user: AuthUser, prepared: PreparedDe
   }
   prepared.values.productId = product!.id;
   prepared.values.productUnlisted = false;
+  if (prepared.values.supplierId === null && prepared.supplierAsked)
+    prepared.values.supplierId = product!.manualSupplierId;
 }
 
 /**
@@ -694,8 +733,11 @@ async function prepareDeclaration(
     };
   }
 
+  const supplierAsked = SUPPLIER_ZONE_CODES.includes(place.zone.code);
+  const supplierId = await lossSupplierId(db, place.zone.code, product.id, input.packagingKey, input.occurredOn);
   return {
     newArticle,
+    supplierAsked,
     values: {
       occurredOn: input.occurredOn,
       occurredTime: input.occurredTime ?? null,
@@ -711,6 +753,7 @@ async function prepareDeclaration(
       teamId,
       responsibility: teamId ? ("equipe" as const) : ("zone" as const),
       productId: product.id,
+      supplierId: supplierId as string | null,
       productUnlisted: product.unlisted,
       productCategory: product.category,
       productName: product.name,

@@ -17,6 +17,7 @@ import {
   unique,
   uniqueIndex,
   uuid,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth";
 import { subzones, teams, zones } from "./organisation";
@@ -24,6 +25,7 @@ import { productionWeeks } from "./production-weeks";
 import { weeklyImports, weekRecipeLines, weekRecipes, weekSubRecipes } from "./imports";
 import type { LotLine } from "@/domain/lots";
 import { causes, containerTares, destinations, productCategoryEnum, products, units } from "./referentiels";
+import { suppliers } from "./matieres";
 
 export const declarationStatusEnum = pgEnum("declaration_status", ["brouillon", "validee", "corrigee", "annulee"]);
 export const responsibilityEnum = pgEnum("responsibility", ["equipe", "zone"]);
@@ -93,6 +95,12 @@ export const lossDeclarations = pgTable(
     batchId: uuid("batch_id").references(() => declarationBatches.id),
 
     productId: uuid("product_id").references(() => products.id),
+    /**
+     * Fournisseur de la matière perdue (Réception, Stockage ; décision du 26/11/2026) : celui du colis choisi, sinon
+     * celui de l'article saisi à la main, sinon le dernier fournisseur livré avant la perte. Sert au bilan par
+     * fournisseur.
+     */
+    supplierId: uuid("supplier_id").references((): AnyPgColumn => suppliers.id),
     /** Produit saisi en texte libre, absent du référentiel : à revoir par l'administrateur. */
     productUnlisted: boolean("product_unlisted").notNull().default(false),
     productCategory: productCategoryEnum("product_category").notNull(),

@@ -302,6 +302,13 @@
       "when": 1795618757711,
       "tag": "0042_periode_perte",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1795619329304,
+      "tag": "0043_fournisseur_perte",
+      "breakpoints": true
     }
   ]
 }

@@ -273,6 +273,7 @@ async function loadAllFacts(db: Db, user: AuthUser, period: Period, filters: Sta
       causeName: causeOf.get(r.causeId)?.name ?? r.causeName,
       causeFamily: causeOf.get(r.causeId)?.family ?? null,
       avoidability: causeOf.get(r.causeId)?.avoidability ?? null,
+      supplierId: r.supplierId,
       netKg: partOrNull(r.netKg),
       netQuantity: part(r.netQuantity),
       netUnitCode: r.netUnitCode,

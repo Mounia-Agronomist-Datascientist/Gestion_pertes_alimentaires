@@ -40,6 +40,8 @@ export interface LossFact {
   /** Famille de cause racine et caractère évitable (réglés sur la cause par l'administration) ; null : pas classée. */
   causeFamily: string | null;
   avoidability: string | null;
+  /** Fournisseur de la matière (Réception, Stockage ; bilan par fournisseur, 26/11/2026). */
+  supplierId?: string | null;
   netKg: number | null;
   netQuantity: number;
   netUnitCode: string;
@@ -86,7 +88,9 @@ const COST_KEYS = ["materialEur", "packagingEur", "labourEur", "indirectEur", "g
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /** Nombre de pertes : une perte de plusieurs jours, répartie en parts, compte une fois. */
-export const countLosses = (facts: readonly { id: string }[]) => new Set(facts.map((f) => f.id)).size;
+export function countLosses(facts: readonly { id: string }[]): number {
+  return new Set(facts.map((f) => f.id)).size;
+}
 
 export function summarize(facts: readonly LossFact[], withCosts: boolean): StatsSummary {
   let foodKg = 0;

@@ -29,6 +29,7 @@ import { materialsOfWeek } from "@/modules/matieres/semaine";
 import { sameDayLosses } from "@/modules/declarations/doublons";
 import { summarize } from "@/domain/statistiques";
 import { loadFacts } from "@/modules/statistiques/facts";
+import { supplierReport } from "@/modules/statistiques/fournisseurs";
 import { createTestDb } from "../helpers/test-db";
 
 const DIR = "tests/fixtures/bons-commande";
@@ -554,5 +555,38 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     expect(s47.reduce((a, f) => a + (f.netKg ?? 0), 0)).toBeCloseTo(4, 6);
     expect(s48[0]!.netKg).toBeCloseTo(2, 6);
     expect(summarize(s47, false).events).toBe(1);
+  });
+
+  it("bilan par fournisseur : fournisseur du colis gardé sur la perte (26/11/2026)", async () => {
+    const NOW = new Date("2026-11-13T10:00:00Z");
+    const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const [productId, list] = [...(await packagingOptions(t.db))].find(([, l]) =>
+      l.some((o) => o.source === "bon_commande"),
+    )!;
+    const colis = list.find((o) => o.source === "bon_commande")!;
+    const d = await createDeclaration(
+      t.db,
+      admin,
+      {
+        occurredOn: "2026-11-12",
+        subzoneId: sub,
+        product: { productId },
+        causeId: cause,
+        method: "comptage",
+        quantity: 1,
+        unitCode: "colis",
+        packagingKey: colis.key,
+        destinations: [{ destinationId: bin, quantity: 1, binNumber: "1" }],
+      },
+      NOW,
+    );
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
+    expect(row!.supplierId).toBe(colis.key.split(":")[1]);
+    const report = await supplierReport(t.db, admin, { kind: "semaine", year: 2026, number: 47 }, {}, "kg");
+    const mine = report.rows.find((r) => r.key === row!.supplierId)!;
+    expect(mine.name).toBe(colis.supplier);
+    expect(mine.receptionKg).toBeGreaterThan(0);
   });
 });
