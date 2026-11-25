@@ -1,0 +1,107 @@
+/* Fiches explicatives (principe de l'application, une fiche par zone) : A4, charte de La Brigade de Véro (R31). */
+@page { size: A4; margin: 12mm 12mm 14mm; }
+:root {
+  --rouge: #d90019; --rouge-vif: #ff1526; --rouge-clair: #fff1f1; --rouge-moyen: #ffd6d9;
+  --brun: #280606; --brun-moyen: #4a1a16; --brun-clair: #f5e6dc; --creme: #fff8f0; --creme-fonce: #feeacf;
+  --vert: #166534; --vert-clair: #e8f5ec; --ambre: #92400e; --ambre-clair: #fef3c7;
+  --gris: #57534e; --ligne: #e7d8cc;
+}
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--brun); font-size: 10pt; line-height: 1.4; }
+p { margin: 3px 0 6px; }
+ul, ol { margin: 3px 0 7px; padding-left: 17px; }
+li { margin: 2px 0; }
+strong { color: var(--brun); }
+.small { font-size: 8.5pt; color: var(--gris); }
+.page-break { break-before: page; }
+.avoid { break-inside: avoid; }
+
+/* En-tête */
+header.hero { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; background: var(--rouge); color: #fff; border-radius: 12px; padding: 11px 16px; margin-bottom: 10px; }
+header.hero .num { width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--rouge); font-weight: 800; font-size: 22pt; display: flex; align-items: center; justify-content: center; }
+header.hero .num.icon { font-size: 20pt; }
+header.hero .kicker { font-size: 8pt; text-transform: uppercase; letter-spacing: .1em; opacity: .9; font-weight: 700; }
+header.hero h1 { margin: 1px 0 0; font-size: 20pt; line-height: 1.1; color: #fff; }
+header.hero .sub { font-size: 9.5pt; opacity: .95; margin-top: 2px; }
+header.hero .meta { text-align: right; font-size: 8pt; opacity: .9; }
+
+h2 { color: var(--rouge); font-size: 12.5pt; margin: 12px 0 6px; display: flex; align-items: center; gap: 7px; break-after: avoid; }
+h2::before { content: ""; width: 5px; height: 15px; background: var(--rouge); border-radius: 2px; }
+h3 { font-size: 10.5pt; margin: 8px 0 3px; break-after: avoid; }
+
+/* Encadrés */
+.box { border-radius: 10px; padding: 8px 11px; margin: 7px 0; break-inside: avoid; }
+.box.creme { background: var(--creme); border: 1px solid var(--creme-fonce); }
+.box.rouge { background: var(--rouge-clair); border-left: 4px solid var(--rouge); }
+.box.vert { background: var(--vert-clair); border-left: 4px solid var(--vert); }
+.box.ambre { background: var(--ambre-clair); border-left: 4px solid var(--ambre); }
+.box > :first-child { margin-top: 0; } .box > :last-child { margin-bottom: 0; }
+.box .title { font-weight: 700; display: block; margin-bottom: 3px; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.card { border: 1px solid var(--ligne); border-radius: 10px; padding: 8px 10px; background: #fff; break-inside: avoid; }
+.card .head { font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.card .emoji { font-size: 15pt; line-height: 1; }
+
+/* Chaîne : saisie → calculs → analyses → actions */
+.flow { display: flex; align-items: stretch; gap: 0; margin: 8px 0 10px; }
+.flow .stage { flex: 1; background: var(--creme); border: 1.5px solid var(--brun); border-radius: 10px; padding: 7px 8px; text-align: center; position: relative; }
+.flow .stage .emoji { font-size: 18pt; display: block; }
+.flow .stage b { display: block; font-size: 10pt; margin: 2px 0; }
+.flow .stage span { font-size: 8.5pt; color: var(--gris); display: block; }
+.flow .stage.on { background: var(--brun); color: #fff; } .flow .stage.on b { color: #fff; } .flow .stage.on span { color: #f5e6dc; }
+.flow .arrow { width: 18px; display: flex; align-items: center; justify-content: center; color: var(--rouge); font-size: 15pt; font-weight: 800; }
+
+/* Marche en avant des zones */
+.zones { display: flex; gap: 0; align-items: center; margin: 6px 0 8px; }
+.zones .z { flex: 1; text-align: center; border-radius: 9px; padding: 6px 4px; background: var(--brun-clair); font-size: 8.5pt; font-weight: 700; }
+.zones .z .n { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: var(--brun); color: #fff; align-items: center; justify-content: center; font-size: 9pt; margin-bottom: 2px; }
+.zones .z.on { background: var(--rouge); color: #fff; } .zones .z.on .n { background: #fff; color: var(--rouge); }
+.zones .sep { color: var(--rouge); font-weight: 800; padding: 0 3px; }
+
+/* Étapes de saisie */
+.steps { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 9px; margin: 6px 0 8px; counter-reset: step; }
+.step { counter-increment: step; position: relative; border: 1px solid var(--ligne); background: #fff; border-radius: 10px; padding: 6px 9px 7px 40px; break-inside: avoid; }
+.step::before { content: counter(step); position: absolute; left: 9px; top: 7px; width: 23px; height: 23px; border-radius: 50%; background: var(--brun); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 10pt; }
+.step .q { font-weight: 800; display: block; margin-bottom: 1px; }
+.step.wide { grid-column: span 2; }
+.step.opt::before { background: var(--gris); }
+
+/* Écran de tablette simplifié */
+.screen { border: 2.5px solid var(--brun); border-radius: 14px; overflow: hidden; background: var(--creme); break-inside: avoid; font-size: 8.5pt; }
+.screen .bar { background: var(--rouge); color: #fff; font-weight: 700; padding: 4px 8px; font-size: 8pt; }
+.screen .body { padding: 6px 8px 8px; }
+.screen .ttl { color: var(--rouge); font-weight: 800; font-size: 10pt; margin-bottom: 4px; }
+.screen .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.screen .tile { background: #fff; border-radius: 7px; padding: 4px 6px; border: 1px solid var(--ligne); }
+.screen .tile.sel { border: 2px solid var(--brun); background: var(--creme-fonce); font-weight: 700; }
+.screen .btnbar { margin-top: 5px; background: var(--brun); color: #fff; text-align: center; border-radius: 7px; padding: 4px; font-weight: 700; }
+
+/* Calculs */
+.calc { border: 1.5px solid var(--brun); border-radius: 10px; overflow: hidden; break-inside: avoid; margin: 7px 0; }
+.calc .ch { background: var(--brun); color: #fff; font-weight: 700; padding: 4px 10px; display: flex; align-items: center; gap: 6px; }
+.calc .cb { padding: 6px 10px 7px; background: #fff; }
+.formula { font-family: "SF Mono", Menlo, monospace; font-size: 9pt; background: var(--creme); border: 1px dashed var(--brun-moyen); border-radius: 6px; padding: 4px 7px; margin: 3px 0 5px; display: block; }
+.eg { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; font-size: 9pt; margin-top: 3px; }
+.eg dt { color: var(--gris); } .eg dd { margin: 0; font-weight: 600; }
+.result { display: inline-block; background: var(--rouge); color: #fff; font-weight: 800; border-radius: 6px; padding: 1px 7px; }
+
+/* Tableaux */
+table { width: 100%; border-collapse: collapse; margin: 5px 0 8px; font-size: 9pt; }
+thead th { background: var(--brun); color: #fff; text-align: left; padding: 4px 6px; font-weight: 700; }
+td { padding: 4px 6px; vertical-align: top; border-bottom: 1px solid var(--ligne); }
+tbody tr:nth-child(even) td { background: var(--creme); }
+tr { break-inside: avoid; }
+
+/* Pastilles */
+.tag { display: inline-block; border-radius: 99px; padding: 0 6px; font-size: 7.5pt; font-weight: 700; white-space: nowrap; border: 1px solid currentColor; }
+.tag.fourn { color: #9a3412; } .tag.orga { color: #1e3a8a; } .tag.equip { color: #5b21b6; } .tag.conserv { color: #0e7490; }
+.tag.hyg { color: #166534; } .tag.surprod { color: #a16207; }
+.btn { display: inline-block; border: 1.5px solid var(--brun); border-radius: 6px; padding: 0 5px; font-weight: 700; font-size: 8.5pt; white-space: nowrap; }
+.btn.solid { background: var(--brun); color: #fff; }
+.do { color: var(--vert); font-weight: 800; } .dont { color: var(--rouge); font-weight: 800; }
+
+footer.doc { margin-top: 10px; color: var(--gris); font-size: 7.5pt; border-top: 1px solid var(--ligne); padding-top: 4px; }

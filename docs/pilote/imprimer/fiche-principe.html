@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>L'application Pertes — principe et rôle</title>
+<link rel="stylesheet" href="fiches.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="num icon">♻️</div>
+  <div>
+    <div class="kicker">La Brigade de Véro · application Pertes</div>
+    <h1>Mesurer nos pertes pour les réduire</h1>
+    <div class="sub">À quoi sert l'application, comment elle fonctionne, qui fait quoi</div>
+  </div>
+  <div class="meta">Fiche générale<br>Version du 26/11/2026</div>
+</header>
+
+<h2>Pourquoi cette application ?</h2>
+<div class="grid3">
+  <div class="card"><div class="head"><span class="emoji">⚖️</span>Savoir ce qu'on perd</div>Chaque produit jeté est noté là où la perte a lieu : combien, pourquoi, et où il part. On ne devine plus, on mesure.</div>
+  <div class="card"><div class="head"><span class="emoji">💶</span>Savoir ce que ça coûte</div>L'application chiffre chaque perte en euros, avec les vrais prix (bons de commande, tome Melba), et son impact carbone.</div>
+  <div class="card"><div class="head"><span class="emoji">🎯</span>Agir là où ça compte</div>Statistiques, alertes et objectifs montrent les zones, causes et produits qui pèsent le plus, pour choisir les actions.</div>
+</div>
+
+<h2>Le chemin d'une perte, de la poubelle à la décision</h2>
+<div class="flow">
+  <div class="stage on"><span class="emoji">📱</span><b>1. Saisie</b><span>L'opérateur répond à quelques questions sur la tablette, au moment de la perte (1 minute)</span></div>
+  <div class="arrow">➜</div>
+  <div class="stage"><span class="emoji">🧮</span><b>2. Calculs</b><span>L'application convertit en kg, chiffre en euros et en CO2e, range la perte dans sa semaine</span></div>
+  <div class="arrow">➜</div>
+  <div class="stage"><span class="emoji">📊</span><b>3. Analyses</b><span>Statistiques par zone, équipe, cause, produit, fournisseur ; objectifs ; rapports PDF</span></div>
+  <div class="arrow">➜</div>
+  <div class="stage"><span class="emoji">🚦</span><b>4. Alertes et actions</b><span>Pertes inhabituelles, causes récurrentes, jours sans saisie ; actions correctives</span></div>
+</div>
+
+<h2>Les zones, dans le sens de la marche en avant</h2>
+<div class="zones">
+  <div class="z on"><span class="n">1</span><br>Réception</div><span class="sep">➜</span>
+  <div class="z on"><span class="n">2</span><br>Stockage</div><span class="sep">➜</span>
+  <div class="z on"><span class="n">3</span><br>Cuisine / Production</div><span class="sep">➜</span>
+  <div class="z"><span class="n">4</span><br>Produits finis<br>(salle des cartons)</div><span class="sep">➜</span>
+  <div class="z"><span class="n">5</span><br>Plonge</div>
+</div>
+<p class="small">Chaque zone a sa fiche (zones 1 à 3 : fiches dédiées). Une perte est toujours notée <strong>dans la zone et au poste où elle a lieu</strong> : c'est ce qui permet de savoir où agir.</p>
+
+<h2>Ce que l'opérateur fait : 7 étapes, toujours les mêmes</h2>
+<div class="grid2">
+  <div class="steps" style="grid-template-columns:1fr; margin:0">
+    <div class="step"><span class="q">Où ?</span>La zone, puis le poste (et l'équipe en Cuisine).</div>
+    <div class="step"><span class="q">Quel produit ?</span>Dans la liste de la semaine (tome Melba, bons de commande), ou « Produit absent de la liste ».</div>
+    <div class="step"><span class="q">Quelle quantité ?</span>1. Comptage, 2. Pesée à la balance, 3. Estimation.</div>
+    <div class="step opt"><span class="q">N° de lot et DLC</span>Réception et Stockage, facultatif (photo de l'étiquette possible).</div>
+    <div class="step"><span class="q">Pourquoi ?</span>La cause, dans la liste de la zone.</div>
+    <div class="step"><span class="q">Où part la perte ?</span>Compost, don, personnel, ordures, retour fournisseur…</div>
+    <div class="step"><span class="q">Vérifier et valider</span>Relire, puis <span class="btn solid">Valider la perte</span>.</div>
+  </div>
+  <div>
+    <div class="screen">
+      <div class="bar">Pertes · Réception</div>
+      <div class="body">
+        <div class="ttl">Quelle quantité ?</div>
+        <div class="tiles">
+          <div class="tile sel">1. Comptage en nombre de colis, sachets ou unités</div>
+          <div class="tile">2. Pesée à la balance</div>
+          <div class="tile">3. Estimation</div>
+          <div class="tile">Colis : Boîte 5/1 — 4 kg</div>
+        </div>
+        <div class="tile" style="margin-top:4px">Nombre : <b>3</b> colis → <b>12 kg · ≈ 14,16 €</b></div>
+        <div class="btnbar">Continuer</div>
+      </div>
+    </div>
+    <div class="box creme" style="margin-top:7px">
+      <span class="title">Ce qui aide l'opérateur</span>
+      <ul>
+        <li>Les listes ne montrent que ce qui concerne <strong>son poste</strong> (produits, causes, destinations).</li>
+        <li>Le poids et le coût s'affichent <strong>pendant la saisie</strong>.</li>
+        <li><strong>Sans réseau</strong>, la perte est gardée sur la tablette et envoyée dès que le réseau revient.</li>
+        <li>« Déjà saisi ce jour-là » prévient d'un <strong>doublon</strong> possible.</li>
+        <li>Pertes jetées en retard : « <strong>Pertes de plusieurs jours</strong> » + le premier jour.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>Ce que l'application calcule, et comment</h2>
+<div class="grid2">
+  <div class="calc">
+    <div class="ch">⚖️ Le poids en kg</div>
+    <div class="cb">
+      Tout est ramené au <strong>kg</strong> pour pouvoir additionner :
+      <ul>
+        <li><strong>Pesée</strong> : le poids lu ; dans des gastros, la <strong>tare</strong> est retirée.</li>
+        <li><strong>Colis</strong> : nombre × poids du colis (bons de commande).</li>
+        <li><strong>Pièces, barquettes</strong> : nombre × poids d'une pièce ou d'une portion (tome Melba).</li>
+        <li><strong>Litres</strong> : × densité du liquide (huile 0,92 kg/L…).</li>
+      </ul>
+      <span class="small">Jamais de poids inventé : sans poids connu, la perte reste dans son unité et c'est signalé. Les emballages et moules ne comptent jamais dans les kg alimentaires.</span>
+    </div>
+  </div>
+  <div class="calc">
+    <div class="ch">💶 Le coût en euros</div>
+    <div class="cb">
+      <span class="formula">coût = kg perdus × prix au kg</span>
+      <ul>
+        <li><strong>Matière première</strong> : dernier prix d'achat (bon de commande) à la date de la perte, sinon le coût du tome Melba.</li>
+        <li><strong>Plat, sous-recette, ingrédient de la semaine</strong> : coût du tome Melba de la semaine.</li>
+        <li>+ <strong>emballages</strong> (moule, barquette) seulement s'ils sont jetés avec le plat.</li>
+      </ul>
+      <span class="small">Le coût est <strong>figé</strong> sur la perte : un prix qui change plus tard ne change pas le passé. Sans prix connu : « sans coût », à compléter (Administration → Coûts manquants).</span>
+    </div>
+  </div>
+  <div class="calc">
+    <div class="ch">🌍 L'impact carbone (CO2e)</div>
+    <div class="cb">
+      <span class="formula">CO2e = Σ kg de chaque ingrédient × facteur Agribalyse</span>
+      Calculé d'après la recette Melba (chaque ingrédient est rattaché à une famille alimentaire). Seule la <strong>production des denrées perdues</strong> est comptée, pas le bilan carbone de l'entreprise.
+    </div>
+  </div>
+  <div class="calc">
+    <div class="ch">📅 La semaine de production</div>
+    <div class="cb">
+      Une semaine va du <strong>jeudi au mercredi</strong> (S48 = jeudi 19/11 → mercredi 25/11). Chaque perte est rangée dans la semaine de <strong>sa date réelle</strong>, même saisie plus tard (« déclaration tardive »).
+      <span class="small">Pertes de plusieurs jours : kg et euros répartis à parts égales sur chaque jour.</span>
+    </div>
+  </div>
+</div>
+
+<div class="box rouge">
+  <span class="title">Trois principes qui ne changent jamais</span>
+  <ol>
+    <li><strong>Rien n'est inventé</strong> : pas de poids, de prix ou de densité deviné. Ce qui manque est signalé.</li>
+    <li><strong>Rien n'est effacé</strong> : une correction crée une nouvelle version, l'ancienne reste dans l'historique avec son motif.</li>
+    <li><strong>Le chiffre est figé</strong> le jour de la perte : poids, tare, prix et coût de ce jour-là.</li>
+  </ol>
+</div>
+
+<h2>Ce que l'on obtient : les statistiques</h2>
+<table>
+  <thead><tr><th style="width:24%">Onglet</th><th>Ce qu'il montre</th></tr></thead>
+  <tbody>
+    <tr><td><b>Vue générale</b></td><td>Kg perdus, coût brut et net, barquettes, nombre de pertes ; évolution par rapport à la semaine d'avant (ⓘ pour le détail) ; pertes par zone ; devenir ; pertes évitables et familles de causes.</td></tr>
+    <tr><td><b>Synthèse de la semaine</b></td><td>Où s'améliorer en priorité : la zone, la cause et le produit qui pèsent le plus.</td></tr>
+    <tr><td><b>Par zone / par équipe</b></td><td>Le détail d'une zone ou d'une équipe, ses causes et ses produits.</td></tr>
+    <tr><td><b>Objectifs</b></td><td>Pour chaque zone : kg perdus face à l'objectif de la semaine, écart, progrès sur 8 semaines.</td></tr>
+    <tr><td><b>Évolution, Ratios</b></td><td>Tendance sur plusieurs semaines ; kg perdus pour 1 000 barquettes produites, part du coût matières.</td></tr>
+    <tr><td><b>Produits, Causes</b></td><td>Classements en kg, en euros ou en nombre de pertes.</td></tr>
+    <tr><td><b>Fournisseurs</b></td><td>Pertes de la Réception et du Stockage par fournisseur, part due au fournisseur, retours.</td></tr>
+    <tr><td><b>Valorisation, Environnement</b></td><td>Ce qui est vendu, donné, composté (registre des dons) ; impact CO2e.</td></tr>
+    <tr><td><b>Rapports PDF</b></td><td>Rapports hebdomadaire, mensuel, annuel, valorisation, environnement.</td></tr>
+  </tbody>
+</table>
+
+<h2>Qui fait quoi</h2>
+<div class="grid4">
+  <div class="card"><div class="head"><span class="emoji">👩‍🍳</span>Équipes de cuisine</div>Déclarent les pertes de leur équipe aux 4 postes de la Cuisine, <strong>le jour même</strong> (7 jours au plus). Voient leurs statistiques.</div>
+  <div class="card"><div class="head"><span class="emoji">📦</span>Responsables de zone</div>Réception, Stockage, salle des cartons, Plonge : déclarent les pertes de leur zone, voient ses statistiques.</div>
+  <div class="card"><div class="head"><span class="emoji">🗂️</span>Administration</div>Chaque semaine : tome Melba, plan, bons de commande, décompte. Règle les listes, prix, objectifs ; valide les articles saisis à la main.</div>
+  <div class="card"><div class="head"><span class="emoji">📈</span>Production, direction</div>Suivent les statistiques, les coûts et les alertes de toute l'entreprise, décident des actions.</div>
+</div>
+
+<h2>Les alertes</h2>
+<div class="grid3">
+  <div class="card"><div class="head">🔴 Pertes inhabituelles</div>Une semaine dépasse d'au moins 50 % la moyenne des 4 semaines d'avant (équipe, zone ou plat).</div>
+  <div class="card"><div class="head">🔁 Causes récurrentes</div>La même cause revient en tête semaine après semaine.</div>
+  <div class="card"><div class="head">⚠️ « Rien de noté »</div>Une équipe sans aucune perte un jour de production : une perte estimée de 150 kg est comptée, jusqu'au rattrapage.</div>
+</div>
+
+<footer class="doc">Application Pertes — La Brigade de Véro. Règles détaillées : docs/REGLES_METIER.md. Fiches par zone : Réception, Stockage, Cuisine / Production.</footer>
+</body>
+</html>

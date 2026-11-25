@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Zone 2 — Stockage</title>
+<link rel="stylesheet" href="fiches.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="num">2</div>
+  <div>
+    <div class="kicker">Application Pertes · fiche de zone</div>
+    <h1>Stockage</h1>
+    <div class="sub">Ce qui se perd dans les chambres et réserves, entre le rangement et la sortie en cuisine</div>
+  </div>
+  <div class="meta">Responsable de zone<br>Version du 26/11/2026</div>
+</header>
+
+<div class="zones">
+  <div class="z"><span class="n">1</span><br>Réception</div><span class="sep">➜</span>
+  <div class="z on"><span class="n">2</span><br>Stockage</div><span class="sep">➜</span>
+  <div class="z"><span class="n">3</span><br>Cuisine / Production</div><span class="sep">➜</span>
+  <div class="z"><span class="n">4</span><br>Salle des cartons</div><span class="sep">➜</span>
+  <div class="z"><span class="n">5</span><br>Plonge</div>
+</div>
+
+<div class="box rouge">
+  <span class="title">🎯 Pourquoi c'est important ici</span>
+  Les pertes du Stockage viennent surtout de la <strong>conservation</strong> : DLC dépassée, surstock, produit abîmé, retour mal identifié, rupture du froid. Elles sont <strong>presque toujours évitables</strong> : bien les noter montre où améliorer la rotation, les commandes et le rangement.
+</div>
+
+<h2>Les 6 postes du Stockage, et ce qui y est proposé</h2>
+<div class="grid3">
+  <div class="card"><div class="head"><span class="emoji">🥕</span>Légumerie</div>Légumes, fruits, champignons, bruts ou découpés.</div>
+  <div class="card"><div class="head"><span class="emoji">🧈</span>Chambre BOF</div>Beurre, œufs, fromages et autres produits frais (hors fruits et légumes).</div>
+  <div class="card"><div class="head"><span class="emoji">❄️</span>Chambre négative</div>Poissons, légumes et autres produits surgelés.</div>
+  <div class="card"><div class="head"><span class="emoji">🥫</span>Stockage sec - ÉPICERIE</div>Tous les produits de l'épicerie (petite zone d'épicerie et stock global).</div>
+  <div class="card"><div class="head"><span class="emoji">🍪</span>Stockage sec - ENCAS</div>Encas secs : biscuits, barres de céréales, crackers… (tous les encas sauf yaourts et fromages).</div>
+  <div class="card"><div class="head"><span class="emoji">🥛</span>Local ENCAS frais</div>Encas des familles <strong>Yaourts</strong> et <strong>Fromages</strong> seulement.</div>
+</div>
+<div class="box creme">
+  <span class="title">Comment l'application choisit les produits proposés à chaque poste</span>
+  Chaque matière est rangée <strong>à un lieu</strong> : son lieu propre (fiche produit), sinon le lieu de sa <strong>catégorie Melba</strong> (Administration → Lieux de stockage). Le poste ne montre que <strong>ses</strong> matières, plus, à part, celles dont le lieu n'est pas encore réglé. Les encas ne sont proposés qu'aux deux postes d'encas. Toutes les autres matières se trouvent par la <strong>recherche</strong>.
+</div>
+
+<h2>Ce que fait l'opérateur, étape par étape</h2>
+<div class="steps">
+  <div class="step"><span class="q">Où ?</span><span class="btn">2. Stockage</span> puis le poste (chambre, réserve).</div>
+  <div class="step"><span class="q">Quel produit ?</span>Les matières de la semaine (S-1 et S) rangées à ce poste, ou la recherche. Introuvable : « Produit absent de la liste » (matière première ou encas, fournisseur, prix) : ajouté à la liste, « à valider ».</div>
+  <div class="step wide"><span class="q">Quelle quantité ?</span>
+    <b>1. Comptage en nombre de colis, sachets ou unités</b> — colis du fournisseur proposé, poids corrigeable, « Autre colis » avec son poids ; unités si le poids d'une pièce est connu.
+    <b>2. Pesée à la balance</b> (kg). <b>3. Estimation</b> (kg, colis ou pièces). Poids toujours en <strong>kg</strong>.</div>
+  <div class="step opt wide"><span class="q">N° de lot et DLC (facultatif)</span><span class="btn">📷 Photographier l'étiquette</span>, puis n° de lot et DLC ; plusieurs lots : une ligne par lot avec sa quantité. Utile pour retrouver une <strong>DLC courte à la livraison</strong> et suivre la rotation.</div>
+  <div class="step"><span class="q">Pourquoi ?</span>Une des 8 causes ci-dessous, ou « Autres causes » + commentaire.</div>
+  <div class="step"><span class="q">Où part la perte ?</span>Compost, ordures, don, personnel, <strong>réutilisation dans une autre préparation</strong>, autre. (Pas de retour fournisseur ici : c'est à la Réception.)</div>
+  <div class="step wide"><span class="q">Vérifier et valider</span>Relire, puis <span class="btn solid">Valider la perte</span>. « Déjà saisi ce jour-là » : même perte ? Tri de chambre fait en une fois pour plusieurs jours : « <strong>Pertes de plusieurs jours</strong> » + le premier jour.</div>
+</div>
+
+<h2>Les causes du Stockage</h2>
+<table>
+  <thead><tr><th style="width:36%">Cause</th><th>Quand la choisir</th><th style="width:20%">Famille</th></tr></thead>
+  <tbody>
+    <tr><td><b>1. Problème de DLC</b></td><td>DLC trop courte, arrivée à terme ou dépassée.</td><td><span class="tag conserv">Conservation</span></td></tr>
+    <tr><td><b>2. Problème de qualité</b></td><td>Produit abîmé, pourri, moisi, contaminé.</td><td><span class="tag conserv">Conservation</span></td></tr>
+    <tr><td><b>3. Retour non conforme</b></td><td>Retour dans la mauvaise chambre, mal filmé ou mal daté, produit non identifiable.</td><td><span class="tag orga">Organisation</span></td></tr>
+    <tr><td><b>4. Surstock</b></td><td>Trop commandé, pas utilisé à temps.</td><td><span class="tag conserv">Conservation</span></td></tr>
+    <tr><td><b>5. Retour non utilisable</b></td><td>Ex. seau de crème ouvert depuis plus de 48 h.</td><td><span class="tag conserv">Conservation</span></td></tr>
+    <tr><td><b>6. Rupture du froid (panne de chambre)</b></td><td>Panne ou porte restée ouverte.</td><td><span class="tag equip">Équipement</span></td></tr>
+    <tr><td><b>7. Nuisibles</b></td><td>Insectes, rongeurs.</td><td><span class="tag hyg">Hygiène</span></td></tr>
+    <tr><td><b>8. Chute / écrasement en manutention</b></td><td>Carton tombé, produit écrasé en rangeant.</td><td><span class="tag orga">Organisation</span></td></tr>
+    <tr><td><b>Autres causes</b></td><td>Aucune ne convient : commentaire obligatoire.</td><td>À évaluer</td></tr>
+  </tbody>
+</table>
+
+<h2>Ce que l'application calcule ensuite</h2>
+<div class="grid2">
+  <div class="calc">
+    <div class="ch">⚖️ Le poids</div>
+    <div class="cb">
+      <span class="formula">kg = nombre de colis × poids d'un colis</span>
+      ou le poids pesé, ou nombre d'unités × poids d'une unité. Un liquide en litres est converti avec sa <strong>densité</strong>. Sans poids connu : la perte reste dans son unité, signalée.
+      <dl class="eg"><dt>Exemple</dt><dd>2 seaux de crème de 5 kg ouverts depuis 3 jours</dd><dt>Poids</dt><dd>2 × 5 kg = <span class="result">10 kg</span></dd></dl>
+    </div>
+  </div>
+  <div class="calc">
+    <div class="ch">💶 Le coût</div>
+    <div class="cb">
+      <span class="formula">coût = kg × prix au kg à la date de la perte</span>
+      Même règle qu'en Réception : dernier prix d'achat (bon de commande) ou correction manuelle, sinon coût du tome Melba ; prix seulement à l'unité : tome au kg, sinon unité ÷ poids du colis.
+      <dl class="eg"><dt>Exemple</dt><dd>10 kg × 3,60 €/kg = <span class="result">36,00 €</span></dd></dl>
+    </div>
+  </div>
+  <div class="calc">
+    <div class="ch">🧭 Évitable ou non, et pourquoi</div>
+    <div class="cb">
+      Chaque cause est rangée dans une <strong>famille de causes racines</strong> (conservation, organisation, équipement…) et marquée <strong>évitable</strong>, inévitable ou à évaluer. Les statistiques montrent ainsi <strong>la part évitable</strong> du Stockage et sa cause principale.
+    </div>
+  </div>
+  <div class="calc">
+    <div class="ch">🏷️ Le fournisseur</div>
+    <div class="cb">
+      Comme en Réception, la perte garde le fournisseur de la matière (colis choisi, sinon dernier livré). Une <strong>DLC trop courte</strong> à répétition chez un fournisseur se voit dans Statistiques → Fournisseurs.
+    </div>
+  </div>
+</div>
+
+<h2>Ce que l'on retrouve dans les statistiques</h2>
+<div class="grid3">
+  <div class="card"><div class="head">📊 Vue générale, Par zone</div>Kg et euros du Stockage, part des pertes de l'entreprise, évolution, causes et produits principaux.</div>
+  <div class="card"><div class="head">🎯 Objectifs</div>Kg perdus de la semaine face à l'objectif du Stockage, et progrès sur 8 semaines.</div>
+  <div class="card"><div class="head">🏷️ Fournisseurs</div>Pertes du Stockage par fournisseur, à côté de celles de la Réception.</div>
+</div>
+
+<h2>Bonnes pratiques</h2>
+<div class="grid2">
+  <div class="box vert">
+    <span class="title do">✓ À faire</span>
+    <ul>
+      <li>Noter la perte <strong>au poste où le produit était rangé</strong> (chambre BOF, négative…).</li>
+      <li>Distinguer « DLC » (date) de « qualité » (aspect) : ce sont deux actions différentes.</li>
+      <li>Noter lot et DLC quand la DLC est en cause.</li>
+      <li>Utiliser « Réutilisation » quand le produit part dans une autre préparation.</li>
+    </ul>
+  </div>
+  <div class="box ambre">
+    <span class="title dont">✗ À éviter</span>
+    <ul>
+      <li>Noter ici un produit refusé à la livraison (c'est la <strong>Réception</strong>).</li>
+      <li>Noter ici une préparation de la cuisine (c'est la <strong>Cuisine / Production</strong>).</li>
+      <li>Un encas déclaré ailleurs qu'à son poste d'encas : l'application le refuse.</li>
+    </ul>
+  </div>
+</div>
+
+<footer class="doc">Application Pertes — fiche zone 2, Stockage. Voir aussi la fiche générale et les fiches Réception et Cuisine / Production. Règles : R25, R28, R33, R34, R37, R43 (docs/REGLES_METIER.md).</footer>
+</body>
+</html>
