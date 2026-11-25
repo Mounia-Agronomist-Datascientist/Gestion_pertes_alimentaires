@@ -31,7 +31,13 @@ import {
   packagingChoiceLabel,
   unitsFor,
 } from "@/domain/saisie-mesure";
-import { computeProductionWeek, formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
+import { lossDays, MAX_PERIOD_DAYS, periodStartError } from "@/domain/periode-perte";
+import {
+  addDays,
+  computeProductionWeek,
+  formatProductionWeek,
+  toProductionLocalDate,
+} from "@/domain/semaine-production";
 import { computeNetWeight } from "@/domain/tares";
 import { convertToKg, type UnitKind } from "@/domain/unites";
 import {
@@ -111,6 +117,8 @@ export interface WizardInitial {
   justification: string;
   occurredOn: string;
   occurredTime: string;
+  /** Pertes de plusieurs jours : premier jour de la période (décision du 26/11/2026). */
+  periodStart?: string | null;
   comment: string;
   /** N° de lot, DLC (« JJ/MM/AAAA ») et quantité de chaque lot (Réception, Stockage). */
   lotLines?: LotLineText[];
@@ -211,6 +219,8 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [recoveredAmounts, setRecoveredAmounts] = useState<Record<string, string>>(init?.recoveredAmounts ?? {});
   const [binNumbers, setBinNumbers] = useState<Record<string, string>>(init?.binNumbers ?? {});
   const [occurredOn, setOccurredOn] = useState(init?.occurredOn ?? options.today);
+  const [periodStart, setPeriodStart] = useState<string | null>(init?.periodStart ?? null);
+  const periodError = periodStartError(occurredOn, periodStart);
   /**
    * Date du jour : celle de l'appareil quand la page vient d'une copie gardée pour la saisie hors ligne (étape 6.6)
    * et date d'un jour précédent.
@@ -584,6 +594,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     const payload = {
       occurredOn,
       occurredTime: occurredTime || null,
+      periodStart: periodStart || null,
       subzoneId: subzone.id,
       teamId: needsTeam ? teamId : null,
       product:
@@ -662,6 +673,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           justification,
           occurredOn,
           occurredTime,
+          periodStart,
           comment,
           lotLines,
           discarded,
@@ -1507,7 +1519,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
-              <span className="font-medium">Date de la perte</span>
+              <span className="font-medium">Date de la perte{periodStart != null ? " (dernier jour)" : ""}</span>
               <input
                 type="date"
                 className="field"
@@ -1525,6 +1537,42 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                 onChange={(e) => setOccurredTime(e.target.value)}
               />
             </label>
+          </div>
+          <div className="flex flex-col gap-2 rounded-xl bg-white p-3">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="size-5"
+                checked={periodStart != null}
+                onChange={(e) => setPeriodStart(e.target.checked ? addDays(occurredOn, -2) : null)}
+              />
+              <span className="font-medium">Pertes de plusieurs jours, jetées en une fois</span>
+            </label>
+            {periodStart != null && (
+              <>
+                <label className="flex flex-col gap-1">
+                  <span className="text-sm">Depuis le (premier jour) — jusqu&apos;à la date de la perte ci-dessus</span>
+                  <input
+                    type="date"
+                    className="field"
+                    min={addDays(occurredOn, -(MAX_PERIOD_DAYS - 1))}
+                    max={addDays(occurredOn, -1)}
+                    value={periodStart}
+                    onChange={(e) => setPeriodStart(e.target.value || null)}
+                  />
+                </label>
+                {periodError ? (
+                  <p role="alert" className="text-sm font-semibold text-red-800">
+                    {periodError}
+                  </p>
+                ) : (
+                  <p className="text-sm text-slate-600">
+                    Pertes du {frDate(periodStart)} au {frDate(occurredOn)} : réparties à parts égales sur{" "}
+                    {lossDays(occurredOn, periodStart).length} jours dans les statistiques.
+                  </p>
+                )}
+              </>
+            )}
           </div>
           {productWeekMismatch && (
             <p role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">
@@ -1590,6 +1638,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             disabled={
               pending ||
               !occurredOn ||
+              !!periodError ||
               productWeekMismatch ||
               missingBin ||
               commentMissing ||
@@ -1614,6 +1663,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
     </div>
   );
 }
+
+/** Date « AAAA-MM-JJ » écrite « JJ/MM ». */
+const frDate = (d: string) => d.slice(8, 10) + "/" + d.slice(5, 7);
 
 // ─── Composants d'interface ────────────────────────────────────────────────────
 

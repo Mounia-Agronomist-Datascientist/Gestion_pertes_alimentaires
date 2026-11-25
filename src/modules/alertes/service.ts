@@ -2,10 +2,11 @@
  * Alerte « rien de noté » (docs/REGLES_METIER.md R8).
  * L'évaluation est idempotente : elle peut être lancée à chaque affichage de l'accueil ou par une tâche planifiée.
  */
-import { and, asc, desc, eq, gte, inArray, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, or, sql } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { ESTIMATED_LOSS_KG_PER_WINDOW, isWindowClosed, missingDays, reuseWindows } from "@/domain/plages-reutilisation";
+import { lossDays } from "@/domain/periode-perte";
 import { addDays, type LocalDate, toProductionLocalDate } from "@/domain/semaine-production";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, can, requirePermission } from "@/modules/auth/permissions";
@@ -70,14 +71,15 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
 
         // Comptent les pertes attribuées à l'équipe et celles saisies par son compte (même hors cuisine).
         const accountIds = teamAccounts.filter((u) => u.teamId === team.id).map((u) => u.id);
+        // Une perte de plusieurs jours couvre chaque jour de sa période (décision du 26/11/2026).
         const declaredRows = await db
-          .selectDistinct({ day: s.lossDeclarations.occurredOn })
+          .selectDistinct({ day: s.lossDeclarations.occurredOn, periodStart: s.lossDeclarations.periodStart })
           .from(s.lossDeclarations)
           .where(
             and(
               inArray(s.lossDeclarations.status, ["validee", "corrigee"]),
+              lte(sql`coalesce(${s.lossDeclarations.periodStart}, ${s.lossDeclarations.occurredOn})`, window.lastDay),
               gte(s.lossDeclarations.occurredOn, window.firstDay),
-              lte(s.lossDeclarations.occurredOn, window.lastDay),
               or(
                 eq(s.lossDeclarations.teamId, team.id),
                 accountIds.length ? inArray(s.lossDeclarations.createdBy, accountIds) : undefined,
@@ -86,7 +88,7 @@ export async function evaluateMissingDeclarations(db: Db, options: EvaluationOpt
           );
         const missing = missingDays(
           window,
-          declaredRows.map((r) => r.day),
+          declaredRows.flatMap((r) => lossDays(r.day, r.periodStart)),
         );
         const alert = existing.find(
           (a) => a.teamId === team.id && a.productionWeekId === week.id && a.window === window.key,

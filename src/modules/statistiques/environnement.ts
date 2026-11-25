@@ -230,7 +230,7 @@ const round = (n: number) => Math.round(n * 1000) / 1000;
 
 export function summarizeCo2(facts: readonly Co2Fact[]): Co2Summary {
   const s: Co2Summary = {
-    losses: facts.length,
+    losses: new Set(facts.map((f) => f.fact.id)).size,
     co2eKg: 0,
     co2ByMethod: { mesure: 0, estime: 0 },
     kg: { mesure: 0, estime: 0, non_couvert: 0 },

@@ -107,6 +107,17 @@ Toutes les saisies sont conservées pour la traçabilité et le suivi des perfor
   absent de la liste). Une perte annulée ne compte pas ; une perte corrigée ne se signale pas elle-même. Hors réseau,
   pas de vérification.
 
+## R5 quater — Pertes de plusieurs jours jetées en une fois (décision du 26/11/2026)
+
+- Exemple : à la Réception, en sous-effectif, les pertes de trois jours sont jetées le quatrième. Au récapitulatif,
+  « Pertes de plusieurs jours, jetées en une fois » : on indique le **premier jour** ; le **dernier jour** est la date
+  de la perte. 14 jours au plus ; le premier jour est avant le dernier.
+- **Statistiques, coûts des pertes, rapports** : les kg, les quantités et les euros sont **répartis à parts égales sur
+  chaque jour** de la période, chaque part dans la semaine de production de son jour (une période à cheval sur deux
+  semaines compte dans les deux). La perte compte **une fois** dans le nombre de pertes.
+- Alerte « rien de noté » : chaque jour de la période compte comme noté.
+- La période est gardée sur la perte (historique, correction).
+
 ## R6 — Statuts et corrections
 
 ```

@@ -15,6 +15,7 @@ import {
 } from "@/domain/couts";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
 import { kgPriceFallback, type KgPriceBasis } from "@/domain/matieres";
+import { periodStartError } from "@/domain/periode-perte";
 import { cartonsProductError, snackAllowedIn } from "@/domain/encas";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { normalizeCauseName as normalizeLabel } from "@/modules/admin/causes";
@@ -193,6 +194,8 @@ async function prepareDeclaration(
   if (input.occurredOn > today) {
     throw new DeclarationError("La date de la perte ne peut pas être dans le futur");
   }
+  const periodError = periodStartError(input.occurredOn, input.periodStart);
+  if (periodError) throw new DeclarationError(periodError);
   if (isBoundByTeamDelay(user)) {
     if (correction && !isWithinTeamCorrectionDelay(input.occurredOn, today)) {
       throw new DeclarationError(
@@ -696,6 +699,7 @@ async function prepareDeclaration(
     values: {
       occurredOn: input.occurredOn,
       occurredTime: input.occurredTime ?? null,
+      periodStart: input.periodStart ?? null,
       declaredAt,
       ...(input.clientId ? { clientId: input.clientId } : {}),
       ...(receivedAt ? { receivedAt } : {}),

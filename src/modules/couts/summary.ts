@@ -12,7 +12,7 @@ import { SUPPLIER_RETURN_KIND } from "@/domain/retours-fournisseur";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 import { zonesCondition } from "@/modules/declarations/queries";
 import type { Period } from "@/domain/periodes";
-import { periodCondition } from "@/modules/statistiques/facts";
+import { lossesInPeriodCondition, spreadOverDays } from "@/modules/statistiques/facts";
 
 export interface CostTotals {
   materialEur: number;
@@ -40,10 +40,13 @@ const empty = (): CostTotals => ({
  */
 const grossOf = (d: typeof s.lossDeclarations.$inferSelect) => d.grossCostEur ?? d.materialCostEur;
 
-/** `kept` : part de la perte comptée (sans la part renvoyée au fournisseur, décision du 19/11/2026). */
-function add(totals: CostTotals, d: typeof s.lossDeclarations.$inferSelect, kept: number) {
+/**
+ * `kept` : part de la perte comptée (sans la part renvoyée au fournisseur, décision du 19/11/2026, et seulement la part
+ * du jour pour une perte de plusieurs jours) ; `share` : part du jour (1 pour une perte d'un seul jour).
+ */
+function add(totals: CostTotals, d: typeof s.lossDeclarations.$inferSelect, kept: number, share = 1) {
   const gross = (grossOf(d) ?? 0) * kept;
-  const recovered = d.recoveredEur ?? 0;
+  const recovered = (d.recoveredEur ?? 0) * share;
   totals.materialEur += (d.materialCostEur ?? 0) * kept;
   totals.packagingEur += (d.packagingCostEur ?? 0) * kept;
   totals.labourEur += (d.labourCostEur ?? 0) * kept;
@@ -57,7 +60,9 @@ const rounded = (t: CostTotals): CostTotals =>
   Object.fromEntries(Object.entries(t).map(([k, v]) => [k, Math.round(v * 100) / 100])) as unknown as CostTotals;
 
 export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: string) {
-  return costSummary(db, user, eq(s.lossDeclarations.productionWeekId, productionWeekId));
+  const [week] = await db.select().from(s.productionWeeks).where(eq(s.productionWeeks.id, productionWeekId));
+  if (!week) return costSummary(db, user, eq(s.lossDeclarations.productionWeekId, productionWeekId), null);
+  return periodCostSummary(db, user, { kind: "semaine", year: week.year, number: week.number });
 }
 
 /**
@@ -66,12 +71,12 @@ export async function weekCostSummary(db: Db, user: AuthUser, productionWeekId: 
  */
 export async function periodCostSummary(db: Db, user: AuthUser, period: Period) {
   requirePermission(user, "indicators.read");
-  return costSummary(db, user, (await periodCondition(db, period)) ?? sql`false`);
+  return costSummary(db, user, (await lossesInPeriodCondition(db, period)) ?? sql`false`, period);
 }
 
-async function costSummary(db: Db, user: AuthUser, inPeriod: SQL) {
+async function costSummary(db: Db, user: AuthUser, inPeriod: SQL, period: Period | null) {
   requirePermission(user, "indicators.read");
-  const [rows, zones, teams, weeks] = await Promise.all([
+  const [found, zones, teams, weeks] = await Promise.all([
     db
       .select()
       .from(s.lossDeclarations)
@@ -97,6 +102,9 @@ async function costSummary(db: Db, user: AuthUser, inPeriod: SQL) {
       })
       .from(s.productionWeeks),
   ]);
+
+  // Pertes de plusieurs jours : une part par jour de la période (décision du 26/11/2026).
+  const rows = period ? await spreadOverDays(db, found, period) : found.map((d) => ({ ...d, share: 1 }));
 
   // Part renvoyée au fournisseur de chaque perte (dernière version des destinations) : hors du total perdu.
   const lines = rows.length
@@ -133,28 +141,36 @@ async function costSummary(db: Db, user: AuthUser, inPeriod: SQL) {
   const byZone = new Map<string, CostTotals>();
   const byTeam = new Map<string, CostTotals>();
   const byWeek = new Map<string, CostTotals>();
-  let valued = 0;
+  const valued = new Set<string>();
   let packagingIncomplete = 0;
   let kg = 0;
   for (const d of rows) {
-    const kept = keptOf(d.id);
+    const kept = keptOf(d.id) * d.share;
     if (kept <= 0) continue;
     kg += (d.netKg ?? 0) * kept;
     if (grossOf(d) == null && d.recoveredEur == null) continue;
-    valued++;
-    if ((d.costDetails as { packagingComplete?: boolean | null } | null)?.packagingComplete === false)
+    if (
+      !valued.has(d.id) &&
+      (d.costDetails as { packagingComplete?: boolean | null } | null)?.packagingComplete === false
+    )
       packagingIncomplete++;
-    add(totals, d, kept);
-    add(byZone.get(d.zoneId) ?? byZone.set(d.zoneId, empty()).get(d.zoneId)!, d, kept);
-    if (d.teamId) add(byTeam.get(d.teamId) ?? byTeam.set(d.teamId, empty()).get(d.teamId)!, d, kept);
-    add(byWeek.get(d.productionWeekId) ?? byWeek.set(d.productionWeekId, empty()).get(d.productionWeekId)!, d, kept);
+    valued.add(d.id);
+    add(totals, d, kept, d.share);
+    add(byZone.get(d.zoneId) ?? byZone.set(d.zoneId, empty()).get(d.zoneId)!, d, kept, d.share);
+    if (d.teamId) add(byTeam.get(d.teamId) ?? byTeam.set(d.teamId, empty()).get(d.teamId)!, d, kept, d.share);
+    add(
+      byWeek.get(d.productionWeekId) ?? byWeek.set(d.productionWeekId, empty()).get(d.productionWeekId)!,
+      d,
+      kept,
+      d.share,
+    );
   }
 
-  const counted = rows.filter((d) => keptOf(d.id) > 0).length;
+  const counted = new Set(rows.filter((d) => keptOf(d.id) > 0).map((d) => d.id)).size;
   return {
     declarations: counted,
-    valued,
-    notValued: counted - valued,
+    valued: valued.size,
+    notValued: counted - valued.size,
     packagingIncomplete,
     netKg: roundQuantity(kg),
     totals: rounded(totals),

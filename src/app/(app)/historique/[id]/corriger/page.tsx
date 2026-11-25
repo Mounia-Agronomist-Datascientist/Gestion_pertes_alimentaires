@@ -128,6 +128,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
     justification: d.destinationGapJustification ?? "",
     occurredOn: d.occurredOn,
     occurredTime: d.occurredTime?.slice(0, 5) ?? "",
+    periodStart: d.periodStart ?? null,
     comment: d.comment ?? "",
     lotLines: (d.lots ?? []).map((l) => ({
       lotNumber: l.lotNumber ?? "",

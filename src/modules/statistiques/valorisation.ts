@@ -6,7 +6,7 @@ import { asc } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import type { Period } from "@/domain/periodes";
-import type { LossFact } from "@/domain/statistiques";
+import { countLosses, type LossFact } from "@/domain/statistiques";
 import { RECOVERY_GROUPS, type RecoveryTotals, recoverySummary } from "@/domain/valorisation";
 import { type AuthUser, can } from "@/modules/auth/permissions";
 import { recentWeeks } from "./evolution";
@@ -61,7 +61,7 @@ export async function recoveryDashboard(
 
   return {
     withCosts,
-    events: facts.length,
+    events: countLosses(facts),
     groups: summary.groups,
     destinations: summary.destinations.map((d) => ({ ...d, name: nameOf.get(d.destinationId) ?? "—" })),
     series,

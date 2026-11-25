@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { causeLenses, destinationTotals, evolution, type LossFact, rankGroups, summarize } from "@/domain/statistiques";
 
+let nextId = 0;
 const fact = (over: Partial<LossFact>): LossFact => ({
-  id: "x",
+  id: `perte-${++nextId}`,
   occurredOn: "2026-11-02",
   productionWeekId: "w",
   zoneId: "cuisine",
@@ -141,5 +142,14 @@ describe("pertes évitables et familles de causes (décision du 23/11/2026)", ()
       ["a_classer", 4],
       ["inherente", 2],
     ]);
+  });
+
+  it("perte de plusieurs jours : ses parts s'additionnent, elle compte une fois (26/11/2026)", () => {
+    const parts = [1, 2, 3].map((n) =>
+      fact({ id: "periode", occurredOn: `2026-11-2${n}`, netKg: 2, netQuantity: 2, cost: cost(3), share: 1 / 3 }),
+    );
+    const s = summarize(parts, true);
+    expect(s).toMatchObject({ events: 1, foodKg: 6 });
+    expect(s.cost).toMatchObject({ grossEur: 9, valued: 1 });
   });
 });

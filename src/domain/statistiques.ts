@@ -45,6 +45,11 @@ export interface LossFact {
   netUnitCode: string;
   /** null : perte sans coût connu, ou coûts non visibles pour ce profil. */
   cost: FactCost | null;
+  /**
+   * Part d'une perte de plusieurs jours tombée ce jour-là (décision du 26/11/2026) ; absente : la perte entière. Une
+   * perte se compte une fois (par son identifiant), même répartie sur plusieurs jours.
+   */
+  share?: number;
   /** recoveredEur : recette encaissée sur une ligne de vente (null : à saisir, ou euros non visibles). */
   destinations: {
     destinationId: string;
@@ -80,11 +85,14 @@ export interface StatsSummary {
 const COST_KEYS = ["materialEur", "packagingEur", "labourEur", "indirectEur", "grossEur", "recoveredEur"] as const;
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
+/** Nombre de pertes : une perte de plusieurs jours, répartie en parts, compte une fois. */
+export const countLosses = (facts: readonly { id: string }[]) => new Set(facts.map((f) => f.id)).size;
+
 export function summarize(facts: readonly LossFact[], withCosts: boolean): StatsSummary {
   let foodKg = 0;
-  let foodNotConverted = 0;
+  const notConverted = new Set<string>();
   let barquettes = 0;
-  const nonFood = { events: 0, quantities: {} as Record<string, number> };
+  const nonFood = { events: new Set<string>(), quantities: {} as Record<string, number> };
   const kgByDestinationKind: Record<string, number> = {};
   const cost = {
     materialEur: 0,
@@ -93,24 +101,24 @@ export function summarize(facts: readonly LossFact[], withCosts: boolean): Stats
     indirectEur: 0,
     grossEur: 0,
     recoveredEur: 0,
-    valued: 0,
   };
+  const valued = new Set<string>();
 
   for (const f of facts) {
     if (f.food) {
-      if (f.netKg == null) foodNotConverted++;
+      if (f.netKg == null) notConverted.add(f.id);
       else foodKg += f.netKg;
       for (const d of f.destinations)
         if (d.netKg != null) kgByDestinationKind[d.kind] = (kgByDestinationKind[d.kind] ?? 0) + d.netKg;
     } else {
-      nonFood.events++;
+      nonFood.events.add(f.id);
       nonFood.quantities[f.netUnitCode] = (nonFood.quantities[f.netUnitCode] ?? 0) + f.netQuantity;
     }
     // Une portion = une barquette (R10) : un plat fini compté en pièces (en cuisine, règle R25) compte aussi.
     if (f.netUnitCode === "barquette" || (f.netUnitCode === "piece" && f.category === "produit_fini"))
       barquettes += f.netQuantity;
     if (withCosts && f.cost) {
-      cost.valued++;
+      valued.add(f.id);
       for (const k of COST_KEYS) cost[k] += f.cost[k];
     }
   }
@@ -118,17 +126,17 @@ export function summarize(facts: readonly LossFact[], withCosts: boolean): Stats
   const roundAll = (r: Record<string, number>) =>
     Object.fromEntries(Object.entries(r).map(([k, v]) => [k, roundQuantity(v)]));
   return {
-    events: facts.length,
+    events: countLosses(facts),
     foodKg: roundQuantity(foodKg),
-    foodNotConverted,
+    foodNotConverted: notConverted.size,
     barquettes: roundQuantity(barquettes),
-    nonFood: { events: nonFood.events, quantities: roundAll(nonFood.quantities) },
+    nonFood: { events: nonFood.events.size, quantities: roundAll(nonFood.quantities) },
     kgByDestinationKind: roundAll(kgByDestinationKind),
     cost: withCosts
       ? {
           ...(Object.fromEntries(COST_KEYS.map((k) => [k, round2(cost[k])])) as unknown as FactCost),
           netEur: round2(cost.grossEur - cost.recoveredEur),
-          valued: cost.valued,
+          valued: valued.size,
         }
       : null,
   };
@@ -187,12 +195,16 @@ export function destinationTotals(
   facts: readonly LossFact[],
 ): Map<string, { kind: string; foodKg: number; events: number }> {
   const totals = new Map<string, { kind: string; foodKg: number; events: number }>();
+  const seen = new Set<string>();
   for (const f of facts) {
     for (const d of f.destinations) {
       const t =
         totals.get(d.destinationId) ??
         totals.set(d.destinationId, { kind: d.kind, foodKg: 0, events: 0 }).get(d.destinationId)!;
-      t.events++;
+      if (!seen.has(`${d.destinationId}|${f.id}`)) {
+        seen.add(`${d.destinationId}|${f.id}`);
+        t.events++;
+      }
       if (f.food && d.netKg != null) t.foodKg = roundQuantity(t.foodKg + d.netKg);
     }
   }

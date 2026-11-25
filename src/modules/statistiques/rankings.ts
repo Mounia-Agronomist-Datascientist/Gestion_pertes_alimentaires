@@ -14,6 +14,7 @@ import { productLabel } from "@/domain/produits";
 import type { Period } from "@/domain/periodes";
 import {
   causeLenses,
+  countLosses,
   destinationTotals,
   type LossFact,
   type RankBy,
@@ -46,7 +47,7 @@ function mainCause(facts: readonly LossFact[]): { name: string; share: number } 
   if (!top) return null;
   const name = facts.find((f) => f.causeId === top.key)!.causeName;
   const total = ranked.reduce((a, g) => a + (g.summary.foodKg || 0), 0);
-  return { name, share: total > 0 ? top.summary.foodKg / total : top.summary.events / facts.length };
+  return { name, share: total > 0 ? top.summary.foodKg / total : top.summary.events / countLosses(facts) };
 }
 
 export interface ProductRow {
@@ -110,7 +111,7 @@ export async function productRanking(
       usedIn: first.category === "sous_recette" ? [...codes].sort() : null,
     };
   });
-  return { withCosts, rows, total: facts.length };
+  return { withCosts, rows, total: countLosses(facts) };
 }
 
 /** Classement des causes (§19.5) et totaux par destination. */
@@ -144,7 +145,7 @@ export async function causeAndDestinationRanking(
   );
   return {
     withCosts,
-    total: facts.length,
+    total: countLosses(facts),
     causes: causes.map((c) => ({ ...c, mainZone: c.mainZoneId ? (zoneNames.get(c.mainZoneId) ?? null) : null })),
     destinations,
     /** Pertes évitables et familles de causes racines (décision du 23/11/2026). */

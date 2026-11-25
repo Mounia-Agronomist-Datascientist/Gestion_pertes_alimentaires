@@ -224,6 +224,12 @@ export default async function DeclarationDetailPage({
         <dd>
           {fmtDay(d.occurredOn)}
           {d.occurredTime && ` à ${d.occurredTime.slice(0, 5)}`} — {formatProductionWeek(detail.productionWeek)}
+          {d.periodStart && (
+            <span className="block text-sm text-slate-600">
+              Pertes de plusieurs jours : du {fmtDay(d.periodStart)} au {fmtDay(d.occurredOn)}, réparties à parts égales
+              dans les statistiques
+            </span>
+          )}
           {d.isLate && <span className="block text-sm text-amber-700">Déclaration tardive</span>}
         </dd>
         <dt className="text-slate-500">Saisie</dt>

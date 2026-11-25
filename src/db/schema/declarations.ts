@@ -60,6 +60,11 @@ export const lossDeclarations = pgTable(
 
     occurredOn: date("occurred_on", { mode: "string" }).notNull(),
     occurredTime: time("occurred_time"),
+    /**
+     * Pertes de plusieurs jours jetées en une fois (décision du 26/11/2026) : premier jour de la période ; le dernier
+     * est `occurredOn`. Kg et euros répartis à parts égales sur chaque jour dans les statistiques. null : un seul jour.
+     */
+    periodStart: date("period_start", { mode: "string" }),
     /** Heure de la saisie : sur l'appareil pour une perte gardée hors ligne puis envoyée (docs/PHASE6.md, étape 6.5). */
     declaredAt: timestamp("declared_at", { withTimezone: true }).notNull().defaultNow(),
     /** Heure de réception par le serveur, quand la perte a été saisie hors ligne ; null : reçue à la saisie. */

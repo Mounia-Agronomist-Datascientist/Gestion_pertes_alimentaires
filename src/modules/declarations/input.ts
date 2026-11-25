@@ -71,6 +71,8 @@ export const declarationInputSchema = z
       .regex(/^\d{2}:\d{2}$/, "Heure invalide")
       .nullable()
       .optional(),
+    /** Pertes de plusieurs jours jetées en une fois : premier jour de la période (décision du 26/11/2026). */
+    periodStart: z.iso.date({ message: "Date de début invalide" }).nullable().optional(),
     subzoneId: uuid,
     teamId: uuid.nullable().optional(),
     product: z.union([

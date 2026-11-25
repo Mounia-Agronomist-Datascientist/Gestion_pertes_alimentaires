@@ -11,7 +11,7 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { productLabel } from "@/domain/produits";
 import { monthBounds, type Period } from "@/domain/periodes";
-import { type LossFact, rankGroups, type StatsSummary, summarize } from "@/domain/statistiques";
+import { countLosses, type LossFact, rankGroups, type StatsSummary, summarize } from "@/domain/statistiques";
 import { type AuthUser, can, ForbiddenError } from "@/modules/auth/permissions";
 import { adjacentOf, loadFacts, type StatsFilters } from "./facts";
 
@@ -81,7 +81,7 @@ export async function compareAxis(db: Db, user: AuthUser, axis: Axis, period: Pe
     }))
     .sort((a, b) => (ref.get(a.id)?.order ?? 0) - (ref.get(b.id)?.order ?? 0));
   // Pertes sans équipe (responsable de zone) : signalées à part dans la comparaison des équipes.
-  const withoutTeam = axis === "equipe" ? facts.filter((f) => !f.teamId).length : 0;
+  const withoutTeam = axis === "equipe" ? countLosses(facts.filter((f) => !f.teamId)) : 0;
   return { withCosts, rows, previousPeriod, withoutTeam };
 }
 

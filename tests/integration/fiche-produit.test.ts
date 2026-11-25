@@ -27,6 +27,8 @@ import { packagingOptions } from "@/modules/matieres/colis";
 import { completeMissingCosts, createDeclaration, missingCosts } from "@/modules/declarations/service";
 import { materialsOfWeek } from "@/modules/matieres/semaine";
 import { sameDayLosses } from "@/modules/declarations/doublons";
+import { summarize } from "@/domain/statistiques";
+import { loadFacts } from "@/modules/statistiques/facts";
 import { createTestDb } from "../helpers/test-db";
 
 const DIR = "tests/fixtures/bons-commande";
@@ -514,5 +516,43 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     expect(await lookFor({ occurredOn: "2026-11-13" })).toEqual([]);
     expect(await lookFor({ subzoneId: other })).toEqual([]);
     expect(await lookFor({ excludeId: d.id })).toEqual([]);
+  });
+
+  it("pertes de plusieurs jours : réparties à parts égales sur chaque jour, dans leur semaine (26/11/2026)", async () => {
+    const NOW = new Date("2026-11-20T10:00:00Z");
+    const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const [sucre] = await t.db
+      .insert(s.products)
+      .values({ category: "matiere_premiere", name: "Sucre période test", defaultUnit: "kg", source: "manuel" })
+      .returning();
+    const base = {
+      occurredOn: "2026-11-19",
+      subzoneId: sub,
+      product: { productId: sucre!.id },
+      causeId: cause,
+      method: "pesee" as const,
+      quantity: 6,
+      unitCode: "kg",
+      destinations: [{ destinationId: bin, quantity: 6, binNumber: "1" }],
+    };
+    await expect(createDeclaration(t.db, admin, { ...base, periodStart: "2026-11-19" }, NOW)).rejects.toThrow(
+      /avant la date/,
+    );
+    await expect(createDeclaration(t.db, admin, { ...base, periodStart: "2026-11-01" }, NOW)).rejects.toThrow(
+      /14 jours/,
+    );
+    const d = await createDeclaration(t.db, admin, { ...base, periodStart: "2026-11-17" }, NOW);
+    // Du 17 au 19/11 : 2 jours en S47 (12 → 18/11), 1 jour en S48 (à partir du 19/11).
+    const mine = async (number: number) =>
+      (await loadFacts(t.db, admin, { kind: "semaine", year: 2026, number })).filter((f) => f.id === d.id);
+    const s47 = await mine(47);
+    const s48 = await mine(48);
+    expect(s47.map((f) => f.occurredOn)).toEqual(["2026-11-17", "2026-11-18"]);
+    expect(s48.map((f) => f.occurredOn)).toEqual(["2026-11-19"]);
+    expect(s47.reduce((a, f) => a + (f.netKg ?? 0), 0)).toBeCloseTo(4, 6);
+    expect(s48[0]!.netKg).toBeCloseTo(2, 6);
+    expect(summarize(s47, false).events).toBe(1);
   });
 });
