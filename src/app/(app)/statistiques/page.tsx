@@ -50,6 +50,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
         current={dashboard.current}
         previous={dashboard.previous}
         previousLabel={dashboard.previousPeriod ? periodLabel(dashboard.previousPeriod) : null}
+        currentLabel={periodLabel(ctx.period)}
         withCosts={dashboard.withCosts}
       />
       <SummaryNotes summary={dashboard.current} withCosts={dashboard.withCosts} />
@@ -60,6 +61,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
         <ZoneFlow
           tiles={dashboard.zoneFlow}
           previousLabel={dashboard.previousPeriod ? periodLabel(dashboard.previousPeriod) : null}
+          currentLabel={periodLabel(ctx.period)}
         />
       )}
 

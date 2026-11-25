@@ -213,6 +213,7 @@ async function Detail({
         current={dashboard.current}
         previous={dashboard.previous}
         previousLabel={dashboard.previousPeriod ? periodLabel(dashboard.previousPeriod) : null}
+        currentLabel={periodLabel(ctx.period)}
         withCosts={withCosts}
       />
       <SummaryNotes summary={dashboard.current} withCosts={withCosts} />

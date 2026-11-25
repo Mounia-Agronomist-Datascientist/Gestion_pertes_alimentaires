@@ -279,20 +279,51 @@ export async function FilterForm({
   );
 }
 
-/** Évolution par rapport à la période précédente, en mots et en flèche (jamais par la seule couleur). */
-export function trend(
+/** Au-delà de ce pourcentage, l'écart n'est plus parlant (période précédente presque vide) : « forte hausse ». */
+const STRONG_CHANGE_PERCENT = 100;
+
+/** Comparaison avec la période précédente : un mot court à l'écran, le détail chiffré au clic ou au survol. */
+export interface Comparison {
+  /** « ▲ +12 % », « ▲ forte hausse », « ▼ −8 % », « = stable », « nouveau ». */
+  short: string;
+  tone: string;
+  /** Explication complète : valeurs des deux périodes, écart, pourcentage et comment il se lit. */
+  detail: string;
+}
+
+/** Mot court d'une évolution en pourcentage (jamais par la seule couleur : flèche et mot). */
+function changeWords(percent: number | null, delta: number): Pick<Comparison, "short" | "tone"> {
+  if (delta === 0) return { short: "= stable", tone: "text-slate-600" };
+  if (percent == null) return { short: "nouveau", tone: "text-amber-800" };
+  if (percent >= STRONG_CHANGE_PERCENT) return { short: "▲ forte hausse", tone: "text-amber-800" };
+  if (Math.abs(percent) < 0.5) return { short: "= stable", tone: "text-slate-600" };
+  return percent > 0
+    ? { short: `▲ +${num.format(Math.round(percent))} %`, tone: "text-amber-800" }
+    : { short: `▼ −${num.format(Math.round(-percent))} %`, tone: "text-emerald-800" };
+}
+
+/** Évolution par rapport à la période précédente (null si elle n'est pas connue). */
+export function compare(
   value: number,
   previous: number | null | undefined,
-  previousLabel: string | null,
+  labels: { previous: string | null; current?: string | null },
   unit: "kg" | "€" | "",
-): string | null {
+): Comparison | null {
   const e = evolution(value, previous);
-  if (!e || !previousLabel) return null;
-  if (e.delta === 0) return `= stable par rapport à ${previousLabel}`;
-  const arrow = e.delta > 0 ? "▲" : "▼";
-  const amount =
-    unit === "€" ? euro.format(Math.abs(e.delta)) : `${num.format(Math.abs(e.delta))}${unit ? ` ${unit}` : ""}`;
-  return `${arrow} ${e.delta > 0 ? "+" : "−"}${amount}${e.percent != null ? ` (${e.percent > 0 ? "+" : "−"}${num.format(Math.abs(e.percent))} %)` : ""} par rapport à ${previousLabel}`;
+  if (!e || !labels.previous || previous == null) return null;
+  const fmt = (v: number) => (unit === "€" ? euro.format(v) : `${num.format(v)}${unit ? ` ${unit}` : ""}`);
+  const sign = e.delta > 0 ? "+" : e.delta < 0 ? "−" : "";
+  const parts = [
+    `${labels.previous} : ${fmt(previous)} → ${labels.current ?? "cette période"} : ${fmt(value)}.`,
+    `Écart : ${sign}${fmt(Math.abs(e.delta))}${e.percent != null ? `, soit ${sign}${num.format(Math.abs(e.percent))} %` : ""}.`,
+  ];
+  if (e.percent == null && value > 0) parts.push(`Rien en ${labels.previous} : pas de pourcentage possible.`);
+  else if (e.percent != null && e.percent >= STRONG_CHANGE_PERCENT) {
+    parts.push(
+      `Le pourcentage compare à ${labels.previous} : il devient très grand quand cette période avait peu de pertes saisies.`,
+    );
+  }
+  return { ...changeWords(e.percent, e.delta), detail: parts.join(" ") };
 }
 
 /** Évolution courte pour un tableau (« ▲ +12 % », « nouveau »). */
@@ -304,11 +335,62 @@ export function shortTrend(value: number, previous: number | null | undefined): 
   return `${e.delta > 0 ? "▲ +" : "▼ −"}${num.format(Math.abs(e.percent))} %`;
 }
 
-export function Stat({ label, value, change }: { label: string; value: string; change?: string | null }) {
+/** Évolution courte ; clic (ou survol) pour le détail chiffré. */
+export function ComparisonNote({
+  comparison: c,
+  previousLabel,
+  align = "left",
+}: {
+  comparison: Comparison;
+  previousLabel: string;
+  align?: "left" | "right";
+}) {
+  return (
+    <details className="group relative text-sm">
+      <summary title={c.detail} className="cursor-pointer list-none rounded-lg [&::-webkit-details-marker]:hidden">
+        <span className={`font-medium whitespace-nowrap ${c.tone}`}>{c.short}</span>{" "}
+        <span className="whitespace-nowrap text-slate-500">
+          vs {previousLabel}{" "}
+          <span
+            aria-hidden
+            className="inline-flex size-4 items-center justify-center rounded-full border border-slate-400 align-[-2px] text-[10px] leading-none text-slate-500 group-open:bg-slate-600 group-open:text-white"
+          >
+            i
+          </span>
+        </span>
+        <span className="sr-only"> (voir le détail)</span>
+      </summary>
+      <p
+        className={`absolute top-full z-10 mt-1 w-64 max-w-[80vw] rounded-lg bg-white p-3 text-left text-xs font-normal text-slate-700 shadow-lg ring-1 ring-slate-200 ${align === "right" ? "right-0" : "left-0"}`}
+      >
+        {c.detail}
+      </p>
+    </details>
+  );
+}
+
+export function Stat({
+  label,
+  value,
+  change,
+  comparison,
+  previousLabel,
+}: {
+  label: string;
+  value: string;
+  change?: string | null;
+  comparison?: Comparison | null;
+  previousLabel?: string | null;
+}) {
   return (
     <div className="flex flex-col rounded-2xl bg-white p-4 shadow-sm">
       <p className="text-sm text-slate-600">{label}</p>
-      <p className="text-2xl font-semibold tabular-nums">{value}</p>
+      <p className="text-xl font-semibold whitespace-nowrap tabular-nums sm:text-2xl">{value}</p>
+      {comparison && previousLabel && (
+        <div className="mt-1">
+          <ComparisonNote comparison={comparison} previousLabel={previousLabel} />
+        </div>
+      )}
       {change && <p className="mt-1 text-xs text-slate-600">{change}</p>}
     </div>
   );
@@ -319,44 +401,43 @@ export function SummaryTiles({
   current,
   previous,
   previousLabel,
+  currentLabel,
   withCosts,
 }: {
   current: StatsSummary;
   previous: StatsSummary | null;
   previousLabel: string | null;
+  currentLabel?: string | null;
   withCosts: boolean;
 }) {
+  const labels = { previous: previousLabel, current: currentLabel };
+  const tile = (
+    label: string,
+    value: string,
+    now: number,
+    before: number | null | undefined,
+    unit: "kg" | "€" | "",
+  ) => (
+    <Stat label={label} value={value} comparison={compare(now, before, labels, unit)} previousLabel={previousLabel} />
+  );
   return (
-    <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Indicateurs principaux">
-      <Stat
-        label="Pertes alimentaires"
-        value={`${num.format(current.foodKg)} kg`}
-        change={trend(current.foodKg, previous?.foodKg, previousLabel, "kg")}
-      />
-      {withCosts && current.cost && (
-        <Stat
-          label="Coût brut"
-          value={euro.format(current.cost.grossEur)}
-          change={trend(current.cost.grossEur, previous?.cost?.grossEur, previousLabel, "€")}
-        />
+    <section className="flex flex-col gap-1" aria-label="Indicateurs principaux">
+      <div className="grid grid-cols-2 items-start gap-2 sm:grid-cols-3">
+        {tile("Pertes alimentaires", `${num.format(current.foodKg)} kg`, current.foodKg, previous?.foodKg, "kg")}
+        {withCosts &&
+          current.cost &&
+          tile("Coût brut", euro.format(current.cost.grossEur), current.cost.grossEur, previous?.cost?.grossEur, "€")}
+        {withCosts &&
+          current.cost &&
+          tile("Coût net", euro.format(current.cost.netEur), current.cost.netEur, previous?.cost?.netEur, "€")}
+        {tile("Barquettes perdues", num.format(current.barquettes), current.barquettes, previous?.barquettes, "")}
+        {tile("Déclarations", String(current.events), current.events, previous?.events, "")}
+      </div>
+      {previousLabel && (
+        <p className="text-xs text-slate-500">
+          Évolution par rapport à {previousLabel} ; touchez ⓘ (ou passez la souris) pour les chiffres.
+        </p>
       )}
-      {withCosts && current.cost && (
-        <Stat
-          label="Coût net"
-          value={euro.format(current.cost.netEur)}
-          change={trend(current.cost.netEur, previous?.cost?.netEur, previousLabel, "€")}
-        />
-      )}
-      <Stat
-        label="Barquettes perdues"
-        value={num.format(current.barquettes)}
-        change={trend(current.barquettes, previous?.barquettes, previousLabel, "")}
-      />
-      <Stat
-        label="Déclarations"
-        value={String(current.events)}
-        change={trend(current.events, previous?.events, previousLabel, "")}
-      />
     </section>
   );
 }
@@ -670,7 +751,15 @@ export function ShareOfTotalCard({ share, withCosts }: { share: ShareOfTotal; wi
  * Pertes par zone en logigramme vertical, de haut en bas dans le sens de la marche en avant (décision du 20/11/2026) :
  * une étape par zone, reliées par une flèche.
  */
-export function ZoneFlow({ tiles, previousLabel }: { tiles: ZoneFlowTile[]; previousLabel: string | null }) {
+export function ZoneFlow({
+  tiles,
+  previousLabel,
+  currentLabel,
+}: {
+  tiles: ZoneFlowTile[];
+  previousLabel: string | null;
+  currentLabel?: string | null;
+}) {
   if (tiles.length === 0) return null;
   return (
     <section className="flex flex-col gap-2" aria-label="Pertes par zone, dans le sens de la marche en avant">
@@ -684,7 +773,7 @@ export function ZoneFlow({ tiles, previousLabel }: { tiles: ZoneFlowTile[]; prev
                 <span className="-mt-1.5 text-sm leading-none text-brun-600">▼</span>
               </span>
             )}
-            <ZoneTile tile={t} previousLabel={previousLabel} step={i + 1} />
+            <ZoneTile tile={t} previousLabel={previousLabel} currentLabel={currentLabel} step={i + 1} />
           </li>
         ))}
       </ol>
@@ -699,25 +788,19 @@ export function ZoneFlow({ tiles, previousLabel }: { tiles: ZoneFlowTile[]; prev
 function ZoneTile({
   tile: t,
   previousLabel,
+  currentLabel,
   step,
 }: {
   tile: ZoneFlowTile;
   previousLabel: string | null;
+  currentLabel?: string | null;
   step: number;
 }) {
   const share = Math.round(t.share * 100);
   const change =
-    t.previousKg == null
-      ? null
-      : t.change == null
-        ? t.kg > 0
-          ? { text: "nouveau", tone: "text-amber-800" }
-          : { text: "= stable", tone: "text-slate-600" }
-        : t.change > 0.005
-          ? { text: `▲ hausse +${pct.format(t.change)}`, tone: "text-amber-800" }
-          : t.change < -0.005
-            ? { text: `▼ baisse −${pct.format(-t.change)}`, tone: "text-emerald-800" }
-            : { text: "= stable", tone: "text-slate-600" };
+    previousLabel && t.previousKg != null
+      ? compare(t.kg, t.previousKg, { previous: previousLabel, current: currentLabel }, "kg")
+      : null;
   return (
     <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 rounded-2xl bg-white p-3 shadow-sm sm:grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)] print:grid-cols-[auto_minmax(0,1.4fr)_minmax(0,1fr)] print:py-2">
       <span
@@ -747,12 +830,7 @@ function ZoneTile({
             <span className="font-semibold text-slate-700 tabular-nums">{euro.format(t.grossEur)}</span>
           )}
         </span>
-        {change && (
-          <span className={`text-sm font-medium ${change.tone}`}>
-            {change.text}
-            {previousLabel && <span className="font-normal text-slate-500"> vs {previousLabel}</span>}
-          </span>
-        )}
+        {change && previousLabel && <ComparisonNote comparison={change} previousLabel={previousLabel} align="right" />}
         {t.returned && (
           <span className="text-xs text-slate-600">
             + retours fournisseur : {num.format(t.returned.kg)} kg
