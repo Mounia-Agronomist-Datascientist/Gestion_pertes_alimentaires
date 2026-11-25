@@ -9,15 +9,18 @@ import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import {
   type DishMould,
+  type PackagingItemPrice,
   dishUnitCost,
   ingredientUnitCost,
   mouldLinesOf,
+  priceMoulds,
   subRecipeUnitCost,
   type UnitCost,
 } from "@/domain/couts";
+import { packagingItemPrices } from "@/modules/admin/packaging";
 import type { PortionKind } from "@/modules/admin/packaging-labels";
 import { melbaExternalId } from "@/domain/matieres";
-import { addDays, type LocalDate } from "@/domain/semaine-production";
+import { addDays, type LocalDate, toProductionLocalDate } from "@/domain/semaine-production";
 import type { AuthUser } from "@/modules/auth/permissions";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import { gramsToKg, isMouldLabel, isSnackCode } from "./merge";
@@ -89,6 +92,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
   if (!thisWeek) return [];
   const previousWeek = await findStoredProductionWeek(db, addDays(thisWeek.startDate, -1));
   const catalogs: WeekCatalog[] = [];
+  const prices = await packagingItemPrices(db, today);
   for (const week of [thisWeek, previousWeek].filter((w) => w != null)) {
     const [current] = await db
       .select()
@@ -129,7 +133,7 @@ export async function weekCatalogs(db: Db, user: AuthUser, today: LocalDate): Pr
         teamId: r.teamId,
         snack: isSnackCode(r.code),
         portionWeightG: portionWeightG(r),
-        ...dishCosts(r, structure),
+        ...dishCosts(r, structure, prices),
         lines: linesOf({ recipeId: r.id }),
       }))
       .sort((a, b) => a.code.localeCompare(b.code));
@@ -169,7 +173,12 @@ type SubRecipeRow = typeof s.weekSubRecipes.$inferSelect;
 
 /** Compositions d'un import, pour retrouver les moules inclus dans le coût d'un plat. */
 function importStructure(lines: readonly LineRow[], subRecipes: readonly SubRecipeRow[]) {
-  const asLine = (l: LineRow) => ({ label: l.label, costEur: l.costEur, subRecipeId: l.componentSubRecipeId });
+  const asLine = (l: LineRow) => ({
+    label: l.label,
+    costEur: l.costEur,
+    subRecipeId: l.componentSubRecipeId,
+    quantity: l.quantity,
+  });
   return {
     linesOfRecipe: (recipeId: string) => lines.filter((l) => l.recipeId === recipeId).map(asLine),
     subRecipes: new Map(
@@ -185,10 +194,17 @@ function importStructure(lines: readonly LineRow[], subRecipes: readonly SubReci
  * Coûts d'un plat : matières (coût Melba moins les moules et plats à gratin qu'il inclut) et emballages
  * (ces moules + emballages du référentiel par portion). Encas : produit acheté, sans emballage ajouté.
  */
-function dishCosts(r: typeof s.weekRecipes.$inferSelect, structure: ReturnType<typeof importStructure>) {
+function dishCosts(
+  r: typeof s.weekRecipes.$inferSelect,
+  structure: ReturnType<typeof importStructure>,
+  prices: readonly PackagingItemPrice[],
+) {
   const snack = isSnackCode(r.code);
-  const moulds = snack ? [] : mouldLinesOf(structure.linesOfRecipe(r.id), structure.subRecipes, isMouldLabel);
-  const mould = Math.round(moulds.reduce((a, m) => a + m.eur, 0) * 10_000) / 10_000;
+  const melba = snack ? [] : mouldLinesOf(structure.linesOfRecipe(r.id), structure.subRecipes, isMouldLabel);
+  // Le coût matières retire les moules au prix Melba (inclus dans le coût Melba) ; le moule jeté est proposé avec le
+  // nom et le prix réglés par l'administration (Emballages et consommables), à défaut ceux du tome.
+  const mould = Math.round(melba.reduce((a, m) => a + m.eur, 0) * 10_000) / 10_000;
+  const moulds = priceMoulds(melba, prices);
   return {
     cost: dishUnitCost(
       r.totalCostEur != null ? Math.round((r.totalCostEur - mould) * 10_000) / 10_000 : null,
@@ -259,7 +275,13 @@ export interface ResolvedWeekItem {
 }
 
 /** Retrouve un produit de la semaine choisi à la saisie, ou null s'il n'existe pas. */
-export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Promise<ResolvedWeekItem | null> {
+/** `date` : date de la perte, pour le prix des moules réglé par l'administration (aujourd'hui par défaut). */
+export async function findWeekItem(
+  db: Db,
+  kind: WeekItemKind,
+  id: string,
+  date?: LocalDate,
+): Promise<ResolvedWeekItem | null> {
   const none = { weekRecipeId: null, weekSubRecipeId: null, weekLineId: null };
   if (kind === "plat") {
     const [r] = await db.select().from(s.weekRecipes).where(eq(s.weekRecipes.id, id));
@@ -269,7 +291,8 @@ export async function findWeekItem(db: Db, kind: WeekItemKind, id: string): Prom
       db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.importId, r.importId)),
       db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.importId, r.importId)),
     ]);
-    const costs = dishCosts(r, importStructure(lines, subRecipes));
+    const prices = await packagingItemPrices(db, date ?? toProductionLocalDate(new Date()));
+    const costs = dishCosts(r, importStructure(lines, subRecipes), prices);
     return {
       // Un encas est un produit acheté ; un plat de la semaine, un produit fini (barquette).
       category: snack ? "produit_externe" : "produit_fini",

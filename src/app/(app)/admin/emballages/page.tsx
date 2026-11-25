@@ -20,7 +20,9 @@ export default async function PackagingPage() {
       <p className="text-sm text-slate-600">
         Coût unitaire daté de chaque emballage, et quantité consommée par portion : ces emballages sont ajoutés au coût
         de tout plat perdu (décision du 10/11/2026). Les moules et plats à gratin déjà comptés dans le coût Melba
-        d&apos;un plat ne sont pas ajoutés une seconde fois. Sans coût saisi, rien n&apos;est compté.
+        d&apos;un plat ne sont pas ajoutés une seconde fois. Un moule ou plat à gratin saisi ici au même nom que
+        l&apos;article du tome Melba donne son nom et son coût à la question « jeté avec ? » de la saisie. Sans coût
+        saisi, rien n&apos;est compté.
       </p>
       <PackagingAdmin
         today={today}

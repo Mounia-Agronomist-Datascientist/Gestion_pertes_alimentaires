@@ -56,7 +56,7 @@ Semaine de production du jeudi au mercredi : **S** = semaine en cours, **S-1** =
   main) ; saisir un prix daté quand le bon ou le tome est faux. Les pertes déjà enregistrées gardent leur coût.
 - **Fournisseurs** (Administration → Fournisseurs) : renommer, voir les matières de chacun. Un colis qu'aucun bon ne
   donne : « Saisir un colis » sur la fiche du produit (pour l'information).
-- **Emballages et main-d'œuvre** : mettre à jour les coûts datés quand ils changent. Le coût de la **barquette** (et de ce qui part avec elle : film, étiquette…) se règle dans Emballages et consommables → « Emballages par portion » (plat, petit-déjeuner) : il est ajouté à une perte de plat seulement si l'équipe répond que la barquette est jetée (salle blanche, salle des cartons).
+- **Emballages et main-d'œuvre** : mettre à jour les coûts datés quand ils changent. Le coût de la **barquette** (et de ce qui part avec elle : film, étiquette…) se règle dans Emballages et consommables → « Emballages par portion » (plat, petit-déjeuner) : il est ajouté à une perte de plat seulement si l'équipe répond que la barquette est jetée (salle blanche, salle des cartons). Un **moule ou plat à gratin** saisi dans Emballages et consommables avec le même nom que l'article du tome (« Pot KRAFT 100ml (grand format) ») donne son nom et son coût unitaire à la question du moule ; sinon, le nom et le prix du tome.
 - **Journal d'audit** : qui a fait quoi, avant/après.
 
 ## Si…

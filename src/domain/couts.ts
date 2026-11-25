@@ -196,37 +196,116 @@ export function mouldCostOf<L extends { label: string; costEur: number | null; s
 export interface DishMould {
   label: string;
   eur: number;
+  /** Nombre de moules par portion (1 pour un moule individuel, 0,125 pour un grand plat de 8 portions), si connu. */
+  pieces?: number | null;
 }
 
 const mouldLabel = (label: string) => label.replace(/\s*\(\s*sous[\s-]*recettes?\s*\)\s*/i, " ").trim();
 
 /**
  * Moules et plats à gratin d'un plat (lignes du tome, sous-recettes comprises au prorata de la quantité utilisée),
- * regroupés par libellé : proposés à la saisie quand le plat est jeté avec (R42).
+ * regroupés par libellé : proposés à la saisie quand le plat est jeté avec (R42). Quand le tome passe par une
+ * sous-recette « Pot panna cotta » ou « Moule rond biodeg », on prend l'article qu'elle contient (« Pot KRAFT
+ * 100ml », « MOULE ROND INDIVIDUEL BIODEG 180mL ») : c'est lui qui est jeté.
  */
-export function mouldLinesOf<L extends { label: string; costEur: number | null; subRecipeId: string | null }>(
+export function mouldLinesOf<
+  L extends { label: string; costEur: number | null; subRecipeId: string | null; quantity?: number | null },
+>(
   lines: readonly L[],
   subRecipes: ReadonlyMap<string, { totalCostEur: number | null; lines: readonly L[] }>,
   isMould: (label: string) => boolean,
   depth = 0,
   share = 1,
-  out = new Map<string, number>(),
+  out = new Map<string, { eur: number; pieces: number | null }>(),
 ): DishMould[] {
   for (const line of lines) {
     if (line.costEur == null) continue;
+    const sub = line.subRecipeId ? subRecipes.get(line.subRecipeId) : undefined;
+    const subShare = sub?.totalCostEur ? (share * line.costEur) / sub.totalCostEur : null;
     if (isMould(line.label)) {
+      // Sous-recette qui n'est qu'un moule : on descend jusqu'à l'article acheté.
+      if (sub && subShare != null && depth < 5 && sub.lines.some((l) => l.costEur != null && isMould(l.label))) {
+        mouldLinesOf(sub.lines, subRecipes, isMould, depth + 1, subShare, out);
+        continue;
+      }
       const label = mouldLabel(line.label);
-      out.set(label, (out.get(label) ?? 0) + line.costEur * share);
-    } else if (line.subRecipeId && depth < 5) {
-      const sub = subRecipes.get(line.subRecipeId);
-      if (!sub?.totalCostEur) continue;
-      mouldLinesOf(sub.lines, subRecipes, isMould, depth + 1, (share * line.costEur) / sub.totalCostEur, out);
+      const known = out.get(label) ?? { eur: 0, pieces: 0 };
+      const pieces = line.subRecipeId || line.quantity == null ? null : line.quantity * share;
+      out.set(label, {
+        eur: known.eur + line.costEur * share,
+        pieces: known.pieces == null || pieces == null ? null : known.pieces + pieces,
+      });
+    } else if (sub && subShare != null && depth < 5) {
+      mouldLinesOf(sub.lines, subRecipes, isMould, depth + 1, subShare, out);
     }
   }
   return depth > 0
     ? []
     : [...out]
-        .map(([label, eur]) => ({ label, eur: Math.round(eur * 10_000) / 10_000 }))
+        .map(([label, m]) => ({
+          label,
+          eur: Math.round(m.eur * 10_000) / 10_000,
+          pieces: m.pieces == null ? null : Math.round(m.pieces * 1000) / 1000,
+        }))
         .filter((m) => m.eur > 0)
         .sort((a, b) => a.label.localeCompare(b.label, "fr"));
+}
+
+/** Clé de rapprochement d'un nom d'article : sans accents, ni ponctuation, ni majuscules. */
+const nameTokens = (name: string) =>
+  name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean);
+
+/** Même article : mêmes mots dans le même ordre, un mot abrégé comptant pour le mot entier (« INDIV » = « INDIVIDUEL »). */
+export function sameArticleName(a: string, b: string) {
+  const x = nameTokens(a);
+  const y = nameTokens(b);
+  return (
+    x.length > 0 &&
+    x.length === y.length &&
+    x.every((w, i) => {
+      const v = y[i]!;
+      return w === v || (Math.min(w.length, v.length) >= 3 && (w.startsWith(v) || v.startsWith(w)));
+    })
+  );
+}
+
+/** Emballage réglé par l'administration (Emballages et consommables), avec son coût unitaire en vigueur. */
+export interface PackagingItemPrice {
+  name: string;
+  code: string;
+  unitCostEur: number | null;
+}
+
+/**
+ * Nom et prix des moules réglés par l'administration (26/11/2026) : un moule du tome qui correspond à un emballage
+ * de l'administration prend son nom et son coût unitaire × le nombre de moules par portion. Sinon, le tome.
+ */
+export function priceMoulds(moulds: readonly DishMould[], items: readonly PackagingItemPrice[]): DishMould[] {
+  const merged = new Map<string, DishMould>();
+  for (const m of moulds) {
+    const item = items.find((i) => sameArticleName(i.name, m.label) || sameArticleName(i.code, m.label));
+    const priced =
+      item && item.unitCostEur != null && m.pieces != null
+        ? { label: item.name, eur: Math.round(m.pieces * item.unitCostEur * 10_000) / 10_000, pieces: m.pieces }
+        : { ...m, label: item?.name ?? m.label };
+    const known = merged.get(priced.label);
+    merged.set(
+      priced.label,
+      known
+        ? {
+            label: priced.label,
+            eur: Math.round((known.eur + priced.eur) * 10_000) / 10_000,
+            pieces: known.pieces == null || priced.pieces == null ? null : known.pieces + priced.pieces,
+          }
+        : priced,
+    );
+  }
+  return [...merged.values()].filter((m) => m.eur > 0).sort((a, b) => a.label.localeCompare(b.label, "fr"));
 }

@@ -278,7 +278,7 @@ async function prepareDeclaration(
   };
   if ("weekItem" in input.product) {
     // Produit de l'import de la semaine (docs/PHASE2.md, étape 2.5).
-    const item = await findWeekItem(db, input.product.weekItem.kind, input.product.weekItem.id);
+    const item = await findWeekItem(db, input.product.weekItem.kind, input.product.weekItem.id, input.occurredOn);
     const current = await currentWeekImport(db, lossWeek.id);
     if (!item) throw new DeclarationError("Produit de la semaine introuvable");
     if (!current || item.importId !== current.id) {

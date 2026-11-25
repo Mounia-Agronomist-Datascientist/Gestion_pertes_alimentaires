@@ -7,6 +7,7 @@ import { and, asc, desc, eq, gte, isNull, lte, or } from "drizzle-orm";
 import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
+import type { PackagingItemPrice } from "@/domain/couts";
 import { addDays, type LocalDate } from "@/domain/semaine-production";
 import { datedChange } from "@/domain/versions-datees";
 import { writeAudit } from "@/modules/audit/audit";
@@ -269,4 +270,21 @@ export async function portionPackagingCost(
   }));
   const totalEur = Math.round(lines.reduce((sum, l) => sum + (l.unitCostEur ?? 0) * l.quantity, 0) * 100_000) / 100_000;
   return { totalEur, lines, complete: lines.every((l) => l.unitCostEur != null) };
+}
+
+/** Emballages actifs et leur coût unitaire en vigueur à une date (nom et prix des moules à la saisie, R42). */
+export async function packagingItemPrices(db: Db, date: LocalDate): Promise<PackagingItemPrice[]> {
+  const rows = await db
+    .select({ item: s.packagingItems, cost: s.packagingItemCosts })
+    .from(s.packagingItems)
+    .leftJoin(
+      s.packagingItemCosts,
+      and(
+        eq(s.packagingItemCosts.itemId, s.packagingItems.id),
+        lte(s.packagingItemCosts.validFrom, date),
+        or(isNull(s.packagingItemCosts.validTo), gte(s.packagingItemCosts.validTo, date)),
+      ),
+    )
+    .where(eq(s.packagingItems.active, true));
+  return rows.map((r) => ({ name: r.item.name, code: r.item.code, unitCostEur: r.cost?.unitCostEur ?? null }));
 }

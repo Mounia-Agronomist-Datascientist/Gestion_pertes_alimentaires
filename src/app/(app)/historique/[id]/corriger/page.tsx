@@ -84,7 +84,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
           },
           dishPackaging: wholeDish
             ? {
-                moulds: (await findWeekItem(db, "plat", weekItem!.id))?.cost.moulds ?? [],
+                moulds: (await findWeekItem(db, "plat", weekItem!.id, d.occurredOn))?.cost.moulds ?? [],
                 trayPerPortionEur:
                   options.packagingPerPortion[d.productCode?.startsWith("PJ") ? "petit_dejeuner" : "plat"],
               }

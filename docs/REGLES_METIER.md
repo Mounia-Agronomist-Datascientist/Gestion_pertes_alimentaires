@@ -691,6 +691,13 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
     « Plat à gratin… » du tome, ainsi que le **pot où la recette est coulée** (« Pot panna cotta », « Pot KRAFT
     100ml », décision du 26/11/2026, migration 0041) ; les **moules à manger** (« moules décoquillées cuites ») sont une denrée, comptée
     dans les matières (corrigé le 26/11/2026, migration 0040).
+  - **Nom et prix du moule proposé** (26/11/2026) : l'article acheté que le tome cite (si le tome passe par une
+    sous-recette « Pot panna cotta » ou « Moule rond biodeg », l'article qu'elle contient : « Pot KRAFT 100ml (grand
+    format) », « MOULE ROND INDIVIDUEL BIODEG 180mL »). Si l'administration a saisi cet article dans Emballages et
+    consommables (même nom, un mot abrégé admis : « INDIV » = « INDIVIDUEL »), la question reprend **son nom** et
+    **son coût unitaire en vigueur à la date de la perte × le nombre de moules par portion** (1 pour un moule
+    individuel, 1/8 pour un grand plat à gratin de 8 portions) ; sinon le nom et le prix du tome. Le coût matières
+    du plat retire toujours les moules au prix du tome (inclus dans le coût Melba).
   - **Sous-recette déclarée seule** : on ne propose un moule que si le tome en cite un dans cette sous-recette ; dans
     les tomes chargés, les moules sont toujours cités au niveau de la recette, donc aucune question aujourd'hui.
   - avant la salle blanche (Déboîtage, Préparation froide, Cuisine), aucune question et aucun emballage.
