@@ -14,6 +14,7 @@ import {
   packagingQuestionsFor,
 } from "@/domain/couts";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
+import { kgPriceFallback, type KgPriceBasis } from "@/domain/matieres";
 import { cartonsProductError, snackAllowedIn } from "@/domain/encas";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { normalizeCauseName as normalizeLabel } from "@/modules/admin/causes";
@@ -38,7 +39,7 @@ import { type AuthUser, ForbiddenError, hasZone, requirePermission } from "@/mod
 import { portionPackagingCost } from "@/modules/admin/packaging";
 import { findWeekItem, type ResolvedWeekItem, SNACK_ZONE_CODES } from "@/modules/imports/catalog";
 import { currentWeekImport } from "@/modules/imports/service";
-import { materialPriceAt } from "@/modules/matieres/referentiel";
+import { materialPricesAt } from "@/modules/matieres/referentiel";
 import { findStoredProductionWeek } from "@/modules/referentiels/weeks";
 import {
   canModifyDeclaration,
@@ -274,6 +275,9 @@ async function prepareDeclaration(
       priceVersion?: { id: string; source: string; validFrom: string };
       /** Prix d'achat indiqué pour un produit absent de la liste (décision du 20/11/2026). */
       freePrice?: FreePrice;
+      /** Prix au kg du tome en vigueur, de secours quand le prix retenu n'est qu'à l'unité (26/11/2026). */
+      tomeKg?: { perKgEur: number; id: string; validFrom: string } | null;
+      priceBasis?: KgPriceBasis | null;
     };
   };
   if ("weekItem" in input.product) {
@@ -331,7 +335,7 @@ async function prepareDeclaration(
       densityKgPerL: row.densityKgPerL,
     };
     // Matière du référentiel : prix en vigueur à la date de la perte (docs/PHASE6.md, étape 6.7).
-    const price = await materialPriceAt(db, row.id, input.occurredOn);
+    const { price, tome } = await materialPricesAt(db, row.id, input.occurredOn);
     if (price) {
       const unitCost = { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur };
       const mould = row.category === "moule_plat_gratin";
@@ -346,6 +350,7 @@ async function prepareDeclaration(
         },
         importId: price.weeklyImportId,
         priceVersion: { id: price.id, source: price.source, validFrom: price.validFrom },
+        tomeKg: tome?.perKgEur != null ? { perKgEur: tome.perKgEur, id: tome.id, validFrom: tome.validFrom } : null,
       };
     }
   } else {
@@ -394,6 +399,19 @@ async function prepareDeclaration(
           }`,
         }
       : { kg, label: `Colis de ${fmtKg(kg)} (poids indiqué à la saisie)` };
+  }
+  // Prix seulement à l'unité (bon de commande) pour une perte pesée ou en colis : prix au kg du tome, sinon prix de
+  // l'unité ÷ poids du colis (décision du 26/11/2026).
+  if (product.cost && !product.cost.item.packagingItself) {
+    const fallback = kgPriceFallback(product.cost.item.food, {
+      countedInUnits: !input.tare && input.unitCode === "piece",
+      tomePerKgEur: product.cost.tomeKg?.perKgEur ?? null,
+      colisKg: packaging?.kg ?? null,
+    });
+    if (fallback) {
+      product.cost.item = { ...product.cost.item, food: { ...product.cost.item.food, perKgEur: fallback.perKgEur } };
+      product.cost.priceBasis = fallback.basis;
+    }
   }
   const measureContext: MeasureContext = {
     zoneCode: place.zone.code,
@@ -661,6 +679,12 @@ async function prepareDeclaration(
         packagingLines: packaging?.lines ?? [],
         packagingItself: c.packagingItself,
         priceVersion: product.cost.priceVersion ?? null,
+        ...(product.cost.priceBasis
+          ? {
+              priceBasis: product.cost.priceBasis,
+              ...(product.cost.priceBasis === "tome_au_kg" ? { tomePriceVersion: product.cost.tomeKg } : {}),
+            }
+          : {}),
         freePrice: product.cost.freePrice ?? null,
         labour: "non imputée : méthode d'affectation à définir (cahier des charges §18.2)",
       },
@@ -745,6 +769,42 @@ function freeCost(category: string, price: FreePrice) {
 }
 
 /**
+ * Coût d'une matière du référentiel à la date d'une perte (R23), avec le prix au kg de secours quand le prix retenu
+ * n'est qu'à l'unité (décision du 26/11/2026). Null sans prix connu (jamais deviné).
+ */
+async function listedProductCost(
+  db: Db,
+  product: { id: string | null; category: string },
+  on: string,
+  loss: { countedInUnits: boolean; colisKg: number | null },
+) {
+  if (!product.id) return null;
+  const { price, tome } = await materialPricesAt(db, product.id, on);
+  if (!price) return null;
+  const unitCost = { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur };
+  const mould = product.category === "moule_plat_gratin";
+  const fallback = mould ? null : kgPriceFallback(unitCost, { ...loss, tomePerKgEur: tome?.perKgEur ?? null });
+  return {
+    item: {
+      food: mould
+        ? { perKgEur: null, perUnitEur: null }
+        : fallback
+          ? { ...unitCost, perKgEur: fallback.perKgEur }
+          : unitCost,
+      mouldPerPortionEur: null,
+      moulds: [] as [],
+      portionKind: null,
+      portionWeightKg: null,
+      packagingItself: mould ? unitCost : null,
+    },
+    importId: price.weeklyImportId,
+    priceVersion: { id: price.id, source: price.source, validFrom: price.validFrom },
+    priceBasis: fallback?.basis ?? null,
+    tomePriceVersion: fallback?.basis === "tome_au_kg" && tome ? { id: tome.id, validFrom: tome.validFrom } : null,
+  };
+}
+
+/**
  * Colonnes de coût d'une perte déjà enregistrée, recalculées à partir d'un coût unitaire (prix indiqué après coup,
  * ou prix du produit auquel la saisie « hors liste » est rattachée). Le coût net garde les recettes encaissées.
  */
@@ -762,6 +822,8 @@ function costColumns(
     importId: string | null;
     freePrice?: FreePrice;
     priceVersion?: { id: string; source: string; validFrom: string };
+    priceBasis?: KgPriceBasis | null;
+    tomePriceVersion?: { id: string; validFrom: string } | null;
   },
   lines: readonly { recoveredAmount?: number | null }[],
   now: Date,
@@ -790,6 +852,7 @@ function costColumns(
       portions: breakdown.portions,
       packagingItself: cost.item.packagingItself,
       priceVersion: cost.priceVersion ?? null,
+      ...(cost.priceBasis ? { priceBasis: cost.priceBasis, tomePriceVersion: cost.tomePriceVersion ?? null } : {}),
       freePrice: cost.freePrice ?? null,
       labour: "non imputée : méthode d'affectation à définir (cahier des charges §18.2)",
     },
@@ -1318,29 +1381,11 @@ export async function linkDeclarationsToProduct(
 
       // Coût recalculé au prix du produit en vigueur à la date de la perte ; sans prix, le coût déjà connu (prix
       // indiqué pour la saisie « hors liste ») est gardé.
-      const price = await materialPriceAt(tx, product.id, existing.occurredOn);
-      const mould = product.category === "moule_plat_gratin";
-      const priced = price
-        ? costColumns(
-            { ...existing, ...measurement },
-            {
-              item: {
-                food: mould
-                  ? { perKgEur: null, perUnitEur: null }
-                  : { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur },
-                mouldPerPortionEur: null,
-                moulds: [],
-                portionKind: null,
-                portionWeightKg: null,
-                packagingItself: mould ? { perKgEur: price.perKgEur, perUnitEur: price.perUnitEur } : null,
-              },
-              importId: price.weeklyImportId,
-              priceVersion: { id: price.id, source: price.source, validFrom: price.validFrom },
-            },
-            before.destinations,
-            now,
-          )
-        : {};
+      const listed = await listedProductCost(tx, product, existing.occurredOn, {
+        countedInUnits: existing.netUnitCode === "piece",
+        colisKg: existing.unitCode === "colis" ? existing.conversionFactorUsed : null,
+      });
+      const priced = listed ? costColumns({ ...existing, ...measurement }, listed, before.destinations, now) : {};
 
       const revision = existing.revision + 1;
       const [declaration] = await tx

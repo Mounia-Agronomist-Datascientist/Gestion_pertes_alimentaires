@@ -380,4 +380,56 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
       ),
     ).rejects.toThrow(/Unité non proposée dans ce lieu/);
   });
+
+  it("prix seulement à l'unité (boîte) pour une perte en colis : tome au kg, sinon boîte ÷ colis (26/11/2026)", async () => {
+    const NOW = new Date("2026-11-13T10:00:00Z");
+    const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const [tomate] = await t.db
+      .insert(s.products)
+      .values({ category: "matiere_premiere", name: "Tomate test 5/1", defaultUnit: "kg", source: "manuel" })
+      .returning();
+    await t.db.insert(s.productPrices).values({
+      productId: tomate!.id,
+      source: "bon_commande",
+      validFrom: "2026-11-10",
+      unit: "Boite 5/1",
+      perUnitEur: 4.5,
+    });
+    const declare = () =>
+      createDeclaration(
+        t.db,
+        admin,
+        {
+          occurredOn: "2026-11-12",
+          subzoneId: sub,
+          product: { productId: tomate!.id },
+          causeId: cause,
+          method: "comptage",
+          quantity: 2,
+          unitCode: "colis",
+          packagingKg: 4,
+          destinations: [{ destinationId: bin, quantity: 2, binNumber: "1" }],
+        },
+        NOW,
+      );
+    const row = async (id: string) =>
+      (await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, id)))[0]!;
+    // Sans prix du tome : 4,50 € la boîte ÷ 4 kg = 1,125 €/kg, × 8 kg = 9 €.
+    const byColis = await row((await declare()).id);
+    expect(byColis).toMatchObject({ netKg: 8, costPerKgEur: 1.125, grossCostEur: 9 });
+    expect((byColis.costDetails as { priceBasis?: string }).priceBasis).toBe("prix_du_colis");
+    // Avec un prix au kg du tome en vigueur : il passe avant le calcul par colis.
+    await t.db.insert(s.productPrices).values({
+      productId: tomate!.id,
+      source: "tome",
+      validFrom: "2026-10-29",
+      unit: "g",
+      perKgEur: 1.2,
+    });
+    const byTome = await row((await declare()).id);
+    expect(byTome).toMatchObject({ costPerKgEur: 1.2, grossCostEur: 9.6 });
+    expect((byTome.costDetails as { priceBasis?: string }).priceBasis).toBe("tome_au_kg");
+  });
 });

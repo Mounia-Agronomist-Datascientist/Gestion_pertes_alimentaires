@@ -21,7 +21,7 @@ import { CARTONS_SNACK_SUBZONE, CARTONS_TRAY_SUBZONE, snackAllowedIn } from "@/d
 import { lotsAllowedIn } from "@/domain/lots";
 import { zoneNameWithoutNumber } from "@/domain/nom-zone";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
-import { materialsForPlace } from "@/domain/matieres";
+import { kgPriceFallback, materialsForPlace } from "@/domain/matieres";
 import {
   countUnitLabel,
   gastroTareAllowed,
@@ -378,8 +378,17 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
 
   // Coût matière estimé d'après le tome de la semaine (le serveur refait le calcul et le fige).
   // Produit absent de la liste : le prix d'achat indiqué (décision du 20/11/2026).
-  const listedPrice = listedProduct
-    ? (options.prices[listedProduct.id] ?? null)
+  const rawListedPrice = listedProduct ? (options.prices[listedProduct.id] ?? null) : null;
+  // Prix seulement à l'unité pour une perte pesée ou en colis : prix au kg du tome, sinon unité ÷ colis (26/11/2026).
+  const kgFallback = rawListedPrice
+    ? kgPriceFallback(rawListedPrice, {
+        countedInUnits: !useTare && unitCode === "piece",
+        tomePerKgEur: rawListedPrice.tomePerKgEur ?? null,
+        colisKg: unitCode === "colis" ? packagingKg : null,
+      })
+    : null;
+  const listedPrice = rawListedPrice
+    ? { ...rawListedPrice, perKgEur: kgFallback?.perKgEur ?? rawListedPrice.perKgEur }
     : product?.kind === "free" && product.price
       ? freeUnitCost(product.price)
       : null;

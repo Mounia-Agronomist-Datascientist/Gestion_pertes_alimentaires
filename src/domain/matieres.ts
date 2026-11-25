@@ -145,3 +145,22 @@ export function materialsForPlace<M extends { categoryId: string | null; storage
   }
   return { here, unplaced };
 }
+
+/** Base du prix au kg d'une perte quand le prix en vigueur n'est qu'à l'unité (revue du 26/11/2026). */
+export type KgPriceBasis = "tome_au_kg" | "prix_du_colis";
+
+/**
+ * Prix au kg de secours (décision du 26/11/2026) : le prix en vigueur (dernier bon de commande, R23) n'est qu'à
+ * l'unité (« Boite 5/1 », « poche 3l ») et la perte n'est pas comptée à l'unité. On prend alors le prix au kg du tome
+ * en vigueur ; à défaut, le prix de l'unité ÷ le poids du colis saisi (un colis = une unité achetée).
+ */
+export function kgPriceFallback(
+  price: { perKgEur: number | null; perUnitEur: number | null },
+  loss: { countedInUnits: boolean; tomePerKgEur: number | null; colisKg: number | null },
+): { perKgEur: number; basis: KgPriceBasis } | null {
+  if (price.perKgEur != null || loss.countedInUnits) return null;
+  if (loss.tomePerKgEur != null) return { perKgEur: loss.tomePerKgEur, basis: "tome_au_kg" };
+  if (price.perUnitEur != null && loss.colisKg != null && loss.colisKg > 0)
+    return { perKgEur: Math.round((price.perUnitEur / loss.colisKg) * 10_000) / 10_000, basis: "prix_du_colis" };
+  return null;
+}

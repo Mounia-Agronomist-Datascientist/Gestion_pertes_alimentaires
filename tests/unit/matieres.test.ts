@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { materialsForPlace, type PriceVersion, priceInForce, samePrice, tomeMaterials } from "@/domain/matieres";
+import {
+  kgPriceFallback,
+  materialsForPlace,
+  type PriceVersion,
+  priceInForce,
+  samePrice,
+  tomeMaterials,
+} from "@/domain/matieres";
 
 const line = (over: Partial<Parameters<typeof tomeMaterials>[0][number]>) => ({
   label: "Sel fin",
@@ -119,5 +126,26 @@ describe("matières de la semaine par lieu de saisie", () => {
     expect(
       materialsForPlace(withOwn, storageOf, { zoneCode: "STOCKAGE", subzoneId: "BOF" }).here.map((x) => x.name),
     ).toEqual(["bœuf", "sel de Guérande"]);
+  });
+});
+
+describe("prix au kg de secours (26/11/2026)", () => {
+  const box = { perKgEur: null, perUnitEur: 4.5 };
+  it("prix au kg déjà connu, ou perte comptée à l'unité : rien à changer", () => {
+    expect(
+      kgPriceFallback({ perKgEur: 2, perUnitEur: null }, { countedInUnits: false, tomePerKgEur: 1, colisKg: 4 }),
+    ).toBeNull();
+    expect(kgPriceFallback(box, { countedInUnits: true, tomePerKgEur: 1.2, colisKg: null })).toBeNull();
+  });
+  it("tome au kg d'abord, sinon prix de l'unité ÷ poids du colis", () => {
+    expect(kgPriceFallback(box, { countedInUnits: false, tomePerKgEur: 1.2, colisKg: 4 })).toEqual({
+      perKgEur: 1.2,
+      basis: "tome_au_kg",
+    });
+    expect(kgPriceFallback(box, { countedInUnits: false, tomePerKgEur: null, colisKg: 4 })).toEqual({
+      perKgEur: 1.125,
+      basis: "prix_du_colis",
+    });
+    expect(kgPriceFallback(box, { countedInUnits: false, tomePerKgEur: null, colisKg: null })).toBeNull();
   });
 });

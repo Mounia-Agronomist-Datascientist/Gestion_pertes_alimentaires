@@ -318,6 +318,11 @@ avec son code Melba devant son nom : « VI04_Ragoût de porc ». Le nom enregist
   colis ÷ son poids) ou à la pièce ; un prix au litre est ramené au kg avec la densité de la matière (R24), jamais
   calculé sans densité ni pour une unité qui ne correspond pas au conditionnement. Deux bons livrés le même jour :
   le dernier déposé fait foi. Un bon redéposé remplace ses prix.
+- **Prix seulement à l'unité** (décision du 26/11/2026) : quand le prix retenu n'est qu'à l'unité (« Boite 5/1 »,
+  « poche 3l », sans poids) et que la perte est pesée ou comptée en colis, le coût prend le **prix au kg du tome** en
+  vigueur ; à défaut, **le prix de l'unité ÷ le poids du colis saisi** (un colis = une unité achetée ; poche de lait
+  de coco à 10,95 € ÷ 3 kg = 3,65 €/kg). La base retenue est gardée sur la perte ; une perte comptée à l'unité garde
+  le prix à l'unité.
 - Le coût du tome **compte la préparation** (réponse du 18/11/2026) : perte à l'épluchage ou au parage, gain des
   féculents qui gonflent. Un écart entre le tome et le prix d'achat n'est donc pas forcément un changement de prix.
   Une matière perdue telle qu'achetée (Réception, Stockage) prend le prix d'achat ; un ingrédient de la semaine

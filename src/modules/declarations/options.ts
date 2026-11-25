@@ -166,7 +166,7 @@ export async function getDeclarationOptions(
     prices: Object.fromEntries(
       [...(await pricesInForce(db, today))].map(([id, p]) => [
         id,
-        { perKgEur: p.current.perKgEur, perUnitEur: p.current.perUnitEur },
+        { perKgEur: p.current.perKgEur, perUnitEur: p.current.perUnitEur, tomePerKgEur: p.tomePerKgEur },
       ]),
     ),
     /** Coût des emballages du référentiel par portion aujourd'hui (aperçu ; le serveur prend la date de la perte). */

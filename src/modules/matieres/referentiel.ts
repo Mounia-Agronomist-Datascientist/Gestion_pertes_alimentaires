@@ -221,11 +221,22 @@ export async function buildMaterialsFromTomes(db: Db, admin: AuthUser) {
 
 /** Prix d'une matière en vigueur à la date d'une perte, ou null (pas de prix connu : jamais deviné). */
 export async function materialPriceAt(db: Db, productId: string, on: string) {
+  return (await materialPricesAt(db, productId, on)).price;
+}
+
+/** Prix en vigueur à la date d'une perte, et le dernier prix du tome en vigueur (prix au kg de secours). */
+export async function materialPricesAt(db: Db, productId: string, on: string) {
   const versions = await db
     .select()
     .from(s.productPrices)
     .where(and(eq(s.productPrices.productId, productId), lte(s.productPrices.validFrom, on)));
-  return priceInForce(versions, on);
+  return {
+    price: priceInForce(versions, on),
+    tome: priceInForce(
+      versions.filter((v) => v.source === "tome" && v.perKgEur != null),
+      on,
+    ),
+  };
 }
 
 /** Versions de prix d'une matière, de la plus récente à la plus ancienne (écran d'administration). */
@@ -240,6 +251,18 @@ export async function pricesInForce(db: Db, on: string) {
   const byProduct = new Map<string, typeof rows>();
   for (const r of rows) byProduct.set(r.productId, [...(byProduct.get(r.productId) ?? []), r]);
   return new Map(
-    [...byProduct].map(([id, versions]) => [id, { current: priceInForce(versions, on)!, versions: versions.length }]),
+    [...byProduct].map(([id, versions]) => [
+      id,
+      {
+        current: priceInForce(versions, on)!,
+        versions: versions.length,
+        /** Prix au kg du tome en vigueur (secours quand le prix retenu n'est qu'à l'unité, 26/11/2026). */
+        tomePerKgEur:
+          priceInForce(
+            versions.filter((v) => v.source === "tome" && v.perKgEur != null),
+            on,
+          )?.perKgEur ?? null,
+      },
+    ]),
   );
 }
