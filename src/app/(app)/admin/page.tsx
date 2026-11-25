@@ -113,6 +113,11 @@ const FAMILIES: { id: string; title: string; text: string; entries: Entry[] }[] 
         text: "Coûts unitaires datés, emballages par portion",
       },
       {
+        href: "/admin/couts-manquants",
+        title: "Coûts manquants",
+        text: "Pertes enregistrées sans coût : les compléter quand le prix ou le tome est arrivé",
+      },
+      {
         href: "/admin/main-oeuvre",
         title: "Main-d'œuvre",
         text: "Coût horaire moyen par zone (non imputé aux pertes)",

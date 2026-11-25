@@ -765,7 +765,7 @@ function freeCost(category: string, price: FreePrice) {
     },
     importId: null,
     freePrice: price,
-  } satisfies NonNullable<NonNullable<Parameters<typeof costColumns>[1]>>;
+  };
 }
 
 /**
@@ -813,12 +813,11 @@ function costColumns(
   cost: {
     item: {
       food: { perKgEur: number | null; perUnitEur: number | null };
-      mouldPerPortionEur: null;
-      moulds: [];
-      portionKind: null;
-      portionWeightKg: null;
+      portionWeightKg: number | null;
       packagingItself: { perKgEur: number | null; perUnitEur: number | null } | null;
     };
+    /** Emballages jetés par portion (plat entier, R42), repris de la perte ; null sinon. */
+    packagingPerPortionEur?: number | null;
     importId: string | null;
     freePrice?: FreePrice;
     priceVersion?: { id: string; source: string; validFrom: string };
@@ -832,8 +831,8 @@ function costColumns(
     { netKg: d.netKg, quantity: d.netQuantity, unitCode: d.netUnitCode },
     {
       food: cost.item.food,
-      packagingPerPortionEur: null,
-      portionWeightKg: null,
+      packagingPerPortionEur: cost.packagingPerPortionEur ?? null,
+      portionWeightKg: cost.item.portionWeightKg,
       packagingItself: cost.item.packagingItself ?? undefined,
     },
   );
@@ -1602,5 +1601,175 @@ export async function setRecoveredAmounts(
       reason,
       occurredAt: now,
     });
+  });
+}
+
+// ─── Coûts manquants (décision du 26/11/2026) ────────────────────────────────
+
+/** Perte sans coût connu : coût brut vide, ou « 0 € » sans coût des matières (enregistrée avant la revue du 26/11). */
+const missingCostCondition = and(
+  inArray(s.lossDeclarations.status, ["validee", "corrigee"]),
+  or(
+    isNull(s.lossDeclarations.grossCostEur),
+    and(eq(s.lossDeclarations.grossCostEur, 0), isNull(s.lossDeclarations.materialCostEur)),
+  ),
+);
+
+/** Produit de la semaine d'une perte, retrouvé dans l'import en vigueur de sa semaine (l'import a pu être remplacé). */
+async function currentWeekItemOf(db: Db, d: typeof s.lossDeclarations.$inferSelect) {
+  const current = await currentWeekImport(db, d.productionWeekId);
+  if (!current) return null;
+  if (d.weekRecipeId) {
+    const [old] = await db.select().from(s.weekRecipes).where(eq(s.weekRecipes.id, d.weekRecipeId));
+    if (!old) return null;
+    const [now] = await db
+      .select()
+      .from(s.weekRecipes)
+      .where(and(eq(s.weekRecipes.importId, current.id), eq(s.weekRecipes.code, old.code)));
+    return now ? findWeekItem(db, "plat", now.id, d.occurredOn) : null;
+  }
+  if (d.weekSubRecipeId) {
+    const [old] = await db.select().from(s.weekSubRecipes).where(eq(s.weekSubRecipes.id, d.weekSubRecipeId));
+    if (!old) return null;
+    const [now] = await db
+      .select()
+      .from(s.weekSubRecipes)
+      .where(and(eq(s.weekSubRecipes.importId, current.id), eq(s.weekSubRecipes.name, old.name)));
+    return now ? findWeekItem(db, "sous_recette", now.id, d.occurredOn) : null;
+  }
+  if (d.weekLineId) {
+    const [old] = await db.select().from(s.weekRecipeLines).where(eq(s.weekRecipeLines.id, d.weekLineId));
+    if (!old) return null;
+    const [now] = await db
+      .select()
+      .from(s.weekRecipeLines)
+      .where(
+        and(
+          eq(s.weekRecipeLines.importId, current.id),
+          eq(s.weekRecipeLines.key, old.key),
+          eq(s.weekRecipeLines.isSubRecipe, false),
+        ),
+      )
+      .limit(1);
+    return now ? findWeekItem(db, "ingredient", now.id, d.occurredOn) : null;
+  }
+  return null;
+}
+
+/** Coût que l'on sait calculer aujourd'hui pour une perte sans coût, ou null. */
+async function completedCost(db: Db, d: typeof s.lossDeclarations.$inferSelect) {
+  if (d.productId) {
+    return listedProductCost(db, { id: d.productId, category: d.productCategory }, d.occurredOn, {
+      countedInUnits: d.netUnitCode === "piece",
+      colisKg: d.unitCode === "colis" ? d.conversionFactorUsed : null,
+    });
+  }
+  const item = await currentWeekItemOf(db, d);
+  if (!item) return null;
+  const details = (d.costDetails ?? {}) as { packagingPerPortionEur?: number | null };
+  return {
+    item: item.cost,
+    // Emballages jetés déclarés avec le plat (R42) : repris tels quels.
+    packagingPerPortionEur: item.cost.portionKind ? (details.packagingPerPortionEur ?? null) : null,
+    importId: item.importId,
+  };
+}
+
+/** Pertes sans coût connu, et combien peuvent être complétées aujourd'hui (écran de l'administration). */
+export async function missingCosts(db: Db, user: AuthUser) {
+  requirePermission(user, "referentiel.manage");
+  const rows = await db
+    .select()
+    .from(s.lossDeclarations)
+    .where(missingCostCondition)
+    .orderBy(s.lossDeclarations.occurredOn);
+  const list = [];
+  for (const d of rows) {
+    const cost = await completedCost(db, d);
+    const gross = cost
+      ? lossCostBreakdown(
+          { netKg: d.netKg, quantity: d.netQuantity, unitCode: d.netUnitCode },
+          {
+            food: cost.item.food,
+            packagingPerPortionEur: "packagingPerPortionEur" in cost ? (cost.packagingPerPortionEur ?? null) : null,
+            portionWeightKg: cost.item.portionWeightKg,
+            packagingItself: cost.item.packagingItself ?? undefined,
+          },
+        ).grossEur
+      : null;
+    list.push({
+      id: d.id,
+      occurredOn: d.occurredOn,
+      productName: d.productName,
+      productUnlisted: d.productUnlisted,
+      quantity: d.quantity,
+      unitCode: d.unitCode,
+      netKg: d.netKg,
+      completedGrossEur: gross,
+    });
+  }
+  return list;
+}
+
+/**
+ * Complète le coût des pertes qui n'en ont pas, quand il se calcule aujourd'hui (prix arrivé depuis, tome de la
+ * semaine importé, prix au kg de secours) : nouvelle version de chaque perte, l'ancienne gardée. Les autres restent
+ * sans coût (jamais deviné).
+ */
+export async function completeMissingCosts(db: Db, user: AuthUser, now: Date = new Date()) {
+  requirePermission(user, "referentiel.manage");
+  const reason = "Coût complété (prix ou tome disponible depuis la saisie)";
+  return db.transaction(async (tx) => {
+    const rows = await tx.select().from(s.lossDeclarations).where(missingCostCondition);
+    let completed = 0;
+    for (const existing of rows) {
+      const cost = await completedCost(tx, existing);
+      if (!cost) continue;
+      const before = await currentSnapshot(tx, existing);
+      const columns = costColumns(existing, cost, before.destinations, now);
+      if (columns.grossCostEur == null) continue;
+      const revision = existing.revision + 1;
+      const [declaration] = await tx
+        .update(s.lossDeclarations)
+        .set({ ...columns, status: "corrigee", revision, updatedAt: now })
+        .where(and(eq(s.lossDeclarations.id, existing.id), eq(s.lossDeclarations.revision, existing.revision)))
+        .returning();
+      if (!declaration) throw new DeclarationConflictError();
+      const after = await writeVersionLines(tx, declaration, {
+        containers: before.containers.map((c) => ({
+          containerTareId: c.containerTareId,
+          count: c.count,
+          tareKg: c.tareKgSnapshot,
+        })),
+        destinations: before.destinations.map((d) => ({
+          destinationId: d.destinationId,
+          quantity: d.quantity,
+          netKg: d.netKg,
+          recoveredAmount: d.recoveredAmount,
+          binNumber: d.binNumber,
+        })),
+      });
+      await tx.insert(s.declarationRevisions).values({
+        declarationId: existing.id,
+        revision,
+        status: "corrigee",
+        data: after,
+        changedBy: user.id,
+        changedAt: now,
+        reason,
+      });
+      await writeAudit(tx, {
+        userId: user.id,
+        action: "complete_cost",
+        entity: "loss_declaration",
+        entityId: existing.id,
+        before,
+        after,
+        reason,
+        occurredAt: now,
+      });
+      completed++;
+    }
+    return { completed, remaining: rows.length - completed };
   });
 }

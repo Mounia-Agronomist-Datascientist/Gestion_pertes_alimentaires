@@ -24,7 +24,7 @@ import {
 } from "@/modules/matieres/fiche";
 import { materialPriceAt } from "@/modules/matieres/referentiel";
 import { packagingOptions } from "@/modules/matieres/colis";
-import { createDeclaration } from "@/modules/declarations/service";
+import { completeMissingCosts, createDeclaration, missingCosts } from "@/modules/declarations/service";
 import { materialsOfWeek } from "@/modules/matieres/semaine";
 import { createTestDb } from "../helpers/test-db";
 
@@ -431,5 +431,47 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     const byTome = await row((await declare()).id);
     expect(byTome).toMatchObject({ costPerKgEur: 1.2, grossCostEur: 9.6 });
     expect((byTome.costDetails as { priceBasis?: string }).priceBasis).toBe("tome_au_kg");
+  });
+
+  it("coûts manquants : listés, puis complétés en nouvelle version quand le prix est arrivé (26/11/2026)", async () => {
+    const NOW = new Date("2026-11-13T10:00:00Z");
+    const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const [coco] = await t.db
+      .insert(s.products)
+      .values({ category: "matiere_premiere", name: "Lait de coco test", defaultUnit: "kg", source: "manuel" })
+      .returning();
+    const d = await createDeclaration(
+      t.db,
+      admin,
+      {
+        occurredOn: "2026-11-12",
+        subzoneId: sub,
+        product: { productId: coco!.id },
+        causeId: cause,
+        method: "pesee",
+        quantity: 6,
+        unitCode: "kg",
+        destinations: [{ destinationId: bin, quantity: 6, binNumber: "1" }],
+      },
+      NOW,
+    );
+    const mine = async () => (await missingCosts(t.db, admin)).find((m) => m.id === d.id);
+    expect(await mine()).toMatchObject({ completedGrossEur: null });
+    await t.db.insert(s.productPrices).values({
+      productId: coco!.id,
+      source: "tome",
+      validFrom: "2026-10-29",
+      unit: "g",
+      perKgEur: 3.65,
+    });
+    expect(await mine()).toMatchObject({ completedGrossEur: 21.9 });
+    const { completed } = await completeMissingCosts(t.db, admin, NOW);
+    expect(completed).toBeGreaterThanOrEqual(1);
+    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, d.id));
+    expect(row).toMatchObject({ grossCostEur: 21.9, status: "corrigee", revision: 2 });
+    expect(await mine()).toBeUndefined();
+    await expect(completeMissingCosts(t.db, team)).rejects.toThrow(ForbiddenError);
   });
 });

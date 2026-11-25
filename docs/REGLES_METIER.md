@@ -189,6 +189,12 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 - **Coût des matières inconnu** (revue du 26/11/2026) : le coût brut est **inconnu**, même si les emballages sont
   connus (jamais « 0 € ») ; la perte compte parmi les « pertes sans coût connu ».
 
+- **Coûts manquants** (décision du 26/11/2026) : Administration → Coûts manquants liste les pertes sans coût connu.
+  Le bouton « Compléter les coûts manquants » calcule, à la date de la perte, le coût de celles qui ont maintenant un
+  prix (bon de commande, prix manuel, prix au kg de secours) ou un tome de leur semaine (un import remplacé est
+  retrouvé par le code du plat, le nom de la sous-recette ou l'ingrédient) : chaque perte complétée devient une
+  nouvelle version (l'ancienne reste dans l'historique). Les autres restent sans coût, jamais deviné.
+
 ## R13 — Recettes encaissées et coût net (Phase 3, 10/11/2026)
 
 - Seules les destinations de **vente** (Too Good To Go, vente flash) portent une recette : le **montant réellement
