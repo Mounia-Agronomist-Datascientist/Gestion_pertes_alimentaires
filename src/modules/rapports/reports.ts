@@ -13,7 +13,7 @@ import type { Db } from "@/db/types";
 import { type Period, periodLabel } from "@/domain/periodes";
 import { RECONCILIATION_STATUS_LABELS } from "@/domain/rapprochement";
 import { formatProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
-import { type StatsSummary } from "@/domain/statistiques";
+import { evolution, type StatsSummary } from "@/domain/statistiques";
 import { SURPLUS_SOURCES, surplusTrays } from "@/domain/surplus";
 import { TREND_LABELS, TREND_SYMBOLS } from "@/domain/tendances";
 import { RECOVERY_GROUPS, recoveredShare, recoveryPerKg } from "@/domain/valorisation";
@@ -49,12 +49,33 @@ const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 const categoryLabel = (c: string) => PRODUCT_CATEGORY_LABELS[c as keyof typeof PRODUCT_CATEGORY_LABELS] ?? c;
 const kindLabel = (k: string) => DESTINATION_KIND_STATS.find((d) => d.kind === k)?.label ?? k;
 
-/** Évolution courte (« +12 % vs S44-2026 »). */
+/** Au-delà de ce pourcentage, l'écart n'est plus parlant (période précédente presque vide) : « forte hausse ». */
+const STRONG_CHANGE_PERCENT = 100;
+
+/** Mot court d'une évolution, comme à l'écran (« hausse +12 % », « forte hausse », « baisse -8 % »). */
+function changeWord(current: number, previous: number | null | undefined): string | null {
+  const e = evolution(current, previous);
+  if (!e) return null;
+  if (e.delta === 0) return "stable";
+  if (e.percent == null) return "nouveau";
+  if (e.percent >= STRONG_CHANGE_PERCENT) return "forte hausse";
+  if (Math.abs(e.percent) < 0.5) return "stable";
+  return e.percent > 0 ? `hausse +${Math.round(e.percent)} %` : `baisse -${Math.round(-e.percent)} %`;
+}
+
+/** Évolution courte sous un chiffre clé (« forte hausse vs S44-2026 »). */
 function trend(current: number, previous: number | null | undefined, label: string | null): string | null {
-  if (previous == null || !label) return null;
-  if (previous === 0) return current > 0 ? `nouveau vs ${label}` : `= ${label}`;
-  const p = Math.round(((current - previous) / previous) * 100);
-  return `${p > 0 ? "+" : ""}${p} % vs ${label}`;
+  const word = changeWord(current, previous);
+  return word && label ? `${word} vs ${label}` : null;
+}
+
+/** Détail chiffré d'une évolution : « pertes alimentaires 17,4 kg -> 1 038,3 kg (+1 020,9 kg, +5 852 %) ». */
+function trendDetail(name: string, current: number, previous: number | null | undefined, fmt: (v: number) => string) {
+  const e = evolution(current, previous);
+  if (!e || previous == null || e.delta === 0) return null;
+  const sign = e.delta > 0 ? "+" : "-";
+  const percent = e.percent != null ? `, ${sign}${num.format(Math.abs(e.percent))} %` : "";
+  return `${name} ${fmt(previous)} -> ${fmt(current)} (${sign}${fmt(Math.abs(e.delta))}${percent})`;
 }
 
 /** Périmètre et filtres, écrits en clair en tête du rapport. */
@@ -119,6 +140,35 @@ function summaryFigures(
       note: trend(current.events, previous?.events, previousLabel),
     },
   ]);
+  if (previous && previousLabel) {
+    const count = (v: number) => num.format(v);
+    const details = [
+      trendDetail("pertes alimentaires", current.foodKg, previous.foodKg, kg),
+      ...(withCosts && current.cost
+        ? [
+            trendDetail("coût brut", current.cost.grossEur, previous.cost?.grossEur, (v) => euro.format(v)),
+            trendDetail("coût net", current.cost.netEur, previous.cost?.netEur, (v) => euro.format(v)),
+          ]
+        : []),
+      trendDetail("barquettes", current.barquettes, previous.barquettes, count),
+      trendDetail("déclarations", current.events, previous.events, count),
+    ].filter((d): d is string => d != null);
+    const strong = [
+      [current.foodKg, previous.foodKg],
+      [current.cost?.grossEur ?? 0, previous.cost?.grossEur],
+      [current.barquettes, previous.barquettes],
+      [current.events, previous.events],
+    ].some(([c, p]) => changeWord(c!, p) === "forte hausse");
+    if (details.length)
+      r.paragraph(
+        `Évolutions par rapport à ${previousLabel} : ${details.join(" ; ")}.${
+          strong
+            ? ` « Forte hausse » : plus du double de ${previousLabel} ; le pourcentage devient très grand quand cette période avait peu de pertes saisies.`
+            : ""
+        }`,
+        { muted: true, size: 8 },
+      );
+  }
   const notes: string[] = [];
   if (current.foodNotConverted > 0)
     notes.push(
@@ -305,7 +355,7 @@ async function periodic(
         kg(x.summary.foodKg),
         ...(withCosts ? [euro.format(x.summary.cost?.grossEur ?? 0)] : []),
         String(x.summary.events),
-        trend(x.summary.foodKg, x.previous?.foodKg, "")?.replace(" vs ", "") ?? "—",
+        changeWord(x.summary.foodKg, x.previous?.foodKg) ?? "—",
       ]),
       // Une équipe garde sa couleur, comme dans l'application (R30).
       { swatches: rows.map((x) => x.color) },
