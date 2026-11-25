@@ -88,7 +88,7 @@ describe("famille de cause racine et pertes évitables (décision du 23/11/2026)
         admin,
         {
           occurredOn: "2026-11-12",
-          subzoneId: await id(s.subzones, "CON_AUTRES"),
+          subzoneId: await id(s.subzones, "CON_BARQUETTES"),
           product: { freeLabel: "Produit test", category: "matiere_premiere" },
           method: "pesee",
           quantity: kg,

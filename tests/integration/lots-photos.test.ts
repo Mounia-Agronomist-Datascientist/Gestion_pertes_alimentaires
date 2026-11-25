@@ -90,7 +90,7 @@ describe("n° de lot, DLC et photos (règle R37)", () => {
             product: { freeLabel: "Barquettes", category: "produit_fini" },
             lots: [{ lotNumber: "X", dlc: null, quantity: 50 }],
           },
-          ["CON_AUTRES", "CON_SURPRODUCTION"],
+          ["CON_BARQUETTES", "CON_SURPRODUCTION"],
         ),
         NOW,
       ),

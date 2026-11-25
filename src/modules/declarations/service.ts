@@ -5,9 +5,15 @@
 import { and, eq, gte, inArray, isNull, lt, lte, or } from "drizzle-orm";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
-import { COST_METHOD, lossCostBreakdown } from "@/domain/couts";
+import {
+  COST_METHOD,
+  discardedPackagingPerPortion,
+  lossCostBreakdown,
+  missingPackagingAnswer,
+  packagingQuestionsFor,
+} from "@/domain/couts";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
-import { snackAllowedIn } from "@/domain/encas";
+import { cartonsProductError, snackAllowedIn } from "@/domain/encas";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { normalizeCauseName as normalizeLabel } from "@/modules/admin/causes";
 import { tomeKey } from "@/modules/imports/tome/parse-tome";
@@ -359,6 +365,8 @@ async function prepareDeclaration(
     if (input.product.price) product.cost = freeCost(product.category, input.product.price);
   }
   const isConsumable = isNonFoodCategory(product.category);
+  const cartonsError = cartonsProductError(place.subzone.code, product.category === "produit_externe");
+  if (cartonsError) throw new DeclarationError(cartonsError);
 
   // ─── Façon de mesurer permise dans ce lieu pour ce produit (règle R25) ──────
   // Colis fournisseur (Réception, Stockage) : le colis connu choisi, dont le poids peut être corrigé à la saisie
@@ -600,10 +608,21 @@ async function prepareDeclaration(
   };
   if (product.cost) {
     const c = product.cost.item;
-    const packaging = c.portionKind ? await portionPackagingCost(db, c.portionKind, input.occurredOn) : null;
-    const packagingPerPortionEur = c.portionKind
-      ? Math.round(((c.mouldPerPortionEur ?? 0) + packaging!.totalEur) * 100_000) / 100_000
-      : null;
+    // Moule et barquette : comptés seulement s'ils sont jetés, en salle blanche et en salle des cartons (R42).
+    const questions = packagingQuestionsFor(
+      { zoneCode: place.zone.code, subzoneCode: place.subzone.code },
+      { wholeDish: c.portionKind != null, mouldPerPortionEur: c.mouldPerPortionEur },
+    );
+    const missing = missingPackagingAnswer(questions, input.discarded);
+    if (missing) throw new DeclarationError(missing);
+    const packaging =
+      c.portionKind && questions.tray && input.discarded?.tray
+        ? await portionPackagingCost(db, c.portionKind, input.occurredOn)
+        : null;
+    const packagingPerPortionEur = discardedPackagingPerPortion(questions, input.discarded, {
+      mouldEur: c.mouldPerPortionEur,
+      trayEur: packaging?.totalEur ?? null,
+    });
     const loss = { netKg: measurement.netKg, quantity: measurement.netQuantity, unitCode: measurement.netUnitCode };
     const breakdown = lossCostBreakdown(loss, {
       food: c.food,
@@ -626,7 +645,14 @@ async function prepareDeclaration(
         portions: breakdown.portions,
         mouldPerPortionEur: c.mouldPerPortionEur,
         packagingPerPortionEur,
-        packagingDate: c.portionKind ? input.occurredOn : null,
+        packagingDate: packaging ? input.occurredOn : null,
+        discarded:
+          questions.mould || questions.tray
+            ? {
+                ...(questions.mould ? { mould: !!input.discarded?.mould } : {}),
+                ...(questions.tray ? { tray: !!input.discarded?.tray } : {}),
+              }
+            : null,
         packagingComplete: packaging?.complete ?? null,
         packagingLines: packaging?.lines ?? [],
         packagingItself: c.packagingItself,

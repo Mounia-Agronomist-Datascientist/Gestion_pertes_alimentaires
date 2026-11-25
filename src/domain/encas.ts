@@ -29,3 +29,19 @@ export function snackAllowedIn(zoneCode: string, subzoneCode: string | null | un
   if (subzoneCode === DRY_SNACK_SUBZONE) return !isFreshSnack(family);
   return false;
 }
+
+/**
+ * Salle des cartons (décision du 25/11/2026) : au poste « Encas jetés », seulement les encas ; au poste « Barquettes
+ * jetées », seulement les plats (aucun encas).
+ */
+export const CARTONS_TRAY_SUBZONE = "CON_BARQUETTES";
+export const CARTONS_SNACK_SUBZONE = "CON_AUTRES";
+
+/** Message d'erreur si ce type de produit n'a pas sa place à ce poste de la salle des cartons, sinon null. */
+export function cartonsProductError(subzoneCode: string | null | undefined, isSnack: boolean): string | null {
+  if (subzoneCode === CARTONS_TRAY_SUBZONE && isSnack)
+    return "Les encas se déclarent au poste des encas jetés, pas avec les barquettes";
+  if (subzoneCode === CARTONS_SNACK_SUBZONE && !isSnack)
+    return "Seuls les encas se déclarent à ce poste : les plats vont au poste des barquettes jetées";
+  return null;
+}

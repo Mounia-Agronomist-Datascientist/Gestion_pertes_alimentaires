@@ -53,7 +53,7 @@ describe("part dans les pertes : équipe de cuisine, responsable de zone", () =>
     await loss("CUI_CUISINE", "CUI_CHUTE_GASTRO", 10, await team("A"));
     await loss("CUI_CUISINE", "CUI_CHUTE_GASTRO", 30, await team("B"));
     await loss("STO_BOF", "STO_PEREMPTION", 40);
-    await loss("CON_AUTRES", "CON_ETIQUETAGE", 20);
+    await loss("CON_BARQUETTES", "CON_ETIQUETAGE", 20);
   });
 
   afterAll(async () => {

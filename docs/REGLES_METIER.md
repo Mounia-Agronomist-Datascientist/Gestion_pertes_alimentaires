@@ -181,8 +181,9 @@ brouillon ──valider──▶ validée ──corriger──▶ corrigée ─�
 
 - Coût brut = matières + emballages (+ main-d'œuvre et charges indirectes quand elles seront définies).
 - Les moules et plats à gratin inclus dans le coût Melba d'un plat sont comptés en **emballages**, jamais deux fois.
-- Les emballages du référentiel s'ajoutent à **tout plat perdu** (par portion), aux prix en vigueur à la date de
-  la perte ; aucun emballage n'est ajouté aux encas, sous-recettes et ingrédients.
+- Depuis le 25/11/2026 (R42), le moule (ou plat à gratin) et la barquette ne s'ajoutent que s'ils sont **jetés
+  avec le plat**, en salle blanche et en salle des cartons ; avant (jusqu'au 24/11), les emballages du référentiel
+  s'ajoutaient à tout plat perdu. Aucun emballage n'est ajouté aux encas, sous-recettes et ingrédients.
 - Le coût est figé sur la déclaration avec sa méthode et sa date de calcul.
 
 ## R13 — Recettes encaissées et coût net (Phase 3, 10/11/2026)
@@ -661,3 +662,24 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
     gardent leur poids et leur coût figés.
 - **Premier chargement** : le PDF de tous les encas récemment utilisés, sur plusieurs semaines ; chaque recette est
   rangée à sa semaine (une semaine absente du calendrier est ignorée et signalée).
+
+## R42 — Salle des cartons, moule et barquette jetés (25/11/2026)
+
+- **Base des encas** : le tableau « Encas commandés S02-S49 » (Google Sheets, lu sans modification) est déjà
+  entièrement dans la liste interne (99 encas, leurs prix datés par livraison, leurs poids quand le conditionnement
+  les donne) ; il avait servi à la liste de départ (R29). Les semaines suivantes, la liste se complète avec le tome
+  des encas (R41) et les bons de commande ; le tableau Google n'est jamais modifié par l'application.
+- **Salle des cartons, poste « Encas jetés »** : seulement des encas — d'abord ceux de la semaine (tome), puis
+  « Tous les encas » par famille, repliés, comme en Réception. **Poste « Barquettes jetées »** : seulement les plats,
+  aucun encas. Le serveur refuse un plat au poste des encas et un encas au poste des barquettes.
+- **Coût d'un plat** : les matières seules (coût Melba de la portion, moules et plats à gratin retirés). Le moule et
+  la barquette sont comptés à part, en **emballages**, seulement s'ils sont jetés :
+  - à partir de la **salle blanche** (Cellule de refroidissement et Salle blanche) et en **salle des cartons**, pour
+    un **plat entier** (pas une sous-recette, un ingrédient ou un encas), deux questions obligatoires après la
+    quantité : « Le moule ou le plat à gratin est-il jeté avec ? » (seulement si le plat en contient) et « La
+    barquette est-elle jetée aussi ? » ;
+  - oui → coût du moule ou plat à gratin par portion (lu dans le tome) ; oui → coût de la barquette par portion :
+    les **emballages par portion** réglés par l'administration (Administration → Emballages et consommables), aux
+    prix en vigueur à la date de la perte ;
+  - avant la salle blanche (Déboîtage, Préparation froide, Cuisine), aucune question et aucun emballage.
+- Les réponses sont gardées sur la perte (récapitulatif, correction). Les pertes déjà enregistrées gardent leur coût.

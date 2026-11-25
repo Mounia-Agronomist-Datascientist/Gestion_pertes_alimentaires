@@ -108,6 +108,11 @@ export const declarationInputSchema = z
       .nullable()
       .optional(),
     tare: tareInput.nullable().optional(),
+    /** Plat entier en salle blanche ou en salle des cartons : moule et barquette jetés avec (règle R42). */
+    discarded: z
+      .object({ mould: z.boolean().nullable().optional(), tray: z.boolean().nullable().optional() })
+      .nullable()
+      .optional(),
     causeId: uuid,
     destinations: z
       .array(

@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { productLabel } from "@/domain/produits";
 import { db } from "@/db/client";
-import type { UnitCost } from "@/domain/couts";
+import type { DiscardedPackaging, UnitCost } from "@/domain/couts";
 import { computeProductionWeek, toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { INPUT_METHODS, type InputMethod } from "@/modules/declarations/input";
@@ -46,6 +46,23 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
         : null;
   const lossWeek = computeProductionWeek(d.occurredOn);
 
+  const options = await getDeclarationOptions(
+    db,
+    user,
+    toProductionLocalDate(new Date()),
+    detail.destinations.map((x) => x.destinationId),
+  );
+  const details = d.costDetails as {
+    packagingPerPortionEur?: number | null;
+    mouldPerPortionEur?: number | null;
+    packagingItself?: UnitCost | null;
+    freePrice?: FreePrice | null;
+    discarded?: DiscardedPackaging | null;
+  } | null;
+  // Plat entier (pas un encas) : moule et barquette, comptés s'ils sont jetés (R42) ; barquette aux prix du jour pour
+  // l'aperçu, le serveur reprend ceux de la date de la perte.
+  const wholeDish = weekItem?.kind === "plat" && d.productCategory === "produit_fini";
+
   const initial: WizardInitial = {
     zoneId: d.zoneId,
     subzoneId: d.subzoneId,
@@ -61,12 +78,17 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
           week: { year: lossWeek.year, number: lossWeek.number },
           cost: {
             food: { perKgEur: d.costPerKgEur, perUnitEur: d.costPerUnitEur },
-            packagingPerPortionEur:
-              (d.costDetails as { packagingPerPortionEur?: number | null } | null)?.packagingPerPortionEur ?? null,
+            packagingPerPortionEur: wholeDish ? null : (details?.packagingPerPortionEur ?? null),
             portionWeightKg: d.conversionFactorUsed,
-            packagingItself:
-              (d.costDetails as { packagingItself?: UnitCost | null } | null)?.packagingItself ?? undefined,
+            packagingItself: details?.packagingItself ?? undefined,
           },
+          dishPackaging: wholeDish
+            ? {
+                mouldPerPortionEur: details?.mouldPerPortionEur ?? null,
+                trayPerPortionEur:
+                  options.packagingPerPortion[d.productCode?.startsWith("PJ") ? "petit_dejeuner" : "plat"],
+              }
+            : undefined,
         }
       : d.productId
         ? { kind: "listed", id: d.productId, name: d.productName, category: d.productCategory }
@@ -75,7 +97,7 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
             name: d.productName,
             category: d.productCategory,
             // Prix d'achat indiqué (à la saisie ou après coup), gardé à la correction.
-            price: (d.costDetails as { freePrice?: FreePrice | null } | null)?.freePrice ?? null,
+            price: details?.freePrice ?? null,
           },
     method,
     quantity: useTare ? "" : String(d.quantity),
@@ -113,14 +135,9 @@ export default async function CorrectPage({ params }: { params: Promise<{ id: st
       quantity: String(l.quantity).replace(".", ","),
     })),
     photos: detail.photos.map((p) => ({ photoId: p.id, src: `/historique/${id}/photo/${p.id}` })),
+    discarded: details?.discarded ?? {},
   };
 
-  const options = await getDeclarationOptions(
-    db,
-    user,
-    toProductionLocalDate(new Date()),
-    detail.destinations.map((x) => x.destinationId),
-  );
   return (
     <DeclarationWizard options={options} userTeam={user.team} correction={{ id, revision: d.revision, initial }} />
   );

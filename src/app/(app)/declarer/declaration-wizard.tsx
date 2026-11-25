@@ -3,10 +3,18 @@
 import { productLabel } from "@/domain/produits";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { type CostInputs, lossCostBreakdown, type UnitCost } from "@/domain/couts";
+import {
+  type CostInputs,
+  type DiscardedPackaging,
+  discardedPackagingPerPortion,
+  lossCostBreakdown,
+  missingPackagingAnswer,
+  packagingQuestionsFor,
+  type UnitCost,
+} from "@/domain/couts";
 import { checkDestinationSplit } from "@/domain/destinations";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
-import { snackAllowedIn } from "@/domain/encas";
+import { CARTONS_SNACK_SUBZONE, CARTONS_TRAY_SUBZONE, snackAllowedIn } from "@/domain/encas";
 import { lotsAllowedIn } from "@/domain/lots";
 import { zoneNameWithoutNumber } from "@/domain/nom-zone";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
@@ -62,8 +70,10 @@ export type ProductChoice =
       densityKgPerL?: number | null;
       /** Semaine de production de l'import (le produit n'est valable que pour une perte de cette semaine). */
       week: { year: number; number: number };
-      /** Coûts du tome de la semaine (matières, emballages par portion). */
+      /** Coûts du tome de la semaine (matières ; emballages seulement pour un moule ou un plat à gratin vendu seul). */
       cost: CostInputs;
+      /** Plat entier : moule (ou plat à gratin) et barquette par portion, comptés seulement s'ils sont jetés (R42). */
+      dishPackaging?: { mouldPerPortionEur: number | null; trayPerPortionEur: number | null };
     };
 
 /** État de départ d'une correction, construit à partir de la déclaration existante. */
@@ -97,6 +107,8 @@ export interface WizardInitial {
   lotLines?: LotLineText[];
   /** Photos du lot et de la DLC : déjà enregistrées (correction) ou prises sur l'appareil. */
   photos?: WizardPhoto[];
+  /** Moule et barquette jetés avec le plat (salle blanche, salle des cartons). */
+  discarded?: DiscardedPackaging;
 }
 
 /** Ligne préparée en mode « plusieurs pertes », gardée sur l'appareil jusqu'à la validation du lot. */
@@ -208,6 +220,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
   const [comment, setComment] = useState(init?.comment ?? "");
   const [lotLines, setLotLines] = useState<LotLineText[]>(init?.lotLines ?? []);
   const [photos, setPhotos] = useState<WizardPhoto[]>(init?.photos ?? []);
+  const [discarded, setDiscarded] = useState<DiscardedPackaging>(init?.discarded ?? {});
   const [reason, setReason] = useState("");
   const [result, setResult] = useState<SubmitResult | null>(null);
   /** Perte gardée sur l'appareil faute de réseau (envoyée au retour du réseau). */
@@ -366,9 +379,29 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       ? freeUnitCost(product.price)
       : null;
   const pricedProduct = !!listedProduct || (product?.kind === "free" && !!product.price);
+  // Moule et barquette jetés avec un plat entier : demandés en salle blanche et en salle des cartons (R42).
+  const packagingQuestions = packagingQuestionsFor(
+    { zoneCode: zone?.code ?? "", subzoneCode: subzone?.code ?? null },
+    {
+      wholeDish: product?.kind === "week" && !!product.dishPackaging,
+      mouldPerPortionEur: product?.kind === "week" ? (product.dishPackaging?.mouldPerPortionEur ?? null) : null,
+    },
+  );
+  const packagingMissing = missingPackagingAnswer(packagingQuestions, discarded);
   const costPreview =
     product?.kind === "week" && net
-      ? lossCostBreakdown({ netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode }, product.cost)
+      ? lossCostBreakdown(
+          { netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode },
+          product.dishPackaging
+            ? {
+                ...product.cost,
+                packagingPerPortionEur: discardedPackagingPerPortion(packagingQuestions, discarded, {
+                  mouldEur: product.dishPackaging.mouldPerPortionEur,
+                  trayEur: product.dishPackaging.trayPerPortionEur,
+                }),
+              }
+            : product.cost,
+        )
       : listedPrice && net && product?.category !== "moule_plat_gratin"
         ? lossCostBreakdown(
             { netKg: net.kg, quantity: net.quantity, unitCode: net.unitCode },
@@ -540,6 +573,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
         .filter((l) => l.quantity > 0),
       destinationGapJustification: justification || null,
       comment: comment || null,
+      discarded: packagingQuestions.mould || packagingQuestions.tray ? discarded : null,
       ...(zone && lotsAllowedIn(zone.code)
         ? {
             lots: lotsPayload(lotLines, net.quantity, today),
@@ -574,6 +608,7 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           occurredTime,
           comment,
           lotLines,
+          discarded,
         },
         summary: {
           productName: product.name,
@@ -849,12 +884,20 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
           initialWeek={occurredWeek}
           initialCatalog={catalogForDate}
           packagingPerPortion={options.packagingPerPortion}
-          dishScope={subzone?.teamMode === "equipe" ? "equipe" : zone?.code === "CONDITIONNEMENT" ? "toutes" : null}
-          showSnacks={!!zone && SNACK_ZONE_CODES.includes(zone.code)}
+          dishScope={
+            subzone?.teamMode === "equipe"
+              ? "equipe"
+              : zone?.code === "CONDITIONNEMENT" && subzone?.code !== CARTONS_SNACK_SUBZONE
+                ? "toutes"
+                : null
+          }
+          showSnacks={!!zone && SNACK_ZONE_CODES.includes(zone.code) && subzone?.code !== CARTONS_TRAY_SUBZONE}
+          onlySnacks={subzone?.code === CARTONS_SNACK_SUBZONE}
           subzoneCode={subzone?.code ?? null}
           teamId={teamId}
           onChoose={(p) => {
             setProduct(p);
+            setDiscarded({});
             setMethod(null);
             setUseTare(false);
             // Une seule façon de mesurer (pesée en Cuisine/production) : déjà choisie.
@@ -1055,10 +1098,29 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             </p>
           )}
 
+          {(packagingQuestions.mould || packagingQuestions.tray) && (
+            <div className="flex flex-col gap-3">
+              {packagingQuestions.mould && (
+                <YesNo
+                  legend="Le moule ou le plat à gratin est-il jeté avec ?"
+                  value={discarded.mould ?? null}
+                  onChange={(v) => setDiscarded((d) => ({ ...d, mould: v }))}
+                />
+              )}
+              {packagingQuestions.tray && (
+                <YesNo
+                  legend="La barquette est-elle jetée aussi ?"
+                  value={discarded.tray ?? null}
+                  onChange={(v) => setDiscarded((d) => ({ ...d, tray: v }))}
+                />
+              )}
+            </div>
+          )}
+
           <button
             type="button"
             className="btn-primary"
-            disabled={!net}
+            disabled={!net || !!packagingMissing}
             onClick={() => {
               // Une seule destination : elle suit la nouvelle quantité (cas d'une correction).
               if (net && destinationLines.length === 1) {
@@ -1255,6 +1317,16 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
             <dt className="text-slate-500">Quantité</dt>
             <dd>
               {netLabel}
+              {(packagingQuestions.mould || packagingQuestions.tray) && (
+                <span className="block text-sm text-slate-500">
+                  {[
+                    packagingQuestions.mould && `moule ${discarded.mould ? "jeté avec" : "gardé"}`,
+                    packagingQuestions.tray && `barquette ${discarded.tray ? "jetée aussi" : "gardée"}`,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              )}
               {useTare &&
                 tarePreview?.result &&
                 ` (brut ${fmt(tarePreview.result.grossKg)} kg − tare ${fmt(tarePreview.result.tareTotalKg)} kg)`}
@@ -1663,6 +1735,7 @@ function ProductStep({
   packagingPerPortion,
   dishScope,
   showSnacks,
+  onlySnacks,
   subzoneCode,
   teamId,
   onChoose,
@@ -1692,6 +1765,8 @@ function ProductStep({
   dishScope: "equipe" | "toutes" | null;
   /** Conditionnement, réception, stockage : encas (règle R9). */
   showSnacks: boolean;
+  /** Salle des cartons, poste des encas : rien d'autre que des encas (décision du 25/11/2026). */
+  onlySnacks?: boolean;
   /** Lieu choisi : au Stockage, les encas frais au local frais, les autres au stockage sec (décision du 23/11/2026). */
   subzoneCode: string | null;
   /** Équipe choisie par un responsable ; pour un compte équipe, le catalogue ne contient déjà que ses plats. */
@@ -1709,7 +1784,9 @@ function ProductStep({
   const [freeSupplierName, setFreeSupplierName] = useState("");
   const toCatalog = CATALOG_ENTRY_ZONE_CODES.includes(zoneCode);
   const supplierInvalid = toCatalog && freeSupplier === "autre" && freeSupplierName.trim().length < 2;
-  const freeCategories = freeCategoriesFor(zoneCode, PRODUCT_CATEGORIES);
+  const freeCategories = freeCategoriesFor(zoneCode, PRODUCT_CATEGORIES).filter(
+    (c) => !onlySnacks || c === "produit_externe",
+  );
   const freePriceValue = Number(freePriceText.replace(",", ".").trim());
   const freePriceInvalid = freePriceText.trim() !== "" && !(freePriceValue > 0);
   /** Chemin parcouru : un plat, puis des sous-recettes. */
@@ -1767,11 +1844,10 @@ function ProductStep({
       category: d.snack ? "produit_externe" : "produit_fini",
       unitWeightKg: gramsToKg(d.portionWeightG),
       week: week!,
-      cost: {
-        food: d.cost,
-        packagingPerPortionEur: d.portionKind ? d.mouldPerPortionEur + packagingPerPortion[d.portionKind] : null,
-        portionWeightKg: gramsToKg(d.portionWeightG),
-      },
+      cost: { food: d.cost, packagingPerPortionEur: null, portionWeightKg: gramsToKg(d.portionWeightG) },
+      dishPackaging: d.portionKind
+        ? { mouldPerPortionEur: d.mouldPerPortionEur, trayPerPortionEur: packagingPerPortion[d.portionKind] }
+        : undefined,
     });
   const chooseSubRecipe = (id: string) =>
     onChoose({
@@ -1944,7 +2020,7 @@ function ProductStep({
   // Encas (règle R9) : seulement en conditionnement, réception et stockage ; au Stockage, là où ils sont rangés.
   const snackHere = (p: (typeof products)[number]) =>
     showSnacks && snackAllowedIn(zoneCode, subzoneCode, p.snackFamily);
-  const offered = products.filter((p) => p.category !== "produit_externe" || snackHere(p));
+  const offered = products.filter((p) => (p.category === "produit_externe" ? snackHere(p) : !onlySnacks));
   const listedMatches = term
     ? offered.filter((p) => [p.name, p.code, p.externalId].some((v) => v?.toLowerCase().includes(term)))
     : [];
@@ -2125,7 +2201,7 @@ function ProductStep({
       ) : (
         <div className="flex flex-col gap-2">
           {snackList}
-          {offered.slice(0, 30).map((p) => (
+          {(onlySnacks ? [] : offered.slice(0, 30)).map((p) => (
             <Tile
               key={p.id}
               compact
@@ -2311,5 +2387,22 @@ function OtherDestinationComment({ value, onChange }: { value: string; onChange:
         placeholder="Où part la perte"
       />
     </label>
+  );
+}
+
+/** Question oui / non posée en grandes tuiles (aucune réponse par défaut). */
+function YesNo({ legend, value, onChange }: { legend: string; value: boolean | null; onChange: (v: boolean) => void }) {
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-1 font-medium">{legend}</legend>
+      <TileGrid>
+        <Tile compact selected={value === true} onClick={() => onChange(true)}>
+          Oui
+        </Tile>
+        <Tile compact selected={value === false} onClick={() => onChange(false)}>
+          Non
+        </Tile>
+      </TileGrid>
+    </fieldset>
   );
 }

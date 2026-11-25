@@ -59,6 +59,8 @@ describe("saisie à partir des produits de la semaine", () => {
     ref = {
       cuisine: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_DEBOITAGE"))),
       conditionnement: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CON_BARQUETTES"))),
+      encasCartons: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CON_AUTRES"))),
+      salleBlanche: await id(t.db.select().from(s.subzones).where(eq(s.subzones.code, "CUI_SALLE_BLANCHE"))),
       cause: await id(t.db.select().from(s.causes).where(eq(s.causes.code, "ERREUR_PREPARATION"))),
       condCause: await id(t.db.select().from(s.causes).where(eq(s.causes.code, "CON_SCELLAGE"))),
       compost: await id(t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES"))),
@@ -129,9 +131,13 @@ describe("saisie à partir des produits de la semaine", () => {
   it("salle des cartons : un plat se compte en barquettes, au poids de sa barquette (décision du 24/11/2026)", async () => {
     const plat = { weekItem: { kind: "plat", id: dish("VI01").id } };
     const at = { subzoneId: ref.conditionnement, causeId: ref.condCause };
-    const r = await declare(admin, plat, { ...at, unitCode: "barquette" });
+    const r = await declare(admin, plat, { ...at, unitCode: "barquette", discarded: { tray: false } });
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
     expect(row).toMatchObject({ netKg: 3.151, kgStatus: "converti" });
+    // Pas de plat au poste des encas.
+    await expect(
+      declare(admin, plat, { ...at, subzoneId: ref.encasCartons, unitCode: "barquette", discarded: { tray: false } }),
+    ).rejects.toThrow(/Seuls les encas/);
     // Ni pièces, ni grammes, ni gastros en salle des cartons.
     await expect(declare(admin, plat, { ...at, unitCode: "piece" })).rejects.toThrow(/Unité non proposée/);
     await expect(
@@ -197,10 +203,17 @@ describe("saisie à partir des produits de la semaine", () => {
     await expect(declare(teamD, { weekItem: { kind: "plat", id: snack.id } })).rejects.toThrow(
       /conditionnement, réception ou stockage/,
     );
+    await expect(
+      declare(
+        admin,
+        { weekItem: { kind: "plat", id: snack.id } },
+        { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" },
+      ),
+    ).rejects.toThrow(/poste des encas/);
     const r = await declare(
       admin,
       { weekItem: { kind: "plat", id: snack.id } },
-      { subzoneId: ref.conditionnement, causeId: ref.condCause, unitCode: "piece" },
+      { subzoneId: ref.encasCartons, causeId: ref.condCause, unitCode: "piece" },
     );
     const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
     expect(row).toMatchObject({ productCategory: "produit_externe", productCode: "EN02_EQ", teamId: null, netKg: 2.5 });
@@ -227,7 +240,7 @@ describe("saisie à partir des produits de la semaine", () => {
     expect(row?.grossCostEur).toBe(row?.packagingCostEur);
   });
 
-  it("coût brut d'un plat : matières hors plat à gratin + emballages (plat à gratin Melba + référentiel à la date de la perte)", async () => {
+  it("coût brut d'un plat : matières seules ; moule et barquette ajoutés s'ils sont jetés, en salle blanche et en salle des cartons (R42)", async () => {
     const barquette = await createPackagingItem(t.db, admin, {
       code: "BARQ",
       name: "Barquette",
@@ -244,21 +257,56 @@ describe("saisie à partir des produits de la semaine", () => {
     const vi03 = adminCatalog[0]!.dishes.find((d) => d.code === "VI03")!; // Choutiflette : 1,46 € dont 0,07 € de plat à gratin
     expect(vi03).toMatchObject({ mouldPerPortionEur: 0.07, portionKind: "plat", cost: { perUnitEur: 1.39 } });
     const teamH = (await t.db.select().from(s.teams).where(eq(s.teams.letter, "H")))[0]!.id;
-    const r = await declare(
-      admin,
-      { weekItem: { kind: "plat", id: vi03.id } },
-      { quantity: 4, teamId: teamH, destinations: [{ destinationId: ref.compost, quantity: 4, binNumber: "1" }] },
-    );
-    const [row] = await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id));
-    expect(row).toMatchObject({
+    const plat = { weekItem: { kind: "plat", id: vi03.id } };
+    const four = {
+      quantity: 4,
+      teamId: teamH,
+      destinations: [{ destinationId: ref.compost, quantity: 4, binNumber: "1" }],
+    };
+    const rowOf = async (r: { id: string }) =>
+      (await t.db.select().from(s.lossDeclarations).where(eq(s.lossDeclarations.id, r.id)))[0];
+
+    // Avant la salle blanche (déboîtage) : ni moule ni barquette, aucune question.
+    expect(await rowOf(await declare(admin, plat, four))).toMatchObject({
       materialCostEur: 5.56,
-      packagingCostEur: 0.88, // 4 × (0,07 + 0,12 + 0,03)
-      grossCostEur: 6.44,
+      packagingCostEur: null,
+      grossCostEur: 5.56,
       labourCostEur: null,
       indirectCostEur: null,
-      costMethod: "melba-semaine+emballages-v1",
+      costMethod: "melba-semaine+emballages-v2",
     });
-    expect(row?.costDetails).toMatchObject({ portions: 4, packagingComplete: true, packagingDate: DAY });
+
+    // Salle blanche : les deux questions sont obligatoires.
+    const salleBlanche = { ...four, subzoneId: ref.salleBlanche };
+    await expect(declare(admin, plat, salleBlanche)).rejects.toThrow(/moule ou le plat à gratin/);
+    await expect(declare(admin, plat, { ...salleBlanche, discarded: { mould: true } })).rejects.toThrow(/barquette/);
+    const both = await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { mould: true, tray: true } }));
+    expect(both).toMatchObject({ packagingCostEur: 0.88, grossCostEur: 6.44 }); // 4 × (0,07 + 0,12 + 0,03)
+    expect(both?.costDetails).toMatchObject({
+      portions: 4,
+      packagingComplete: true,
+      packagingDate: DAY,
+      discarded: { mould: true, tray: true },
+    });
+    // Moule gardé, barquette jetée : 4 × 0,15.
+    expect(
+      await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { mould: false, tray: true } })),
+    ).toMatchObject({ packagingCostEur: 0.6 });
+    // Rien de jeté : 0 € d'emballages.
+    expect(
+      await rowOf(await declare(admin, plat, { ...salleBlanche, discarded: { mould: false, tray: false } })),
+    ).toMatchObject({ packagingCostEur: 0, grossCostEur: 5.56 });
+
+    // Salle des cartons, en barquettes : mêmes questions.
+    await expect(
+      declare(admin, plat, {
+        ...four,
+        teamId: undefined,
+        subzoneId: ref.conditionnement,
+        causeId: ref.condCause,
+        unitCode: "barquette",
+      }),
+    ).rejects.toThrow(/moule ou le plat à gratin/);
 
     // Un sous-produit (sous-recette) n'a pas d'emballage ajouté.
     const sub = await declare(

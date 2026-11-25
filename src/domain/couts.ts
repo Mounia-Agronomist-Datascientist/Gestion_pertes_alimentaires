@@ -70,7 +70,58 @@ export function estimateLossCost(
 }
 
 /** Méthode de calcul enregistrée avec chaque perte (§18.5) ; à changer si la méthode évolue. */
-export const COST_METHOD = "melba-semaine+emballages-v1";
+export const COST_METHOD = "melba-semaine+emballages-v2";
+
+// ─── Moule et barquette jetés avec le plat (décision du 25/11/2026, règle R42) ───
+/** Postes où l'on demande si le moule et la barquette sont jetés : salle blanche, puis salle des cartons. */
+const PACKAGING_SUBZONE_CODES: readonly string[] = ["CUI_SALLE_BLANCHE"];
+const PACKAGING_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT"];
+
+export interface PackagingQuestions {
+  /** « Le moule ou le plat à gratin est-il jeté avec ? » : plat entier qui en contient. */
+  mould: boolean;
+  /** « La barquette est-elle jetée aussi ? » : plat entier. */
+  tray: boolean;
+}
+export interface DiscardedPackaging {
+  mould?: boolean | null;
+  tray?: boolean | null;
+}
+
+/**
+ * Questions posées pour un plat entier (jamais pour une sous-recette, un ingrédient ou un encas), seulement en salle
+ * blanche et en salle des cartons ; avant, ni moule ni barquette ne sont comptés.
+ */
+export function packagingQuestionsFor(
+  place: { zoneCode: string; subzoneCode: string | null },
+  dish: { wholeDish: boolean; mouldPerPortionEur: number | null },
+): PackagingQuestions {
+  const inScope =
+    dish.wholeDish &&
+    (PACKAGING_ZONE_CODES.includes(place.zoneCode) || PACKAGING_SUBZONE_CODES.includes(place.subzoneCode ?? ""));
+  return { mould: inScope && (dish.mouldPerPortionEur ?? 0) > 0, tray: inScope };
+}
+
+/** Réponse manquante à une question posée, ou null. */
+export function missingPackagingAnswer(q: PackagingQuestions, a: DiscardedPackaging | null | undefined) {
+  if (q.mould && a?.mould == null) return "Indiquez si le moule ou le plat à gratin est jeté avec le plat";
+  if (q.tray && a?.tray == null) return "Indiquez si la barquette est jetée aussi";
+  return null;
+}
+
+/**
+ * Emballages d'une portion ajoutés au coût : le moule (ou plat à gratin) s'il est jeté avec, la barquette (emballages
+ * par portion de l'administration) si elle est jetée ; null quand aucune question ne se pose.
+ */
+export function discardedPackagingPerPortion(
+  q: PackagingQuestions,
+  a: DiscardedPackaging | null | undefined,
+  parts: { mouldEur: number | null; trayEur: number | null },
+): number | null {
+  if (!q.mould && !q.tray) return null;
+  const total = (q.mould && a?.mould ? (parts.mouldEur ?? 0) : 0) + (q.tray && a?.tray ? (parts.trayEur ?? 0) : 0);
+  return Math.round(total * 100_000) / 100_000;
+}
 
 export interface CostInputs {
   /** Coût matières du produit (hors moules et plats à gratin). */

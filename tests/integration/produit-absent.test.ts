@@ -72,7 +72,7 @@ describe("produit absent de la liste en Stockage : types de la zone et prix d'ac
 
   it("prix indiqué après coup : nouvelle version, coût recalculé ; rattachement au prix du produit", async () => {
     // Saisie « hors liste » (Conditionnement ; en Réception et Stockage, l'article entre aussitôt dans la liste).
-    const conditionnement: [string, string] = ["CON_AUTRES", "CON_SURPRODUCTION"];
+    const conditionnement: [string, string] = ["CON_BARQUETTES", "CON_SURPRODUCTION"];
     const first = await loss("Crème fraîche", "matiere_premiere", 3, undefined, conditionnement);
     await loss("crème  FRAÎCHE", "matiere_premiere", 1, undefined, conditionnement);
     expect((await row(first.id)).grossCostEur).toBeNull();
