@@ -21,7 +21,7 @@ const FAMILIES: { id: string; title: string; text: string; entries: Entry[] }[] 
       {
         href: "/admin/import",
         title: "Import de la semaine",
-        text: "Tome Melba + plan (mardi), Décompte barquettes et bons de commande (jeudi), ventes et dons, pesées des Alchimistes",
+        text: "Tome Melba + plan et tome des encas (mardi), Décompte barquettes et bons de commande (jeudi), ventes et dons, pesées des Alchimistes",
       },
       {
         href: "/admin/recoupement",

@@ -10,6 +10,7 @@ import { AlchimistesWizard } from "./alchimistes-wizard";
 import { DecompteWizard } from "./decompte-wizard";
 import { ImportWizard } from "./import-wizard";
 import { PurchaseOrdersWizard } from "./purchase-orders-wizard";
+import { SnackTomeWizard } from "./snack-tome-wizard";
 import { SurplusWizard } from "./surplus-wizard";
 import { DayHeader, DocumentIntro, WeekLegend, weeksAround } from "./import-steps";
 import { toProductionLocalDate } from "@/domain/semaine-production";
@@ -78,6 +79,22 @@ export default async function ImportPage() {
           .filter((i) => i.status === "validee")
           .map((i) => ({ year: i.weekYear, week: i.weekNumber, version: i.version }))}
       />
+
+      <DocumentIntro
+        title="Tome des encas"
+        offset={1}
+        weeks={weeks}
+        weekNote="ou plusieurs semaines à la fois"
+        what="le PDF Melba « Imprimer les recettes » des encas (recettes EN…, par exemple EN09_FB « Barre de céréales », 30 g, 0,90 €), téléchargé à part du tome des plats."
+        usedFor={[
+          "Tenir à jour la liste interne des encas : poids d'un encas et prix, avec une nouvelle version datée de la semaine quand le prix ou le poids change.",
+          "Ajouter les nouveaux encas à la liste (famille à donner dans Administration → Produits).",
+          "Compter les encas jetés en salle des cartons, en Réception et au Stockage, au poids d'un encas.",
+        ]}
+        notes="pour le premier chargement, déposez le PDF de tous les encas récemment utilisés : chaque recette est rangée à sa semaine. Les pertes déjà enregistrées gardent leur poids et leur coût."
+      >
+        <SnackTomeWizard />
+      </DocumentIntro>
 
       <DayHeader
         id="jeudi"

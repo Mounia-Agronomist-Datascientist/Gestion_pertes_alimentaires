@@ -20,6 +20,7 @@ Semaine de production du jeudi au mercredi : **S** = semaine en cours, **S-1** =
 | Quand | Où | Quoi |
 |---|---|---|
 | **Mardi** (avant la nouvelle semaine) | Administration → **Import de la semaine** | Pour la semaine qui commence jeudi (**S+1**) : déposer le **tome Melba** (PDF « Imprimer les recettes ») et le **plan de production** (Google Sheets → Fichier → Télécharger → Microsoft Excel). Vérifier l'aperçu (plats par équipe, anomalies) puis valider. Sans import, les équipes ne voient pas les plats de la semaine. |
+| Mardi | Administration → **Import de la semaine** → **Tome des encas** | Déposer le **PDF Melba des encas** (« Imprimer les recettes », recettes EN…), téléchargé à part du tome : poids et prix de chaque encas mis à jour (nouvelle version datée si le prix ou le poids change), nouveaux encas ajoutés à la liste. **Premier chargement** : le PDF de tous les encas récemment utilisés, sur plusieurs semaines. Donner ensuite leur famille aux nouveaux encas (Administration → Produits). |
 | Mardi | Administration → **Équipes par semaine** | Désactiver une équipe qui ne travaille pas (semaine creuse) : pas d'alerte « saisie incomplète » pour elle. |
 | Avant un férié ou un samedi travaillé | Administration → **Jours de production** | Retirer le jour férié, ajouter le samedi. |
 | **Après la fin de la semaine** (jeudi) | Administration → **Import** → « Barquettes réellement produites » | Déposer le **« Décompte barquettes »** (**S-1**) : il donne les ratios et la comparaison à volume égal. |

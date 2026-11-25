@@ -136,7 +136,7 @@ Rangée en 6 familles, de la plus utilisée à la plus rare :
 
 | Famille | Options | Quand |
 |---|---|---|
-| **1. Chaque semaine** | Import de la semaine, rangé par jour : **mardi** tome Melba + plan (S+1) ; **jeudi** Décompte barquettes, pesées des Alchimistes, ventes TGTG / flash / Linkee (S-1), puis bons de commande (S+1) · Recoupement tome / bons · Matières à compléter | Chaque semaine |
+| **1. Chaque semaine** | Import de la semaine, rangé par jour : **mardi** tome Melba + plan, puis tome des encas (S+1) ; **jeudi** Décompte barquettes, pesées des Alchimistes, ventes TGTG / flash / Linkee (S-1), puis bons de commande (S+1) · Recoupement tome / bons · Matières à compléter | Chaque semaine |
 | **2. Ce que les équipes voient à la saisie** | Causes (propositions des équipes, famille et évitabilité à valider) · Destinations (n° de poubelle) · Zones et postes · Gastros et tares | Au fil de l'eau |
 | **3. Produits et achats** | Produits (articles saisis à la main, saisies hors liste, fiches : prix datés, colis, lieu, famille d'encas) · Fournisseurs (à valider, renommer) · Lieux de stockage des matières | Au fil de l'eau |
 | **4. Équipes, comptes et calendrier** | Comptes et leurs zones · Équipes par semaine · Jours de production (fériés, samedis) | Ponctuellement |

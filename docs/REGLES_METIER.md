@@ -638,3 +638,26 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
 - Un consommable (barquette vide, carton) se compte toujours en pièces. L'estimation propose le kg et l'unité
   comptée. Le serveur refuse les autres unités, aussi pour une correction ; les pertes déjà enregistrées ne changent
   pas.
+
+## R41 — Poids et prix des encas et des plats, d'après Melba (25/11/2026)
+
+- **Plats** : une barquette pèse le **poids d'une portion** de la recette dans le tome Melba de la semaine (LC01 :
+  310,6 g en S47) ; le coût est celui de la portion du même tome. C'est déjà ce que lit la saisie (R10, R40).
+- **Encas** : le tome des plats ne contient plus les encas. L'administration dépose à part le **PDF Melba des
+  encas** (« Imprimer les recettes », recettes EN…), le mardi avec le tome (Import de la semaine → « Tome des
+  encas »). Le fichier est lu dans le navigateur ; seules les recettes d'encas sont envoyées.
+- **Liste interne des encas** (Administration → Produits, type « Encas ») :
+  - chaque **article** d'une recette d'encas (« Barres de céréales … », Unité (30 g), 0,90 €) est un encas de la
+    liste, retrouvé par son libellé Melba ; un article inconnu est **ajouté** (famille à donner à la main) ;
+  - une recette qui n'est pas un seul article pris une fois (trio de fromages 75 g, 2 pots de yaourt 250 g) donne en
+    plus un **encas composé**, au poids et au coût de la recette, rangé dans la famille de ses articles quand elle
+    est la même ;
+  - **prix** : une version datée du début de la semaine de production de la recette, créée seulement si le prix
+    change (même tolérance que les tomes) ; un fichier redéposé pour la même semaine corrige le prix de cette
+    semaine. Le prix en vigueur suit la règle des matières (dernier bon de commande ou prix saisi à la main, à
+    défaut le tome) ;
+  - **poids d'un encas** : celui du fichier le plus récent ; un fichier plus ancien ne le remplace pas ;
+  - le nom, la famille et l'état réglés par l'administration ne sont jamais écrasés. Les pertes déjà enregistrées
+    gardent leur poids et leur coût figés.
+- **Premier chargement** : le PDF de tous les encas récemment utilisés, sur plusieurs semaines ; chaque recette est
+  rangée à sa semaine (une semaine absente du calendrier est ignorée et signalée).

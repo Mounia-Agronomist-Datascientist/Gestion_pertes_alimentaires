@@ -46,6 +46,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   alert_regularized: "Alerte régularisée",
   alert_cancelled: "Alerte levée",
   import_week: "Import plan + tome",
+  import_encas: "Import du PDF des encas",
   import_count: "Import du décompte des barquettes",
   cost_new_version: "Nouveau coût",
   cost_corrected: "Correction de coût",

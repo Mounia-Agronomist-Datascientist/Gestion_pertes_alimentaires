@@ -11,6 +11,7 @@ import { importPayloadSchema } from "@/modules/imports/payload";
 import { SURPLUS_SOURCE_LABELS, saveSurplusImport, surplusPayloadSchema } from "@/modules/imports/surplus/service";
 import { ImportError, saveWeekImport } from "@/modules/imports/service";
 import { PurchaseOrderError, type PurchaseOrdersResult, savePurchaseOrders } from "@/modules/matieres/bons-commande";
+import { importSnackTome, SnackTomeError, snackTomePayloadSchema } from "@/modules/matieres/encas-tome";
 
 export interface ImportActionState {
   error?: string;
@@ -145,6 +146,35 @@ export async function savePurchaseOrdersAction(orders: unknown): Promise<Purchas
     return { ok: true, result };
   } catch (e) {
     if (e instanceof PurchaseOrderError || e instanceof ForbiddenError) return { ok: false, error: e.message };
+    throw e;
+  }
+}
+
+/** PDF Melba des encas : seules les recettes d'encas lues dans le navigateur sont reçues, revérifiées ici. */
+export async function importSnackTomeAction(_prev: ImportActionState, formData: FormData): Promise<ImportActionState> {
+  const admin = await requireUser();
+  let raw: unknown;
+  try {
+    raw = JSON.parse(String(formData.get("payload") ?? ""));
+  } catch {
+    return { error: "Données illisibles : rechargez la page et déposez à nouveau le fichier" };
+  }
+  const parsed = snackTomePayloadSchema.safeParse(raw);
+  if (!parsed.success) return { error: "Données inattendues : rechargez la page et déposez à nouveau le fichier" };
+  try {
+    const r = await importSnackTome(db, admin, parsed.data);
+    revalidatePath("/admin/import");
+    revalidatePath("/admin/produits");
+    const parts = [
+      `${r.snacks} encas lus (${r.weeks.join(", ")})`,
+      `${r.created} ajouté${r.created > 1 ? "s" : ""} à la liste${r.composites ? ` dont ${r.composites} composé${r.composites > 1 ? "s" : ""}` : ""}`,
+      `${r.newPrices} nouveau${r.newPrices > 1 ? "x" : ""} prix`,
+      `${r.newWeights} poids mis à jour`,
+    ];
+    const skipped = r.skipped.length ? ` Semaines hors calendrier, ignorées : ${r.skipped.join(", ")}.` : "";
+    return { message: `${parts.join(" · ")}.${skipped}` };
+  } catch (e) {
+    if (e instanceof SnackTomeError || e instanceof ForbiddenError) return { error: e.message };
     throw e;
   }
 }
