@@ -31,6 +31,7 @@ import { summarize } from "@/domain/statistiques";
 import { loadFacts } from "@/modules/statistiques/facts";
 import { supplierReport } from "@/modules/statistiques/fournisseurs";
 import { setZoneTarget, zoneTargetProgress } from "@/modules/objectifs";
+import { donationRegister } from "@/modules/statistiques/dons";
 import { createTestDb } from "../helpers/test-db";
 
 const DIR = "tests/fixtures/bons-commande";
@@ -606,5 +607,48 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     expect(last.kg).toBeGreaterThan(0);
     // Avant sa date, pas d'objectif.
     expect(zone.weeks[0]!.target).toBeNull();
+  });
+
+  it("registre des dons : une ligne par don, valeur au coût de revient (26/11/2026)", async () => {
+    const NOW = new Date("2026-11-13T10:00:00Z");
+    const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const don = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "DON")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const [pomme] = await t.db
+      .insert(s.products)
+      .values({ category: "matiere_premiere", name: "Pomme don test", defaultUnit: "kg", source: "manuel" })
+      .returning();
+    await t.db
+      .insert(s.productPrices)
+      .values({ productId: pomme!.id, source: "manuel", validFrom: "2026-11-01", unit: "kg", perKgEur: 2 });
+    await createDeclaration(
+      t.db,
+      admin,
+      {
+        occurredOn: "2026-11-12",
+        subzoneId: sub,
+        product: { productId: pomme!.id },
+        causeId: cause,
+        method: "pesee",
+        quantity: 10,
+        unitCode: "kg",
+        lots: [{ lotNumber: "L123", dlc: "2026-11-20", quantity: 10 }],
+        destinations: [
+          { destinationId: don, quantity: 6 },
+          { destinationId: bin, quantity: 4, binNumber: "1" },
+        ],
+      },
+      NOW,
+    );
+    const register = await donationRegister(t.db, admin, { kind: "semaine", year: 2026, number: 47 });
+    expect(register.rows.find((r) => r.product === "Pomme don test")).toMatchObject({
+      date: "2026-11-12",
+      beneficiary: "Association / don",
+      kg: 6,
+      valueEur: 12,
+      lots: "L123",
+      bestBefore: "2026-11-20",
+    });
   });
 });

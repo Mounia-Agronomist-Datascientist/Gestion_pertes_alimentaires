@@ -26,6 +26,7 @@ import { recoveryDashboard } from "./valorisation";
 import { type Co2Group, environmentDashboard } from "./environnement";
 import { alchimistesReconciliation, type ReconciliationPeriod } from "./alchimistes";
 import { weeklySummary } from "./weekly";
+import { donationRegister } from "./dons";
 
 export const EXPORT_TABS = [
   "general",
@@ -39,6 +40,7 @@ export const EXPORT_TABS = [
   "valorisation",
   "environnement",
   "alchimistes",
+  "dons",
 ] as const;
 export type ExportTab = (typeof EXPORT_TABS)[number];
 
@@ -235,6 +237,72 @@ export async function statsExport(
               ];
             },
           }),
+        ],
+      };
+    }
+
+    case "dons": {
+      // Registre des dons (décision du 26/11/2026) : une ligne par don, puis le total par bénéficiaire.
+      const register = await donationRegister(db, user, ctx.period, ctx.filters);
+      const unitLabel: Record<string, string> = { piece: "pièce", barquette: "barquette", kg: "kg", colis: "colis" };
+      const frDate = (d: string | null) =>
+        d
+          ? d
+              .split(", ")
+              .map((x) => x.split("-").reverse().join("/"))
+              .join(", ")
+          : null;
+      const byBeneficiary = new Map<string, { gifts: number; kg: number; value: number }>();
+      for (const r of register.rows) {
+        const b = byBeneficiary.get(r.beneficiary) ?? { gifts: 0, kg: 0, value: 0 };
+        b.gifts++;
+        b.kg += r.kg ?? 0;
+        b.value += r.valueEur ?? 0;
+        byBeneficiary.set(r.beneficiary, b);
+      }
+      return {
+        name: fileName("registre-des-dons", label),
+        tables: [
+          {
+            title: "Registre des dons",
+            headers: [
+              "Date",
+              "Bénéficiaire",
+              "Origine",
+              "Zone",
+              "Produit",
+              "Quantité",
+              "Unité",
+              "Kg",
+              ...(register.withCosts ? ["Valeur (coût de revient HT, €)"] : []),
+              "N° de lot",
+              "DLC",
+            ],
+            rows: register.rows.map((r) => [
+              frDate(r.date),
+              r.beneficiary,
+              r.origin === "linkee" ? "Surplus de barquettes (Linkee)" : "Perte déclarée",
+              r.zone,
+              r.product,
+              r.quantity,
+              unitLabel[r.unit] ?? r.unit,
+              r.kg,
+              ...(register.withCosts ? [r.valueEur] : []),
+              r.lots,
+              frDate(r.bestBefore),
+            ]),
+          },
+          {
+            title: "Total par bénéficiaire",
+            headers: ["Période", "Bénéficiaire", "Dons", "Kg", ...(register.withCosts ? ["Valeur (€)"] : [])],
+            rows: [...byBeneficiary].map(([name, b]) => [
+              label,
+              name,
+              b.gifts,
+              roundKg(b.kg),
+              ...(register.withCosts ? [Math.round(b.value * 100) / 100] : []),
+            ]),
+          },
         ],
       };
     }

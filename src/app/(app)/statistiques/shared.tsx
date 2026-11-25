@@ -641,17 +641,19 @@ export function ExportLinks({
   ctx,
   keep = {},
   note,
+  title = "Exporter",
 }: {
   tab: string;
   ctx: StatsContext;
   keep?: Record<string, string>;
   note?: string;
+  title?: string;
 }) {
   const href = (format: "csv" | "xlsx") =>
     statsHref("/statistiques/export", ctx, ctx.period, { ...keep, onglet: tab, format });
   return (
     <section className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm print:hidden">
-      <h2 className="text-lg font-semibold">Exporter</h2>
+      <h2 className="text-lg font-semibold">{title}</h2>
       <div className="flex flex-col gap-2 sm:flex-row">
         <a className="btn-secondary flex flex-1 items-center justify-center" href={href("xlsx")}>
           Excel

@@ -242,6 +242,12 @@ export default async function RecoveryPage({ searchParams }: { searchParams: Pro
         </p>
       )}
       <ExportLinks tab="valorisation" ctx={ctx} />
+      <ExportLinks
+        tab="dons"
+        ctx={ctx}
+        title="Registre des dons"
+        note="Chaque don de la période (pertes données à une association, barquettes données à Linkee) : date, bénéficiaire, produit, kg, valeur au coût de revient, n° de lot et DLC, puis le total par bénéficiaire. Pour les reçus fiscaux et la démarche anti-gaspillage."
+      />
     </div>
   );
 }

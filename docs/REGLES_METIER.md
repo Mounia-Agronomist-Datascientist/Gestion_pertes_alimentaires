@@ -759,3 +759,12 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
   au-dessus de l'objectif, objectif en pointillés). Nombre de zones dans l'objectif. Retours fournisseur non
   comptés ; une perte de plusieurs jours compte pour chaque jour de sa période (R5 quater).
 
+## R45 — Registre des dons (26/11/2026)
+
+- Statistiques → Valorisation → **Registre des dons** (Excel ou CSV), pour la période et les filtres de l'écran :
+  une ligne par don — date, bénéficiaire, origine (perte déclarée vers une destination « don », ou barquettes données
+  à Linkee lues dans le fichier des surplus), zone, produit, quantité, kg, **valeur au coût de revient HT** (coût
+  figé de la perte, au prorata de la part donnée ; coût Melba des barquettes Linkee), n° de lot et DLC ; puis le total
+  par bénéficiaire. Sert aux reçus fiscaux et à la démarche anti-gaspillage (à confirmer avec la comptabilité).
+- Les dons Linkee ne figurent que pour un compte qui compare les équipes, sans filtre de zone ni d'équipe.
+
