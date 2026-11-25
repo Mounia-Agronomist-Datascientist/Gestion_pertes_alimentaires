@@ -688,7 +688,8 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
        en vigueur à la date de la perte ; une recette peut avoir à la fois un moule et une barquette ;
     3. le total des emballages par portion s'affiche, puis le coût de la perte « dont emballages ».
   - **Reconnaître un moule** : un « Moule rond… », « Moule rectangulaire… », « MOULE … INDIVIDUEL BIODEG… » ou un
-    « Plat à gratin… » du tome ; les **moules à manger** (« moules décoquillées cuites ») sont une denrée, comptée
+    « Plat à gratin… » du tome, ainsi que le **pot où la recette est coulée** (« Pot panna cotta », « Pot KRAFT
+    100ml », décision du 26/11/2026, migration 0041) ; les **moules à manger** (« moules décoquillées cuites ») sont une denrée, comptée
     dans les matières (corrigé le 26/11/2026, migration 0040).
   - **Sous-recette déclarée seule** : on ne propose un moule que si le tome en cite un dans cette sous-recette ; dans
     les tomes chargés, les moules sont toujours cités au niveau de la recette, donc aucune question aujourd'hui.

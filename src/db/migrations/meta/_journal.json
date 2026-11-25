@@ -288,6 +288,13 @@
       "when": 1795612830166,
       "tag": "0040_moules_comestibles",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795613159602,
+      "tag": "0041_pot_panna_cotta",
+      "breakpoints": true
     }
   ]
 }

@@ -18,11 +18,14 @@ export const gramsToKg = (g: number | null) => (g == null ? null : Math.round(g 
  */
 /**
  * Moule ou plat à gratin (emballage de cuisson), pas une denrée : « Moule rond biodeg », « MOULE RECTANGULAIRE
- * INDIVIDUEL… », « Plat à gratin (grand format) ». Les moules à manger (« moules décoquillées cuites ») n'en sont pas.
+ * INDIVIDUEL… », « Plat à gratin (grand format) », « Pot panna cotta ». Les moules à manger (« moules décoquillées cuites ») n'en sont pas.
  */
 const MOULD_RE =
   /^\s*moules?\s+(rond|rectangulaire|carr[ée]|ovale|individuel|silicone|biod[ée]g|cake|tarte|muffin|cannel|savarin|kouglof|papier|alu|à\s|a\s)/i;
-export const isMouldLabel = (label: string) => MOULD_RE.test(label) || /\bplats? à gratin\b/i.test(label);
+/** Pot où la recette est coulée (« Pot panna cotta », « Pot KRAFT 100ml »), traité comme un moule (26/11/2026). */
+const POT_RE = /^\s*pots?\s+(panna|kraft)/i;
+export const isMouldLabel = (label: string) =>
+  MOULD_RE.test(label) || POT_RE.test(label) || /\bplats? à gratin\b/i.test(label);
 
 /** Zones où les encas sont proposés (règle R9). */
 export const SNACK_ZONE_CODES: readonly string[] = ["CONDITIONNEMENT", "RECEPTION", "STOCKAGE"];

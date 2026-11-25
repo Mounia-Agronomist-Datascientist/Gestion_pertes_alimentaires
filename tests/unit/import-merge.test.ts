@@ -64,6 +64,9 @@ describe("rapprochement du tome et du plan S45", () => {
     expect(isMouldLabel("moules décoquillées cuites 300/500")).toBe(false);
     expect(isMouldLabel("Poisson: Moule décortiquée (sous recette)")).toBe(false);
     expect(isMouldLabel("Bombe de graisse pour moule et plaque")).toBe(false);
+    expect(isMouldLabel("Pot panna cotta ( sous-recette )")).toBe(true);
+    expect(isMouldLabel("Pot KRAFT 100ml (grand format)")).toBe(true);
+    expect(isMouldLabel("Pot de yaourt nature")).toBe(false);
     expect(isMouldLabel("muscade moulue")).toBe(false);
     expect(isMouldLabel("Bombe de graisse pour moule et plaque")).toBe(false);
     expect(isMouldLabel("Plat à gratin (grand format)")).toBe(true);

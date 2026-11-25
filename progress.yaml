@@ -33,9 +33,9 @@ etapes_phase_6:
   - { id: "6.11", nom: "Administration → Produits (fournisseurs, matières, prix)", statut: faite, date: 2026-11-18 }
 
 base_de_donnees:
-  derniere_migration: "0040_moules_comestibles"
+  derniere_migration: "0041_pot_panna_cotta"
   production:
-    a_appliquer: "0014 à 0040"
+    a_appliquer: "0014 à 0041"
     puis:
       - "Compléter depuis les tomes importés (Administration → Produits)"
       - "Dépôt du ZIP des bons de commande"
