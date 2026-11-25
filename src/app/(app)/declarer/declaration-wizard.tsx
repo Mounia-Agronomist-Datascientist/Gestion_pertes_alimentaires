@@ -47,7 +47,13 @@ import type { WeekCatalog, WeekItemKind } from "@/modules/imports/catalog";
 import { gramsToKg, SNACK_ZONE_CODES } from "@/modules/imports/merge";
 import { isNetworkError, stamp } from "@/modules/declarations/offline-queue";
 import { useOfflineQueue } from "../offline-provider";
-import { proposeCauseAction, submitCorrection, submitDeclaration, type SubmitResult } from "./actions";
+import {
+  proposeCauseAction,
+  sameDayLossesAction,
+  submitCorrection,
+  submitDeclaration,
+  type SubmitResult,
+} from "./actions";
 import { type LotLineText, LotsStep, lotsPayload, lotsSummary, type WizardPhoto } from "./lots-step";
 
 type Step = "zone" | "subzone" | "team" | "product" | "quantity" | "lots" | "cause" | "destination" | "recap" | "done";
@@ -537,6 +543,41 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
       setStep("zone");
     }
   }
+
+  // Doublon probable (décision du 26/11/2026) : même produit, même équipe ou zone, même jour. On prévient, puis on
+  // laisse valider. Hors réseau, pas de vérification.
+  const [sameDayFound, setSameDayFound] = useState<{
+    key: string;
+    list: Awaited<ReturnType<typeof sameDayLossesAction>>;
+  } | null>(null);
+  const duplicateKey =
+    step === "recap" && subzone && product
+      ? JSON.stringify({
+          occurredOn,
+          subzoneId: subzone.id,
+          teamId: needsTeam ? teamId : null,
+          product:
+            product.kind === "listed"
+              ? { productId: product.id }
+              : product.kind === "week"
+                ? { weekItem: { kind: product.itemKind, id: product.id } }
+                : { freeLabel: product.name },
+          excludeId: correction?.id ?? null,
+        })
+      : null;
+  useEffect(() => {
+    if (!duplicateKey || (typeof navigator !== "undefined" && !navigator.onLine)) return;
+    let live = true;
+    sameDayLossesAction(JSON.parse(duplicateKey))
+      .then((list) => {
+        if (live) setSameDayFound({ key: duplicateKey, list });
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [duplicateKey]);
+  const sameDay = sameDayFound && sameDayFound.key === duplicateKey ? sameDayFound.list : [];
 
   function submit() {
     if (!zone || !subzone || !product || !method || !causeId || !net) return;
@@ -1519,6 +1560,25 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
               />
             </label>
           )}
+          {sameDay.length > 0 && (
+            <div role="status" className="rounded-xl bg-amber-50 p-3 text-amber-900">
+              <p className="font-semibold">
+                Déjà saisi ce jour-là pour ce produit{needsTeam ? " par cette équipe" : " dans cette zone"} :
+              </p>
+              <ul className="list-disc pl-5">
+                {sameDay.map((d) => (
+                  <li key={d.id}>
+                    {fmt(d.quantity)} {unitLabel(d.unitCode)}
+                    {d.netKg != null && d.unitCode !== "kg" ? ` (${fmt(d.netKg)} kg)` : ""} à{" "}
+                    {d.time.replace(":", " h ")}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-sm">
+                Vérifiez que ce n&apos;est pas la même perte. Si c&apos;en est une autre, validez.
+              </p>
+            </div>
+          )}
           {result && !result.ok && (
             <p role="alert" className="rounded-xl bg-red-50 p-3 text-red-800">
               {result.error}
@@ -1545,7 +1605,9 @@ export function DeclarationWizard({ options, userTeam, correction, batch }: Prop
                   ? batch.editing
                     ? "Mettre à jour la ligne"
                     : "Ajouter à la liste"
-                  : "Valider la perte"}
+                  : sameDay.length > 0
+                    ? "Valider quand même"
+                    : "Valider la perte"}
           </button>
         </Section>
       )}

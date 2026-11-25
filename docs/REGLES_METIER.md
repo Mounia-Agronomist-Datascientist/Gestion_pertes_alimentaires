@@ -98,6 +98,15 @@ Toutes les saisies sont conservées pour la traçabilité et le suivi des perfor
   Au-delà, seul un responsable (zone, production, administrateur) peut le faire.
 - Alerte « rien de noté » : voir R8.
 
+## R5 ter — Doublon probable (décision du 26/11/2026)
+
+- Au moment de valider, la saisie signale les pertes **du même produit**, **le même jour**, pour **la même équipe**
+  (Cuisine) ou **la même zone** (zones sans équipe) : quantité et heure de chacune. On **prévient, puis on laisse
+  valider** (« Valider quand même ») : deux pertes du même produit le même jour peuvent être réelles.
+- Même produit : même fiche, même code de plat, même nom de sous-recette ou d'ingrédient, ou même nom tapé (produit
+  absent de la liste). Une perte annulée ne compte pas ; une perte corrigée ne se signale pas elle-même. Hors réseau,
+  pas de vérification.
+
 ## R6 — Statuts et corrections
 
 ```

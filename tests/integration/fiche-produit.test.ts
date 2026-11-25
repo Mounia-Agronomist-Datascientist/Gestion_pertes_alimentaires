@@ -26,6 +26,7 @@ import { materialPriceAt } from "@/modules/matieres/referentiel";
 import { packagingOptions } from "@/modules/matieres/colis";
 import { completeMissingCosts, createDeclaration, missingCosts } from "@/modules/declarations/service";
 import { materialsOfWeek } from "@/modules/matieres/semaine";
+import { sameDayLosses } from "@/modules/declarations/doublons";
 import { createTestDb } from "../helpers/test-db";
 
 const DIR = "tests/fixtures/bons-commande";
@@ -473,5 +474,45 @@ describe("fiche d'un produit et fournisseurs (étape 6.11)", () => {
     expect(row).toMatchObject({ grossCostEur: 21.9, status: "corrigee", revision: 2 });
     expect(await mine()).toBeUndefined();
     await expect(completeMissingCosts(t.db, team)).rejects.toThrow(ForbiddenError);
+  });
+
+  it("doublon probable : même produit, même zone, même jour (26/11/2026)", async () => {
+    const NOW = new Date("2026-11-13T10:00:00Z");
+    const sub = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "REC_RECEPTION")))[0]!.id;
+    const other = (await t.db.select().from(s.subzones).where(eq(s.subzones.code, "STO_BOF")))[0]!.id;
+    const cause = (await t.db.select().from(s.causes).where(eq(s.causes.code, "REC_CASSE_MANIP")))[0]!.id;
+    const bin = (await t.db.select().from(s.destinations).where(eq(s.destinations.code, "ALCHIMISTES")))[0]!.id;
+    const [farine] = await t.db
+      .insert(s.products)
+      .values({ category: "matiere_premiere", name: "Farine doublon test", defaultUnit: "kg", source: "manuel" })
+      .returning();
+    const lookFor = (over: Record<string, unknown> = {}) =>
+      sameDayLosses(t.db, team, {
+        occurredOn: "2026-11-12",
+        subzoneId: sub,
+        product: { productId: farine!.id },
+        ...over,
+      });
+    expect(await lookFor()).toEqual([]);
+    const d = await createDeclaration(
+      t.db,
+      admin,
+      {
+        occurredOn: "2026-11-12",
+        occurredTime: "09:12",
+        subzoneId: sub,
+        product: { productId: farine!.id },
+        causeId: cause,
+        method: "pesee",
+        quantity: 5,
+        unitCode: "kg",
+        destinations: [{ destinationId: bin, quantity: 5, binNumber: "1" }],
+      },
+      NOW,
+    );
+    expect(await lookFor()).toEqual([{ id: d.id, time: "09:12", quantity: 5, unitCode: "kg", netKg: 5 }]);
+    expect(await lookFor({ occurredOn: "2026-11-13" })).toEqual([]);
+    expect(await lookFor({ subzoneId: other })).toEqual([]);
+    expect(await lookFor({ excludeId: d.id })).toEqual([]);
   });
 });

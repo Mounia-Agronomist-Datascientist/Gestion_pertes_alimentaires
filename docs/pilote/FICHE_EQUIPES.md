@@ -23,7 +23,7 @@ Accueil → **Déclarer une perte**, puis répondre aux questions :
 | **N° de lot et DLC** (Réception, Stockage) | Facultatif. **Photographier l'étiquette** (4 photos au plus), puis taper le **n° de lot** et la **DLC** (« 251126 » donne 25/11/26). Plusieurs lots ou DLC (50 kg de carottes, 3 DLC) : « Ajouter un autre lot ou une autre DLC », une quantité par ligne, « Mettre le reste » pour la dernière ; le total doit faire la quantité de la perte. Rien à noter : « Passer » |
 | **Pourquoi ?** | La cause. Aucune ne convient : « Autres causes » + un commentaire, ou « Proposer une nouvelle cause » |
 | **Où part la perte ?** | Compost (Les Alchimistes), ordures ménagères, personnel, don, réutilisation… En Réception : « Retour fournisseur » (pas de réutilisation). « Autre destination » : la préciser en commentaire. Plusieurs destinations : « Répartir entre plusieurs destinations ». **N° de poubelle des Alchimistes** (encadré orange au récapitulatif) : vérifier le numéro écrit sur la poubelle |
-| **Vérifier et valider** | Relire, corriger avec « Modifier », puis **Valider la perte** |
+| **Vérifier et valider** | Relire, corriger avec « Modifier », puis **Valider la perte**. Encadré « Déjà saisi ce jour-là » : vérifier que ce n'est pas la même perte avant « Valider quand même » |
 
 ✓ **Perte enregistrée** : « Nouvelle perte — même endroit » pour enchaîner.
 

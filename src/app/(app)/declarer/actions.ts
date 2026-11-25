@@ -5,6 +5,7 @@ import { AdminError } from "@/modules/admin/accounts";
 import { proposeCause } from "@/modules/admin/causes";
 import { getCurrentUser, requireUser } from "@/modules/auth/next-session";
 import type { SendResult } from "@/modules/declarations/offline-queue";
+import { sameDayLosses } from "@/modules/declarations/doublons";
 import { ForbiddenError } from "@/modules/auth/permissions";
 import {
   BatchLineError,
@@ -97,5 +98,16 @@ export async function sendQueued(kind: "une" | "serie", payloads: unknown[]): Pr
     if (isInputError(e)) return { ok: false, error: e.message };
     console.error("Échec d'envoi d'une perte gardée hors ligne", e);
     return { ok: false, error: "Erreur inattendue du serveur : nouvel essai plus tard.", retry: true };
+  }
+}
+
+/** Pertes du même produit, au même endroit, le même jour (doublon probable, décision du 26/11/2026). */
+export async function sameDayLossesAction(input: unknown) {
+  const user = await requireUser();
+  try {
+    return await sameDayLosses(db, user, input);
+  } catch (e) {
+    console.error("Recherche de doublons impossible", e);
+    return [];
   }
 }
