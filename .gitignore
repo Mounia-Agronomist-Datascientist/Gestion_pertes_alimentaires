@@ -20,5 +20,8 @@ next-env.d.ts
 # Fichiers réels déposés pour les essais locaux (plan de production, tome) : jamais commités
 imports-local/
 
+# Documents sources rangés en local (tomes, plans, décomptes, bons, pesées) : jamais commités
+documents-sources/
+
 # Copié depuis node_modules à l'installation (scripts/copy-pdf-worker.mjs)
 public/pdf.worker.min.mjs
