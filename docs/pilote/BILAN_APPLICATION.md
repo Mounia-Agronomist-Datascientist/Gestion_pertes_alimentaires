@@ -61,7 +61,7 @@ Lot et DLC tapés à la main pour l'instant (lecture automatique possible plus t
 
 | Zone | Causes |
 |---|---|
-| Réception | Produit arrivé cassé / ouvert / dessouvidé · Cassé / ouvert pendant la manipulation · Problème de qualité (abîmé, pourri…) · Étiquetage ou emballage non conforme · Corps étranger / contamination |
+| Réception | 1. Produit arrivé cassé / ouvert / dessouvidé · 2. Cassé / ouvert pendant la manipulation · 3. Problème de qualité (abîmé, pourri…) · 4. Étiquetage ou emballage non conforme · 5. Corps étranger / contamination |
 | Stockage | 1. Problème de DLC · 2. Problème de qualité · 3. Retour non conforme · 4. Surstock · 5. Retour non utilisable · 6. Rupture du froid (panne de chambre) · 7. Nuisibles · 8. Chute / écrasement en manutention |
 | Cuisine / Production (mêmes causes aux 4 postes) | 1. Non-conformité POIDS · 2. Non-conformité CUISSON · 3. Non-conformité INGRÉDIENT · 4. Surplus non utilisable · 5. Chute de gastro · 6. Oubli de gastro sur une échelle · 7. Non-protection des gastros · 8. Contamination / corps étranger · 9. Panne / casse machine · 10. Erreur de déboîtage / préparation · 11. Erreur sur les chiffres prévisionnels |
 | Conditionnement | Non-conformité qualité · Surplus de production · Chute de produit · Doseuse · Défaut de scellage · Barquettes de test d'oxygène · Erreur d'étiquetage · Poids non conforme · Défaut d'aspect · Barquette abîmée · Erreur de production · Barquette remise au personnel puis jetée · Fond de gastro · Panne d'équipement · Réglage / démarrage de la ligne |
@@ -166,7 +166,7 @@ Chaque semaine aussi : lire les alertes (accueil) et la **Synthèse de la semain
 ## Ce qui reste à faire ou à décider
 
 **Mise en ligne (à partir du 8 décembre)**, dans l'ordre, après une sauvegarde :
-1. pousser les commits, puis passer les migrations **0014 à 0046** (GitHub → Actions → « Base de données ») ;
+1. pousser les commits, puis passer les migrations **0014 à 0047** (GitHub → Actions → « Base de données ») ;
 2. Administration → Produits → « Compléter depuis les tomes importés » ;
 3. réimporter les semaines dont le tome a été importé avant le 19/11 (composition des plats manquante) ;
 4. déposer le ZIP des bons de commande du Drive ;

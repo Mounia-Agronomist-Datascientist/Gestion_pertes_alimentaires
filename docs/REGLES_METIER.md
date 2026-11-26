@@ -598,6 +598,10 @@ Migration 0037 ; les pertes déjà enregistrées gardent leur cause.
   (ancienne « 7. Lot oublié / surstock »), **5. Retour non utilisable** (nouvelle : par exemple un seau de crème ouvert
   depuis plus de 48 h ; « Conservation / stockage » · évitable, proposé), 6. Rupture du froid (panne de chambre),
   7. Nuisibles, 8. Chute / écrasement en manutention.
+- **Réception numérotée** (26/11/2026, migration 0047), dans l'ordre de la saisie : 1. Produit arrivé cassé / ouvert /
+  dessouvidé, 2. Cassé / ouvert pendant la manipulation, 3. Problème de qualité (abîmé, pourri, etc.), 4. Étiquetage
+  ou emballage non conforme, 5. Corps étranger / contamination ; « Autres causes » reste à la fin, sans numéro. Une
+  nouvelle cause ajoutée plus tard se numérote en la renommant (Administration → Causes).
 
 ## R37 — N° de lot, DLC et photos (23/11/2026)
 

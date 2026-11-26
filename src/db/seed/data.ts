@@ -104,12 +104,12 @@ export const OTHER_CAUSE = {
 } as const;
 
 export const CAUSES: readonly CauseSeed[] = [
-  // Réception
-  { code: "REC_ARRIVE_CASSE", name: "Produit arrivé cassé / ouvert", zones: ["RECEPTION"] },
-  { code: "REC_CASSE_MANIP", name: "Cassé / ouvert pendant la manipulation", zones: ["RECEPTION"] },
+  // Réception : numérotées comme en Cuisine et en Stockage (décision du 26/11/2026, migration 0047)
+  { code: "REC_ARRIVE_CASSE", name: "1. Produit arrivé cassé / ouvert", zones: ["RECEPTION"] },
+  { code: "REC_CASSE_MANIP", name: "2. Cassé / ouvert pendant la manipulation", zones: ["RECEPTION"] },
   {
     code: "REC_DESSOUVIDE",
-    name: "Produit arrivé dessouvidé",
+    name: "3. Produit arrivé dessouvidé",
     description: "Perte du sous-vide à la livraison",
     zones: ["RECEPTION"],
   },
@@ -174,11 +174,11 @@ export const CAUSES: readonly CauseSeed[] = [
   { code: "STO_NUISIBLES", name: "7. Nuisibles", description: "Insectes, rongeurs", zones: ["STOCKAGE"] },
   { code: "STO_MANUTENTION", name: "8. Chute / écrasement en manutention", zones: ["STOCKAGE"] },
   { code: "PANNE_EQUIPEMENT", name: "Panne d'équipement", zones: ["CONDITIONNEMENT"] },
-  { code: "REC_CORPS_ETRANGER", name: "Corps étranger / contamination", zones: ["RECEPTION"] },
+  { code: "REC_CORPS_ETRANGER", name: "4. Corps étranger / contamination", zones: ["RECEPTION"] },
   // Retours du futur utilisateur (décision du 23/11/2026, migration 0037)
   {
     code: "REC_ETIQUETAGE",
-    name: "Étiquetage ou emballage non conforme",
+    name: "5. Étiquetage ou emballage non conforme",
     description: "Pas de n° de lot ou de DLC, etc.",
     zones: ["RECEPTION"],
   },
