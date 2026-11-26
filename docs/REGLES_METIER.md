@@ -799,3 +799,14 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
   Légumerie, Stockage sec…) et recherche **se cumulent**. Chaque liste ne propose que les choix qui donnent au moins
   un article avec les autres filtres, avec leur nombre. Seuls les types présents dans la liste ont un onglet
   (recettes, sous-recettes, produits finis n'en ont pas : ce ne sont pas des articles).
+
+## R48 — Cuisine : produit hors des recettes de l'équipe (26/11/2026)
+
+- À un poste de Cuisine, sous les plats de l'équipe, la tuile **« Autre produit, hors des recettes de l'équipe »**
+  permet de jeter un produit qui n'est dans aucune recette de l'équipe pour la semaine : on le **cherche dans toute la
+  liste des articles** (matières, sous-recettes, emballages… ; pas les encas, R9), ou on le **tape à la main** (nom,
+  type, prix d'achat facultatif) comme un « produit absent de la liste ». En Conditionnement, la même tuile s'appelle
+  « hors des plats de la semaine ».
+- Une saisie à la main reste une saisie « hors liste » : l'administration la chiffre, la rattache à un article ou crée
+  l'article (Administration → Produits). Rien ne change pour le calcul.
+

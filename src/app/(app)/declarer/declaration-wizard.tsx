@@ -1896,6 +1896,9 @@ function ProductStep({
 }) {
   const [search, setSearch] = useState("");
   const [freeMode, setFreeMode] = useState(false);
+  /** Produit hors des recettes de l'équipe (décision du 26/11/2026) : recherche dans toute la liste ou saisie libre. */
+  const [otherMode, setOtherMode] = useState(false);
+  const [otherSearch, setOtherSearch] = useState("");
   const [freeName, setFreeName] = useState("");
   const [freeCategory, setFreeCategory] = useState<(typeof PRODUCT_CATEGORIES)[number] | null>(null);
   const [freePriceText, setFreePriceText] = useState("");
@@ -2093,6 +2096,71 @@ function ProductStep({
         </button>
         <button type="button" className="text-slate-600 underline" onClick={() => setFreeMode(false)}>
           Revenir à la liste
+        </button>
+      </Section>
+    );
+  }
+
+  // ─── Produit hors des recettes de l'équipe (décision du 26/11/2026) ─────
+  if (otherMode) {
+    const q = otherSearch.trim().toLowerCase();
+    const matches =
+      q.length >= 2
+        ? products.filter(
+            (p) =>
+              p.category !== "produit_externe" && [p.name, p.variant, p.code].some((v) => v?.toLowerCase().includes(q)),
+          )
+        : [];
+    return (
+      <Section title="Autre produit">
+        <p className="text-slate-700">
+          Un produit qui n&apos;est pas dans{" "}
+          {dishScope === "equipe" ? "les recettes de l'équipe" : "les plats de la semaine"} : cherchez-le dans la liste
+          des articles, ou tapez-le à la main.
+        </p>
+        <input
+          className="field"
+          type="search"
+          placeholder="Nom ou code (ex. crème, beurre, barquette)"
+          aria-label="Rechercher dans la liste des articles"
+          value={otherSearch}
+          onChange={(e) => setOtherSearch(e.target.value)}
+          autoFocus
+        />
+        <Tile onClick={() => setFreeMode(true)}>
+          Le taper à la main
+          <small className="font-normal opacity-80">Produit introuvable dans la liste : nom, type, prix si connu</small>
+        </Tile>
+        {q.length >= 2 && (
+          <div className="flex flex-col gap-2">
+            {matches.slice(0, 30).map((p) => (
+              <Tile
+                key={p.id}
+                compact
+                onClick={() => onChoose({ kind: "listed", id: p.id, name: p.name, category: p.category })}
+              >
+                {p.name}
+                {p.variant && ` – ${p.variant}`}
+                <small className="font-normal opacity-70">
+                  {PRODUCT_CATEGORY_LABELS[p.category]}
+                  {p.code && ` · ${p.code}`}
+                </small>
+              </Tile>
+            ))}
+            {matches.length === 0 && (
+              <p className="text-slate-500">Aucun article trouvé : utilisez « Le taper à la main ».</p>
+            )}
+          </div>
+        )}
+        <button
+          type="button"
+          className="self-start text-slate-700 underline"
+          onClick={() => {
+            setOtherMode(false);
+            setOtherSearch("");
+          }}
+        >
+          {dishScope === "equipe" ? "← Revenir aux recettes de l'équipe" : "← Revenir aux plats de la semaine"}
         </button>
       </Section>
     );
@@ -2318,6 +2386,16 @@ function ProductStep({
             ))}
           </div>
           {snackList}
+          {dishScope && !onlySnacks && (
+            <Tile onClick={() => setOtherMode(true)}>
+              {dishScope === "equipe"
+                ? "Autre produit, hors des recettes de l'équipe"
+                : "Autre produit, hors des plats de la semaine"}
+              <small className="font-normal opacity-80">
+                Ingrédient, matière, emballage… à chercher dans la liste ou à taper à la main
+              </small>
+            </Tile>
+          )}
         </>
       ) : (
         <div className="flex flex-col gap-2">
