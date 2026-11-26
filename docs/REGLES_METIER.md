@@ -768,3 +768,15 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
   par bénéficiaire. Sert aux reçus fiscaux et à la démarche anti-gaspillage (à confirmer avec la comptabilité).
 - Les dons Linkee ne figurent que pour un compte qui compare les équipes, sans filtre de zone ni d'équipe.
 
+## R46 — Fournisseurs en double (26/11/2026)
+
+- Un même fournisseur peut apparaître sous plusieurs noms dans les bons de commande : « Passion Froid » et
+  « Passion Froid (BOF) », « Moulin de Sauret (Stock Sécu) », « Pro à Pro (Neg) », « Farret (Groupe GP) », ou avec
+  son n° SIREN/SIRET. Ils sont **un seul fournisseur** : la clé de rapprochement est le nom **sans ce qui est entre
+  parenthèses ni le n° SIRET**. Un bon, un colis ou un article saisi à la main sous une variante retrouve le même
+  fournisseur.
+- Le **nom affiché** n'a jamais de n° SIRET. Le nom gardé est celui sans parenthèses (sinon celui qui a le plus de
+  bons) ; il se renomme toujours dans Administration → Fournisseurs.
+- Regroupement des fournisseurs existants (migration 0045) : bons, colis (la livraison la plus récente l'emporte),
+  articles et pertes passent sur le fournisseur gardé ; les doublons sont retirés (42 → 35 sur la base locale).
+

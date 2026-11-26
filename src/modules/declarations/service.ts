@@ -14,12 +14,12 @@ import {
   packagingQuestionsFor,
 } from "@/domain/couts";
 import { commentRequiredFor, destinationAllowedIn } from "@/domain/devenirs";
+import { cleanSupplierName, supplierKey } from "@/domain/fournisseurs";
 import { kgPriceFallback, type KgPriceBasis } from "@/domain/matieres";
 import { periodStartError } from "@/domain/periode-perte";
 import { cartonsProductError, snackAllowedIn } from "@/domain/encas";
 import { CATALOG_ENTRY_ZONE_CODES, type FreePrice, freeCategoriesFor, freeUnitCost } from "@/domain/produit-absent";
 import { normalizeCauseName as normalizeLabel } from "@/modules/admin/causes";
-import { tomeKey } from "@/modules/imports/tome/parse-tome";
 import { DestinationError, validateDestinationSplit } from "@/domain/destinations";
 import {
   LotError,
@@ -140,14 +140,14 @@ async function createEnteredArticle(tx: Db, user: AuthUser, prepared: PreparedDe
     let supplierId: string | null = null;
     if (article.supplier && "supplierId" in article.supplier) supplierId = article.supplier.supplierId;
     else if (article.supplier) {
-      const key = tomeKey(article.supplier.supplierName);
+      const key = supplierKey(article.supplier.supplierName);
       const [known] = await tx.select().from(s.suppliers).where(eq(s.suppliers.key, key));
       supplierId =
         known?.id ??
         (
           await tx
             .insert(s.suppliers)
-            .values({ name: article.supplier.supplierName, key, toValidate: true })
+            .values({ name: cleanSupplierName(article.supplier.supplierName), key, toValidate: true })
             .returning({ id: s.suppliers.id })
         )[0]!.id;
     }

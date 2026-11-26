@@ -6,6 +6,7 @@
  * - Prix d'achat : nouvelle version datée du jour de livraison quand il change (règle R23).
  * - Un bon redéposé (même numéro) remplace ses lignes et ses prix ; rien d'autre n'est effacé.
  */
+import { cleanSupplierName, supplierKey } from "@/domain/fournisseurs";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import * as s from "@/db/schema";
@@ -120,13 +121,16 @@ export async function savePurchaseOrders(
   await db.transaction(async (tx) => {
     for (const order of orders) {
       // ─── Fournisseur ───────────────────────────────────────────────────
-      const supplierKey = tomeKey(order.supplier);
-      let [supplier] = await tx.select().from(s.suppliers).where(eq(s.suppliers.key, supplierKey));
+      const key = supplierKey(order.supplier);
+      let [supplier] = await tx.select().from(s.suppliers).where(eq(s.suppliers.key, key));
       // Fournisseur tapé à la saisie d'un article, retrouvé dans un bon : confirmé.
       if (supplier?.toValidate)
         await tx.update(s.suppliers).set({ toValidate: false, updatedAt: now }).where(eq(s.suppliers.id, supplier.id));
       if (!supplier) {
-        [supplier] = await tx.insert(s.suppliers).values({ name: order.supplier, key: supplierKey }).returning();
+        [supplier] = await tx
+          .insert(s.suppliers)
+          .values({ name: cleanSupplierName(order.supplier), key })
+          .returning();
         result.newSuppliers++;
       }
 

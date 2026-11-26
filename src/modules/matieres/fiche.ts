@@ -4,12 +4,12 @@
  * fournisseurs. Les imports suivants ne touchent à aucun de ces réglages (règle R23) : une matière est retrouvée par
  * son identifiant Melba, jamais par son nom.
  */
+import { cleanSupplierName, supplierKey } from "@/domain/fournisseurs";
 import { and, asc, count, desc, eq, inArray, isNotNull, max, sql } from "drizzle-orm";
 import { z } from "zod";
 import * as s from "@/db/schema";
 import type { Db } from "@/db/types";
 import { priceInForce } from "@/domain/matieres";
-import { tomeKey } from "@/modules/imports/tome/parse-tome";
 import { writeAudit } from "@/modules/audit/audit";
 import { type AuthUser, requirePermission } from "@/modules/auth/permissions";
 
@@ -385,12 +385,15 @@ export async function saveManualPackaging(db: Db, admin: AuthUser, productId: st
       const [found] = await tx.select({ id: s.suppliers.id }).from(s.suppliers).where(eq(s.suppliers.id, supplierId));
       if (!found) throw new ProductSheetError("Fournisseur inconnu.");
     } else {
-      const key = tomeKey(p.newSupplier!);
+      const key = supplierKey(p.newSupplier!);
       if (!key) throw new ProductSheetError("Nom de fournisseur invalide.");
       const [existing] = await tx.select({ id: s.suppliers.id }).from(s.suppliers).where(eq(s.suppliers.key, key));
       if (existing) supplierId = existing.id;
       else {
-        const [created] = await tx.insert(s.suppliers).values({ name: p.newSupplier!, key }).returning();
+        const [created] = await tx
+          .insert(s.suppliers)
+          .values({ name: cleanSupplierName(p.newSupplier!), key })
+          .returning();
         await writeAudit(tx, {
           userId: admin.id,
           action: "create",
