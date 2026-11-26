@@ -78,6 +78,7 @@ Les règles marquées ⚠️ sont des hypothèses à valider (voir POINTS_A_VALI
 Toutes les saisies sont conservées pour la traçabilité et le suivi des performances dans le temps :
 
 - **Rien n'est jamais supprimé** : ni déclaration, ni équipe, ni zone, ni cause, ni tare (désactivation seulement).
+  Seule exception : un article **sans aucun historique** peut être supprimé (R47).
 - Chaque déclaration garde sa date réelle, sa date de saisie, son auteur et un **instantané** des données
   utilisées (nom et référence du produit, tare, densité, poids unitaire, coûts en Phase 3).
 - Chaque modification crée une **nouvelle version** complète de la déclaration (table `declaration_revisions`) :
@@ -780,3 +781,17 @@ Zone « Produits finis (salle des cartons) » (Conditionnement), aux deux postes
 - Regroupement des fournisseurs existants (migration 0045) : bons, colis (la livraison la plus récente l'emporte),
   articles et pertes passent sur le fournisseur gardé ; les doublons sont retirés (42 → 35 sur la base locale).
 
+## R47 — Suppression, commentaire et filtres des articles (26/11/2026)
+
+- Administration → Produits : un article peut être **supprimé** seulement s'il n'a **aucun historique** : aucune
+  perte (même annulée), aucune ligne de bon de commande, aucun prix venu des tomes ou des bons. Cas visé : un article
+  saisi à la main par erreur ou en double, jamais utilisé. Ses colis et prix saisis à la main partent avec lui ; la
+  suppression est inscrite au journal d'audit. Une confirmation est demandée.
+- Un article qui a des pertes ne se supprime pas (R5) : on le **fusionne** avec le bon article (ses pertes passent
+  dessus) ou on le **désactive**.
+- Chaque article peut porter un **commentaire** libre de l'administration (1 000 caractères), visible dans la liste et
+  sur sa fiche ; il n'entre dans aucun calcul.
+- Filtres de la liste : type, catégorie Melba, fournisseur, **lieu de stockage** (Chambre BOF, Chambre négative,
+  Légumerie, Stockage sec…) et recherche **se cumulent**. Chaque liste ne propose que les choix qui donnent au moins
+  un article avec les autres filtres, avec leur nombre. Seuls les types présents dans la liste ont un onglet
+  (recettes, sous-recettes, produits finis n'en ont pas : ce ne sont pas des articles).

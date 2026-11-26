@@ -2,7 +2,13 @@ import Link from "next/link";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import * as s from "@/db/schema";
-import { listEnteredArticles, listProductsForAdmin, listUnlistedGroups } from "@/modules/admin/products";
+import {
+  isDeletable,
+  listEnteredArticles,
+  listProductsForAdmin,
+  listUnlistedGroups,
+  productHistories,
+} from "@/modules/admin/products";
 import { toProductionLocalDate } from "@/domain/semaine-production";
 import { requireUser } from "@/modules/auth/next-session";
 import { pricesInForce } from "@/modules/matieres/referentiel";
@@ -23,7 +29,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const { fournisseur } = await searchParams;
   const admin = await requireUser();
   const today = toProductionLocalDate(new Date());
-  const [products, groups, units, prices, choices, suppliers, supplierIdsOf, entered] = await Promise.all([
+  const [products, groups, units, prices, choices, suppliers, supplierIdsOf, entered, histories] = await Promise.all([
     listProductsForAdmin(db, admin),
     listUnlistedGroups(db, admin),
     db
@@ -36,15 +42,16 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     listSuppliers(db, admin),
     suppliersByProduct(db),
     listEnteredArticles(db, admin),
+    productHistories(db),
   ]);
   const categoryOf = new Map(choices.categories.map((c) => [c.id, c]));
   const placeName = new Map(choices.subzones.map((z) => [z.id, z.name]));
   /** Lieu de stockage effectif : celui du produit, sinon celui de sa catégorie Melba. */
   const storageOf = (p: (typeof products)[number]) => {
     const own = p.storageSubzoneId ? placeName.get(p.storageSubzoneId) : null;
-    if (own) return { name: own, own: true };
+    if (own) return { id: p.storageSubzoneId!, name: own, own: true };
     const fromCategory = p.materialCategoryId ? categoryOf.get(p.materialCategoryId)?.storageSubzoneId : null;
-    return fromCategory ? { name: placeName.get(fromCategory) ?? null, own: false } : null;
+    return fromCategory ? { id: fromCategory, name: placeName.get(fromCategory) ?? null, own: false } : null;
   };
   return (
     <>
@@ -56,7 +63,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         Matières de la semaine à compléter (fournisseur, poids du colis)
       </Link>
       <EnteredArticles
-        articles={entered}
+        articles={entered.map((a) => ({ ...a, deletable: isDeletable(histories.get(a.id)) }))}
         candidates={products
           .filter((p) => p.active && !p.toValidate)
           .map((p) => ({ id: p.id, name: p.variant ? `${p.name} – ${p.variant}` : p.name, category: p.category }))}
@@ -65,6 +72,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         units={units}
         materialCategories={choices.categories.map((c) => ({ id: c.id, name: c.name }))}
         suppliers={suppliers.map((x) => ({ id: x.id, name: x.name }))}
+        places={choices.subzones.map((z) => ({ id: z.id, name: z.name }))}
         initialSupplier={suppliers.some((x) => x.id === fournisseur) ? fournisseur : undefined}
         groups={groups.map(({ declarationIds: _ids, ...g }) => g)}
         products={products.map((p) => ({
@@ -84,6 +92,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           materialCategoryId: p.materialCategoryId,
           materialCategory: p.materialCategoryId ? (categoryOf.get(p.materialCategoryId)?.name ?? null) : null,
           storage: storageOf(p),
+          comment: p.comment,
+          deletable: isDeletable(histories.get(p.id)),
           supplierIds: supplierIdsOf.get(p.id) ?? [],
           price: prices.get(p.id)
             ? {

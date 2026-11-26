@@ -47,6 +47,8 @@ import {
   priceUnlistedGroup,
   setProductActive,
   updateProduct,
+  deleteProduct,
+  setProductComment,
   validateEnteredArticle,
   validateSupplier,
 } from "@/modules/admin/products";
@@ -227,6 +229,7 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
     defaultUnit: String(formData.get("defaultUnit") ?? ""),
     unitWeightKg: String(formData.get("unitWeightKg") ?? ""),
     densityKgPerL: String(formData.get("densityKgPerL") ?? ""),
+    comment: String(formData.get("comment") ?? ""),
   });
   // Prix d'achat d'une saisie « hors liste » (texte au clavier français, « 3,50 »).
   const priceFields = () => {
@@ -254,6 +257,13 @@ export async function productAction(_prev: ProductActionState, formData: FormDat
       case "deactivate":
         await setProductActive(db, admin, productId, intent === "activate");
         message = intent === "activate" ? "Produit réactivé." : "Produit désactivé : il n'est plus proposé.";
+        break;
+      case "delete":
+        message = `Article « ${await deleteProduct(db, admin, productId)} » supprimé.`;
+        break;
+      case "comment":
+        await setProductComment(db, admin, productId, String(formData.get("comment") ?? ""));
+        message = "Commentaire enregistré.";
         break;
       case "link": {
         if (!productId) return { error: "Choisissez le produit de la liste" };
@@ -683,6 +693,12 @@ export async function enteredArticleAction(formData: FormData): Promise<void> {
       }
       case "validate_supplier":
         await validateSupplier(db, admin, String(formData.get("supplierId") ?? ""));
+        break;
+      case "delete":
+        await deleteProduct(db, admin, productId);
+        break;
+      case "comment":
+        await setProductComment(db, admin, productId, String(formData.get("comment") ?? ""));
         break;
     }
   } catch (e) {

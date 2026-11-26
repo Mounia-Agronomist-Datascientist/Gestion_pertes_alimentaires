@@ -100,6 +100,8 @@ export const products = pgTable(
     toValidate: boolean("to_validate").notNull().default(false),
     manualSupplierId: uuid("manual_supplier_id").references((): AnyPgColumn => suppliers.id),
     enteredBy: uuid("entered_by").references(() => users.id),
+    /** Commentaire libre de l'administration sur l'article (décision du 26/11/2026). */
+    comment: text("comment"),
     active: boolean("active").notNull().default(true),
     ...timestamps,
   },

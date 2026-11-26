@@ -25,6 +25,7 @@ interface Props {
     active: boolean;
     materialCategoryId: string | null;
     storageSubzoneId: string | null;
+    comment: string | null;
   };
   packagings: {
     supplierId: string;
@@ -155,6 +156,12 @@ export function ProductSheet({
               {p.densityKgPerL != null &&
                 ` · densité ${fmtNumber(p.densityKgPerL)} kg/L${p.densityReference ? ` (référence : ${p.densityReference})` : ""}`}
             </p>
+            {p.comment && (
+              <p className="rounded-xl bg-brun-50 p-2 text-sm whitespace-pre-line text-slate-800">
+                <span className="font-medium">Commentaire : </span>
+                {p.comment}
+              </p>
+            )}
             <p className="text-sm text-slate-500">
               Le nom, l&apos;unité, le poids et la densité ne sont jamais changés par un import ; les pertes passées
               gardent ce qui a été enregistré à l&apos;époque.

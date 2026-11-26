@@ -159,3 +159,39 @@ test("les répartitions s'affichent en anneau, avec le total au centre et la lé
   }).toPass();
   await expect(donut.getByRole("status")).toContainText("Erreur de déboîtage / préparation");
 });
+
+test("l'administration ajoute, commente puis supprime un article ; les filtres se cumulent", async ({ page }) => {
+  await login(page, "admin");
+  await page.goto("/admin/produits");
+  // Pas d'onglet vide (recettes, sous-recettes, produits finis ne sont pas des articles de la liste).
+  await expect(page.getByRole("navigation", { name: "Type de produit" }).getByText(/^Recette/)).toHaveCount(0);
+  // La liste « Choisir le produit » d'une saisie hors liste reste dans son cadre.
+  const unlisted = page.getByLabel("Produit de la liste").first();
+  if (await unlisted.count()) {
+    const box = (await unlisted.boundingBox())!;
+    const frame = (await unlisted
+      .locator("xpath=ancestor::div[contains(@class,'border-amber-300')][1]")
+      .boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(frame.x + frame.width);
+  }
+
+  const name = unique("Article e2e");
+  await page.getByRole("button", { name: "+ Ajouter un produit" }).click();
+  await page.getByLabel("Nom").fill(name);
+  await page.getByLabel("Type de produit").selectOption("matiere_premiere");
+  await page.getByLabel("Commentaire (facultatif)").fill("Ajouté pour le test");
+  await page.getByRole("button", { name: "Créer", exact: true }).click();
+  await expect(page.getByText(`Produit « ${name} » créé.`)).toBeVisible();
+
+  await page.getByLabel("Rechercher un produit").fill(name);
+  await expect(page.getByText("1 produit avec ces filtres")).toBeVisible();
+  const item = page.getByRole("listitem").filter({ hasText: name });
+  await expect(item.getByText("Ajouté pour le test")).toBeVisible();
+  await page.getByLabel("Lieu de stockage").selectOption("aucun");
+  await expect(page.getByText("1 produit avec ces filtres")).toBeVisible();
+
+  page.once("dialog", (d) => d.accept());
+  await item.getByRole("button", { name: "Supprimer" }).click();
+  await expect(page.getByText(`Article « ${name} » supprimé.`)).toBeVisible();
+  await expect(page.getByText("0 produit avec ces filtres")).toBeVisible();
+});

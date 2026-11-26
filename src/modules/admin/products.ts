@@ -1,7 +1,9 @@
 /**
  * Référentiel des produits, saisi à la main en attendant l'import du plan de production et du tome
  * (Phase 2), et revue des produits saisis « hors liste » par les équipes.
- * Un produit n'est jamais supprimé : il est désactivé. Les déclarations gardent le nom saisi à l'époque.
+ * Un produit est désactivé plutôt que supprimé : les déclarations gardent le nom saisi à l'époque. Il ne peut être
+ * supprimé que s'il n'a aucun historique (ni perte, ni ligne de bon de commande, ni prix des tomes) — décision du
+ * 26/11/2026, docs/REGLES_METIER.md R47.
  */
 import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -40,6 +42,8 @@ const productSchema = z.object({
   defaultUnit: z.string().min(1, "Choisissez l'unité"),
   unitWeightKg: optionalPositive,
   densityKgPerL: optionalPositive,
+  /** Commentaire libre de l'administration (décision du 26/11/2026). */
+  comment: optionalText(1000),
 });
 
 export type ProductInput = z.input<typeof productSchema>;
@@ -112,6 +116,105 @@ export async function setProductActive(db: Db, admin: AuthUser, productId: strin
     entity: "product",
     entityId: productId,
     before,
+  });
+}
+
+/** Ce qui empêche de supprimer un article : son historique (pertes, bons de commande, prix des tomes). */
+export interface ProductHistory {
+  losses: number;
+  orderLines: number;
+  tomePrices: number;
+}
+
+export const isDeletable = (h: ProductHistory | undefined) =>
+  !h || (h.losses === 0 && h.orderLines === 0 && h.tomePrices === 0);
+
+/** Historique de chaque article qui en a un (les autres sont absents de la table). */
+export async function productHistories(db: Db, productIds?: string[]): Promise<Map<string, ProductHistory>> {
+  const ids = productIds?.length ? productIds : ["00000000-0000-0000-0000-000000000000"];
+  const only = (col: typeof s.lossDeclarations.productId | typeof s.purchaseOrderLines.productId) =>
+    productIds ? inArray(col, ids) : undefined;
+  const [losses, lines, prices] = await Promise.all([
+    db
+      .select({ id: s.lossDeclarations.productId, n: sql<number>`count(*)::int` })
+      .from(s.lossDeclarations)
+      .where(only(s.lossDeclarations.productId))
+      .groupBy(s.lossDeclarations.productId),
+    db
+      .select({ id: s.purchaseOrderLines.productId, n: sql<number>`count(*)::int` })
+      .from(s.purchaseOrderLines)
+      .where(only(s.purchaseOrderLines.productId))
+      .groupBy(s.purchaseOrderLines.productId),
+    db
+      .select({ id: s.productPrices.productId, n: sql<number>`count(*)::int` })
+      .from(s.productPrices)
+      .where(
+        and(ne(s.productPrices.source, "manuel"), productIds ? inArray(s.productPrices.productId, ids) : undefined),
+      )
+      .groupBy(s.productPrices.productId),
+  ]);
+  const map = new Map<string, ProductHistory>();
+  const add = (rows: { id: string | null; n: number }[], key: keyof ProductHistory) => {
+    for (const r of rows) {
+      if (!r.id) continue;
+      const h = map.get(r.id) ?? { losses: 0, orderLines: 0, tomePrices: 0 };
+      h[key] = r.n;
+      map.set(r.id, h);
+    }
+  };
+  add(losses, "losses");
+  add(lines, "orderLines");
+  add(prices, "tomePrices");
+  return map;
+}
+
+/**
+ * Supprime un article sans historique (article ajouté par erreur, doublon jamais utilisé) avec ses colis et prix
+ * saisis à la main. Un article qui a des pertes se fusionne ou se désactive : ses pertes ne sont jamais effacées (R5).
+ */
+export async function deleteProduct(db: Db, admin: AuthUser, productId: string, now = new Date()) {
+  requirePermission(admin, "referentiel.manage");
+  const [before] = await db.select().from(s.products).where(eq(s.products.id, productId));
+  if (!before) throw new AdminError("Article introuvable");
+  const history = (await productHistories(db, [productId])).get(productId);
+  if (!isDeletable(history)) {
+    throw new AdminError(
+      history!.losses
+        ? "Cet article a des pertes enregistrées : fusionnez-le avec le bon article ou désactivez-le."
+        : "Cet article vient des tomes ou des bons de commande : désactivez-le plutôt.",
+    );
+  }
+  await db.transaction(async (tx) => {
+    await tx.delete(s.productPrices).where(eq(s.productPrices.productId, productId));
+    await tx.delete(s.manualPackagings).where(eq(s.manualPackagings.productId, productId));
+    await tx.delete(s.supplierProducts).where(eq(s.supplierProducts.productId, productId));
+    await tx.delete(s.products).where(eq(s.products.id, productId));
+  });
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "delete",
+    entity: "product",
+    entityId: productId,
+    before,
+    occurredAt: now,
+  });
+  return before.name;
+}
+
+/** Commentaire de l'administration sur un article, sans toucher au reste de sa fiche. */
+export async function setProductComment(db: Db, admin: AuthUser, productId: string, raw: string) {
+  requirePermission(admin, "referentiel.manage");
+  const comment = raw.trim().slice(0, 1000) || null;
+  const [before] = await db.select().from(s.products).where(eq(s.products.id, productId));
+  if (!before) throw new AdminError("Article introuvable");
+  await db.update(s.products).set({ comment, updatedAt: new Date() }).where(eq(s.products.id, productId));
+  await writeAudit(db, {
+    userId: admin.id,
+    action: "update",
+    entity: "product",
+    entityId: productId,
+    before: { comment: before.comment },
+    after: { comment },
   });
 }
 
@@ -246,6 +349,7 @@ export async function listEnteredArticles(db: Db, admin: AuthUser) {
     supplierId: r.product.manualSupplierId,
     supplierToValidate: r.supplierToValidate ?? false,
     enteredBy: r.enteredBy,
+    comment: r.product.comment,
     createdAt: r.product.createdAt,
     declarations: countOf.get(r.product.id) ?? 0,
   }));

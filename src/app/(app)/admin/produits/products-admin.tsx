@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import { NO_FILTERS, type ProductFilters, facetCounts, filterProducts } from "@/domain/filtres-produits";
 import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { type ProductActionState, productAction } from "../actions";
+import { DeleteButton } from "./delete-button";
 
 type Category = (typeof PRODUCT_CATEGORIES)[number];
 
@@ -27,8 +29,12 @@ interface Product {
   /** Catégorie Melba (bons de commande). */
   materialCategory?: string | null;
   /** Lieu de stockage effectif : propre au produit (own) ou celui de sa catégorie. */
-  storage?: { name: string | null; own: boolean } | null;
+  storage?: { id: string; name: string | null; own: boolean } | null;
   supplierIds?: string[];
+  /** Commentaire libre de l'administration. */
+  comment?: string | null;
+  /** Sans historique (ni perte, ni bon de commande, ni prix des tomes) : peut être supprimé. */
+  deletable?: boolean;
   price: {
     perKgEur: number | null;
     perUnitEur: number | null;
@@ -95,6 +101,8 @@ interface Props {
   units: { code: string; label: string }[];
   materialCategories: { id: string; name: string }[];
   suppliers: { id: string; name: string }[];
+  /** Lieux de stockage (Chambre BOF, Chambre négative…). */
+  places: { id: string; name: string }[];
   /** Fournisseur choisi depuis Administration → Fournisseurs. */
   initialSupplier?: string;
 }
@@ -102,32 +110,78 @@ interface Props {
 const dayFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
 const fmtDay = (date: string) => dayFormat.format(new Date(`${date}T12:00:00Z`));
 const fmtNumber = (n: number) => n.toLocaleString("fr-FR", { maximumFractionDigits: 4 });
-/** Comparaison sans accents ni majuscules, comme pour les doublons côté serveur. */
-const fold = (text: string) =>
-  text
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
 
-export function ProductsAdmin({ products, groups, units, materialCategories, suppliers, initialSupplier }: Props) {
+/**
+ * Liste de choix d'un filtre : seules les valeurs qui donnent au moins un produit avec les autres filtres, avec leur
+ * nombre ; la valeur choisie reste affichée même si elle ne donne plus rien.
+ */
+function FacetSelect({
+  label,
+  all,
+  none,
+  value,
+  onChange,
+  options,
+  counts,
+}: {
+  label: string;
+  all: string;
+  none?: { value: string; label: string };
+  value: string;
+  onChange: (v: string) => void;
+  options: { id: string; name: string }[];
+  counts: Map<string, number>;
+}) {
+  const shown = options.filter((o) => counts.get(o.id) || o.id === value);
+  const noneCount = counts.get("") ?? 0;
+  return (
+    <label className="flex min-w-0 flex-col gap-1">
+      <span className="text-sm font-medium">{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="field w-full min-w-0">
+        <option value="">{all}</option>
+        {none && (noneCount > 0 || value === none.value) && (
+          <option value={none.value}>
+            {none.label} ({noneCount})
+          </option>
+        )}
+        {shown.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.name} ({counts.get(o.id) ?? 0})
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+export function ProductsAdmin({
+  products,
+  groups,
+  units,
+  materialCategories,
+  suppliers,
+  places,
+  initialSupplier,
+}: Props) {
   const [state, action, pending] = useActionState<ProductActionState, FormData>(productAction, {});
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<Category | "toutes">("toutes");
+  const [filters, setFilters] = useState<ProductFilters>({ ...NO_FILTERS, supplier: initialSupplier ?? "" });
+  const setFilter = (key: keyof ProductFilters) => (value: string) => setFilters((f) => ({ ...f, [key]: value }));
   const [editing, setEditing] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [creatingFrom, setCreatingFrom] = useState<string | null>(null);
-  const [melbaCategory, setMelbaCategory] = useState("");
-  const [supplier, setSupplier] = useState(initialSupplier ?? "");
 
   const active = products.filter((p) => p.active);
-  const listed = products.filter(
-    (p) =>
-      (category === "toutes" || p.category === category) &&
-      (!melbaCategory ||
-        (melbaCategory === "aucune" ? !p.materialCategoryId : p.materialCategoryId === melbaCategory)) &&
-      (!supplier || (p.supplierIds ?? []).includes(supplier)) &&
-      fold(`${p.name} ${p.variant ?? ""} ${p.code ?? ""}`).includes(fold(search.trim())),
-  );
+  const filterable = products.map((p) => ({
+    ...p,
+    materialCategoryId: p.materialCategoryId ?? null,
+    supplierIds: p.supplierIds ?? [],
+    storageId: p.storage?.id ?? null,
+  }));
+  const listed = filterProducts(filterable, filters);
+  const typeCounts = facetCounts(filterable, filters, "category");
+  /** Types de produit présents dans la liste (pas d'onglet vide : recettes, sous-recettes… ne sont pas des articles). */
+  const types = PRODUCT_CATEGORIES.filter((c) => products.some((p) => p.category === c));
+  const filtered = Object.entries(filters).some(([, v]) => v !== "");
 
   return (
     <div className="flex flex-col gap-4">
@@ -193,7 +247,7 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                   <input type="hidden" name="groupKey" value={g.key} />
                   <select
                     name="productId"
-                    className="field min-h-12 flex-1 text-base"
+                    className="field min-h-12 w-full min-w-0 text-base"
                     defaultValue=""
                     aria-label="Produit de la liste"
                   >
@@ -270,55 +324,67 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
         </h2>
         <input
           type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={filters.search}
+          onChange={(e) => setFilter("search")(e.target.value)}
           placeholder="Rechercher par nom ou code"
           className="field"
           aria-label="Rechercher un produit"
         />
-        <nav aria-label="Type de produit" className="flex flex-wrap gap-2">
-          {(["toutes", ...PRODUCT_CATEGORIES] as const).map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setCategory(c)}
-              className={`rounded-full px-4 py-2 text-sm font-medium ${category === c ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
-            >
-              {c === "toutes" ? "Tous" : PRODUCT_CATEGORY_LABELS[c]}
-            </button>
-          ))}
-        </nav>
-        {(materialCategories.length > 0 || suppliers.length > 0) && (
-          <div className="grid gap-2 sm:grid-cols-2">
-            <select
-              value={melbaCategory}
-              onChange={(e) => setMelbaCategory(e.target.value)}
-              className="field min-w-0"
-              aria-label="Catégorie Melba"
-            >
-              <option value="">Toutes les catégories Melba</option>
-              <option value="aucune">Sans catégorie Melba</option>
-              {materialCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={supplier}
-              onChange={(e) => setSupplier(e.target.value)}
-              className="field min-w-0"
-              aria-label="Fournisseur"
-            >
-              <option value="">Tous les fournisseurs</option>
-              {suppliers.map((x) => (
-                <option key={x.id} value={x.id}>
-                  {x.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {types.length > 1 && (
+          <nav aria-label="Type de produit" className="flex flex-wrap gap-2">
+            {(["", ...types] as const).map((c) => (
+              <button
+                key={c || "tous"}
+                type="button"
+                onClick={() => setFilter("category")(c)}
+                className={`rounded-full px-4 py-2 text-sm font-medium ${filters.category === c ? "bg-brun-700 text-white" : "bg-white text-slate-700 shadow-sm"}`}
+              >
+                {c === "" ? "Tous" : `${PRODUCT_CATEGORY_LABELS[c]} (${typeCounts.get(c) ?? 0})`}
+              </button>
+            ))}
+          </nav>
         )}
+        <div className="grid gap-2 sm:grid-cols-3">
+          <FacetSelect
+            label="Catégorie Melba"
+            all="Toutes les catégories"
+            none={{ value: "aucune", label: "Sans catégorie Melba" }}
+            value={filters.materialCategory}
+            onChange={setFilter("materialCategory")}
+            options={materialCategories}
+            counts={facetCounts(filterable, filters, "materialCategory")}
+          />
+          <FacetSelect
+            label="Fournisseur"
+            all="Tous les fournisseurs"
+            value={filters.supplier}
+            onChange={setFilter("supplier")}
+            options={suppliers}
+            counts={facetCounts(filterable, filters, "supplier")}
+          />
+          <FacetSelect
+            label="Lieu de stockage"
+            all="Tous les lieux"
+            none={{ value: "aucun", label: "Sans lieu de stockage" }}
+            value={filters.storage}
+            onChange={setFilter("storage")}
+            options={places}
+            counts={facetCounts(filterable, filters, "storage")}
+          />
+        </div>
+        <p className="flex flex-wrap items-center gap-3 text-sm text-slate-600" role="status">
+          {listed.length} produit{listed.length > 1 && "s"}
+          {filtered && " avec ces filtres"}
+          {filtered && (
+            <button
+              type="button"
+              className="font-medium text-rouge-700 underline"
+              onClick={() => setFilters(NO_FILTERS)}
+            >
+              Effacer les filtres
+            </button>
+          )}
+        </p>
         {listed.length === 0 && <p className="text-slate-600">Aucun produit.</p>}
         <ul className="flex flex-col gap-2">
           {listed.map((p) => (
@@ -378,6 +444,12 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                   ) : (
                     p.melba && <span className="text-sm text-amber-800">Pas de prix dans les tomes</span>
                   )}
+                  {p.comment && (
+                    <p className="rounded-xl bg-brun-50 p-2 text-sm whitespace-pre-line text-slate-800">
+                      <span className="font-medium">Commentaire : </span>
+                      {p.comment}
+                    </p>
+                  )}
                   <form action={action} className="flex flex-wrap gap-4">
                     <input type="hidden" name="productId" value={p.id} />
                     <Link href={`/admin/produits/${p.id}`} className="text-sm font-medium text-rouge-700 underline">
@@ -398,6 +470,9 @@ export function ProductsAdmin({ products, groups, units, materialCategories, sup
                     >
                       {p.active ? "Désactiver" : "Réactiver"}
                     </button>
+                    {p.deletable && (
+                      <DeleteButton name={p.name} className="text-sm font-medium text-red-800 underline" />
+                    )}
                   </form>
                 </div>
               )}
@@ -489,6 +564,16 @@ export function ProductFields({
           />
         </label>
       </div>
+      <label className="flex flex-col gap-1">
+        <span className="font-medium">Commentaire (facultatif)</span>
+        <textarea
+          name="comment"
+          className="field min-h-20"
+          maxLength={1000}
+          defaultValue={defaults?.comment ?? ""}
+          placeholder="ex. à vérifier avec la réception, nom à corriger dans Melba…"
+        />
+      </label>
       <p className="text-sm text-slate-500">
         Poids et densité : laisser vide si la valeur n&apos;est pas connue. Ils servent à convertir en kg les pertes
         comptées en pièces ou mesurées en litres.

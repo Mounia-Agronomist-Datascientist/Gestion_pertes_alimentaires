@@ -68,6 +68,7 @@ export default async function ProductSheetPage({ params }: { params: Promise<{ i
           active: p.active,
           materialCategoryId: p.materialCategoryId,
           storageSubzoneId: p.storageSubzoneId,
+          comment: p.comment,
         }}
         packagings={sheet.packagings}
         manualPackagings={sheet.manualPackagings.map(({ updatedAt, ...k }) => ({

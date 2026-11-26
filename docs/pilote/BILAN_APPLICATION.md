@@ -166,7 +166,7 @@ Chaque semaine aussi : lire les alertes (accueil) et la **Synthèse de la semain
 ## Ce qui reste à faire ou à décider
 
 **Mise en ligne (à partir du 8 décembre)**, dans l'ordre, après une sauvegarde :
-1. pousser les commits, puis passer les migrations **0014 à 0045** (GitHub → Actions → « Base de données ») ;
+1. pousser les commits, puis passer les migrations **0014 à 0046** (GitHub → Actions → « Base de données ») ;
 2. Administration → Produits → « Compléter depuis les tomes importés » ;
 3. réimporter les semaines dont le tome a été importé avant le 19/11 (composition des plats manquante) ;
 4. déposer le ZIP des bons de commande du Drive ;

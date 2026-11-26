@@ -4,8 +4,13 @@ import * as s from "@/db/schema";
 import { seed } from "@/db/seed/seed";
 import {
   createProduct,
+  deleteProduct,
+  isDeletable,
   listEnteredArticles,
   mergeEnteredArticle,
+  productHistories,
+  setProductComment,
+  updateProduct,
   validateEnteredArticle,
 } from "@/modules/admin/products";
 import { createAccount } from "@/modules/auth/accounts";
@@ -126,5 +131,43 @@ describe("article saisi à la main en Réception ou Stockage : ajouté à la lis
     expect(moved).toHaveLength(2);
     expect(moved.every((m) => m.status === "corrigee")).toBe(true);
     expect(await listEnteredArticles(t.db, admin)).toEqual([]);
+  });
+
+  it("suppression d'un article sans historique, commentaire (décision du 26/11/2026)", async () => {
+    const extra = await createProduct(t.db, admin, {
+      name: "Article ajouté par erreur",
+      category: "matiere_premiere",
+      defaultUnit: "kg",
+      comment: "  à supprimer  ",
+    });
+    expect(extra.comment).toBe("à supprimer");
+    await setProductComment(t.db, admin, extra.id, "Nom à vérifier avec la réception");
+    const [withComment] = await t.db.select().from(s.products).where(eq(s.products.id, extra.id));
+    expect(withComment!.comment).toBe("Nom à vérifier avec la réception");
+    // Modifier sans commentaire l'efface (champ vidé dans le formulaire).
+    await updateProduct(t.db, admin, extra.id, {
+      name: "Article ajouté par erreur",
+      category: "matiere_premiere",
+      defaultUnit: "kg",
+      comment: "",
+    });
+    expect((await t.db.select().from(s.products).where(eq(s.products.id, extra.id)))[0]!.comment).toBeNull();
+
+    expect(isDeletable((await productHistories(t.db, [extra.id])).get(extra.id))).toBe(true);
+    await deleteProduct(t.db, admin, extra.id);
+    expect(await t.db.select().from(s.products).where(eq(s.products.id, extra.id))).toHaveLength(0);
+    const [audit] = await t.db
+      .select()
+      .from(s.auditLog)
+      .where(eq(s.auditLog.entityId, extra.id))
+      .orderBy(s.auditLog.occurredAt);
+    expect(audit).toBeDefined();
+
+    // Un article avec des pertes ne se supprime pas : ses pertes restent (fusionner ou désactiver).
+    const used = await loss({ freeLabel: "Article avec pertes", category: "matiere_premiere" });
+    const productId = (await row(used.id)).productId!;
+    expect((await productHistories(t.db)).get(productId)?.losses).toBe(1);
+    await expect(deleteProduct(t.db, admin, productId)).rejects.toThrow(/a des pertes enregistrées/);
+    expect((await listEnteredArticles(t.db, admin)).find((a) => a.id === productId)).toBeDefined();
   });
 });

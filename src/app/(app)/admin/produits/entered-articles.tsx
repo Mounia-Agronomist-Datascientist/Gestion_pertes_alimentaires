@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { PRODUCT_CATEGORY_LABELS } from "@/modules/declarations/input";
 import { enteredArticleAction } from "../actions";
+import { DeleteButton } from "./delete-button";
 
 type Category = keyof typeof PRODUCT_CATEGORY_LABELS;
 
@@ -16,8 +17,11 @@ export interface EnteredArticle {
   supplierId: string | null;
   supplierToValidate: boolean;
   enteredBy: string | null;
+  comment: string | null;
   createdAt: Date;
   declarations: number;
+  /** Sans aucune perte ni historique : peut être supprimé. */
+  deletable: boolean;
 }
 
 const day = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" });
@@ -37,7 +41,8 @@ export function EnteredArticles({
       <p className="text-sm text-amber-950">
         Ajoutés en Réception ou en Stockage par les opérateurs, ils sont déjà proposés à la saisie. Validez-les,
         corrigez leur fiche (nom, poids, prix, fournisseur), ou fusionnez-les avec l&apos;article existant s&apos;il
-        s&apos;agit d&apos;un doublon : leurs pertes passent alors sur cet article.
+        s&apos;agit d&apos;un doublon : leurs pertes passent alors sur cet article. Un article ajouté par erreur et sans
+        aucune perte peut être supprimé.
       </p>
       <ul className="flex flex-col gap-3">
         {articles.map((a) => (
@@ -71,13 +76,40 @@ export function EnteredArticles({
               <Link href={`/admin/produits/${a.id}`} className="px-2 font-medium text-rouge-700 underline">
                 Ouvrir la fiche
               </Link>
+              {a.deletable ? (
+                <form action={enteredArticleAction}>
+                  <input type="hidden" name="productId" value={a.id} />
+                  <DeleteButton name={a.name} className="px-2 font-medium text-red-800 underline" />
+                </form>
+              ) : (
+                <span className="text-sm text-slate-500">
+                  Pas de suppression : il a des pertes (fusionnez-le ou validez-le).
+                </span>
+              )}
             </div>
+            <form action={enteredArticleAction} className="flex flex-col gap-1">
+              <input type="hidden" name="intent" value="comment" />
+              <input type="hidden" name="productId" value={a.id} />
+              <label className="flex flex-col gap-1 text-sm">
+                <span>Commentaire</span>
+                <textarea
+                  name="comment"
+                  className="field min-h-16 w-full"
+                  maxLength={1000}
+                  defaultValue={a.comment ?? ""}
+                  placeholder="ex. demander le poids du colis à la réception"
+                />
+              </label>
+              <button type="submit" className="self-start text-sm font-medium text-rouge-700 underline">
+                Enregistrer le commentaire
+              </button>
+            </form>
             <form action={enteredArticleAction} className="flex flex-wrap items-center gap-2">
               <input type="hidden" name="intent" value="merge" />
               <input type="hidden" name="productId" value={a.id} />
-              <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+              <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
                 <span>Doublon ? Fusionner avec :</span>
-                <select name="targetId" className="field" defaultValue="" required>
+                <select name="targetId" className="field w-full min-w-0" defaultValue="" required>
                   <option value="" disabled>
                     Choisir l&apos;article existant…
                   </option>
@@ -90,7 +122,7 @@ export function EnteredArticles({
                     ))}
                 </select>
               </label>
-              <button type="submit" className="self-end rounded-xl border-2 border-brun-700 px-4 py-2 font-semibold">
+              <button type="submit" className="rounded-xl border-2 border-brun-700 px-4 py-2 font-semibold">
                 Fusionner
               </button>
             </form>
